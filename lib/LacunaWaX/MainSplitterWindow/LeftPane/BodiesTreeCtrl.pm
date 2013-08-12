@@ -59,6 +59,14 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
     sub fill_tree {#{{{
         my $self = shift;
 
+        ### CHECK
+        ### Attempting to make the tree properly re-display on a 
+        ### previously-unrecognized SS on ubuntu.  Works on Windows.
+        if( $self->has_treectrl ) {
+            $self->treectrl->Destroy;
+            $self->clear_treectrl;
+        }
+
         $self->root_item_id( 
             $self->treectrl->AddRoot( ('Root Item ' . time), -1, -1, Wx::TreeItemData->new('Hidden Root') )
         );

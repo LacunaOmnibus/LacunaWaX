@@ -450,6 +450,68 @@ package LacunaWaX::Dialog::Mail {
             wxTE_READONLY
         );
     }#}}}
+    sub _get_trash_messages {#{{{
+        my $self            = shift;
+        my $tags_to_trash   = shift;
+        my $status          = shift;
+        my $trash_these     = [];
+
+        my $created_own_status = 0;
+        unless( $status ) {
+            $created_own_status = 1;
+            $status = LacunaWaX::Dialog::Status->new(
+                app      => $self->app,
+                ancestor => $self,
+                title    => 'Clear Mail',
+            );
+            $status->show;
+        }
+
+        ### We always have to get the first page of messages, which will tell 
+        ### us how many messages (and therefore pages) there are in total.
+        $status->say("Reading page 1");
+        my $contents = try {
+            $self->inbox->view_inbox({page_number => 1, tags => $tags_to_trash});
+        }
+        catch {
+            my $msg = (ref $_) ? $_->text : $_;
+            $self->poperr("Unable to get page 1: $msg");
+            return;
+        } or return;
+        my $msg_count   = $contents->{'message_count'};
+        my $msgs        = $contents->{'messages'};
+        foreach my $m(@{$msgs}) {
+            next if $self->chk_read->GetValue and not $m->{'has_read'};
+            push @{$trash_these}, $m->{'id'};
+        }
+
+        ### Get subsequent pages if necessary.
+        my $max_page = int($msg_count / 25);
+        $max_page++ if $msg_count % 25;
+        for my $page(2..$max_page) {    # already got page 1
+            $status->say("Reading page $page");
+            my $contents = try {
+                $self->inbox->view_inbox({page_number => $page, tags => $tags_to_trash});
+            }
+            catch {
+                my $msg = (ref $_) ? $_->text : $_;
+                $self->poperr("Unable to get page $page: $msg");
+                return;
+            } or return;
+            my $msgs = $contents->{'messages'};
+            my $found_count = 0;
+            foreach my $m(@{$msgs}) {
+                next if $self->chk_read->GetValue and not $m->{'has_read'};
+                push @{$trash_these}, $m->{'id'};
+            }
+        }
+
+        if( $created_own_status ) {
+            $status->close();
+        }
+
+        return $trash_these;
+    }#}}}
     sub _set_events {#{{{
         my $self = shift;
         EVT_BUTTON(     $self, $self->btn_clear_inbox->GetId,   sub{$self->OnClearMail(@_)} );
@@ -560,68 +622,6 @@ already used 'bless'.
         my $to_out = join q{, }, sort keys %{$to_hash};
         $self->txt_to->SetValue($to_out);
         return 1;
-    }#}}}
-    sub _get_trash_messages {#{{{
-        my $self            = shift;
-        my $tags_to_trash   = shift;
-        my $status          = shift;
-        my $trash_these     = [];
-
-        my $created_own_status = 0;
-        unless( $status ) {
-            $created_own_status = 1;
-            $status = LacunaWaX::Dialog::Status->new(
-                app      => $self->app,
-                ancestor => $self,
-                title    => 'Clear Mail',
-            );
-            $status->show;
-        }
-
-        ### We always have to get the first page of messages, which will tell 
-        ### us how many messages (and therefore pages) there are in total.
-        $status->say("Reading page 1");
-        my $contents = try {
-            $self->inbox->view_inbox({page_number => 1, tags => $tags_to_trash});
-        }
-        catch {
-            my $msg = (ref $_) ? $_->text : $_;
-            $self->poperr("Unable to get page 1: $msg");
-            return;
-        } or return;
-        my $msg_count   = $contents->{'message_count'};
-        my $msgs        = $contents->{'messages'};
-        foreach my $m(@{$msgs}) {
-            next if $self->chk_read->GetValue and not $m->{'has_read'};
-            push @{$trash_these}, $m->{'id'};
-        }
-
-        ### Get subsequent pages if necessary.
-        my $max_page = int($msg_count / 25);
-        $max_page++ if $msg_count % 25;
-        for my $page(2..$max_page) {    # already got page 1
-            $status->say("Reading page $page");
-            my $contents = try {
-                $self->inbox->view_inbox({page_number => $page, tags => $tags_to_trash});
-            }
-            catch {
-                my $msg = (ref $_) ? $_->text : $_;
-                $self->poperr("Unable to get page $page: $msg");
-                return;
-            } or return;
-            my $msgs = $contents->{'messages'};
-            my $found_count = 0;
-            foreach my $m(@{$msgs}) {
-                next if $self->chk_read->GetValue and not $m->{'has_read'};
-                push @{$trash_these}, $m->{'id'};
-            }
-        }
-
-        if( $created_own_status ) {
-            $status->close();
-        }
-
-        return $trash_these;
     }#}}}
     sub OnClearMail {#{{{
         my $self            = shift;
