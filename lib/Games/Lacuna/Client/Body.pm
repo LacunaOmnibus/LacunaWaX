@@ -22,6 +22,7 @@ sub api_methods {
     get_status          => { default_args => [qw(session_id body_id)] },
     get_buildable       => { default_args => [qw(session_id body_id)] },
     rename              => { default_args => [qw(session_id body_id)] },
+    repair_list         => { default_args => [qw(session_id body_id)] },    ### 08/09/2013 JDB added
     abandon             => { default_args => [qw(session_id body_id)] },
   };
 }

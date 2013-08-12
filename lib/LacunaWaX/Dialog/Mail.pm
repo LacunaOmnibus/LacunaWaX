@@ -478,118 +478,68 @@ package LacunaWaX::Dialog::Mail {
             wxTE_READONLY
         );
     }#}}}
-    sub _set_events {#{{{
-        my $self = shift;
-        EVT_BUTTON(     $self, $self->btn_clear_inbox->GetId,   sub{$self->OnClearMail(@_)} );
-        EVT_BUTTON(     $self, $self->btn_clear_to->GetId,      sub{$self->OnClearTo(@_)} );
-        EVT_BUTTON(     $self, $self->btn_send->GetId,          sub{$self->OnSendMail(@_)} );
-        EVT_CHECKBOX(   $self, $self->chk_corr->GetId,          sub{$self->OnCorrespondenceCheckbox(@_)} );
-        EVT_CHOICE(     $self, $self->chc_ally->GetId,          sub{$self->OnAllyChoice(@_)} );
-        EVT_CLOSE(      $self,                                  sub{$self->OnClose(@_)});
-        return 1;
-    }#}}}
+    sub _get_trash_messages_ORIG {#{{{
+        my $self            = shift;
+        my $tags_to_trash   = shift;
+        my $status          = shift;
+        my $trash_these     = [];
 
-    sub clear_mail_form {#{{{
-        my $self = shift;
-        $self->txt_to->SetValue(q{});
-        $self->txt_subject->SetValue(q{});
-        $self->txt_body->SetValue(q{});
-        return 1;
-    }#}}}
-    sub fix_profanity {#{{{
-        my $self = shift;
-        my $body = shift;
+        my $created_own_status = 0;
+        unless( $status ) {
+            $created_own_status = 1;
+            $status = LacunaWaX::Dialog::Status->new(
+                app      => $self->app,
+                ancestor => $self,
+                title    => 'Clear Mail',
+            );
+            $status->show;
+        }
 
-=head2 fix_profanity
+        ### We always have to get the first page of messages, which will tell 
+        ### us how many messages (and therefore pages) there are in total.
+        $status->say("Reading page 1");
+        my $contents = try {
+            $self->inbox->view_inbox({page_number => 1, tags => $tags_to_trash});
+        }
+        catch {
+            my $msg = (ref $_) ? $_->text : $_;
+            $self->poperr("Unable to get page 1: $msg");
+            return;
+        } or return;
+        my $msg_count   = $contents->{'message_count'};
+        my $msgs        = $contents->{'messages'};
+        foreach my $m(@{$msgs}) {
+            next if $self->chk_read->GetValue and not $m->{'has_read'};
+            push @{$trash_these}, $m->{'id'};
+        }
 
-Accepts a chunk of text (multiline is fine) and checks it for profanity, 
-determined by Regexp::Common's profanity filter, which is what the server is 
-using to check for mail profanity.
-
-Any profane words are passed through sacren(), which renders them non-profane, 
-though they'll still display the same way.
-
-NOTE
-This should really only be used for in-alliance mail.  We don't want people to 
-(eg) start F-bombing non alliance members with this.
-
-=cut
-
-        my @bad_lines = split /[\r\n]/, $body;
-        my @good_lines = ();
-
-        LINE:
-        for my $line( @bad_lines ) {
-            if( $RE{profanity}->matches($line) ) {
-                my @bad_words = split /\s/, $line;
-                my @good_words = ();
-
-                WORD:
-                foreach my $word(@bad_words) {
-                    if( $RE{profanity}->matches($word) ) {
-                        $word = $self->sacren($word);
-                    }
-                    push @good_words, $word;
-                }
-
-                $line = join q{ }, @good_words;
+        ### Get subsequent pages if necessary.
+        my $max_page = int($msg_count / 25);
+        $max_page++ if $msg_count % 25;
+        for my $page(2..$max_page) {    # already got page 1
+            $status->say("Reading page $page");
+            my $contents = try {
+                $self->inbox->view_inbox({page_number => $page, tags => $tags_to_trash});
             }
-            push @good_lines, $line;
+            catch {
+                my $msg = (ref $_) ? $_->text : $_;
+                $self->poperr("Unable to get page $page: $msg");
+                return;
+            } or return;
+            my $msgs = $contents->{'messages'};
+            my $found_count = 0;
+            foreach my $m(@{$msgs}) {
+                next if $self->chk_read->GetValue and not $m->{'has_read'};
+                push @{$trash_these}, $m->{'id'};
+            }
         }
 
-        $body = join qq{\n}, @good_lines;
-        return $body;
-    }#}}}
-    sub sacren {#{{{
-        my $self = shift;
-        my $word = shift;
-
-=pod
-
-sacren
-    Middle English
-    To consecrate; to sanctify; to make holy
-
-Accepts a string, assumed to be a profane word.  Inserts an ASCII 001 SOH (start 
-of heading), which is non-printable, after the first letter of the word, 
-transforming the word from profane to sacrosanct.  More or less.  Too bad Larry 
-already used 'bless'.
-
-=cut
-
-        substr $word, 1, 0, chr(1);
-        return $word;
-    }#}}}
-    sub trim {#{{{
-        my $self = shift;
-        my $str  = shift;
-        $str =~ s/^\s+//;
-        $str =~ s/\s+$//;
-        return $str;
-    }#}}}
-
-    sub OnAllyChoice {#{{{
-        my $self   = shift;
-
-        my $name = $self->ally_members->[ $self->chc_ally->GetCurrentSelection ]->{'name'};
-        my $to   = $self->txt_to->GetLineText(0);
-
-        my $to_hash = {};
-        for my $n( ((split /,/, $to), $name) ) {
-            $to_hash->{$self->trim($n)}++;
+        if( $created_own_status ) {
+            $status->close();
         }
 
-        if( defined $to_hash->{'@ally'} ) {
-            ### Message is being sent to all.  No need to include individual 
-            ### names on top of that.
-            $to_hash = {'@ally' => 1};
-        }
-
-        my $to_out = join q{, }, sort keys %{$to_hash};
-        $self->txt_to->SetValue($to_out);
-        return 1;
+        return $trash_these;
     }#}}}
-	
     sub _get_trash_messages {#{{{
         my $self            = shift;
 		my $go_cust			= shift;
@@ -716,6 +666,117 @@ already used 'bless'.
 
         return $trash_these;
     }#}}}
+    sub _set_events {#{{{
+        my $self = shift;
+        EVT_BUTTON(     $self, $self->btn_clear_inbox->GetId,   sub{$self->OnClearMail(@_)} );
+        EVT_BUTTON(     $self, $self->btn_clear_to->GetId,      sub{$self->OnClearTo(@_)} );
+        EVT_BUTTON(     $self, $self->btn_send->GetId,          sub{$self->OnSendMail(@_)} );
+        EVT_CHECKBOX(   $self, $self->chk_corr->GetId,          sub{$self->OnCorrespondenceCheckbox(@_)} );
+        EVT_CHOICE(     $self, $self->chc_ally->GetId,          sub{$self->OnAllyChoice(@_)} );
+        EVT_CLOSE(      $self,                                  sub{$self->OnClose(@_)});
+        return 1;
+    }#}}}
+
+    sub clear_mail_form {#{{{
+        my $self = shift;
+        $self->txt_to->SetValue(q{});
+        $self->txt_subject->SetValue(q{});
+        $self->txt_body->SetValue(q{});
+        return 1;
+    }#}}}
+    sub fix_profanity {#{{{
+        my $self = shift;
+        my $body = shift;
+
+=head2 fix_profanity
+
+Accepts a chunk of text (multiline is fine) and checks it for profanity, 
+determined by Regexp::Common's profanity filter, which is what the server is 
+using to check for mail profanity.
+
+Any profane words are passed through sacren(), which renders them non-profane, 
+though they'll still display the same way.
+
+NOTE
+This should really only be used for in-alliance mail.  We don't want people to 
+(eg) start F-bombing non alliance members with this.
+
+=cut
+
+        my @bad_lines = split /[\r\n]/, $body;
+        my @good_lines = ();
+
+        LINE:
+        for my $line( @bad_lines ) {
+            if( $RE{profanity}->matches($line) ) {
+                my @bad_words = split /\s/, $line;
+                my @good_words = ();
+
+                WORD:
+                foreach my $word(@bad_words) {
+                    if( $RE{profanity}->matches($word) ) {
+                        $word = $self->sacren($word);
+                    }
+                    push @good_words, $word;
+                }
+
+                $line = join q{ }, @good_words;
+            }
+            push @good_lines, $line;
+        }
+
+        $body = join qq{\n}, @good_lines;
+        return $body;
+    }#}}}
+    sub sacren {#{{{
+        my $self = shift;
+        my $word = shift;
+
+=pod
+
+sacren
+    Middle English
+    To consecrate; to sanctify; to make holy
+
+Accepts a string, assumed to be a profane word.  Inserts an ASCII 001 SOH (start 
+of heading), which is non-printable, after the first letter of the word, 
+transforming the word from profane to sacrosanct.  More or less.  Too bad Larry 
+already used 'bless'.
+
+=cut
+
+        substr $word, 1, 0, chr(1);
+        return $word;
+    }#}}}
+    sub trim {#{{{
+        my $self = shift;
+        my $str  = shift;
+        $str =~ s/^\s+//;
+        $str =~ s/\s+$//;
+        return $str;
+    }#}}}
+
+    sub OnAllyChoice {#{{{
+        my $self   = shift;
+
+        my $name = $self->ally_members->[ $self->chc_ally->GetCurrentSelection ]->{'name'};
+        my $to   = $self->txt_to->GetLineText(0);
+
+        my $to_hash = {};
+        for my $n( ((split /,/, $to), $name) ) {
+            $to_hash->{$self->trim($n)}++;
+        }
+
+        if( defined $to_hash->{'@ally'} ) {
+            ### Message is being sent to all.  No need to include individual 
+            ### names on top of that.
+            $to_hash = {'@ally' => 1};
+        }
+
+        my $to_out = join q{, }, sort keys %{$to_hash};
+        $self->txt_to->SetValue($to_out);
+        return 1;
+    }#}}}
     sub OnClearMail {#{{{
         my $self            = shift;
         my $dialog          = shift;
@@ -784,7 +845,6 @@ already used 'bless'.
         $status->say("Mail clearing complete.");
         return 1;
     }#}}}
-	
     sub OnClearTo {#{{{
         my $self = shift;
         $self->txt_to->SetValue(q{});

@@ -13,6 +13,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::RepairPane {
 
     has 'sizer_debug'   => (is => 'rw', isa => 'Int',                           lazy => 1,      default => 0    );
     has 'planet_id'     => (is => 'rw', isa => 'Int',                           lazy_build => 1                 );
+    has 'body'          => (is => 'rw', isa => 'Games::Lacuna::Client::Body',   lazy_build => 1                 );
     has 'planet_name'   => (is => 'rw', isa => 'Str',                                           required => 1   );
     has 'status'        => (is => 'rw', isa => 'LacunaWaX::Dialog::Status',     lazy_build => 1                 );
     has 'res_bar'       => (is => 'rw', isa => 'LacunaWaX::Generics::ResBar',   lazy_build => 1                 );
@@ -22,15 +23,19 @@ package LacunaWaX::MainSplitterWindow::RightPane::RepairPane {
         isa     => 'Str',
         lazy    => 1,
         #default => 'all',
-        default => 'flurble',
+        default => 'just show the broken ones pls',
         documentation => q{
             Determines whether we show all buildings in the left ListCtrl, or 
             only damaged buildings.  If the value is anything other than 
-            'all', we'll just display damaged buildings.  "Only damaged" seems 
-            to make more sense for real use, but 'all' is easier to work on 
+            'all', we'll just display damaged buildings.  "Only damaged" 
+            makes more sense for real use, but 'all' is easier to work on 
             and test.
-            This should only be set to 'all' while developing (so you can see 
-            contents in the left list without having to snark yourself).
+            So this should only be set to 'all' while developing (so you can see 
+            contents in the left list without having to snark or BFG yourself).
+            When this is set to 'all' and you attempt to repair buildings that 
+            are already in good shape, those buildings will report that they 
+            were repaired.  Nothing was done to those buildings, but the 
+            repair didn't fail either.
         }
     );
 
@@ -114,7 +119,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::RepairPane {
     sub BUILD {
         my $self = shift;
 
-        $self->lst_bldgs_onsite();
+        ### Add buildings to the left list.
         $self->populate_bldgs_list( $self->lst_bldgs_onsite );
 
         ### Header, instructions
@@ -160,6 +165,11 @@ package LacunaWaX::MainSplitterWindow::RightPane::RepairPane {
 
         return $self;
     }
+    sub _build_body {#{{{
+        my $self = shift;
+        my $body = $self->game_client->get_body( $self->planet_id );
+        return $body;
+    }#}}}
     sub _build_btn_add {#{{{
         my $self = shift;
         my $v = Wx::Button->new(
@@ -372,14 +382,16 @@ If many buildings are damaged, you may run out of resources before you can repai
             |wxSUNKEN_BORDER
             |wxLC_SINGLE_SEL
         );
-        $v->InsertColumn(0, 'Name');
-        $v->InsertColumn(1, 'X');
-        $v->InsertColumn(2, 'Y');
-        $v->InsertColumn(3, 'Damaged');
-        $v->SetColumnWidth(0,150);
-        $v->SetColumnWidth(1,40);
+        $v->InsertColumn(0, 'ID');
+        $v->InsertColumn(1, 'Name');
+        $v->InsertColumn(2, 'X');
+        $v->InsertColumn(3, 'Y');
+        $v->InsertColumn(4, 'Damaged');
+        $v->SetColumnWidth(0,60);
+        $v->SetColumnWidth(1,150);
         $v->SetColumnWidth(2,40);
-        $v->SetColumnWidth(3,100);
+        $v->SetColumnWidth(3,40);
+        $v->SetColumnWidth(4,100);
         $v->Arrange(wxLIST_ALIGN_TOP);
         $self->yield;
 
@@ -395,14 +407,16 @@ If many buildings are damaged, you may run out of resources before you can repai
             |wxSUNKEN_BORDER
             |wxLC_SINGLE_SEL
         );
-        $v->InsertColumn(0, 'Name');
-        $v->InsertColumn(1, 'X');
-        $v->InsertColumn(2, 'Y');
-        $v->InsertColumn(3, 'Damaged');
-        $v->SetColumnWidth(0,150);
-        $v->SetColumnWidth(1,40);
+        $v->InsertColumn(0, 'ID');
+        $v->InsertColumn(1, 'Name');
+        $v->InsertColumn(2, 'X');
+        $v->InsertColumn(3, 'Y');
+        $v->InsertColumn(4, 'Damaged');
+        $v->SetColumnWidth(0,60);
+        $v->SetColumnWidth(1,150);
         $v->SetColumnWidth(2,40);
-        $v->SetColumnWidth(3,100);
+        $v->SetColumnWidth(3,40);
+        $v->SetColumnWidth(4,100);
         $v->Arrange(wxLIST_ALIGN_TOP);
         $self->yield;
         return $v;
@@ -471,6 +485,7 @@ If many buildings are damaged, you may run out of resources before you can repai
     sub add_row {#{{{
         my $self    = shift;
         my $list    = shift;
+        my $id      = shift;
         my $name    = shift;
         my $x       = shift;
         my $y       = shift;
@@ -513,13 +528,14 @@ inserting.
         ### to remember to reset that row number after creating our first list 
         ### if we plan to use it again.  Hacky and nasty.
         my $itm_name = Wx::ListItem->new();
-        $itm_name->SetText( $name );
+        $itm_name->SetText( $id );
         $itm_name->SetData( $self->row );
 
         my $row_idx = $list->InsertItem($itm_name);
-        $list->SetItem( $row_idx, 1, sprintf("%2d", $x) );
-        $list->SetItem( $row_idx, 2, sprintf("%2d", $y) );
-        $list->SetItem( $row_idx, 3, sprintf("%3d%%", $damage) );
+        $list->SetItem( $row_idx, 1, $name                      );
+        $list->SetItem( $row_idx, 2, sprintf("%2d", $x)         );
+        $list->SetItem( $row_idx, 3, sprintf("%2d", $y)         );
+        $list->SetItem( $row_idx, 4, sprintf("%3d%%", $damage)  );
 
         $self->inc_row;
         return $row_idx;
@@ -645,6 +661,7 @@ assignments intact.
 
             $self->add_row(
                 $list,
+                $bldg_hr->{'id'},
                 $bldg_hr->{'name'},
                 $bldg_hr->{'x'},
                 $bldg_hr->{'y'},
@@ -653,6 +670,20 @@ assignments intact.
         }
 
         $self->reset_row;
+    }#}}}
+    sub post_repair_cleanup {#{{{
+        my $self = shift;
+
+        $self->clear_list($self->lst_bldgs_to_repair);
+        $self->clear_list($self->lst_bldgs_onsite);
+        $self->clear_buildings;
+        $self->_build_buildings(1); 
+        $self->populate_bldgs_list( $self->lst_bldgs_onsite );
+        $self->res_bar->update_res;
+        $self->status_say("");
+        $self->status_say_recsep();
+        $self->status_say("");
+        $self->status_say("You may close this window.");
     }#}}}
     sub repair {#{{{
         my $self = shift;
@@ -718,17 +749,18 @@ I have not tested the "fails if we're out of res" yet.
             $row = $self->lst_bldgs_onsite->GetNextItem($row, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
             last if $row == -1;
 
-            my $name    = $self->lst_bldgs_onsite->GetItem($row, 0);
-            my $x       = $self->lst_bldgs_onsite->GetItem($row, 1);
-            my $y       = $self->lst_bldgs_onsite->GetItem($row, 2);
-            my $damage  = $self->lst_bldgs_onsite->GetItem($row, 3);
+            my $id      = $self->lst_bldgs_onsite->GetItem($row, 0)->GetText;
+            my $name    = $self->lst_bldgs_onsite->GetItem($row, 1)->GetText;
+            my $x       = $self->lst_bldgs_onsite->GetItem($row, 2)->GetText;
+            my $y       = $self->lst_bldgs_onsite->GetItem($row, 3)->GetText;
+            my $damage  = $self->lst_bldgs_onsite->GetItem($row, 4)->GetText;
+
 
             $self->add_row(
                 $self->lst_bldgs_to_repair,
-                $name->GetText,
-                $x->GetText,
-                $y->GetText,
-                $damage->GetText,
+                $id, $name,
+                $x, $y,
+                $damage,
             );
             $self->lst_bldgs_onsite->DeleteItem( $row );
         }
@@ -762,13 +794,14 @@ I have not tested the "fails if we're out of res" yet.
             $row = $self->lst_bldgs_onsite->GetNextItem($row, wxLIST_NEXT_ALL, wxLIST_STATE_DONTCARE);
             last if $row == -1;
 
-            my $itm = $self->lst_bldgs_onsite->GetItem($row);
-            my $name = $self->str_trim( $itm->GetText );
+            my $itm  = $self->lst_bldgs_onsite->GetItem($row);
+            my $id   = $self->str_trim( $itm->GetText );
+            my $name = $self->str_trim( $self->lst_bldgs_onsite->GetItem($row, 1)->GetText );
             if( $self->find_glyph_bldg(sub{$_ eq lc $name}) ) {
-                my $x = $self->str_trim( $self->lst_bldgs_onsite->GetItem($row, 1)->GetText );
-                my $y = $self->str_trim( $self->lst_bldgs_onsite->GetItem($row, 2)->GetText );
-                my $d = $self->str_trim( $self->lst_bldgs_onsite->GetItem($row, 3)->GetText );
-                unshift @glyph_rows, [$name, $x, $y, $d];
+                my $x = $self->str_trim( $self->lst_bldgs_onsite->GetItem($row, 2)->GetText );
+                my $y = $self->str_trim( $self->lst_bldgs_onsite->GetItem($row, 3)->GetText );
+                my $d = $self->str_trim( $self->lst_bldgs_onsite->GetItem($row, 4)->GetText );
+                unshift @glyph_rows, [$id, $name, $x, $y, $d];
 
                 $self->lst_bldgs_onsite->DeleteItem( $row );
                 $row--; # since we just deleted one, back up or we'll skip the next one if two are consecutive.
@@ -800,17 +833,17 @@ I have not tested the "fails if we're out of res" yet.
             $row = $self->lst_bldgs_to_repair->GetNextItem($row, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
             last if $row == -1;
 
-            my $name    = $self->lst_bldgs_to_repair->GetItem($row, 0);
-            my $x       = $self->lst_bldgs_to_repair->GetItem($row, 1);
-            my $y       = $self->lst_bldgs_to_repair->GetItem($row, 2);
-            my $damage  = $self->lst_bldgs_to_repair->GetItem($row, 3);
+            my $id      = $self->lst_bldgs_to_repair->GetItem($row, 0)->GetText;
+            my $name    = $self->lst_bldgs_to_repair->GetItem($row, 1)->GetText;
+            my $x       = $self->lst_bldgs_to_repair->GetItem($row, 2)->GetText;
+            my $y       = $self->lst_bldgs_to_repair->GetItem($row, 3)->GetText;
+            my $damage  = $self->lst_bldgs_to_repair->GetItem($row, 4)->GetText;
 
             $self->add_row(
                 $self->lst_bldgs_onsite,
-                $name->GetText,
-                $x->GetText,
-                $y->GetText,
-                $damage->GetText,
+                $id, $name,
+                $x, $y,
+                $damage,
             );
             $self->lst_bldgs_to_repair->DeleteItem( $row );
         }
@@ -876,7 +909,7 @@ I have not tested the "fails if we're out of res" yet.
 
         $event->Skip;
     }#}}}
-    sub OnRepair {#{{{
+    sub OnRepairOrig {#{{{
         my $self    = shift;
         my $parent  = shift;    # Wx::ScrolledWindow
         my $event   = shift;    # Wx::CommandEvent
@@ -892,9 +925,10 @@ I have not tested the "fails if we're out of res" yet.
             last if $row == -1;
             last if $self->flg_stop;
 
-            my $name = $self->str_trim( $self->lst_bldgs_to_repair->GetItem($row)->GetText );
-            my $x    = $self->str_trim( $self->lst_bldgs_to_repair->GetItem($row, 1)->GetText );
-            my $y    = $self->str_trim( $self->lst_bldgs_to_repair->GetItem($row, 2)->GetText );
+            my $id      = $self->str_trim( $self->lst_bldgs_to_repair->GetItem($row)->GetText );
+            my $name    = $self->str_trim( $self->lst_bldgs_to_repair->GetItem($row, 1)->GetText );
+            my $x       = $self->str_trim( $self->lst_bldgs_to_repair->GetItem($row, 2)->GetText );
+            my $y       = $self->str_trim( $self->lst_bldgs_to_repair->GetItem($row, 3)->GetText );
 
             $self->lst_bldgs_to_repair->DeleteItem( $row );
             $self->status_say("Repairing $name ($x,$y)...");
@@ -956,6 +990,72 @@ I have not tested the "fails if we're out of res" yet.
         $self->status_say("");
         $self->status_say("You may close this window.");
 
+        return 1;
+    }#}}}
+    sub OnRepair {#{{{
+        my $self    = shift;
+        my $parent  = shift;    # Wx::ScrolledWindow
+        my $event   = shift;    # Wx::CommandEvent
+
+        $self->status->show;
+
+        my @ids_to_repair = ();
+        while( 1 ) {
+            my $row = -1;
+            $self->yield;
+            $row = $self->lst_bldgs_to_repair->GetNextItem($row, wxLIST_NEXT_ALL, wxLIST_STATE_DONTCARE);
+            last if $row == -1;
+            my $id = $self->str_trim( $self->lst_bldgs_to_repair->GetItem($row)->GetText );
+            push @ids_to_repair, $id;
+            $self->lst_bldgs_to_repair->DeleteItem( $row );
+        }
+
+        my $rv = try {
+            $self->body->repair_list(\@ids_to_repair);
+        }
+        catch {
+            my $msg = (ref $_) ? $_->text : $_;
+            ### This doesn't hit due to low or no res; it's an actual exception.
+            $self->status_say("GONG!  Attempt to repair buildings failed: $msg");
+            $self->post_repair_cleanup();
+            return;
+        } or return;
+
+        ### $rv contains:
+        ###     {'buildings'} => {
+        ###         numeric_bldg_id => { bldg_hashref }
+        ###     }
+        ###
+        ### bldg_hashref contains:
+        ###     x               => int
+        ###     y               => int
+        ###     efficiency      => int
+        ###     image           => str
+        ###     level           => int
+        ###     name            => str; ("Distribution Center")
+        ###     repair_costs    => {
+        ###         food    => int
+        ###         ore     => int
+        ###         water   => int
+        ###         energy  => int
+        ###     }
+        ###     url             => str; ("/distributioncenter")
+
+        my $incomplete = 0;
+        while( my($id,$hr) = each %{$rv->{'buildings'}} ) {
+            if( $hr->{'efficiency'} < 100 ) {
+                $incomplete = 1;
+                last;
+            }
+        }
+        if( $incomplete ) {
+            $self->status_say("Your planet ran out of resources while trying to repair its buildings.  As much as possible has been repaired, but the job is not finished; you'll need to return for further repairs later when you have more resources.");
+        }
+        else {
+            $self->status_say("Congratulations!  All requested repairs have been completed.");
+        }
+
+        $self->post_repair_cleanup();
         return 1;
     }#}}}
     sub OnDialogStatusClose {#{{{
