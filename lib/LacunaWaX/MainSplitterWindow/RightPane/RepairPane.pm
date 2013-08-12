@@ -1086,7 +1086,11 @@ __END__
 
 =head2 ListCtrls
 
-These are a freaking mess.
+Wx::ListCtrl is pretty notorious for having a terrible API an just general 
+sucktitude.  There exists Wx::Perl::ListCtrl, which is meant to somewhat 
+de-awful-ize the problem.  But it's not a drop-in replacement for Wx::ListCtrl, 
+and I haven't switched from the one to the other at this point.  
+
 
 In Report mode, which is what's mostly being used in LacunaWaX, an "item" is a 
 row.  The thingies in the columns are "sub-items".
