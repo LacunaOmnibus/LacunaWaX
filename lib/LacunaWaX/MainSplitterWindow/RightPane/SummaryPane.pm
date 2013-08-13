@@ -162,28 +162,43 @@ Orbit $s->{orbit} around $s->{star_name} (ID $s->{star_id}), in zone $s->{zone}\
 
         ### Still here?  The current body is a Space Station.
 
-        my $tree = $self->get_left_pane->bodies_tree->treectrl;
-        my $leaf = $tree->GetFirstVisibleItem;  # "Bodies"
+        ### On Windows, the FirstVisibleItem is "Bodies", which is what we 
+        ### want...
+        my $tree        = $self->get_left_pane->bodies_tree->treectrl;
+        my $bodies_leaf = $tree->GetFirstVisibleItem;
 
-        ### Find the $body_leaf (Wx::TreeItemId) that represents the current 
-        ### body, which we now know to be a Space Station.
-        my($body_leaf, $leaf_cookie) = $tree->GetFirstChild($leaf);
-        my $body_leafname = $tree->GetItemText($body_leaf);
-        while( $body_leafname ne $self->planet_name ) {
-            ($body_leaf, $leaf_cookie) = $tree->GetNextChild($leaf, $leaf_cookie); 
-            last unless $body_leaf->IsOk;
-            $body_leafname = $tree->GetItemText($body_leaf);
+        ### leaf_cookie needs to be declared now.  Might as well declare 
+        ### orbital_leaf while we're at it.
+        my($orbital_leaf, $leaf_cookie);
+
+        ### ...but on Ubuntu, the FirstVisibleItem is the root freaking item, 
+        ### which is not freaking visible dagnabit.  Anyway, if that's what 
+        ### we've got, get _its_ first child, which _will_ be "Bodies".
+        if( $tree->GetItemText($bodies_leaf) =~ /root/i ) {
+            ($bodies_leaf, $leaf_cookie) = $tree->GetFirstChild($bodies_leaf);
         }
-        ### This would be a true exception; there's no leaf on the tree that 
-        ### matches our current planet name (huzzuh?)
-        return if $body_leafname ne $self->planet_name;
+
+        ### Find the $orbital_leaf that represents the current body, which we 
+        ### now know to be a Space Station.
+        ($orbital_leaf, $leaf_cookie) = $tree->GetFirstChild($bodies_leaf);
+
+        my $orbital_leafname = $tree->GetItemText($orbital_leaf);
+        while( $orbital_leafname ne $self->planet_name ) {
+            ($orbital_leaf, $leaf_cookie) = $tree->GetNextChild($bodies_leaf, $leaf_cookie); 
+            last unless $orbital_leaf->IsOk;
+            $orbital_leafname = $tree->GetItemText($orbital_leaf);
+        }
+        if( $orbital_leafname ne $self->planet_name ) {
+            say "No leaf on the tree matches our current planet.  Wat?";
+            return;
+        }
 
 
         ### Now search the child leaves of our current Space Station.  If it's 
         ### already displaying Station-specific child leaves, we're ok 
         ### (meaning that this station is known to the application as a 
         ### station).
-        my($body_child, $child_cookie) = $tree->GetFirstChild($body_leaf);
+        my($body_child, $child_cookie) = $tree->GetFirstChild($orbital_leaf);
         my $body_child_leafname = $tree->GetItemText($body_child);
         while( 1 ) {
 
@@ -191,7 +206,9 @@ Orbit $s->{orbit} around $s->{star_name} (ID $s->{star_id}), in zone $s->{zone}\
             ### knows this body is a station and we're done.
             return if (
                    $body_child_leafname eq 'Fire the BFG'
+                or $body_child_leafname eq 'Health Alerts'
                 or $body_child_leafname eq 'Incoming'
+                or $body_child_leafname eq 'Propositions'
             );
 
             ### These are Planet-only leaves.  If we find one, the app does 
@@ -203,7 +220,7 @@ Orbit $s->{orbit} around $s->{star_name} (ID $s->{star_id}), in zone $s->{zone}\
                 or $body_child_leafname eq 'Spies'
             );
 
-            ($body_child, $child_cookie) = $tree->GetNextChild($body_leaf, $child_cookie); 
+            ($body_child, $child_cookie) = $tree->GetNextChild($orbital_leaf, $child_cookie); 
             last unless $body_child->IsOk;
             $body_child_leafname = $tree->GetItemText($body_child);
         }
