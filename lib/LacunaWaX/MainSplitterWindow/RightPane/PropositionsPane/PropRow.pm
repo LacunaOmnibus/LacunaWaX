@@ -796,6 +796,7 @@ sitters.
         }
 
         $self->endthrob;
+        $self->dialog_status_say("All props have been voted on.  You may close this window.");
         return 1;
     }#}}}
     sub OnMyVote {#{{{

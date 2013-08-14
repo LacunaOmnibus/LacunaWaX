@@ -171,9 +171,9 @@ Orbit $s->{orbit} around $s->{star_name} (ID $s->{star_id}), in zone $s->{zone}\
         ### orbital_leaf while we're at it.
         my($orbital_leaf, $leaf_cookie);
 
-        ### ...but on Ubuntu, the FirstVisibleItem is the root freaking item, 
-        ### which is not freaking visible dagnabit.  Anyway, if that's what 
-        ### we've got, get _its_ first child, which _will_ be "Bodies".
+        ### ...but on Ubuntu, the FirstVisibleItem is the root item, which is 
+        ### not visible dagnabit.  Anyway, if that's what we've got, get _its_ 
+        ### first child, which _will_ be "Bodies".
         if( $tree->GetItemText($bodies_leaf) =~ /root/i ) {
             ($bodies_leaf, $leaf_cookie) = $tree->GetFirstChild($bodies_leaf);
         }
@@ -228,6 +228,8 @@ Orbit $s->{orbit} around $s->{star_name} (ID $s->{star_id}), in zone $s->{zone}\
         ### Still here?  We have a station whose tree is currently showing the 
         ### default 'body' child leaves.  Fix that.
         $self->get_left_pane->bodies_tree->fill_tree();
+        $self->get_left_pane->bodies_tree->_set_events();
+        $self->get_left_pane->main_panel->Layout();
     }#}}}
 
     no Moose;
