@@ -216,6 +216,20 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane {
             $self->yield;
         }
 
+        $szr_props->AddSpacer( $self->row_spacer_size * 10 );
+
+        if( @{ $self->rows } ) {
+            my $footer = LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane::PropRow->new(
+                app         => $self->app,
+                ancestor    => $self,
+                parent      => $self->parent,
+                planet_id   => $self->planet_id,
+                rows        => $self->rows,
+                is_footer   => 1,
+            );
+            $szr_props->Add($footer->main_sizer, 0, 0, 0);
+        }
+
         return $szr_props;
     }#}}}
     sub parl_exists_here {#{{{

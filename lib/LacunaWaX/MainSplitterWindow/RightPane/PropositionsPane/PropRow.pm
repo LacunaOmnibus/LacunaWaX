@@ -23,6 +23,15 @@ object.
 Simply calling $self->clear_dialog_status _will_ take care of that, due to the 
 'before' method modifier.
 
+
+If you're testing something, search for "SITTERVOTE" in this file.  There's 
+commented-out code there that you can turn on that will pretend to vote but not 
+really vote (so you don't have to keep voting and then going back to the game 
+to create a new prop to test on).
+
+Also, if you need to force a 'No' vote for some specific reason, there's code 
+at that same SITTERVOTE tag to do that.
+
 =cut
 
 
@@ -41,15 +50,17 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane::PropRow {
     has 'sizer_debug' => (is => 'rw', isa => 'Int',  lazy => 1, default => 0 );
 
     has 'main_sizer'    => (is => 'rw', isa => 'Wx::BoxSizer',  lazy_build => 1, documentation => 'vertical');
+    has 'planet_id'     => (is => 'rw', isa => 'Int', required => 1);
+    has 'parl'          => (is => 'rw', isa => 'Maybe[Games::Lacuna::Client::Buildings::Parliament]',   lazy_build => 1);
+    has 'ally_members'  => (is => 'rw', isa => 'Maybe[HashRef]', lazy_build => 1);
 
-    has 'planet_id' => (is => 'rw', isa => 'Int', required => 1);
-    has 'parl'      => (is => 'rw', isa => 'Maybe[Games::Lacuna::Client::Buildings::Parliament]',   lazy_build => 1);
-    has 'prop'      => (is => 'rw', isa => 'Maybe[HashRef]', 
+    has 'prop' => (is => 'rw', isa => 'Maybe[HashRef]', 
         documentation => q{
             This must be passed in from the outside if you want to display 
             anything but a blank row or a header.
         }
     );
+
 
     has 'stop_voting' => (is => 'rw', isa => 'Int', lazy => 1, default => 0,
         documentation => q{
@@ -65,11 +76,43 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane::PropRow {
         }
     );
 
-    has 'is_header'     => (is => 'rw', isa => 'Int', lazy => 1, default => 0,
-        documentation => q{
+    has 'is_header' => (
+        is              => 'rw',
+        isa             => 'Int',
+        lazy            => 1,
+        default         => 0,
+        documentation   => q{
             If true, the produced Row will be a simple header with no input
             controls and no events.  The advantage is that the header's size will 
             match the size of the rest of the rows you're about to produce.
+        }
+    );
+
+    has 'is_footer' => (
+        is              => 'rw',
+        isa             => 'Int',
+        lazy            => 1,
+        default         => 0,
+        documentation   => q{
+            If true, the produced Row contain a "Vote for all props" button
+            Like the header, the footer's size will match the size of the rest 
+            of the rows you're about to produce.
+            Mutually exclusive with 'is_header'.  If both are sent, is_header 
+            wins.
+        }
+    );
+    has 'rows' => (
+        is      => 'rw',
+        isa     => 'ArrayRef',
+        lazy    => 1, 
+        default => sub{ [] },
+        documentation => q{
+            This must get passed to the footer row, and only to the footer 
+            row.
+            It's the PropositionPane's ->rows, which contains all of the 
+            propositions displayed on the screen.  We need to have this to be 
+            able to vote for all of the props (which is the reason for the 
+            existence of the footer).
         }
     );
 
@@ -105,6 +148,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane::PropRow {
     has 'btn_me_yes'        => (is => 'rw', isa => 'Wx::Button',    lazy_build => 1);
     has 'btn_me_no'         => (is => 'rw', isa => 'Wx::Button',    lazy_build => 1);
     has 'btn_sitters_yes'   => (is => 'rw', isa => 'Wx::Button',    lazy_build => 1);
+    has 'btn_all_yes'       => (is => 'rw', isa => 'Wx::Button',    lazy_build => 1);
 
     has 'dialog_status'     => (is => 'rw', isa => 'LacunaWaX::Dialog::Status', lazy_build => 1             );
     has 'waiting_for_enter' => (is => 'rw', isa => 'Int',                       lazy => 1,      default => 0);
@@ -112,80 +156,8 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane::PropRow {
     sub BUILD {
         my $self = shift;
 
-        if( $self->is_header ) {#{{{
-            $self->name_header(
-                Wx::StaticText->new(
-                    $self->parent, -1, 'Name: ',
-                    wxDefaultPosition, Wx::Size->new($self->name_width,$self->row_height)
-                )
-            );
-            $self->proposed_by_header(
-                Wx::StaticText->new(
-                    $self->parent, -1, 'Prop by: ',
-                    wxDefaultPosition, Wx::Size->new($self->proposed_by_width,$self->row_height)
-                )
-            );
-            $self->votes_needed_header(
-                Wx::StaticText->new(
-                    $self->parent, -1, 'Need: ',
-                    wxDefaultPosition, Wx::Size->new($self->votes_needed_width,$self->row_height)
-                )
-            );
-            $self->votes_yes_header(
-                Wx::StaticText->new(
-                    $self->parent, -1, 'Yes: ',
-                    wxDefaultPosition, Wx::Size->new($self->votes_yes_width,$self->row_height)
-                )
-            );
-            $self->votes_no_header(
-                Wx::StaticText->new(
-                    $self->parent, -1, 'No: ',
-                    wxDefaultPosition, Wx::Size->new($self->votes_no_width,$self->row_height)
-                )
-            );
-            $self->my_vote_header(
-                Wx::StaticText->new(
-                    $self->parent, -1, 'Mine: ',
-                    wxDefaultPosition, Wx::Size->new($self->my_vote_width,$self->row_height)
-                )
-            );
-            $self->cast_my_vote_header(
-                Wx::StaticText->new(
-                    $self->parent, -1, 'Me: ',
-                    ### 2 buttons + 2 pixels between those (estimate) + 5 pixel 
-                    ### spacer between "me" and "sitter" button groups
-                    wxDefaultPosition, Wx::Size->new(($self->button_width * 2 + 2 + 5), $self->row_height)
-                )
-            );
-            $self->cast_sitters_vote_header(
-                Wx::StaticText->new(
-                    $self->parent, -1, 'Sitters: ',
-                    ### No "+ 5" because there's no spacer after this button 
-                    ### group.
-                    wxDefaultPosition, Wx::Size->new(($self->button_width * 2 + 2), $self->row_height)
-                )
-            );
-
-            $self->name_header->SetFont                 ( $self->get_font('/header_7') );
-            $self->proposed_by_header->SetFont          ( $self->get_font('/header_7') );
-            $self->votes_needed_header->SetFont         ( $self->get_font('/header_7') );
-            $self->votes_yes_header->SetFont            ( $self->get_font('/header_7') );
-            $self->votes_no_header->SetFont             ( $self->get_font('/header_7') ); 
-            $self->my_vote_header->SetFont              ( $self->get_font('/header_7') ); 
-            $self->cast_my_vote_header->SetFont         ( $self->get_font('/header_7') ); 
-            $self->cast_sitters_vote_header->SetFont    ( $self->get_font('/header_7') ); 
-
-
-            $self->main_sizer->Add($self->name_header, 0, 0, 0);
-            $self->main_sizer->Add($self->proposed_by_header, 0, 0, 0);
-            $self->main_sizer->Add($self->votes_needed_header, 0, 0, 0);
-            $self->main_sizer->Add($self->votes_yes_header, 0, 0, 0);
-            $self->main_sizer->Add($self->votes_no_header, 0, 0, 0);
-            $self->main_sizer->Add($self->my_vote_header, 0, 0, 0);
-            $self->main_sizer->Add($self->cast_my_vote_header, 0, 0, 0);
-            $self->main_sizer->Add($self->cast_sitters_vote_header, 0, 0, 0);
-            return;
-        }#}}}
+        return $self->_make_header if $self->is_header;
+        return $self->_make_footer if $self->is_footer;
 
         $self->main_sizer->Add($self->lbl_name, 0, 0, 0);
         $self->main_sizer->Add($self->lbl_proposed_by, 0, 0, 0);
@@ -201,6 +173,21 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane::PropRow {
         $self->yield;
         return $self;
     }
+    sub _build_ally_members {#{{{
+        my $self = shift;
+        my $ally_hash = {};
+
+        $ally_hash = try {
+            $self->game_client->get_alliance_members();
+        }
+        catch {
+            $self->poperr("Could not find your alliance members.  You're most likely out of RPCs; wait a minute and try again.", "Error!");
+            $self->btn_sitters_yes->Enable(1);
+            $self->clear_dialog_status;
+            return $ally_hash;
+        };
+        return $ally_hash;
+    }#}}}
     sub _build_cast_me_sizer {#{{{
         my $self = shift;
 
@@ -377,6 +364,20 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane::PropRow {
 
         return $v;
     }#}}}
+    sub _build_btn_all_yes {#{{{
+        my $self = shift;
+
+        ### button_width * 2 because there's no sitters_no button.
+        my $v = Wx::Button->new($self->parent, -1, 
+            "Yes to all props",
+            wxDefaultPosition, 
+            ### + 20 to make the sitters button stand out a bit
+            Wx::Size->new(90, $self->row_height)
+        );
+        $v->SetFont( $self->get_font('/para_text_1') );
+
+        return $v;
+    }#}}}
     sub _build_btn_sitters_no {#{{{
         my $self = shift;
 
@@ -413,7 +414,14 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane::PropRow {
         ### The header has no controls so setting events on it is pointless.
         ### Furthermore, setting these events will call lazy builders on some of 
         ### those non-existent controls which will explode.
-        return if $self->is_header;
+        return 1 if $self->is_header;
+
+        ### The footer only has a "Vote for all" button, and it's the only row 
+        ### that has that button.
+        if( $self->is_footer ) {
+            EVT_BUTTON( $self->parent, $self->btn_all_yes->GetId,   sub{$self->OnAllVote(@_, 1)}        );
+            return 1;
+        }
 
         EVT_BUTTON( $self->parent, $self->btn_me_yes->GetId,        sub{$self->OnMyVote(@_, 1)}         );
         EVT_BUTTON( $self->parent, $self->btn_me_no->GetId,         sub{$self->OnMyVote(@_, 0)}         );
@@ -421,11 +429,99 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane::PropRow {
         return 1;
     }#}}}
 
+    sub _make_header {#{{{
+        my $self = shift;
+
+        ### On the off chance the user sent both is_header and is_footer, 
+        ### unset is_footer.
+        $self->is_footer(0);
+
+        $self->name_header(
+            Wx::StaticText->new(
+                $self->parent, -1, 'Name: ',
+                wxDefaultPosition, Wx::Size->new($self->name_width,$self->row_height)
+            )
+        );
+        $self->proposed_by_header(
+            Wx::StaticText->new(
+                $self->parent, -1, 'Prop by: ',
+                wxDefaultPosition, Wx::Size->new($self->proposed_by_width,$self->row_height)
+            )
+        );
+        $self->votes_needed_header(
+            Wx::StaticText->new(
+                $self->parent, -1, 'Need: ',
+                wxDefaultPosition, Wx::Size->new($self->votes_needed_width,$self->row_height)
+            )
+        );
+        $self->votes_yes_header(
+            Wx::StaticText->new(
+                $self->parent, -1, 'Yes: ',
+                wxDefaultPosition, Wx::Size->new($self->votes_yes_width,$self->row_height)
+            )
+        );
+        $self->votes_no_header(
+            Wx::StaticText->new(
+                $self->parent, -1, 'No: ',
+                wxDefaultPosition, Wx::Size->new($self->votes_no_width,$self->row_height)
+            )
+        );
+        $self->my_vote_header(
+            Wx::StaticText->new(
+                $self->parent, -1, 'Mine: ',
+                wxDefaultPosition, Wx::Size->new($self->my_vote_width,$self->row_height)
+            )
+        );
+        $self->cast_my_vote_header(
+            Wx::StaticText->new(
+                $self->parent, -1, 'Me: ',
+                ### 2 buttons + 2 pixels between those (estimate) + 5 pixel 
+                ### spacer between "me" and "sitter" button groups
+                wxDefaultPosition, Wx::Size->new(($self->button_width * 2 + 2 + 5), $self->row_height)
+            )
+        );
+        $self->cast_sitters_vote_header(
+            Wx::StaticText->new(
+                $self->parent, -1, 'Sitters: ',
+                ### No "+ 5" because there's no spacer after this button 
+                ### group.
+                wxDefaultPosition, Wx::Size->new(($self->button_width * 2 + 2), $self->row_height)
+            )
+        );
+
+        $self->name_header->SetFont                 ( $self->get_font('/header_7') );
+        $self->proposed_by_header->SetFont          ( $self->get_font('/header_7') );
+        $self->votes_needed_header->SetFont         ( $self->get_font('/header_7') );
+        $self->votes_yes_header->SetFont            ( $self->get_font('/header_7') );
+        $self->votes_no_header->SetFont             ( $self->get_font('/header_7') ); 
+        $self->my_vote_header->SetFont              ( $self->get_font('/header_7') ); 
+        $self->cast_my_vote_header->SetFont         ( $self->get_font('/header_7') ); 
+        $self->cast_sitters_vote_header->SetFont    ( $self->get_font('/header_7') ); 
+
+        $self->main_sizer->Add($self->name_header, 0, 0, 0);
+        $self->main_sizer->Add($self->proposed_by_header, 0, 0, 0);
+        $self->main_sizer->Add($self->votes_needed_header, 0, 0, 0);
+        $self->main_sizer->Add($self->votes_yes_header, 0, 0, 0);
+        $self->main_sizer->Add($self->votes_no_header, 0, 0, 0);
+        $self->main_sizer->Add($self->my_vote_header, 0, 0, 0);
+        $self->main_sizer->Add($self->cast_my_vote_header, 0, 0, 0);
+        $self->main_sizer->Add($self->cast_sitters_vote_header, 0, 0, 0);
+        return;
+    }#}}}
+    sub _make_footer {#{{{
+        my $self = shift;
+
+        $self->main_sizer->AddSpacer(430);
+        $self->main_sizer->Add($self->btn_all_yes, 0, 0, 0);
+        return;
+    }#}}}
     sub attempt_vote {#{{{
         my $self                = shift;
         my $sitter_rec          = shift;
+        my $prop                = shift;
         my $prop_has_passed     = 0;
 
+        $self->yield;
         if($self->stop_voting) { $self->stop_voting(0); $self->btn_sitters_yes->Enable(1); return; }
 
         my $player = $sitter_rec->player_name;
@@ -466,9 +562,21 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane::PropRow {
             ### rescues us from that stall.
             local $SIG{ALRM} = sub { croak "voting stall"; };
             alarm 5;
-            my $rv = $sitter_parl->cast_vote($self->prop->{'id'}, 1);
-#            my $rv = $sitter_parl->cast_vote($self->prop->{'id'}, 0);  # to force 'no' votes
+
+            ### SITTERVOTE
+            ### That 'tag' comment exists so this chunk of code is easy to 
+            ### find, please do not delete it.
+            my $rv = $sitter_parl->cast_vote($prop->{'id'}, 1);
+            ##my $rv = $sitter_parl->cast_vote($prop->{'id'}, 0);  # to force 'no' votes
             alarm 0;
+
+            ### For testing.  Comment out the call to cast_vote above and just 
+            ### return this.
+#            my $rv = {
+#                proposition => { my_vote => 1 },
+#                passed => 0,
+#            };
+
             return $rv;
         }
         catch {
@@ -523,6 +631,96 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane::PropRow {
 
         return($voted_ok, $prop_has_passed);
     }#}}}
+    sub sitter_vote_on_prop {#{{{
+        my $self = shift;
+        my $row  = shift;
+
+=pod
+
+Given a PropRow object, votes on that row's proposition using all recorded 
+sitters.
+
+=cut
+
+        my $schema = $self->get_main_schema;
+        my @recorded_sitter_recs    = $schema->resultset('SitterPasswords')->search(
+                                        { server_id => $self->get_connected_server->id, },
+                                        { order_by  => { -asc => 'RANDOM()' } }
+                                        );
+        unless(@recorded_sitter_recs) {
+            $self->poperr("You don't have any sitters recorded yet, so you can't cast votes on their behalf.  See the Sitter Manager tool.", "Error");
+            $self->btn_sitters_yes->Enable(1);
+            $self->clear_dialog_status;
+            return;
+        }
+        
+        my $current_yes         = $row->lbl_votes_yes->GetLabelText;
+        my $total_needed        = $row->lbl_votes_needed->GetLabelText;
+        my $voting_members      = [];
+        my $prop_has_passed     = 0;
+        SITTER:
+        foreach my $sitter_rec(@recorded_sitter_recs) {
+            ### User might have recorded a sitter of a player not in the current 
+            ### alliance.
+            next SITTER unless defined $self->ally_members->{ $sitter_rec->player_id };
+
+            my $voted_ok;
+            ($voted_ok, $prop_has_passed) = $self->attempt_vote($sitter_rec, $row->prop);
+            if( $voted_ok ) {
+                push @{$voting_members}, $sitter_rec->player_name;
+                $current_yes++;
+                $row->lbl_votes_yes->SetLabel($current_yes);
+                $prop_has_passed++ if $current_yes >= $total_needed;
+            }
+            last SITTER if $prop_has_passed;
+        }
+
+        unless( $prop_has_passed ) {
+            ### We skipped attempting to vote for members who'd already been 
+            ### recorded as having voted on a different prop.  They /probably/ 
+            ### voted on this prop, but only /probably/.  Since this prop hasn't 
+            ### passed yet, we'll fall back to trying those members now.
+            my @try_these = values %{ $self->ancestor->already_voted };
+            $self->ancestor->clear_already_voted();
+
+            ALREADY_VOTED:
+            foreach my $sitter_rec(@try_these) {
+                next ALREADY_VOTED unless defined $self->ally_members->{ $sitter_rec->player_id };
+                my $voted_ok;
+                ($voted_ok, $prop_has_passed) = $self->attempt_vote($sitter_rec, $row->prop);
+                if( $voted_ok ) {
+                    push @{$voting_members}, $sitter_rec->player_name;
+                    $current_yes++;
+                    $row->lbl_votes_yes->SetLabel($current_yes);
+                    $prop_has_passed++ if $current_yes >= $total_needed;
+                }
+                last ALREADY_VOTED if $prop_has_passed;
+            }
+        }
+
+        if(@{$voting_members}) {
+            my $votes_cast = @{$voting_members};
+            $self->dialog_status_say("\nVotes have been cast on this prop for the following $votes_cast players:\n");
+            $self->dialog_status_say( (join q{, }, @{$voting_members}) . qq{\n} );
+
+            if( $prop_has_passed ) {
+                $self->dialog_status_say(
+                    "This prop has passed.  It may have passed without having to use all of"
+                    . " your saved sitter passwords, so the list of names above may be missing"
+                    . " some who never actually voted."
+                )
+            }
+        }
+        else {
+            $self->dialog_status_say("\nNo votes have been cast on this prop.");
+        }
+
+        $self->dialog_status_say_recsep();
+        $self->dialog_status_say_recsep();
+        $self->dialog_status_say('');
+        $self->dialog_status_say('');
+
+    }#}}}
     before 'clear_dialog_status' => sub {#{{{
         my $self = shift;
         
@@ -565,6 +763,39 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane::PropRow {
         my $parent  = shift;    # Wx::Dialog
         my $event   = shift;    # Wx::CommandEvent
         $self->waiting_for_enter(0);
+        return 1;
+    }#}}}
+    sub OnAllVote {#{{{
+        my $self    = shift;
+        my $parent  = shift;    # Wx::Dialog
+        my $event   = shift;    # Wx::CommandEvent
+        my $vote    = shift;    # 1 or 0
+
+        unless($self->parl) {
+            $self->poperr("We seem not to have a parliament building; no voting is possible.", "Error");
+            return;
+        }
+
+        my $conf_msg = q{You're about to vote 'Yes' for all props on this page for all of your sitters.  Are you sure?};
+        unless( wxYES == $self->popconf($conf_msg) ) {
+            $self->popmsg("OK; bailing.");
+            return;
+        }
+
+        $self->dialog_status->show();
+        $self->yield;
+        foreach my $row( @{$self->rows} ) {
+            $self->dialog_status_say("Voting on prop '" . $row->prop->{'name'} . "'");
+            $self->dialog_status_say_recsep();
+            $row->btn_sitters_yes->Enable(0);  # Disable the button to keep the user from double-clicking.
+            $self->endthrob;
+            $self->sitter_vote_on_prop($row);
+        }
+        if( $self->ancestor->chk_close_status->IsChecked ) {
+            $self->clear_dialog_status; # also closes it
+        }
+
+        $self->endthrob;
         return 1;
     }#}}}
     sub OnMyVote {#{{{
@@ -648,89 +879,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane::PropRow {
         $self->dialog_status->show();
         $self->yield;
 
-        my $schema = $self->get_main_schema;
-        my @recorded_sitter_recs    = $schema->resultset('SitterPasswords')->search(
-                                        { server_id => $self->get_connected_server->id, },
-                                        { order_by  => { -asc => 'RANDOM()' } }
-                                        );
-        unless(@recorded_sitter_recs) {
-            $self->poperr("You don't have any sitters recorded yet, so you can't cast votes on their behalf.  See the Sitter Manager tool.", "Error");
-            $self->btn_sitters_yes->Enable(1);
-            $self->clear_dialog_status;
-            return;
-        }
-        
-        ### Get alliance members
-        my $ally_hash = try {
-            $self->game_client->get_alliance_members();
-        }
-        catch {
-            $self->poperr("Could not find your alliance members.  You're most likely out of RPCs; wait a minute and try again.", "Error!");
-            $self->btn_sitters_yes->Enable(1);
-            $self->clear_dialog_status;
-            return;
-        } or return;
-
-        my $current_yes         = $self->lbl_votes_yes->GetLabelText;
-        my $total_needed        = $self->lbl_votes_needed->GetLabelText;
-        my $voting_members      = [];
-        my $prop_has_passed     = 0;
-        SITTER:
-        foreach my $sitter_rec(@recorded_sitter_recs) {
-            ### User might have recorded a sitter of a player not in the current 
-            ### alliance.
-            next SITTER unless defined $ally_hash->{ $sitter_rec->player_id };
-
-            my $voted_ok;
-            ($voted_ok, $prop_has_passed) = $self->attempt_vote($sitter_rec);
-            if( $voted_ok ) {
-                push @{$voting_members}, $sitter_rec->player_name;
-                $current_yes++;
-                $self->lbl_votes_yes->SetLabel($current_yes);
-                $prop_has_passed++ if $current_yes >= $total_needed;
-            }
-            last SITTER if $prop_has_passed;
-        }
-
-        unless( $prop_has_passed ) {
-            ### We skipped attempting to vote for members who'd already been 
-            ### recorded as having voted on a different prop.  They /probably/ 
-            ### voted on this prop, but only /probably/.  Since this prop hasn't 
-            ### passed yet, we'll fall back to trying those members now.
-            my @try_these = values %{ $self->ancestor->already_voted };
-            $self->ancestor->clear_already_voted();
-
-            ALREADY_VOTED:
-            foreach my $sitter_rec(@try_these) {
-                next ALREADY_VOTED unless defined $ally_hash->{ $sitter_rec->player_id };
-                my $voted_ok;
-                ($voted_ok, $prop_has_passed) = $self->attempt_vote($sitter_rec);
-                if( $voted_ok ) {
-                    push @{$voting_members}, $sitter_rec->player_name;
-                    $current_yes++;
-                    $self->lbl_votes_yes->SetLabel($current_yes);
-                    $prop_has_passed++ if $current_yes >= $total_needed;
-                }
-                last ALREADY_VOTED if $prop_has_passed;
-            }
-        }
-
-        if(@{$voting_members}) {
-            my $votes_cast = @{$voting_members};
-            $self->dialog_status_say("\nVotes have been cast on this prop for the following $votes_cast players:\n");
-            $self->dialog_status_say( (join q{, }, @{$voting_members}) . qq{\n} );
-
-            if( $prop_has_passed ) {
-                $self->dialog_status_say(
-                    "This prop has passed.  It may have passed without having to use all of"
-                    . " your saved sitter passwords, so the list of names above may be missing"
-                    . " some who never actually voted."
-                )
-            }
-        }
-        else {
-            $self->dialog_status_say("\nNo votes have been cast on this prop.");
-        }
+        $self->sitter_vote_on_prop($self);
 
         if( $self->ancestor->chk_close_status->IsChecked ) {
             $self->clear_dialog_status; # also closes it
