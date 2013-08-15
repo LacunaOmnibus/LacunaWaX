@@ -372,7 +372,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane::PropRow {
             "Yes to all props",
             wxDefaultPosition, 
             ### + 20 to make the sitters button stand out a bit
-            Wx::Size->new(90, $self->row_height)
+            Wx::Size->new(100, $self->row_height)
         );
         $v->SetFont( $self->get_font('/para_text_1') );
 
@@ -511,7 +511,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane::PropRow {
     sub _make_footer {#{{{
         my $self = shift;
 
-        $self->main_sizer->AddSpacer(430);
+        $self->main_sizer->AddSpacer(420);
         $self->main_sizer->Add($self->btn_all_yes, 0, 0, 0);
         return;
     }#}}}
