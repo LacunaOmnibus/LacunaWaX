@@ -10,22 +10,34 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
     use Wx::Event qw(EVT_TREE_ITEM_ACTIVATED EVT_ENTER_WINDOW);
     with 'LacunaWaX::Roles::GuiElement';
 
-    has 'treectrl' => (is => 'rw', isa => 'Wx::TreeCtrl',  lazy_build => 1);
+    has 'treectrl' => (
+        is          => 'rw',
+        isa         => 'Wx::TreeCtrl',
+        lazy_build  => 1,
+    );
 
-    has 'root_item_id' => (is => 'rw', isa => 'Wx::TreeItemId',
-        documentation => q{
+    has 'root_item_id' => (
+        is              => 'rw',
+        isa             => 'Wx::TreeItemId',
+        documentation   => q{
             The true root item.  Not visisble because of the wxTR_HIDE_ROOT style.
         }
     );
 
-    has 'bodies_id' => (is => 'rw', isa => 'Wx::TreeItemId',
-        documentation => q{
+    has 'bodies_id' => (
+        is              => 'rw', 
+        isa             => 'Wx::TreeItemId',
+        documentation   => q{
             The 'Bodies' leaf, which looks like the root item, as it's the top level item visible.
         }
     );
 
-    has 'expand_state' => (is => 'rw', isa => 'Str', lazy => 1, default => 'collapsed', 
-        documentation => q{
+    has 'expand_state' => (
+        is              => 'rw',
+        isa             => 'Str',
+        lazy            => 1,
+        default         => 'collapsed', 
+        documentation   => q{
             Starts out 'collapsed', the other option is 'expanded'.  Used to keep track of what we should
             do (expand or collapse) on a double-click on the visible root item.
         }
@@ -36,8 +48,13 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
         $self->fill_tree;
         return $self;
     };
+    sub _build_szr_main {#{{{
+        my $self = shift;
+        return $self->build_sizer($self->parent, wxVERTICAL, 'Main Sizer');
+    }#}}}
     sub _build_treectrl {#{{{
         my $self = shift;
+say "building tree (lazy builder)";
         my $v = Wx::TreeCtrl->new(
             $self->parent, -1, wxDefaultPosition, wxDefaultSize, 
             wxTR_DEFAULT_STYLE
@@ -56,16 +73,15 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
         return 1;
     }#}}}
 
-    sub fill_tree {#{{{
+    sub clear_children {#{{{
         my $self = shift;
-
-        ### CHECK
-        ### Attempting to make the tree properly re-display on a 
-        ### previously-unrecognized SS on ubuntu.  Works on Windows.
         if( $self->has_treectrl ) {
             $self->treectrl->Destroy;
             $self->clear_treectrl;
         }
+    }#}}}
+    sub fill_tree {#{{{
+        my $self = shift;
 
         $self->root_item_id( 
             $self->treectrl->AddRoot( ('Root Item ' . time), -1, -1, Wx::TreeItemData->new('Hidden Root') )

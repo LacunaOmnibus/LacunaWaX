@@ -193,7 +193,6 @@ Orbit $s->{orbit} around $s->{star_name} (ID $s->{star_id}), in zone $s->{zone}\
             return;
         }
 
-
         ### Now search the child leaves of our current Space Station.  If it's 
         ### already displaying Station-specific child leaves, we're ok 
         ### (meaning that this station is known to the application as a 
@@ -227,7 +226,11 @@ Orbit $s->{orbit} around $s->{star_name} (ID $s->{star_id}), in zone $s->{zone}\
 
         ### Still here?  We have a station whose tree is currently showing the 
         ### default 'body' child leaves.  Fix that.
-        $self->get_left_pane->bodies_tree->fill_tree();
+
+        #$self->get_left_pane->bodies_tree->fill_tree();
+        #$self->get_left_pane->bodies_tree->add_fresh_tree();
+        $self->get_left_pane->add_fresh_tree();
+
         $self->get_left_pane->bodies_tree->_set_events();
         $self->get_left_pane->main_panel->Layout();
     }#}}}
