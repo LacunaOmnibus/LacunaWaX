@@ -80,7 +80,10 @@ re-creation, the correct leaves will be shown.
         $self->clear_bodies_tree;
 
         if( $self->has_main_sizer ) {
-            $self->main_sizer->Clear();
+            ### Clear(1) is meant to clear the sizer and destroy its children. 
+            ### It crashes on Windows but is required on Linux.
+            my $arg = ($^O eq 'linux') ? 1 : 0;
+            $self->main_sizer->Clear($arg);
             $self->clear_main_sizer;
         }
 
