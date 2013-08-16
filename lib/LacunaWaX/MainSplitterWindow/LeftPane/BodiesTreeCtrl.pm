@@ -54,7 +54,6 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
     }#}}}
     sub _build_treectrl {#{{{
         my $self = shift;
-say "building tree (lazy builder)";
         my $v = Wx::TreeCtrl->new(
             $self->parent, -1, wxDefaultPosition, wxDefaultSize, 
             wxTR_DEFAULT_STYLE
