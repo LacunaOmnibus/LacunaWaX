@@ -16,6 +16,7 @@ package LacunaWaX::Model::Container {
     use Carp;
     use Moose;
     use MooseX::NonMoose;
+    no warnings 'experimental';
 
     ### This exists, commented, as a reminder not to get clever and add it.  
     ### It doesn't play well with Bread::Board.

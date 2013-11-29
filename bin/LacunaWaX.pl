@@ -10,6 +10,8 @@ use lib $FindBin::Bin . '/../lib';
 use LacunaWaX;
 use LacunaWaX::Model::DefaultData;
 
+no warnings 'experimental';
+
 my $root_dir = "$FindBin::Bin/..";
 my $app_db   = "$root_dir/user/lacuna_app.sqlite";
 my $log_db   = "$root_dir/user/lacuna_log.sqlite";
