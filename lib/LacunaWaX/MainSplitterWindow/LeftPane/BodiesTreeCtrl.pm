@@ -186,7 +186,9 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
             ### window, the last item in the tree is partially obscured by 
             ### the status bar, even after scrolling all the way down.
             ### Appending an empty item at the very end fixes this.
-            my $blank_id = $self->treectrl->AppendItem( $self->bodies_id, q{}, -1, -1 );
+            my $blank_id_one    = $self->treectrl->AppendItem( $self->bodies_id, q{}, -1, -1 );
+            my $blank_id_two    = $self->treectrl->AppendItem( $self->bodies_id, q{}, -1, -1 );
+            my $blank_id_three  = $self->treectrl->AppendItem( $self->bodies_id, q{}, -1, -1 );
 
             $self->treectrl->Expand($self->bodies_id);
         }
