@@ -10,7 +10,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::RepairPane {
     use Wx qw(:everything);
     use Wx::Event qw(EVT_BUTTON EVT_CLOSE EVT_LIST_COL_CLICK);
     with 'LacunaWaX::Roles::MainSplitterWindow::RightPane';
-    no warnings 'experimental';
+    no if $] >= 5.017011, warnings => 'experimental::smartmatch';
 
     has 'sizer_debug'   => (is => 'rw', isa => 'Int',                           lazy => 1,      default => 0    );
     has 'planet_id'     => (is => 'rw', isa => 'Int',                           lazy_build => 1                 );

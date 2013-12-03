@@ -9,7 +9,7 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
     use Wx qw(:everything);
     use Wx::Event qw(EVT_TREE_ITEM_ACTIVATED EVT_ENTER_WINDOW);
     with 'LacunaWaX::Roles::GuiElement';
-    no warnings 'experimental';
+    no if $] >= 5.017011, warnings => 'experimental::smartmatch';
 
     has 'treectrl' => (
         is          => 'rw',
