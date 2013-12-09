@@ -6,7 +6,7 @@ package LacunaWaX::Schedule::Archmin {
     use Moose;
     use Try::Tiny;
     with 'LacunaWaX::Roles::ScheduledTask';
-    no warnings 'experimental';
+    no if $] >= 5.017011, warnings => 'experimental::smartmatch';
 
     has GLYPH_CARGO_SIZE => (
         is      => 'ro',

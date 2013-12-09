@@ -10,7 +10,7 @@ use lib $FindBin::Bin . '/../lib';
 use LacunaWaX;
 use LacunaWaX::Model::DefaultData;
 
-no warnings 'experimental';
+no if $] >= 5.017011, warnings => 'experimental::smartmatch';
 
 my $root_dir = "$FindBin::Bin/..";
 my $app_db   = "$root_dir/user/lacuna_app.sqlite";

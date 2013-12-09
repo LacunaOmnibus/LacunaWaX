@@ -46,7 +46,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane::PropRow {
     use Wx qw(:everything);
     use Wx::Event qw(EVT_BUTTON EVT_TEXT_ENTER EVT_CLOSE);
     with 'LacunaWaX::Roles::GuiElement';
-    no warnings 'experimental';
+    no if $] >= 5.017011, warnings => 'experimental::smartmatch';
 
     has 'sizer_debug' => (is => 'rw', isa => 'Int',  lazy => 1, default => 0 );
 

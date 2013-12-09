@@ -6,7 +6,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::SpiesPane::BatchRenameForm {
     use Wx qw(:everything);
     use Wx::Event qw(EVT_BUTTON);
     with 'LacunaWaX::Roles::GuiElement';
-    no warnings 'experimental';
+    no if $] >= 5.017011, warnings => 'experimental::smartmatch';
 
     has 'sizer_debug'   => (is => 'rw', isa => 'Int',                       lazy => 1, default => 0 );
     has 'dialog_status' => (is => 'rw', isa => 'LacunaWaX::Dialog::Status', lazy_build  => 1        );
