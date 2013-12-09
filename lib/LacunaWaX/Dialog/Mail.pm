@@ -560,9 +560,9 @@ package LacunaWaX::Dialog::Mail {
 
         ### We always have to get the first page of messages, which will tell 
         ### us how many messages (and therefore pages) there are in total.
-        $status->say("Reading page 01");
+        $status->say("Reading page 1");
 		
-		#Add section for custom text handling
+        ### Add section for custom text handling
 		my $scc_test 	= $go_cust; 
 		my $scc_str		= $self->txt_cust->GetValue;
 		
@@ -581,10 +581,7 @@ package LacunaWaX::Dialog::Mail {
 			foreach my $m(@{$msgs}) {
 				next if $self->chk_read->GetValue and not $m->{'has_read'};
 				
-				#print Dumper $m->{'subject'};
-				
 				if ($scc_str eq $m->{'subject'}) {
-					#$status->say($m->{'subject'} . ' will be deleted');
 					push @{$trash_these}, $m->{'id'};
 				}
 			}
@@ -611,9 +608,19 @@ package LacunaWaX::Dialog::Mail {
 						push @{$trash_these}, $m->{'id'};
 					}
 				}
+                if( $max_page >= 60 ) {
+                    ### Or we'll hit the RPC limit when there are more than 60 
+                    ### pages, which does happen periodically.  Only bother 
+                    ### with the sleep if there are that many pages.
+                    ###
+                    ### TBD
+                    ### What should happen is that I should just clear all 
+                    ### messages every 55 pages or so.
+                    sleep 1;
+                }
 			}
-
-		} else {
+		}
+        else {
 			my $contents = try {
 				$self->inbox->view_inbox({page_number => 1, tags => $tags_to_trash});
 			}
@@ -625,14 +632,8 @@ package LacunaWaX::Dialog::Mail {
 			my $msg_count   = $contents->{'message_count'};
 			my $msgs        = $contents->{'messages'};
 			
-			
-			#print $msg_count;
-			#print $m->{'subject'};
-			
 			foreach my $m(@{$msgs}) {
 				next if $self->chk_read->GetValue and not $m->{'has_read'};
-				
-				#print Dumper $m;
 				
 				push @{$trash_these}, $m->{'id'};
 			}
@@ -657,7 +658,6 @@ package LacunaWaX::Dialog::Mail {
 					push @{$trash_these}, $m->{'id'};
 				}
 			}
-
 		}
 		
         if( $created_own_status ) {
@@ -786,8 +786,6 @@ already used 'bless'.
 		
         foreach my $checkbox( $self->chk_alert, $self->chk_attacks, $self->chk_corr, $self->chk_excav, $self->chk_parl, $self->chk_probe,  $self->chk_cust) {
 			if ($checkbox->GetLabel eq 'Custom' and $checkbox->GetValue) {
-				#say($checkbox->GetLabel);
-				#say($checkbox->GetValue);
 				$go_cust = 'Y';
 				last;
 			} else {
@@ -796,7 +794,6 @@ already used 'bless'.
         }
 		
 		if ($go_cust ne 'Y') {
-		
 			unless( @{$tags_to_trash} ) {
 				$self->poperr(
 					"I should remove nothing?  You got it.",
@@ -807,9 +804,6 @@ already used 'bless'.
 			}
 		}
 		
-		
-		#say('Cust Val : ' . $go_cust);
-
         my $status = LacunaWaX::Dialog::Status->new(
             app      => $self->app,
             ancestor => $self,
@@ -820,9 +814,6 @@ already used 'bless'.
 
         my $trash_these = $self->_get_trash_messages($go_cust, $tags_to_trash, $status);
 
-		#SCC:
-		#print Dumper $trash_these;
-		
 		
         $status->say("Deleting selected messages");
         my $rv = try {
