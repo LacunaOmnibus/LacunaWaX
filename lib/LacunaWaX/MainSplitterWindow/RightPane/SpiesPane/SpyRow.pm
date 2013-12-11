@@ -157,7 +157,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::SpiesPane::SpyRow {
         my $selection = 0;
         my $schema = $self->get_main_schema;
         if( my $rec = $schema->resultset('SpyTrainPrefs')->find({spy_id => $self->spy->id}) ) {
-            $selection = $v->FindString( ucfirst $rec->train );
+            $selection = $v->FindString( ucfirst $rec->train ) if $rec->train;
         }
         $v->SetSelection($selection);
         $v->SetFont( $self->get_font('/para_text_1') );

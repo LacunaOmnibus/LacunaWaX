@@ -594,10 +594,11 @@ see what you're doing.
             return;
         }
 
-        ### Train the first spy just to see if we need a captcha, and provide 
-        ### one if so.
+        ### Train the first spy just to see if we need a captcha.
+        my $row = shift @{ $self->spy_table};
         try {
-            $self->int_min->assign_spy($self->spy_table->[0]->spy->id, 'Intel Training');
+            my $chosen_training_str = $row->chc_train->GetString( $row->chc_train->GetSelection );
+            $self->int_min->assign_spy( $row->spy->id, $chosen_training_str );
         }
         catch {
             my $msg = (ref $_) ? $_->text : $_;
@@ -608,6 +609,8 @@ see what you're doing.
                     parent      => $self->parent,
                 );
             }
+            my $chosen_training_str = $row->chc_train->GetString( $row->chc_train->GetSelection );
+            $self->int_min->assign_spy( $row->spy->id, $chosen_training_str );
             return;
         };
 
@@ -621,12 +624,14 @@ see what you're doing.
 
             my $rv = try {
                 $self->int_min->assign_spy($row->spy->id, $chosen_training_str);
+                return 1;
             }
             catch {
                 my $msg = (ref $_) ? $_->text : $_;
                 $self->poperr($msg);
                 return;
             };
+            return unless $rv;
             sleep 1;
 
             ### And record their training setup in our database
