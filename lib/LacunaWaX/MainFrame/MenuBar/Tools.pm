@@ -11,15 +11,16 @@ package LacunaWaX::MainFrame::MenuBar::Tools {
     use LacunaWaX::Dialog::Mail;
     use LacunaWaX::Dialog::SitterManager;
     use LacunaWaX::Dialog::Test;
+use LacunaWaX::Dialog::Captcha;
 
     ### Wx::Menu is a non-hash object.  Extending such requires 
     ### MooseX::NonMoose::InsideOut instead of plain MooseX::NonMoose.
     use MooseX::NonMoose::InsideOut;
     extends 'Wx::Menu';
 
-    has 'show_test'     => (is => 'rw', isa => 'Int', lazy_build => 1,
+    has 'show_test'     => (is => 'rw', isa => 'Int', 
         documentation => q{
-            This is being set by ../MenuBar.pm - changing it here will probably have no effect!
+            This is being set by ../MenuBar.pm - changing it here will have no effect
         }
     );
 
@@ -94,9 +95,6 @@ package LacunaWaX::MainFrame::MenuBar::Tools {
             wxITEM_NORMAL,
             undef   # if defined, this is a sub-menu
         );
-    }#}}}
-    sub _build_show_test {#{{{
-        return 0;
     }#}}}
     sub _set_events {#{{{
         my $self = shift;
@@ -197,6 +195,16 @@ package LacunaWaX::MainFrame::MenuBar::Tools {
     }#}}}
     sub OnTestDialog {#{{{
         my $self = shift;
+
+
+my $c = LacunaWaX::Dialog::Captcha->new(
+    app         => $self->app,
+    ancestor    => $self->ancestor,
+    parent      => $self->parent,
+);
+return 1;
+
+
 
         ### Determine starting point of Sitter Manager window
         my $tlc         = $self->get_top_left_corner;

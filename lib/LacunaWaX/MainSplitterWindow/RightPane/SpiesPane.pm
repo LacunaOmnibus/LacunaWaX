@@ -10,6 +10,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::SpiesPane {
     use Wx::Event qw(EVT_CHOICE EVT_BUTTON);
     with 'LacunaWaX::Roles::MainSplitterWindow::RightPane';
 
+    use LacunaWaX::Dialog::Captcha;
     use LacunaWaX::MainSplitterWindow::RightPane::SpiesPane::SpyRow;
     use LacunaWaX::MainSplitterWindow::RightPane::SpiesPane::BatchRenameForm;
 
@@ -589,35 +590,51 @@ see what you're doing.
         my $panel   = shift;    # Wx::ScrolledWindow
         my $event   = shift;    # Wx::CommandEvent
 
+        unless( wxYES == $self->popconf("This is going to take one second per spy, is that OK?", "Are you sure?") ) {
+            return;
+        }
+
+        ### Train the first spy just to see if we need a captcha, and provide 
+        ### one if so.
+        try {
+            $self->int_min->assign_spy($self->spy_table->[0]->spy->id, 'Intel Training');
+        }
+        catch {
+            my $msg = (ref $_) ? $_->text : $_;
+            if( $msg =~ /solve a captcha/i ) {
+                my $c = LacunaWaX::Dialog::Captcha->new(
+                    app         => $self->app,
+                    ancestor    => $self->ancestor,
+                    parent      => $self->parent,
+                );
+            }
+            return;
+        };
+
+        ### Set each spy to train
         $self->throb();
         my $schema = $self->get_main_schema;
         foreach my $row( @{$self->spy_table} ) {
             $self->yield;
             my $spy = $row->spy;
-
-
-### CHECK
-### Need to solve captcha before assign_spy can be called.  So I need to add 
-### captcha code to LW.
-
             my $chosen_training_str = $row->chc_train->GetString( $row->chc_train->GetSelection );
-#say $chosen_training_str;   # "Mayhem Training";
+
             my $rv = try {
                 $self->int_min->assign_spy($row->spy->id, $chosen_training_str);
             }
             catch {
                 my $msg = (ref $_) ? $_->text : $_;
                 $self->poperr($msg);
-                #$self->clear_dialog_status;
                 return;
             };
+            sleep 1;
 
-#            my $rec = $schema->resultset('SpyTrainPrefs')->find_or_create({
-#                spy_id      => $spy->id, 
-#                server_id   => $self->get_connected_server->id
-#            });
-#            $rec->train( $chosen_training_str );
-#            $rec->update;
+            ### And record their training setup in our database
+            my $rec = $schema->resultset('SpyTrainPrefs')->find_or_create({
+                spy_id      => $spy->id,
+                server_id   => $self->get_connected_server->id
+            });
+            $rec->update;
         }
         $self->endthrob();
 
