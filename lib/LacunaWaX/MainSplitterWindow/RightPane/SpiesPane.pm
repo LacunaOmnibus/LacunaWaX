@@ -1,4 +1,6 @@
 
+### See CHECK
+
 package LacunaWaX::MainSplitterWindow::RightPane::SpiesPane {
     use v5.14;
     use LacunaWaX::Model::Client;
@@ -489,6 +491,8 @@ see what you're doing.
         my $chosen_training_idx = $choice->GetSelection;
         my $chosen_training_str = lc $choice->GetString( $chosen_training_idx );
 
+        $chosen_training_str =~ s/\s+Training//i;
+
         ROW:
         foreach my $row( @{$self->spy_table} ) {
             my $spy = $row->spy;
@@ -552,6 +556,7 @@ see what you're doing.
                 $self->clear_dialog_status;
                 return;
             };
+
             if( $rv ) {
                 $row->change_name( $row->new_name );
                 $cnt++;
@@ -589,13 +594,30 @@ see what you're doing.
         foreach my $row( @{$self->spy_table} ) {
             $self->yield;
             my $spy = $row->spy;
-            my $chosen_training_str = lc $row->chc_train->GetString( $row->chc_train->GetSelection );
-            my $rec = $schema->resultset('SpyTrainPrefs')->find_or_create({
-                spy_id => $spy->id, 
-                server_id => $self->get_connected_server->id
-            });
-            $rec->train( $chosen_training_str );
-            $rec->update;
+
+
+### CHECK
+### Need to solve captcha before assign_spy can be called.  So I need to add 
+### captcha code to LW.
+
+            my $chosen_training_str = $row->chc_train->GetString( $row->chc_train->GetSelection );
+#say $chosen_training_str;   # "Mayhem Training";
+            my $rv = try {
+                $self->int_min->assign_spy($row->spy->id, $chosen_training_str);
+            }
+            catch {
+                my $msg = (ref $_) ? $_->text : $_;
+                $self->poperr($msg);
+                #$self->clear_dialog_status;
+                return;
+            };
+
+#            my $rec = $schema->resultset('SpyTrainPrefs')->find_or_create({
+#                spy_id      => $spy->id, 
+#                server_id   => $self->get_connected_server->id
+#            });
+#            $rec->train( $chosen_training_str );
+#            $rec->update;
         }
         $self->endthrob();
 

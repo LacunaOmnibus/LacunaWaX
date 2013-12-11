@@ -15,6 +15,8 @@ our @ISA = qw(Games::Lacuna::Client::Buildings);
 sub api_methods {
   return {
     view                  => { default_args => [qw(session_id building_id)] },
+    ### JDB new spy training update
+    view_all_spies        => { default_args => [qw(session_id building_id)] },
     train_spy             => { default_args => [qw(session_id building_id)] },
     view_spies            => { default_args => [qw(session_id building_id)] },
     subsidize_training    => { default_args => [qw(session_id building_id)] },
