@@ -58,6 +58,7 @@ package LacunaWaX::Dialog::Captcha {
         $self->main_sizer->Add($self->szr_solution, 0, 0, 0);
 
         $self->init_screen();
+        $self->txt_solution->SetFocus();
         $self->ShowModal();
         return $self;
     }
