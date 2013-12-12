@@ -167,9 +167,16 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
                     my $glyphs_id = $self->treectrl->AppendItem( 
                         $planet_name_id, 'Glyphs', -1, -1, Wx::TreeItemData->new($b64_glyphs)
                     );
-                    my $lottery_id = $self->treectrl->AppendItem( 
-                        $planet_name_id, 'Lottery', -1, -1, Wx::TreeItemData->new($b64_lottery)
-                    );
+                    ### The original lottery pane code still exists, but 
+                    ### hitting it now requires a captcha.  I've added 
+                    ### captcha-producing code to the lottery pane, so simply 
+                    ### uncommenting this will put it back, working.
+                    ### However, since the whole point of the Lottery pane is 
+                    ### to set up for the scheduled task, and _it_ will not be 
+                    ### able to solve a captcha, I'm just removing the thing.
+                    #my $lottery_id = $self->treectrl->AppendItem( 
+                    #    $planet_name_id, 'Lottery', -1, -1, Wx::TreeItemData->new($b64_lottery)
+                    #);
                     my $rearrange_id = $self->treectrl->AppendItem( 
                         $planet_name_id, 'Rearrange', -1, -1, Wx::TreeItemData->new($b64_rearrange)
                     );

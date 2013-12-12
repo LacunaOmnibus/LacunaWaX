@@ -9,6 +9,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::LotteryPane {
     use Wx::Event qw(EVT_BUTTON EVT_ENTER_WINDOW EVT_LEAVE_WINDOW);
     with 'LacunaWaX::Roles::MainSplitterWindow::RightPane';
 
+    use LacunaWaX::Dialog::Captcha;
     use LacunaWaX::Model::Lottery::Links;
 
     has 'sizer_debug' => (is => 'rw', isa => 'Int', lazy => 1, default => 0);
@@ -90,18 +91,40 @@ package LacunaWaX::MainSplitterWindow::RightPane::LotteryPane {
     sub BUILD {
         my $self = shift;
 
+        ### Try to get the links once, solve the captcha if needed
         my $l = try {
-            $self->_make_links
+            return $self->_make_links;
         }
         catch {
             my $msg = (ref $_) ? $_->text : $_;
-            $self->poperr("I was unable to access the lottery links: $msg");
-            $self->get_right_pane->clear_pane;
-            $self->get_right_pane->show_right_pane(
-                'LacunaWaX::MainSplitterWindow::RightPane::DefaultPane'
-            );
-            return;
-        } or return;
+            if( $msg =~ /solve a captcha/ ) {
+                my $c = LacunaWaX::Dialog::Captcha->new(
+                    app         => $self->app,
+                    ancestor    => $self->ancestor,
+                    parent      => $self->parent,
+                );
+            }
+            return 0;
+        };
+
+        unless($l) {
+            ### If we had to solve a captcha, try again.  This time if it 
+            ### doesn't work, we have an actual problem.
+            $l = try {
+                return $self->_make_links;
+            }
+            catch {
+                my $msg = (ref $_) ? $_->text : $_;
+                $self->poperr("I was unable to access the lottery links: $msg");
+                $self->get_right_pane->clear_pane;
+                $self->get_right_pane->show_right_pane(
+                    'LacunaWaX::MainSplitterWindow::RightPane::DefaultPane'
+                );
+                return;
+            }
+            or return;
+        }
+
         $self->links($l);
 
         $self->szr_header->Add($self->lbl_header, 0, 0, 0);
