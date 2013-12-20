@@ -2,6 +2,7 @@
 package LacunaWaX::Dialog::About {
     use Moose;
     use Try::Tiny;
+    use Wx qw(:everything);
     with 'LacunaWaX::Roles::GuiElement';
 
     has 'info'  => (is => 'rw', isa => 'Wx::AboutDialogInfo');
@@ -13,9 +14,19 @@ package LacunaWaX::Dialog::About {
         $self->info->SetName(
             $self->bb->resolve(service => '/Strings/app_name')
         );
+
+        my $maj = wxMAJOR_VERSION;
+        my $min = wxMINOR_VERSION;
+        ### These are documented, but don't work under wxperl
+        #my $rel = wxRELEASE_NUMBER;
+        #my $sub = wxSUBRELEASE_NUMBER;
+
+        my $wxwidgets_version = join '.', ($maj, $min);
+
         $self->info->SetVersion(
-            "$LacunaWaX::VERSION - wxPerl $Wx::VERSION"
+            "$LacunaWaX::VERSION - wxPerl $Wx::VERSION (wxwidgets version $wxwidgets_version)"
         );
+
         $self->info->SetCopyright(
             'Copyright 2012, 2013 Jonathan D. Barton'
         );

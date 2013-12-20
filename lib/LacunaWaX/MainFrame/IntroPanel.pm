@@ -55,8 +55,8 @@ package LacunaWaX::MainFrame::IntroPanel {
         $self->bottom_panel->SetSizer($self->bottom_panel_sizer);
 
         ### Main
-        $self->main_sizer->Add($self->top_panel,    2, wxEXPAND, 0);
-        $self->main_sizer->Add($self->bottom_panel, 4, wxEXPAND, 0);
+        $self->main_sizer->Add($self->top_panel,    2, wxEXPAND, 1);
+        $self->main_sizer->Add($self->bottom_panel, 4, wxEXPAND, 1);
         $self->main_panel->SetSizer( $self->main_sizer );
 
         $self->main_panel->Show(1);
@@ -66,7 +66,8 @@ package LacunaWaX::MainFrame::IntroPanel {
         my $self = shift;
         my $panel = Wx::Panel->new(
             $self->main_panel, -1, 
-            wxDefaultPosition, wxDefaultSize,
+            wxDefaultPosition, 
+            Wx::Size->new(1,1),
             0,
             'midPanel',
         );
@@ -113,7 +114,7 @@ package LacunaWaX::MainFrame::IntroPanel {
             Wx::Panel->new(
                 $self->main_panel, -1, 
                 wxDefaultPosition, 
-                wxDefaultSize,
+                Wx::Size->new(1,1),
                 wxFULL_REPAINT_ON_RESIZE,
                 'topPanel',
             )
