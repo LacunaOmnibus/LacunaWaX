@@ -153,7 +153,14 @@ which should save some space and time.
                                             last unless $read;
                                         }
                                         open my $sfh, '<', \$binary or croak "Unable to open stream: $ERRNO";
-                                        my $img = Wx::Image->new($sfh, wxBITMAP_TYPE_ANY);
+                                        ### wxwidgets 2.9 lost the ability to 
+                                        ### determine the image type from a 
+                                        ### non-seekable stream.  Specifying 
+                                        ### BITMAP_TYPE_PNG works (for pngs), 
+                                        ### but will likely explode for 
+                                        ### anything else.
+                                        #my $img = Wx::Image->new($sfh, wxBITMAP_TYPE_ANY);
+                                        my $img = Wx::Image->new($sfh, wxBITMAP_TYPE_PNG);
                                         close $sfh or croak "Unable to close stream: $ERRNO";
                                         return(wantarray) ? ($img, $binary) : $img;
                                     }
