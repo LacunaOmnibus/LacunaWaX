@@ -629,6 +629,7 @@ see what you're doing.
             $self->yield;
             my $spy = $row->spy;
             my $chosen_training_str = $row->chc_train->GetString( $row->chc_train->GetSelection );
+            next if $chosen_training_str eq 'None';
 
             my $rv = try {
                 $self->int_min->assign_spy($row->spy->id, $chosen_training_str);
