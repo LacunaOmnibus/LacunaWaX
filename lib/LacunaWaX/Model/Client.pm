@@ -594,7 +594,7 @@ is given, now() is assumed.
         return $seconds_dur->seconds;
     }#}}}
     sub spy_training_choices {#{{{
-        return ['Intel Training', 'Mayhem Training', 'Politics Training', 'Theft Training'];
+        return ['Idle', 'Intel Training', 'Mayhem Training', 'Politics Training', 'Theft Training'];
     }#}}}
     sub travel_speed {#{{{
         my $self = shift;
