@@ -6,7 +6,6 @@ package LacunaWaX::Model::DBILogger {
     use Carp;
     use Data::Dumper;
     use DateTime;
-    use DateTime::Format::ISO8601;
     use DBI;
     use Moose;
     use MooseX::NonMoose;

@@ -11,6 +11,7 @@ use LacunaWaX;
 use LacunaWaX::Model::DefaultData;
 
 no if $] >= 5.017011, warnings => 'experimental::smartmatch';
+say "--$FindBin::Bin--";
 
 my $root_dir = "$FindBin::Bin/..";
 my $app_db   = "$root_dir/user/lacuna_app.sqlite";
