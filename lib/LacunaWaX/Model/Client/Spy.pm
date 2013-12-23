@@ -8,6 +8,7 @@ package LacunaWaX::Model::Client::Spy {
     has 'name'              => ( is => 'rw', isa => 'Str', lazy_build => 1 );
     has 'assignment'        => ( is => 'rw', isa => 'Str', lazy_build => 1 );
     has 'level'             => ( is => 'rw', isa => 'Int', lazy_build => 1 );
+    has 'idle'              => ( is => 'rw', isa => 'Int', lazy_build => 1 );
     has 'politics'          => ( is => 'rw', isa => 'Int', lazy_build => 1 );
     has 'mayhem'            => ( is => 'rw', isa => 'Int', lazy_build => 1 );
     has 'theft'             => ( is => 'rw', isa => 'Int', lazy_build => 1 );
@@ -48,6 +49,10 @@ spy object.
     sub _build_level {#{{{
         my $self = shift;
         return $self->hr->{'level'};
+    }#}}}
+    sub _build_idle {#{{{
+        my $self = shift;
+        return 1;
     }#}}}
     sub _build_politics {#{{{
         my $self = shift;
