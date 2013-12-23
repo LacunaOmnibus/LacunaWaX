@@ -12,7 +12,6 @@ extends qw( Games::Lacuna::Client );
 use Carp qw(carp croak confess);
 use CHI;
 use DateTime;
-use DateTime::Format::ISO8601;
 use File::Temp qw(tempdir);
 use Games::Lacuna::Client::Util;
 use Games::Lacuna::Client::Task::Mailbox;
