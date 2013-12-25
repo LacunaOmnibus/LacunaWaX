@@ -52,7 +52,7 @@ spy object.
     }#}}}
     sub _build_idle {#{{{
         my $self = shift;
-        return 0;
+        return 1;
     }#}}}
     sub _build_politics {#{{{
         my $self = shift;

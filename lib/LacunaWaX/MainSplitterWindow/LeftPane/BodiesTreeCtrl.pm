@@ -364,3 +364,4 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
 }
 
 1;
+

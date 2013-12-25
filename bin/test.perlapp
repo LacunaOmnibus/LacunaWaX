@@ -1,36 +1,27 @@
 #!/home/jon/opt/pdk/bin/perlapp-gui
 PAP-Version: 1.0
 Packer: ../../../opt/pdk/bin/perlapp
-Script: LacunaWaX.pl
+Script: test.pl
 Cwd: /home/jon/work/LacunaWaX/bin
-Add: Wx::
-Add: JSON::RPC::Common::
-Add: Params::Validate::*
-Add: DateTime::Locale::*
-Add: Bread::Board::
-Add: Moose::
-Add: MooseX::
-Add: SQL::Translator::
-Add: SQL::Abstract
-Add: Log::Dispatch::*
-Add: DateTime::Format::*
-Add: CHI::Driver::
+Add: Params::Validate::XS
+Add: DateTime::Locale::
+Byref: 0
 Clean: 0
-Date: 2013-12-23 16:01:36
+Date: 2013-12-23 15:18:03
 Debug: 
 Dependent: 0
 Dyndll: 0
-Exe: LacunaWaX-windows-x86-64
+Exe: test
 Force: 0
 Gui: 0
 Hostname: gandalf
-Icon: ../user/ico/frai_48.png
-Lib: lib:../lib
 Manifest: 
 No-Compress: 0
+No-Gui: 0
 No-Logo: 0
 Runlib: 
-Shared: private
+Shared: none
+Singleton: 0
 Tmpdir: 
 Verbose: 0
 Version-Comments: 
