@@ -2,7 +2,7 @@ package Games::Lacuna::Client::Util;
 use feature ':5.10';
 use Moose;
 use DateTime;
-use DateTime::Format::ISO8601;
+use DateTime::Format::RFC3339;
 use DateTime::Format::Strptime;
 use File::Slurp;            # read_file(), write_file()
 use YAML::XS;               # Load(), Dump()
@@ -334,7 +334,7 @@ The only string date/time format that gets turned into DateTime objects is
             }
             else {
                 return $ref unless $ref =~ /^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d$/;
-                $e = DateTime::Format::ISO8601->parse_datetime( $ref );
+                $e = DateTime::Format::RFC3339->parse_datetime( $ref );
             }
 
         }
@@ -350,7 +350,7 @@ The only string date/time format that gets turned into DateTime objects is
             }
             else {
                 return unless $v =~ /^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d$/;
-                $ref->{$n} = DateTime::Format::ISO8601->parse_datetime( $v );
+                $ref->{$n} = DateTime::Format::RFC3339->parse_datetime( $v );
             }
         }
     }

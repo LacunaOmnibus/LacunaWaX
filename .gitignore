@@ -6,6 +6,9 @@ inc/
 Build
 !Build/
 Build.bat
+bin/LacunaWaX
+bin/LacunaWaX.exe
+bin/test
 Cava/tmt/cava20/
 Cava/tmt/cava20-logs/
 Cava/tmt/cava20-temp/

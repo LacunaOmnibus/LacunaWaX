@@ -393,7 +393,7 @@ see what you're doing.
 
 
         my $text = "12/12/2013
-    I'm unconvinced the spy training bit is useful to anyone anymore, but I'm leaving it here for anybody who wants it.
+    Spy assignments are meant to help with training, so 'regular' assignments are not listed.  To set all of your spies to Idle, click the 'Clear Spy Assignments' button to the right first.
 
     You can rename spies individually by clicking their name and then typing the desired new name.  Or, you can use the Batch Rename form at the very bottom of the screen to rename all of your spies at once.  Either way, don't forget to click the Rename Spies button at the bottom.
     ";
@@ -402,7 +402,6 @@ see what you're doing.
             $self->parent, -1, 
             $text,
             wxDefaultPosition, 
-            #Wx::Size->new(-1, 370) # for orig_text
             Wx::Size->new(-1, 130)
         );
         $y->SetFont( $self->get_font('/para_text_2') );
