@@ -7,7 +7,7 @@ Build
 !Build/
 Build.bat
 bin/LacunaWaX
-bin/LacunaWaX.exe
+bin/Schedule_archmin
 bin/test
 Cava/tmt/cava20/
 Cava/tmt/cava20-logs/
