@@ -1,0 +1,7 @@
+
+- extra_scan.pl
+    - Forcefully uses modules that aren't found by perlApp automatically.  
+      There are a lot of them, and adding them into this file and then adding 
+      the file as a "scanned script" in the Files tab is much easier than 
+      adding them each as Implicit Modules individually.
+
