@@ -4,8 +4,10 @@ use DateTime::TimeZone;
 use FindBin;
 use Try::Tiny;
 
-use lib $FindBin::Bin . '/../lib';
+### This must exist here for perlApp to understand it needs Moose in time.
+use Moose;
 
+use lib $FindBin::Bin . '/../lib';
 use LacunaWaX::Model::Container;
 use LacunaWaX::Schedule;
 
@@ -31,6 +33,7 @@ my $scheduler = LacunaWaX::Schedule->new(
     schedule    => 'archmin',
 );
 $scheduler->archmin();
+warn "done";
 
 exit 0;
 

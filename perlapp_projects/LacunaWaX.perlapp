@@ -15,13 +15,20 @@ Add: SQL::Abstract
 Add: Log::Dispatch::*
 Add: DateTime::Format::*
 Add: CHI::Driver::
+Add: LacunaWaX::
+Add: Games::Lacuna::Client::
+Add: Games::Lacuna::Cache
+Add: Games::Lacuna::Client::
+Add: Games::Lacuna::Client::
+Add: Games::Lacuna::Client
+Add: Games::Lacuna::Client::Buildings::**
 Clean: 0
-Date: 2013-12-23 16:01:36
+Date: 2014-01-09 16:32:51
 Debug: 
 Dependent: 0
 Dyndll: 0
-Exe: LacunaWaX-windows-x86-64
-Force: 0
+Exe: LacunaWaX
+Force: 1
 Gui: 0
 Hostname: gandalf
 Icon: ../user/ico/frai_48.png
@@ -30,8 +37,10 @@ Manifest:
 No-Compress: 0
 No-Logo: 0
 Runlib: 
+Scan: ../perlapp_projects/extra_scan.pl
 Shared: private
 Tmpdir: 
+Trim: Games::Lacuna::Client
 Verbose: 0
 Version-Comments: 
 Version-CompanyName: 
