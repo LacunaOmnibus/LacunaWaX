@@ -7,7 +7,7 @@ Build
 !Build/
 Build.bat
 bin/LacunaWaX
-bin/LacunaWaX.exe
+bin/Schedule_archmin
 bin/test
 Cava/tmt/cava20/
 Cava/tmt/cava20-logs/
@@ -26,6 +26,7 @@ pm_to_blib
 .svn/
 *.swo
 *.swp
+perlapp_projects/linux_64/*
 user/doc/html/html.idx/
 local 
 .carton 

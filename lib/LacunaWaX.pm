@@ -3,6 +3,7 @@ package LacunaWaX {
     use v5.14;
     use strict;
     use warnings;
+    use Data::Dumper;  $Data::Dumper::INDENT = 1;
     use English qw( -no_match_vars );
     use Games::Lacuna::Client::TMTRPC;
     use Getopt::Long;
@@ -448,6 +449,68 @@ Returns the number of halls needed to get from one level to another.
         alarm 0;
         return;
     }#}}}
+    sub export_to {
+        my $self = shift;
+        my $file = shift;
+
+        ### This doesn't do anything useful yet, it's just a start.
+
+        ### TBD - Sanity-check $file.
+
+        my $schema = $self->bb->resolve( service => '/Database/schema' );
+
+        ### Get list of tables
+        my @table_names;
+        my $tsth = $schema->storage->dbh->table_info(undef, undef, undef, 'TABLE');
+        while(my $row = $tsth->fetchrow_hashref) {
+            push @table_names, $row->{'TABLE_NAME'};
+            #say Dumper $row;
+        }
+
+        ### Per table, get list of columns
+        foreach my $t(@table_names) {
+            say uc($t);
+            my $csth = $schema->storage->dbh->column_info(undef, undef, $t, undef);
+            while(my $row = $csth->fetchrow_hashref) {
+                say Dumper $row;
+
+=pod
+
+$row looks like:
+
+$VAR1 = {
+  'DECIMAL_DIGITS' => undef,
+  'COLUMN_DEF' => undef,
+  'TABLE_CAT' => undef,
+  'NUM_PREC_RADIX' => undef,
+  'TABLE_SCHEM' => 'main',
+  'BUFFER_LENGTH' => undef,
+  'CHAR_OCTET_LENGTH' => undef,
+  'IS_NULLABLE' => 'YES',
+  'REMARKS' => undef,
+  'COLUMN_SIZE' => '32',
+  'ORDINAL_POSITION' => 4,
+  'COLUMN_NAME' => 'train',
+  'TYPE_NAME' => 'varchar',
+  'NULLABLE' => 1,
+  'DATA_TYPE' => undef,
+  'TABLE_NAME' => 'SpyTrainPrefs',
+  'SQL_DATA_TYPE' => undef,
+  'SQL_DATETIME_SUB' => undef
+};
+
+
+=cut
+
+
+            }
+            say "";
+        }
+
+        
+        exit;
+
+    }
     sub poperr {#{{{
         my $self    = shift;
         my $message = shift || 'Unknown error occurred';
