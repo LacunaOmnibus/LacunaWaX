@@ -19,6 +19,13 @@ package LacunaWaX::Dialog::Calculator {
     has 'szr_header'        => (is => 'rw', isa => 'Wx::Sizer',         lazy_build => 1, documentation => 'vertical'    );
     has 'szr_instructions'  => (is => 'rw', isa => 'Wx::Sizer',         lazy_build => 1);
 
+    has 'sorted_planets'  => (is => 'rw', isa => 'ArrayRef[Str]', default => sub{ [] },
+        documentation => q{
+            Curry cache; used for the planets dropdowns.  There are two dropdowns; both contain 
+            sorted planet names.
+        }
+    );
+
     ### Halls
     has 'szr_halls'             => (is => 'rw', isa => 'Wx::Sizer',         lazy_build => 1, documentation => 'horizontal'    );
     has 'lbl_halls_lvl_from'    => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1);
@@ -53,22 +60,24 @@ package LacunaWaX::Dialog::Calculator {
     has 'btn_time'      => (is => 'rw', isa => 'Wx::Button',        lazy_build => 1);
 
     ### Trilateration
+    has 'chc_body_1'        => (is => 'rw', isa => 'Wx::Choice',    lazy_build => 1);
+    has 'chc_body_2'        => (is => 'rw', isa => 'Wx::Choice',    lazy_build => 1);
     has 'szr_tri'           => (is => 'rw', isa => 'Wx::Sizer',         lazy_build => 1, documentation => 'vertical'    );
     has 'szr_tri_p1'        => (is => 'rw', isa => 'Wx::Sizer',         lazy_build => 1, documentation => 'horizontal'    );
     has 'szr_tri_p2'        => (is => 'rw', isa => 'Wx::Sizer',         lazy_build => 1, documentation => 'horizontal'    );
     has 'lbl_tri_inst'      => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1);
-    has 'lbl_p1_x'          => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1);
-    has 'txt_p1_x'          => (is => 'rw', isa => 'Wx::TextCtrl',      lazy_build => 1);
-    has 'lbl_p1_y'          => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1);
-    has 'txt_p1_y'          => (is => 'rw', isa => 'Wx::TextCtrl',      lazy_build => 1);
+    #has 'lbl_p1_x'          => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1);
+    #has 'txt_p1_x'          => (is => 'rw', isa => 'Wx::TextCtrl',      lazy_build => 1);
+    #has 'lbl_p1_y'          => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1);
+    #has 'txt_p1_y'          => (is => 'rw', isa => 'Wx::TextCtrl',      lazy_build => 1);
     has 'lbl_p1_rate'       => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1);
     has 'txt_p1_rate'       => (is => 'rw', isa => 'Wx::TextCtrl',      lazy_build => 1);
     has 'lbl_p1_time'       => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1);
     has 'txt_p1_time'       => (is => 'rw', isa => 'Wx::TextCtrl',      lazy_build => 1);
-    has 'lbl_p2_x'          => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1);
-    has 'txt_p2_x'          => (is => 'rw', isa => 'Wx::TextCtrl',      lazy_build => 1);
-    has 'lbl_p2_y'          => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1);
-    has 'txt_p2_y'          => (is => 'rw', isa => 'Wx::TextCtrl',      lazy_build => 1);
+    #has 'lbl_p2_x'          => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1);
+    #has 'txt_p2_x'          => (is => 'rw', isa => 'Wx::TextCtrl',      lazy_build => 1);
+    #has 'lbl_p2_y'          => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1);
+    #has 'txt_p2_y'          => (is => 'rw', isa => 'Wx::TextCtrl',      lazy_build => 1);
     has 'lbl_p2_rate'       => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1);
     has 'txt_p2_rate'       => (is => 'rw', isa => 'Wx::TextCtrl',      lazy_build => 1);
     has 'lbl_p2_time'       => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1);
@@ -132,11 +141,7 @@ package LacunaWaX::Dialog::Calculator {
         $self->szr_time->Add($self->btn_time, 0, 0, 0);
 
         ### Trilateration
-        $self->szr_tri_p1->Add($self->lbl_p1_x, 0, 0, 0);
-        $self->szr_tri_p1->Add($self->txt_p1_x, 0, 0, 0);
-        $self->szr_tri_p1->AddSpacer(5);
-        $self->szr_tri_p1->Add($self->lbl_p1_y, 0, 0, 0);
-        $self->szr_tri_p1->Add($self->txt_p1_y, 0, 0, 0);
+        $self->szr_tri_p1->Add($self->chc_body_1, 0, 0, 0);
         $self->szr_tri_p1->AddSpacer(5);
         $self->szr_tri_p1->Add($self->lbl_p1_rate, 0, 0, 0);
         $self->szr_tri_p1->Add($self->txt_p1_rate, 0, 0, 0);
@@ -144,11 +149,7 @@ package LacunaWaX::Dialog::Calculator {
         $self->szr_tri_p1->Add($self->lbl_p1_time, 0, 0, 0);
         $self->szr_tri_p1->Add($self->txt_p1_time, 0, 0, 0);
 
-        $self->szr_tri_p2->Add($self->lbl_p2_x, 0, 0, 0);
-        $self->szr_tri_p2->Add($self->txt_p2_x, 0, 0, 0);
-        $self->szr_tri_p2->AddSpacer(5);
-        $self->szr_tri_p2->Add($self->lbl_p2_y, 0, 0, 0);
-        $self->szr_tri_p2->Add($self->txt_p2_y, 0, 0, 0);
+        $self->szr_tri_p2->Add($self->chc_body_2, 0, 0, 0);
         $self->szr_tri_p2->AddSpacer(5);
         $self->szr_tri_p2->Add($self->lbl_p2_rate, 0, 0, 0);
         $self->szr_tri_p2->Add($self->txt_p2_rate, 0, 0, 0);
@@ -408,6 +409,39 @@ package LacunaWaX::Dialog::Calculator {
     }#}}}
 
 ### Trilateration
+    sub _build_chc_body_1 {#{{{
+        my $self = shift;
+        return $self->_build_chc_body();
+    }#}}}
+    sub _build_chc_body_2 {#{{{
+        my $self = shift;
+        return $self->_build_chc_body();
+    }#}}}
+    sub _build_chc_body {#{{{
+        my $self = shift;
+
+        unless( scalar @{$self->sorted_planets} ) {
+            my %planets_by_id = reverse %{$self->game_client->planets};
+            my $schema = $self->get_main_schema;
+            foreach my $id( keys %planets_by_id ) {
+                ### Get SSs out of the dropdown
+                if( my $rec = $schema->resultset('BodyTypes')->find({body_id => $id, type_general => 'space station'}) ) {
+                    delete $planets_by_id{$id};
+                }
+            }
+            $self->sorted_planets([ sort values %planets_by_id ]);
+        }
+
+        my $v = Wx::Choice->new(
+            $self, -1, 
+            wxDefaultPosition, 
+            Wx::Size->new(110, 25), 
+            ['', @{$self->sorted_planets}],
+        );
+        $v->SetFont( $self->get_font('/para_text_1') );
+        return $v;
+    }#}}}
+
     sub _build_btn_tri {#{{{
         my $self = shift;
         my $v = Wx::Button->new(
@@ -442,28 +476,6 @@ package LacunaWaX::Dialog::Calculator {
         $y->SetFont( $self->get_font('/para_text_1') );
         return $y;
     }#}}}
-    sub _build_lbl_p1_x {#{{{
-        my $self = shift;
-        my $y = Wx::StaticText->new(
-            $self, -1, 
-            q{X:},
-            wxDefaultPosition, 
-            Wx::Size->new(13, $self->line_height)
-        );
-        $y->SetFont( $self->get_font('/bold_para_text_1') );
-        return $y;
-    }#}}}
-    sub _build_lbl_p1_y {#{{{
-        my $self = shift;
-        my $y = Wx::StaticText->new(
-            $self, -1, 
-            q{Y:},
-            wxDefaultPosition, 
-            Wx::Size->new(13, $self->line_height)
-        );
-        $y->SetFont( $self->get_font('/bold_para_text_1') );
-        return $y;
-    }#}}}
     sub _build_lbl_p1_rate {#{{{
         my $self = shift;
         my $y = Wx::StaticText->new(
@@ -488,30 +500,14 @@ package LacunaWaX::Dialog::Calculator {
         $y->SetToolTip( "Enter the time as given in-game, eg hh:mm:ss" );
         return $y;
     }#}}}
-    sub _build_txt_p1_x {#{{{
-        my $self = shift;
-        return Wx::TextCtrl->new(
-            $self, -1, 
-            q{},
-            wxDefaultPosition, Wx::Size->new(40,$self->line_height),
-        );
-    }#}}}
-    sub _build_txt_p1_y {#{{{
-        my $self = shift;
-        return Wx::TextCtrl->new(
-            $self, -1, 
-            q{},
-            wxDefaultPosition, Wx::Size->new(40,$self->line_height),
-        );
-    }#}}}
     sub _build_txt_p1_rate {#{{{
         my $self = shift;
         my $y =  Wx::TextCtrl->new(
             $self, -1, 
-            q{},
+            q{14066},
             wxDefaultPosition, Wx::Size->new(80,$self->line_height),
         );
-        $y->SetToolTip("Enter the speed as an integer, as it appears in-game.");
+        $y->SetToolTip("14066 is max sweeper speed.  Change it if you're using a ship with a different speed.");
         return $y;
     }#}}}
     sub _build_txt_p1_time {#{{{
@@ -522,28 +518,6 @@ package LacunaWaX::Dialog::Calculator {
             wxDefaultPosition, Wx::Size->new(80,$self->line_height),
         );
         $y->SetToolTip( "Enter the time as given in-game, eg hh:mm:ss" );
-        return $y;
-    }#}}}
-    sub _build_lbl_p2_x {#{{{
-        my $self = shift;
-        my $y = Wx::StaticText->new(
-            $self, -1, 
-            q{X:},
-            wxDefaultPosition, 
-            Wx::Size->new(13, $self->line_height)
-        );
-        $y->SetFont( $self->get_font('/bold_para_text_1') );
-        return $y;
-    }#}}}
-    sub _build_lbl_p2_y {#{{{
-        my $self = shift;
-        my $y = Wx::StaticText->new(
-            $self, -1, 
-            q{Y:},
-            wxDefaultPosition, 
-            Wx::Size->new(13, $self->line_height)
-        );
-        $y->SetFont( $self->get_font('/bold_para_text_1') );
         return $y;
     }#}}}
     sub _build_lbl_p2_rate {#{{{
@@ -570,30 +544,14 @@ package LacunaWaX::Dialog::Calculator {
         $y->SetToolTip( "Enter the time as given in-game, eg hh:mm:ss" );
         return $y;
     }#}}}
-    sub _build_txt_p2_x {#{{{
-        my $self = shift;
-        return Wx::TextCtrl->new(
-            $self, -1, 
-            q{},
-            wxDefaultPosition, Wx::Size->new(40,$self->line_height),
-        );
-    }#}}}
-    sub _build_txt_p2_y {#{{{
-        my $self = shift;
-        return Wx::TextCtrl->new(
-            $self, -1, 
-            q{},
-            wxDefaultPosition, Wx::Size->new(40,$self->line_height),
-        );
-    }#}}}
     sub _build_txt_p2_rate {#{{{
         my $self = shift;
         my $y = Wx::TextCtrl->new(
             $self, -1, 
-            q{},
+            q{14066},
             wxDefaultPosition, Wx::Size->new(80,$self->line_height),
         );
-        $y->SetToolTip("Enter the speed as an integer, as it appears in-game.");
+        $y->SetToolTip("14066 is max sweeper speed.  Change it if you're using a ship with a different speed.");
         return $y;
     }#}}}
     sub _build_txt_p2_time {#{{{
@@ -790,19 +748,38 @@ sub distance_from_coords {#{{{
         my $dialog  = shift;    # self
         my $event   = shift;    # CommandEvent
 
-        my $ax = $self->txt_p1_x->GetValue;
-        my $ay = $self->txt_p1_y->GetValue;
-        my $bx = $self->txt_p2_x->GetValue;
-        my $by = $self->txt_p2_y->GetValue;
+        my %planets     = %{$self->game_client->planets};   # keyed by name
+
+        my $b1_idx      = $self->chc_body_1->GetSelection;
+        unless($b1_idx) {
+            $self->poperr("Planet 1 must be selected");
+            return 0;
+        }
+        my $b1_name     = $self->chc_body_1->GetString( $b1_idx );
+        my $b1_status   = $self->game_client->get_body_status( $planets{$b1_name} );
+        my( $ax, $ay )  = ($b1_status->{'x'}, $b1_status->{'y'} );
+
+        my $b2_idx      = $self->chc_body_2->GetSelection;
+        unless($b2_idx) {
+            $self->poperr("Planet 2 must be selected");
+            return 0;
+        }
+        if( $b2_idx == $b1_idx ) {
+            $self->poperr("Don't chose the same planet for both choices; that won't tell you anything.");
+            return 0;
+        }
+        my $b2_name     = $self->chc_body_2->GetString( $b2_idx );
+        my $b2_status   = $self->game_client->get_body_status( $planets{$b2_name} );
+        my( $bx, $by )  = ($b2_status->{'x'}, $b2_status->{'y'} );
 
         my $ac_rate = $self->txt_p1_rate->GetValue;
         my $bc_rate = $self->txt_p2_rate->GetValue;
         my $ac_time = $self->txt_p1_time->GetValue;
         my $bc_time = $self->txt_p2_time->GetValue;
 
-        for($ax, $ay, $bx, $by, $ac_rate, $bc_rate, $ac_time, $bc_time) {
+        for($ac_rate, $bc_rate, $ac_time, $bc_time) {
             unless( defined ) {
-                $self->poperr("All of the inputs must be set.");
+                $self->poperr("All rates and times must be set.");
                 return 0;
             }
         }
@@ -814,10 +791,22 @@ sub distance_from_coords {#{{{
         my $ac_length = $self->distance_from_rt($ac_rate, $ac_time);
         my $bc_length = $self->distance_from_rt($bc_rate, $bc_time);
 
-        my ($cx1, $cy1, $cx2, $cy2) = $self->trilaterate(
-            $ax, $ay, $bx, $by,
-            $ab_length, $ac_length, $bc_length
-        );
+        my ($cx1, $cy1, $cx2, $cy2) = try {
+            $self->trilaterate(
+                $ax, $ay, $bx, $by,
+                $ab_length, $ac_length, $bc_length
+            );
+        }
+        catch {
+            $self->poperr(
+                "The numbers you entered do not intersect; check your speeds and rates.",
+                "Likely Typo"
+            );
+            return 1501;
+        };
+        if( $cx1 == 1501 ) {
+            return 0;
+        }
 
         ### We can only be sure of the actual location of the target planet if 
         ### one of the given coordinates is outside the boundaries of the 
