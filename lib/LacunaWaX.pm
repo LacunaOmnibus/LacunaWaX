@@ -96,8 +96,6 @@ package LacunaWaX {
         }
     );
 
-    has 'warships' => (is => 'rw', isa => 'ArrayRef[Str]', lazy_build => 1, documentation => q{hardcoded list});
-
     sub FOREIGNBUILDARGS {#{{{
         return (); # Wx::App->new() gets no arguments.
     }#}}}
@@ -187,32 +185,6 @@ package LacunaWaX {
         my $self        = shift;
         my $schema      = $self->bb->resolve( service => '/Database/schema' );
         return LacunaWaX::Servers->new( schema => $schema );
-    }#}}}
-    sub _build_warships {#{{{
-        my $self = shift;
-        my $list = [qw(
-            bleeder
-            detonator
-            fighter
-            placebo
-            placebo2
-            placebo3
-            placebo4
-            placebo5
-            placebo6
-            scow
-            scow_large
-            scow_fast
-            scow_mega
-            security_ministry_seeker
-            snark
-            snark2
-            snark3
-            spaceport_seeker
-            sweeper
-            thud
-        )];
-        return $list;
     }#}}}
     sub _build_wxbb {#{{{
         my $self = shift;
