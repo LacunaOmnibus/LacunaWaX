@@ -114,7 +114,7 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
                 my $b64_rearrange   = encode_base64(join q{:}, ('rearrange', $pid));
                 ### Planet
                 my $b64_glyphs      = encode_base64(join q{:}, ('glyphs', $pid));
-                my $b64_lottery     = encode_base64(join q{:}, ('lottery', $pid));
+#                my $b64_lottery     = encode_base64(join q{:}, ('lottery', $pid));
                 my $b64_repair      = encode_base64(join q{:}, ('repair', $pid));
                 my $b64_spies       = encode_base64(join q{:}, ('spies', $pid));
                 ### Station
@@ -167,9 +167,10 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
                     my $glyphs_id = $self->treectrl->AppendItem( 
                         $planet_name_id, 'Glyphs', -1, -1, Wx::TreeItemData->new($b64_glyphs)
                     );
-                    my $lottery_id = $self->treectrl->AppendItem( 
-                        $planet_name_id, 'Lottery', -1, -1, Wx::TreeItemData->new($b64_lottery)
-                    );
+### This no longer works, so no need for it to be here anymore.
+#                    my $lottery_id = $self->treectrl->AppendItem( 
+#                        $planet_name_id, 'Lottery', -1, -1, Wx::TreeItemData->new($b64_lottery)
+#                    );
                     my $rearrange_id = $self->treectrl->AppendItem( 
                         $planet_name_id, 'Rearrange', -1, -1, Wx::TreeItemData->new($b64_rearrange)
                     );
@@ -277,13 +278,13 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
                         { required_buildings  => {'Archaeology Ministry' => undef}, }
                     );
                 }
-                when(/^lottery$/) {
-                    $self->get_right_pane->show_right_pane(
-                        'LacunaWaX::MainSplitterWindow::RightPane::LotteryPane',
-                        $planet,
-                        { required_buildings  => {'Entertainment District' => undef}, }
-                    );
-                }
+#                when(/^lottery$/) {
+#                    $self->get_right_pane->show_right_pane(
+#                        'LacunaWaX::MainSplitterWindow::RightPane::LotteryPane',
+#                        $planet,
+#                        { required_buildings  => {'Entertainment District' => undef}, }
+#                    );
+#                }
                 when(/^repair$/) {
                     $self->get_right_pane->show_right_pane(
                         'LacunaWaX::MainSplitterWindow::RightPane::RepairPane',
