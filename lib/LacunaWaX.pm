@@ -96,7 +96,6 @@ package LacunaWaX {
         }
     );
 
-    has 'glyphs'   => (is => 'rw', isa => 'ArrayRef[Str]', lazy_build => 1, documentation => q{hardcoded list});
     has 'warships' => (is => 'rw', isa => 'ArrayRef[Str]', lazy_build => 1, documentation => q{hardcoded list});
 
     sub FOREIGNBUILDARGS {#{{{
@@ -140,30 +139,6 @@ package LacunaWaX {
     sub _build_display_y {#{{{
         my $self = shift;
         return Wx::SystemSettings::GetMetric(wxSYS_SCREEN_Y);
-    }#}}}
-    sub _build_glyphs {#{{{
-        return [sort qw(
-            anthracite
-            bauxite
-            beryl
-            chalcopyrite
-            chromite
-            fluorite
-            galena
-            goethite
-            gold
-            gypsum
-            halite
-            kerogen
-            magnetite
-            methane
-            monazite
-            rutile
-            sulfur
-            trona
-            uraninite
-            zircon
-        )];
     }#}}}
     sub _build_icon_bundle {#{{{
         my $self = shift;
