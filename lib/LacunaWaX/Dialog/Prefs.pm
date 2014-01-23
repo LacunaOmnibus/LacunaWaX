@@ -155,6 +155,7 @@ package LacunaWaX::Dialog::Prefs {
         if( $username_str and $password_str ) {
             if( $self->intro_panel_exists ) {
                 $self->get_intro_panel->buttons->{ $server_account->server->id }->Enable(1);
+                #$self->get_intro_panel->buttons->{ $server_account->server->id }->GetToolTip->SetTip(q{Ready to log in.});
             }
             $menu_file->itm_connect->Enable($srvr_menu_id, 1);
         }

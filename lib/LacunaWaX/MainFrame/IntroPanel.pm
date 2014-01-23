@@ -143,10 +143,6 @@ package LacunaWaX::MainFrame::IntroPanel {
         my $self    = shift;
         my $schema  = $self->get_main_schema;
 
-        my $disabled_tt = Wx::ToolTip->new(
-            "Edit... Preferences, then enter your empire name and password to enable login."
-        );
-
         ### One connect button per server
         for my $srvr_id( sort{$a<=>$b}$self->server_ids ) {
             my $srvr_rec = $self->server_record_by_id($srvr_id);
@@ -168,7 +164,6 @@ package LacunaWaX::MainFrame::IntroPanel {
             }
             else {
                 $b->Disable;
-                $b->SetToolTip($disabled_tt);
             }
             $self->buttons->{$srvr_id} = $b;
         }
