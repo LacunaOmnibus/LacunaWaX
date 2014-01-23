@@ -16,6 +16,8 @@ my $root_dir = "$FindBin::Bin/..";
 my $app_db   = "$root_dir/user/lacuna_app.sqlite";
 my $log_db   = "$root_dir/user/lacuna_log.sqlite";
 
+open STDERR, ">/dev/null";  # CHECK is this going to blow up on windows?
+
 unless(-e $app_db and -e $log_db ) {#{{{
     autoflush STDOUT 1;
     say "
