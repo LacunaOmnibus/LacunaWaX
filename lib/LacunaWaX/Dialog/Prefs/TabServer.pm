@@ -210,6 +210,7 @@ package LacunaWax::Dialog::Prefs::TabServer {
         if( my $r = $rs->next ) {
             $self->txtbox_user->SetValue($r->username);
         }
+        $self->txtbox_user->SetFocus();
         return 1;
     }#}}}
     sub set_pass {#{{{
