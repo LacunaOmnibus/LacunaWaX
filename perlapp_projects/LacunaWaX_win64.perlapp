@@ -15,8 +15,9 @@ Add: SQL::Abstract
 Add: Log::Dispatch::*
 Add: DateTime::Format::*
 Add: JSON::
+Add: Games::Lacuna::Client::
 Clean: 0
-Date: 2014-01-23 15:28:57
+Date: 2014-01-23 15:37:08
 Debug: 
 Dependent: 0
 Dyndll: 0
