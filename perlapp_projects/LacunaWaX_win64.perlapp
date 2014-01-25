@@ -1,8 +1,8 @@
 #!C:\Program Files\ActiveState Perl Dev Kit 9.2.1\bin\perlapp-gui.exe
 PAP-Version: 1.0
 Packer: C:\Program Files\ActiveState Perl Dev Kit 9.2.1\bin\perlapp.exe
-Script: LacunaWaX.pl
-Cwd: C:\Users\Jon\Documents\work\LacunaWaX\bin
+Script: ..\..\..\bin\LacunaWaX.pl
+Cwd: C:\Users\Jon\Documents\work\LacunaWaX\perlapp_projects\windows_64\bin
 Add: Wx::
 Add: JSON::RPC::Common::
 Add: Params::Validate::*
@@ -14,23 +14,26 @@ Add: SQL::Translator::
 Add: SQL::Abstract
 Add: Log::Dispatch::*
 Add: DateTime::Format::*
+Add: JSON::
+Add: Games::Lacuna::Client::
 Clean: 0
-Date: 2013-12-23 16:49:45
+Date: 2014-01-23 15:37:08
 Debug: 
 Dependent: 0
 Dyndll: 0
 Exe: LacunaWaX.exe
-Force: 0
+Force: 1
 Gui: 0
 Hostname: frodo
-Icon: ..\unpackaged assets\frai.ico
-Lib: lib:../lib
+Icon: ..\..\..\unpackaged assets\frai.ico
+Lib: lib:..\..\..\lib
 Manifest: 
 No-Compress: 0
 No-Logo: 0
 Runlib: 
-Shared: none
+Shared: private
 Tmpdir: 
+Trim: MooseX
 Verbose: 0
 Version-Comments: 
 Version-CompanyName: 
