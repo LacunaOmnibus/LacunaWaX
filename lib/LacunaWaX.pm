@@ -401,6 +401,11 @@ Returns the number of halls needed to get from one level to another.
         my $file = shift;
 
         ### This doesn't do anything useful yet, it's just a start.
+        ###
+        ### And now I'm starting to lean in the other direction.  Provide an 
+        ### "Import from old database" item in the File or Tools menu; allow 
+        ### the user to surf to their old SQLite database, and import their 
+        ### preferences from that.
 
         ### TBD - Sanity-check $file.
 
