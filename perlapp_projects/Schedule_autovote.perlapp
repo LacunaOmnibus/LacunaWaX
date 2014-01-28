@@ -1,7 +1,7 @@
 #!/home/jon/opt/pdk/bin/perlapp-gui
 PAP-Version: 1.0
 Packer: ../../../opt/pdk/bin/perlapp
-Script: Schedule_archmin.pl
+Script: Schedule_autovote.pl
 Cwd: /home/jon/work/LacunaWaX/bin
 Add: Wx::
 Add: JSON::RPC::Common::
@@ -17,11 +17,11 @@ Add: DateTime::Format::*
 Add: CHI::Driver::
 Add: Moose
 Clean: 0
-Date: 2014-01-28 13:33:06
+Date: 2014-01-28 13:31:37
 Debug: 
 Dependent: 0
 Dyndll: 0
-Exe: Schedule_archmin
+Exe: Schedule_autovote
 Force: 1
 Gui: 0
 Hostname: gandalf
