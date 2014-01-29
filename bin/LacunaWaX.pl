@@ -16,13 +16,6 @@ my $root_dir = "$FindBin::Bin/..";
 my $app_db   = "$root_dir/user/lacuna_app.sqlite";
 my $log_db   = "$root_dir/user/lacuna_log.sqlite";
 
-### This is here to shut Bread::Board up.  It's warning about nonsensical 
-### things that it didn't used to warn about.  Closing rather than redirecting 
-### to /dev/null so it'll work on Windows.
-###
-### Doing this might somehow be corrupting my database - knock it off.
-#close STDERR;
-
 unless(-e $app_db and -e $log_db ) {#{{{
     autoflush STDOUT 1;
     say "
