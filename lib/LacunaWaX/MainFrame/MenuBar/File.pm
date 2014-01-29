@@ -6,8 +6,6 @@ package LacunaWaX::MainFrame::MenuBar::File {
     use Wx::Event qw(EVT_MENU);
     with 'LacunaWaX::Roles::GuiElement';
 
-    ### Wx::Menu is a non-hash object.  Extending such requires 
-    ### MooseX::NonMoose::InsideOut instead of plain MooseX::NonMoose.
     use MooseX::NonMoose::InsideOut;
     extends 'Wx::Menu';
 
