@@ -27,7 +27,7 @@ package LacunaWaX::Dialog::Mail {
     has 'chk_parl'          => (is => 'rw', isa => 'Wx::CheckBox',      lazy_build => 1);
     has 'chk_probe'         => (is => 'rw', isa => 'Wx::CheckBox',      lazy_build => 1);
     has 'chk_targ_neut'     => (is => 'rw', isa => 'Wx::CheckBox',      lazy_build => 1);
-    has 'chk_cust'			=> (is => 'rw', isa => 'Wx::CheckBox',      lazy_build => 1);
+#    has 'chk_cust'			=> (is => 'rw', isa => 'Wx::CheckBox',      lazy_build => 1);
     has 'chk_read'          => (is => 'rw', isa => 'Wx::CheckBox',      lazy_build => 1);
     has 'lbl_ally'          => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1);
     has 'lbl_body'          => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1);
@@ -82,8 +82,8 @@ package LacunaWaX::Dialog::Mail {
         $self->szr_check_2->Add($self->chk_probe, 0, 0, 0);
         $self->szr_check_2->AddSpacer(2);
         $self->szr_check_2->Add($self->chk_targ_neut, 0, 0, 0);		
-        $self->szr_check_2->AddSpacer(2);
-        $self->szr_check_2->Add($self->chk_cust, 0, 0, 0);		
+        #$self->szr_check_2->AddSpacer(2);
+        #$self->szr_check_2->Add($self->chk_cust, 0, 0, 0);		
         $self->szr_check_2->AddSpacer(20);
         $self->szr_check_2->Add($self->chk_read, 0, 0, 0);		
 
@@ -527,6 +527,14 @@ package LacunaWaX::Dialog::Mail {
             $status->show;
         }
 
+### wx-common
+###     includes libwxbase2.8-0
+### libwxgtk2.8-dev
+###     includes
+###         libwxbase2.8-dev
+###         libwxgtk2.8-0
+###         wx2.8-headers
+
         ### We always have to get the first page of messages, which will tell 
         ### us how many messages (and therefore pages) there are in total.
         $status->say("Reading page 1");
@@ -534,8 +542,9 @@ package LacunaWaX::Dialog::Mail {
         my $inbox_args = { page_number => 1 };
         $inbox_args->{'tags'} = $tags_to_trash unless $del_string;
 
-        ### We'll need this to check the messages against if we were handed a 
-        ### $del_string.
+        ### If we were handed a $del_string, we'll be getting all messages, 
+        ### not just ones with our selected tags.  In that case, we'll need to 
+        ### individually check each message's tags.
         my %tags_to_trash_hash = map{ $_ => 1 }@{$tags_to_trash};
 
         my $contents = try {
@@ -551,6 +560,7 @@ package LacunaWaX::Dialog::Mail {
         my $msgs        = $contents->{'messages'};
         foreach my $m(@{$msgs}) {
             next if $self->chk_read->GetValue and not $m->{'has_read'};
+
             if( $del_string and $del_string eq $m->{'subject'} ) {
                 push @{$trash_these}, $m->{'id'};
             }
@@ -734,6 +744,7 @@ $status->say(Dumper $m);
         EVT_BUTTON(     $self, $self->btn_clear_to->GetId,      sub{$self->OnClearTo(@_)} );
         EVT_BUTTON(     $self, $self->btn_send->GetId,          sub{$self->OnSendMail(@_)} );
         EVT_CHECKBOX(   $self, $self->chk_corr->GetId,          sub{$self->OnCorrespondenceCheckbox(@_)} );
+        EVT_CHECKBOX(   $self, $self->chk_targ_neut->GetId,     sub{$self->OnTargNeutChecked(@_)} );
         EVT_CHOICE(     $self, $self->chc_ally->GetId,          sub{$self->OnAllyChoice(@_)} );
         EVT_CLOSE(      $self,                                  sub{$self->OnClose(@_)});
         return 1;
@@ -846,18 +857,12 @@ already used 'bless'.
         my $tags_to_trash   = [];
 
 		my $del_string = q{};
-        if( $self->chk_targ_neut->GetValue ) {
-            $del_string = 'Target Neutralized';
+        if( my $str = $self->txt_cust->GetValue ) {
+            $del_string = $str;
         }
-        if( $self->chk_cust->GetValue ) {
-            ### Yes, this overwrites the previous setting of $del_string - the 
-            ### Custom checkbox is doc'd as overriding everything.
-            $del_string = $self->txt_cust->GetValue;
-        }
-        else {
-            foreach my $checkbox( $self->chk_alert, $self->chk_attacks, $self->chk_corr, $self->chk_excav, $self->chk_parl, $self->chk_probe ) {
-                push @{$tags_to_trash}, $checkbox->GetLabel if $checkbox->GetValue;
-            }
+
+        foreach my $checkbox( $self->chk_alert, $self->chk_attacks, $self->chk_corr, $self->chk_excav, $self->chk_parl, $self->chk_probe ) {
+            push @{$tags_to_trash}, $checkbox->GetLabel if $checkbox->GetValue;
         }
 		
         unless( @{$tags_to_trash} or $del_string ) {
@@ -940,6 +945,14 @@ already used 'bless'.
         else {
             $self->poperr("Unknown error sending message.");
         }
+        return 1;
+    }#}}}
+    sub OnTargNeutChecked {#{{{
+        my $self   = shift;
+
+        $self->txt_cust->SetValue('Target Neutralized');
+        $self->chk_targ_neut->SetValue(0);
+
         return 1;
     }#}}}
 
