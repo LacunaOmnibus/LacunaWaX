@@ -452,6 +452,14 @@ Returns the number of halls needed to get from one level to another.
         my $self    = shift;
         my $db_file = shift;
 
+        ### Attempts to import the important (there's a linguistic joke hiding 
+        ### in there somewhere) stuff from a previous LW database into the 
+        ### current one.
+        ###
+        ### The previous and current databases may not be in exactly the same 
+        ### format.  That's OK as long as the previous database contains the 
+        ### tables and column listed in $imports, below.
+        ###
         ### Dies with message on failure, so wrap in try/catch.
 
         my $imports = {
