@@ -505,11 +505,16 @@ package LacunaWaX::Dialog::Mail {
             wxTE_READONLY
         );
     }#}}}
-    sub _get_trash_messages_ORIG {#{{{
+    sub _get_trash_messages {#{{{
         my $self            = shift;
+		my $del_string      = shift;
         my $tags_to_trash   = shift;
         my $status          = shift;
         my $trash_these     = [];
+
+        ### If $del_string is non-empty, we'll delete all mails whose subject 
+        ### exactly matches that string.  Otherwise, we'll delete mails whose 
+        ### tag is in the arrayref $tags_to_trash.
 
         my $created_own_status = 0;
         unless( $status ) {
@@ -525,19 +530,34 @@ package LacunaWaX::Dialog::Mail {
         ### We always have to get the first page of messages, which will tell 
         ### us how many messages (and therefore pages) there are in total.
         $status->say("Reading page 1");
+
+        my $inbox_args = { page_number => 1 };
+        $inbox_args->{'tags'} = $tags_to_trash unless $del_string;
+
+        ### We'll need this to check the messages against if we were handed a 
+        ### $del_string.
+        my %tags_to_trash_hash = map{ $_ => 1 }@{$tags_to_trash};
+
         my $contents = try {
-            $self->inbox->view_inbox({page_number => 1, tags => $tags_to_trash});
+            $self->inbox->view_inbox( $inbox_args );
         }
         catch {
             my $msg = (ref $_) ? $_->text : $_;
             $self->poperr("Unable to get page 1: $msg");
             return;
         } or return;
+
         my $msg_count   = $contents->{'message_count'};
         my $msgs        = $contents->{'messages'};
         foreach my $m(@{$msgs}) {
             next if $self->chk_read->GetValue and not $m->{'has_read'};
-            push @{$trash_these}, $m->{'id'};
+            if( $del_string and $del_string eq $m->{'subject'} ) {
+                push @{$trash_these}, $m->{'id'};
+            }
+            ### If any of the message's tags match any of the tags we were 
+            ### told to dump, the message is trash.
+            my @matching_tags = grep{ $tags_to_trash_hash{$_} }@{$m->{'tags'}};
+            push(@{$trash_these}, $m) if scalar @matching_tags;
         }
 
         ### Get subsequent pages if necessary.
@@ -545,8 +565,9 @@ package LacunaWaX::Dialog::Mail {
         $max_page++ if $msg_count % 25;
         for my $page(2..$max_page) {    # already got page 1
             $status->say("Reading page $page");
+            $inbox_args->{'page_number'} = $page;
             my $contents = try {
-                $self->inbox->view_inbox({page_number => $page, tags => $tags_to_trash});
+                $self->inbox->view_inbox( $inbox_args );
             }
             catch {
                 my $msg = (ref $_) ? $_->text : $_;
@@ -557,7 +578,21 @@ package LacunaWaX::Dialog::Mail {
             my $found_count = 0;
             foreach my $m(@{$msgs}) {
                 next if $self->chk_read->GetValue and not $m->{'has_read'};
-                push @{$trash_these}, $m->{'id'};
+                if ($del_string eq $m->{'subject'}) {
+                    push @{$trash_these}, $m->{'id'};
+                }
+                my @matching_tags = grep{ $tags_to_trash_hash{$_} }@{$m->{'tags'}};
+                push(@{$trash_these}, $m) if scalar @matching_tags;
+            }
+            if( $max_page >= 60 ) {
+                ### Or we'll hit the RPC limit when there are more than 60 
+                ### pages, which does happen periodically.  Only bother 
+                ### with the sleep if there are that many pages.
+                ###
+                ### TBD
+                ### What should happen is that I should just clear all 
+                ### messages every 55 pages or so.
+                sleep 1;
             }
         }
 
@@ -567,7 +602,7 @@ package LacunaWaX::Dialog::Mail {
 
         return $trash_these;
     }#}}}
-    sub _get_trash_messages {#{{{
+    sub _get_trash_messages_old {#{{{
         my $self            = shift;
 		my $del_string      = shift;
         my $tags_to_trash   = shift;
@@ -606,6 +641,7 @@ package LacunaWaX::Dialog::Mail {
 			my $msgs        = $contents->{'messages'};
 			
 			foreach my $m(@{$msgs}) {
+$status->say(Dumper $m);
 				next if $self->chk_read->GetValue and not $m->{'has_read'};
 				
 				if ($del_string eq $m->{'subject'}) {
