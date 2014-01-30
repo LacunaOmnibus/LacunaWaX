@@ -118,12 +118,7 @@ package LacunaWaX::Model::Schema::ServerAccounts {#{{{
         server => 'LacunaWaX::Model::Schema::Servers', 
         { 'foreign.id' => 'self.server_id' }
     );
-    sub sqlt_deploy_hook {#{{{
-        my $self  = shift;
-        my $table = shift;
-        $table->add_index(name => 'ServerAccounts_one_per_server',   fields => ['server_id', 'username']);
-        return 1;
-    }#}}}
+    __PACKAGE__->add_unique_constraint( 'ServerAccounts_one_per_server' => [qw(server_id username)] ); 
 
     sub all_servers {#{{{
         my $self = shift;

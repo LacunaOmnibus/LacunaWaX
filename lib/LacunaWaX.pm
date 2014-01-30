@@ -452,6 +452,8 @@ Returns the number of halls needed to get from one level to another.
         my $self    = shift;
         my $db_file = shift;
 
+        ### Dies with message on failure, so wrap in try/catch.
+
         my $imports = {
             ArchMinPrefs => [qw(
                 server_id body_id glyph_home_id reserve_glyphs pusher_ship_name auto_search_for 
@@ -472,7 +474,7 @@ Returns the number of halls needed to get from one level to another.
 
         ### Connect to the old database.
         my $options = {sqlite_unicode => 1, quote_names => 1};
-        my $old_dbh = DBI->connect("dbi:SQLite:dbname=$db_file", q{}, q{}, $options ) or die "--$DBI::errstr--\n";
+        my $old_dbh = DBI->connect("dbi:SQLite:dbname=$db_file", q{}, q{}, $options ) or die "$DBI::errstr\n";
 
         ### Sanity-check old database.
         unless( $self->database_checks_out($old_dbh, $imports) ) {
