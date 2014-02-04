@@ -96,9 +96,6 @@ package LacunaWaX {
         }
     );
 
-    has 'glyphs'   => (is => 'rw', isa => 'ArrayRef[Str]', lazy_build => 1, documentation => q{hardcoded list});
-    has 'warships' => (is => 'rw', isa => 'ArrayRef[Str]', lazy_build => 1, documentation => q{hardcoded list});
-
     sub FOREIGNBUILDARGS {#{{{
         return (); # Wx::App->new() gets no arguments.
     }#}}}
@@ -140,30 +137,6 @@ package LacunaWaX {
     sub _build_display_y {#{{{
         my $self = shift;
         return Wx::SystemSettings::GetMetric(wxSYS_SCREEN_Y);
-    }#}}}
-    sub _build_glyphs {#{{{
-        return [sort qw(
-            anthracite
-            bauxite
-            beryl
-            chalcopyrite
-            chromite
-            fluorite
-            galena
-            goethite
-            gold
-            gypsum
-            halite
-            kerogen
-            magnetite
-            methane
-            monazite
-            rutile
-            sulfur
-            trona
-            uraninite
-            zircon
-        )];
     }#}}}
     sub _build_icon_bundle {#{{{
         my $self = shift;
@@ -212,32 +185,6 @@ package LacunaWaX {
         my $self        = shift;
         my $schema      = $self->bb->resolve( service => '/Database/schema' );
         return LacunaWaX::Servers->new( schema => $schema );
-    }#}}}
-    sub _build_warships {#{{{
-        my $self = shift;
-        my $list = [qw(
-            bleeder
-            detonator
-            fighter
-            placebo
-            placebo2
-            placebo3
-            placebo4
-            placebo5
-            placebo6
-            scow
-            scow_large
-            scow_fast
-            scow_mega
-            security_ministry_seeker
-            snark
-            snark2
-            snark3
-            spaceport_seeker
-            sweeper
-            thud
-        )];
-        return $list;
     }#}}}
     sub _build_wxbb {#{{{
         my $self = shift;
@@ -368,6 +315,68 @@ perform arithmetic on it without Math::BigFloat.
 
         return sqrt( ($tx - $ox)**2 + ($ty - $oy)**2 );
     }#}}}
+    sub database_checks_out  {#{{{
+        my $self    = shift;
+        my $dbh     = shift;
+        my $tables  = shift;
+
+=head2 database_checks_out
+
+Returns true if the database passed in contains the correct tables and columns.
+
+ $must_have_these = {
+  table_name_one => [ column_one,   column_two  ],
+  table_name_two => [ column_three, column_four ],
+ };
+
+ $dbh = get_DBI_database_handle_from_somewhere();
+
+ if( database_checks_out($dbh, $tables) ) {
+  say "Your database is OK";
+ }
+ else {
+  say "Your database is NOT OK.";
+ }
+
+=cut
+
+        ### Ensure the tables we're going to try to import exist in the old 
+        ### database
+        my %tables = ();
+        map{ $tables{$_} = 0 }(keys %{$tables} );
+        my $tbl_sth = try {
+            $dbh->table_info(undef, undef, undef, 'TABLE');
+        }
+        catch { return };
+        return 0 unless $tbl_sth;
+        while( my $r = $tbl_sth->fetchrow_hashref ) {
+            delete $tables{$r->{'TABLE_NAME'}};
+        }
+        return 0 if keys %tables;
+
+        ### Ensure each of those tables contains the correct columns
+        foreach my $tbl( keys %{$tables} ) {
+            my %cols = ();
+            map{ $cols{$_} = 0 }(@{$tables->{$tbl}});
+            my $sth = $dbh->column_info(undef, undef, $tbl, undef);
+            while( my $r = $sth->fetchrow_hashref ) {
+                delete $cols{$r->{'COLUMN_NAME'}};
+            }
+            return 0 if keys %cols;
+        }
+
+        return 1;
+    }#}}}
+    sub endthrob {#{{{
+        my $self = shift;
+
+        $self->main_frame->status_bar->bar_reset;
+        $self->Yield; 
+        local %SIG = ();
+        $SIG{ALRM} = undef;     ##no critic qw(RequireLocalizedPunctuationVars) - PC thinks $SIG there is a scalar - whoops
+        alarm 0;
+        return;
+    }#}}}
     sub game_connect {#{{{
         my $self = shift;
 
@@ -439,78 +448,70 @@ Returns the number of halls needed to get from one level to another.
 
         return $self->triangle($max) - $self->triangle($current);
     }#}}}
-    sub endthrob {#{{{
-        my $self = shift;
+    sub import_old_database {#{{{
+        my $self    = shift;
+        my $db_file = shift;
 
-        $self->main_frame->status_bar->bar_reset;
-        $self->Yield; 
-        local %SIG = ();
-        $SIG{ALRM} = undef;     ##no critic qw(RequireLocalizedPunctuationVars) - PC thinks $SIG there is a scalar - whoops
-        alarm 0;
-        return;
-    }#}}}
-    sub export_to {
-        my $self = shift;
-        my $file = shift;
+        ### Attempts to import the important (there's a linguistic joke hiding 
+        ### in there somewhere) stuff from a previous LW database into the 
+        ### current one.
+        ###
+        ### The previous and current databases may not be in exactly the same 
+        ### format.  That's OK as long as the previous database contains the 
+        ### tables and column listed in $imports, below.
+        ###
+        ### Dies with message on failure, so wrap in try/catch.
 
-        ### This doesn't do anything useful yet, it's just a start.
+        my $imports = {
+            ArchMinPrefs => [qw(
+                server_id body_id glyph_home_id reserve_glyphs pusher_ship_name auto_search_for 
+            )],
+            BodyTypes => [qw(
+                body_id server_id type_general 
+            )],
+            SSAlerts => [qw(
+                server_id station_id enabled min_res 
+            )],
+            ServerAccounts => [qw(
+                server_id username password default_for_server 
+            )],
+            SitterPasswords => [qw(
+                server_id player_id player_name sitter 
+            )],
+        };
 
-        ### TBD - Sanity-check $file.
+        ### Connect to the old database.
+        my $options = {sqlite_unicode => 1, quote_names => 1};
+        my $old_dbh = DBI->connect("dbi:SQLite:dbname=$db_file", q{}, q{}, $options ) or die "$DBI::errstr\n";
 
-        my $schema = $self->bb->resolve( service => '/Database/schema' );
-
-        ### Get list of tables
-        my @table_names;
-        my $tsth = $schema->storage->dbh->table_info(undef, undef, undef, 'TABLE');
-        while(my $row = $tsth->fetchrow_hashref) {
-            push @table_names, $row->{'TABLE_NAME'};
-            #say Dumper $row;
+        ### Sanity-check old database.
+        unless( $self->database_checks_out($old_dbh, $imports) ) {
+            die "$db_file is not a LacunaWaX database.\n";
         }
 
-        ### Per table, get list of columns
-        foreach my $t(@table_names) {
-            say uc($t);
-            my $csth = $schema->storage->dbh->column_info(undef, undef, $t, undef);
-            while(my $row = $csth->fetchrow_hashref) {
-                say Dumper $row;
+        ### Get DBI connection to the new (current) database.
+        my $schema  = $self->bb->resolve( service => '/Database/schema' );
+        my $new_dbh = $schema->storage->dbh;
 
-=pod
+        foreach my $table_name(keys %{$imports}) {
+            my $cols        = $imports->{$table_name};
+            my $comma_cols  = join ', ', @{$cols};
+            my @ques_arr    = ();
+            push @ques_arr, '?' for @$cols;
+            my $ques        = join ',', @ques_arr;
+            my $sel_sth     = $old_dbh->prepare("SELECT $comma_cols FROM $table_name");
+            my $ins_sth     = $new_dbh->prepare("INSERT OR IGNORE INTO $table_name ($comma_cols) VALUES ($ques)");
 
-$row looks like:
-
-$VAR1 = {
-  'DECIMAL_DIGITS' => undef,
-  'COLUMN_DEF' => undef,
-  'TABLE_CAT' => undef,
-  'NUM_PREC_RADIX' => undef,
-  'TABLE_SCHEM' => 'main',
-  'BUFFER_LENGTH' => undef,
-  'CHAR_OCTET_LENGTH' => undef,
-  'IS_NULLABLE' => 'YES',
-  'REMARKS' => undef,
-  'COLUMN_SIZE' => '32',
-  'ORDINAL_POSITION' => 4,
-  'COLUMN_NAME' => 'train',
-  'TYPE_NAME' => 'varchar',
-  'NULLABLE' => 1,
-  'DATA_TYPE' => undef,
-  'TABLE_NAME' => 'SpyTrainPrefs',
-  'SQL_DATA_TYPE' => undef,
-  'SQL_DATETIME_SUB' => undef
-};
-
-
-=cut
-
-
+            $sel_sth->execute();
+            $new_dbh->begin_work;
+            while(my $rec = $sel_sth->fetchrow_arrayref) {
+                $ins_sth->execute(@{$rec});
             }
-            say "";
+            $new_dbh->commit;
         }
 
-        
-        exit;
-
-    }
+        return 1;
+    }#}}}
     sub poperr {#{{{
         my $self    = shift;
         my $message = shift || 'Unknown error occurred';
