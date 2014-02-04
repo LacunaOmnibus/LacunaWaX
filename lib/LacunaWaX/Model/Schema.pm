@@ -118,6 +118,7 @@ package LacunaWaX::Model::Schema::ServerAccounts {#{{{
         server => 'LacunaWaX::Model::Schema::Servers', 
         { 'foreign.id' => 'self.server_id' }
     );
+    __PACKAGE__->add_unique_constraint( 'ServerAccounts_one_per_server' => [qw(server_id username)] ); 
 
     sub all_servers {#{{{
         my $self = shift;

@@ -1,1356 +1,0 @@
-filenameschedule_setup.htmltitleSet up Scheduled ProgramssummaryƒZ Schedule-able programs are found in [% bin_dir %], and include: Schedule_archmin.exe Handles both glyph pushing and automated searching of individual arch mins Schedule_autovote.exe Votes for SS propositions based on your settings Schedule_lottery.exe Plays the lottery on your requested colonies Schedule_train_spies.exe Trains spies in the skills you've chosen provided the spies are both available and currently sitting on a planet with the appropriate training buildingcontent™Set up Scheduled Programs
-
-One of the main benefits of LacunaWaX is that it allows you to schedule a number of common 
-tasks.  You set up what you want those scheduled tasks to do using the main LacunaWaX GUI, 
-but LacunaWaX itself does not schedule anything; you must set up your own schedule.
-
-
-Schedule-able programs are found in [% bin_dir %], and include:
-
-    
-        Schedule_archmin.exe
-        
-            Handles both glyph pushing and automated searching of individual arch 
-            mins
-        
-    
-    
-        Schedule_autovote.exe
-        
-            Votes for SS propositions based on your settings
-        
-    
-    
-        Schedule_lottery.exe
-        
-            Plays the lottery on your requested colonies
-        
-    
-    
-        Schedule_train_spies.exe
-        
-            Trains spies in the skills you've chosen provided the spies are both available 
-            and currently sitting on a planet with the appropriate training building
-        
-    
-
-
-Actually setting up the schedule (Windows)
-
-You can use the built-in Windows Task Scheduler if you want to, but if you're not used to 
-it, it can be a horror show to try to figure out.
-
-
-Instead, download and install System 
-Scheduler Free from Splinterware.  It's easier to use than the Windows scheduler and 
-it will look the same across different versions of Windows, so you can just follow the 
-instructions below step-by-step.
-
-
-Preferences
-
-
-
-After installing System Scheduler, you'll have a little alarm clock icon in 
-your system tray (next to your clock).  Right-click it and chose 
-"Preferences", then chose the Startup/Logging tab.
-
-
-Make sure the "Do NOT start System Scheduler automatically on logon" checkbox 
-is unchecked!  After you've made sure of that, you can close the 
-preferences window.
-
-
-
-
-Create new event
-
-
-
-Go back to the alarm clock icon in your systray again and just double-(left)-click it to 
-bring up the actual scheduler.
-
-
-You can see I have my Arch Min and Spy Training already set up, but I don't have Autovote 
-set yet.  To set that up, click the indicated green circle icon to create a New Event.
-
-
-
-    
-Name it and select the program to run
-
-
-
-Give your event a title, then click the yellow folder icon next to Application .  
-Browse to your TMT Tools/LacunaWaX/bin/ folder and select "Schedule_autovote.exe".
-
-
-
-
-Make sure to run it Hidden
-
-
-
-Make sure to select the "Hidden" State.  This will keep the black CMD window from popping 
-up at you each time the scheduled event runs.
-
-
-
-
-Choose times for it to run
-
-
-
-I want my autovote to run every three hours.  So I selected "Every 
-Hour/Selected Minutes" in the dropdown box up top.  Then, in the Hours 
-box, I entered:
-
-    00,03,06,09,12,15,18,21
-
-Also, I typed 30 in the Minutes box, so my task will run at 
-30 minutes past the hour, every three hours.
-
-
-If you wanted your task to run every two hours, it would be:
-
-    00,02,04,06,08,10,12,14,16,18,20,22
-
-...etc
-
-
-
-
-Save
-
-
-
-Don't forget to save your new scheduled task by clicking the floppy icon.
-
-
-
-
-Done!
-
-
-
-And that's it - you can see my new scheduled task has been set up, and it displays the 
-time when it'll run next.  You can now just close the System Scheduler window.
-
-filenamerearrange_pane.htmltitleRearrange Screensummary‚ If the destination square already contained a building, it will be replaced with the one you most recently "picked up", and it will now be the one "picked up". When all your buildings are laid out the way you want them, click the Rearrange button at the bottom.content‡qRearrange Screen
-
-Thanks Jazz
-I had used Jazz's building mover program quite a bit, and found that I missed being able 
-to use it when I switched over to my Ubuntu machine.  So this rearranger screen was the 
-first bit of LacunaWaX I created, and draws its layout from Jazz's program.
-
-
-Rearranging Buildings
-Simply click the building you want to move (it will get "picked up"), then click where you 
-want to lay it back down again.
-
-
-If the destination square already contained a building, it will be replaced with the one 
-you most recently "picked up", and it will now be the one "picked up".  When all your 
-buildings are laid out the way you want them, click the Rearrange button at the bottom.
-
-
-If you decide that the layout you've been working on is awful and want to start over 
-again, click the Reload button to reset everything.
-
-
-After rearranging your buildings, if you already had that planet open in your browser, 
-you'll need to refresh the planet surface in your browser to see the changes.
-
-filenamemenu_file_exit.htmltitleFile... Exitsummary
-No Summarycontent File... Exit
-
-Closes LacunaWaX.
-filenamefire_bfg_pane.htmltitleFire the BFGsummary‚< Firing the BFG requires that you be logged in with your full password, not your sitter. If you're currently logged in with your sitter, change that to your full password in Edit... Preferences, then close and restart LacunaWaX. Simply re-connecting with File... Connect... will not work; you must close and restart.content‘1Fire the BFG
-
-Viewing this screen requires that the SS have a Parliament of at least level 25.  If it 
-does not, no BFG exists, and clicking the BFG leaf in the tree will simply complain and 
-then show you the Station's summary screen instead.
-
-
-Firing the BFG requires that you be logged in with your full password, not your sitter.  
-If you're currently logged in with your sitter, change that to your full password in 
-Edit... Preferences, then close and restart LacunaWaX .  Simply re-connecting with 
-File... Connect... will not work; you must close and restart.
-
-
-Once you're logged in with your full password, enter the name of the Star that 
-your target is orbiting, then chose the orbit number of your target .  The 
-"reason" text is required, and will be included in the mail that gets sent out to your 
-alliance members.  You can keep the default or enter anything you wish.
-
-
-When you click the red "Open fire!" button, the ID of the target planet will appear in the 
-Target Planet ID box.  This is for your convenience; if you plan on firing the BFG 
-multiple times, you can just write that number down somewhere.  The next time you want to 
-fire the BFG, you can enter that number in the box, and skip the Star Name and Orbit 
-inputs.
-
-
-Also, a confirmation box will pop up asking if you're sure about firing.  So if you're 
-just interested in getting the target ID for later, you can click "Open fire!", then 
-choose not to actually fire, and you'll still be given the target ID.
-
-
-That Target Planet ID is for more than just convenience.  During an extended battle, it's 
-possible one of your allies might move your target to another orbit for some reason 
-(likely an attempt to reduce happiness).  If you're not paying attention, and blindly fire 
-the BFG at the same star and same orbit you did yesterday, you could conceivably end up 
-firing it at an ally instead of your intended target.
-
-
-If you use the Target Planet ID instead, that target is what will be in the BFG's 
-crosshairs, even if it had been moved.
-
-
-A legend exists of a certain careless BFG gunman who did exactly what's been described 
-above, and shot at one of his own alliance member's colonies.  Learn from that bonehead's 
-mistakes.
-
-
-filenameinitial_login.htmltitleInitial Loginsummary†/ In the top menu, choose Edit... Preferences. Server US1 (you can come back and fool with the PT settings later if you have a PT account). Connection Protocol 'https' is suggested. Switch to 'http' if the game is running slowly or if 'https' causes problems for you, but be aware that your password will be sent in plaintext in that case, which is not secure. Username Your TLE empire name. Password Your TLE password. Your sitter is sufficient for most functions in LacunaWaX. However, if you want to Fire the BFG with LacunaWaX, you'll need to enter your main password, not your sitter. This is less important now, since the BFG can now be fired from the game. Click the Save button. The preferences window will disappear, and the connect button for US1 on the main screen will now be enabled. Click it to log in.content‰7Initial Login
-
-The first time you run LacunaWaX, both connect buttons in the middle of the screen will be 
-grayed-out.  This is because you haven't yet entered your empire name and password; you 
-have to do that first.
-
-
-In the top menu, choose Edit... Preferences.
-
-
-    
-        Server US1 (you can come back and fool with the PT settings later 
-        if you have a PT account).
-    
-    
-        Connection Protocol 'https' is suggested.  Switch to 'http' if 
-        the game is running slowly or if 'https' causes problems for you, but be aware 
-        that your password will be sent in plaintext in that case, which is not secure.
-    
-    
-        Username Your TLE empire name.
-    
-    
-        Password Your TLE password.  Your sitter is sufficient for most 
-        functions in LacunaWaX.  However, if you want to Fire the BFG with LacunaWaX, 
-        you'll need to enter your main password, not your sitter.  This is less important 
-        now, since the BFG can now be fired from the game.
-    
-    
-        Click the Save button.  The preferences window will disappear, 
-        and the connect button for US1 on the main screen will now be enabled.  Click it 
-        to log in.
-    
-
-filenamemenu_tools_calculator.htmltitleTools... Calculatorsummary‚" Often, the reason you're calculating a distance in the first place is because you want to know how long it will take a given ship to travel between two points. So when you calculate a distance, the result will be automatically entered into the Distance input of the Time calculator, below.content“
-Tools... Calculator
-
-Halls
-Enter the current level of one of your glyph buildings, and the level you want to get it 
-up to.  You'll be given the number of halls needed to make the requested upgrade.
-
-
-Distance from coords
-Enter the (x,y) coordinates of any two points (generally you'll use the coordinates of two 
-planets, but any two points will work) to get the distance between those two points.
-
-
-Often, the reason you're calculating a distance in the first place is because you want to 
-know how long it will take a given ship to travel between two points.  So when you 
-calculate a distance, the result will be automatically entered into the Distance input of 
-the Time calculator, below.
-
-
-Time
-Given a distance and a rate of travel (the Speed attribute of the ship you wish to send; 
-that Speed attribute can be seen in your Space Port), this gives you the time it will take 
-for a ship travelling that speed to cover that distance.
-
-
-Trilaterate
-Occasionally you'll have the name of a planet (possibly from a mail message), but you'll 
-have no idea where that planet is.  This calculator allows you to find that planet.
-
-
-To do this, we need to know how much time it will take for a ship of a known speed to 
-reach the target planet; we'll need this information from two of your planets.
-
-
-So chose two of your planets, preferably two that are as far away from each other as 
-possible.
-
-
-On each of these planets:
-
-    Record the (x,y) coordinates of the planet
-    Open one of the Space Ports
-    On the Send tab, enter the name of your target planet and click "Get Available 
-    Ships For Target"
-    Record the speed of your fastest ship, and the time it will take for that ship to 
-    reach your target planet.  Record the speed as it's given in-game (eg h:m:s, d:h:m:s, 
-    whatever.)
-
-
-
-Enter that information into the Trilaterate calculator.  You'll usually be given two 
-candidate points; your target planet is at one of those two points.  With the information 
-in hand, there's no way to mathematically determine which of those two points is the 
-correct location of your target planet, so you'll need to probe both stars.
-
-
-However, occasionally one of the candidate points will be outside the boundaries of the 
-Expanse.  In those cases, the calculator knows for sure that that point cannot be correct.  
-if the calculator only provides you with a single candidate point, that's the location of 
-your target planet.
-
-
-
-filenamesource_install_notes.htmltitleSource Install Notessummary" I've got the program running that way on both Windows and Ubuntu, but my own setup process has been piecemeal, and I don't have a good "how to install" document.contentƒ
-Source Install Notes
-
-If you're running LacunaWaX from source (meaning you're not using the Windows-only 
-installer program), I'd much appreciate it if you could keep a journal of what steps you 
-took to get everything working.
-
-
-I've got the program running that way on both Windows and Ubuntu, but my own setup process 
-has been piecemeal, and I don't have a good "how to install" document.
-
-filenamemenu_help_help.htmltitleHelp... Helpsummary
-No SummarycontentRHelp... Help
-
-You appear to already have a pretty good handle on how this works.
-
-filenamepropositions_pane.htmltitlePropositions Screensummary	 More usefully, you can also enter Yes votes for each alliance member for whom you have a sitter password recorded in the Sitter Manager.content…IPropositions Screen
-
-This screen shows all propositions currently pending on this Station.  You can enter Yes 
-or No votes for yourself for each proposition.
-
-
-More usefully, you can also enter Yes votes for each alliance member for whom you have a 
-sitter password recorded in the Sitter 
-Manager .
-
-
-It's common for several alliance officers to maintain a list of members' sitter passwords 
-for exactly this purpose - pushing votes through as they come in.
-
-
-Each alliance has different rules.  It's ultimately your decision who you send your sitter 
-to, but most alliances do want you to at least give your sitter to the alliance leader.  
-But be careful about who you give it to - use your best judgement.
-
-
-
-filenamemenu_help_about.htmltitleHelp... Aboutsummary
-No SummarycontentpHelp... About
-
-This is basically the standard About dialog, including Version, License and a Developers 
-list.
-
-filenamers.htmltitleRSsummary
-No SummarycontentRS
-
-gogopuffs
-filename
-index.htmltitle
-Help Indexsummary General Logging in for the first time Set up scheduled programs How To Help Add or correct Help documents Installation notes when running from sourcecontent|Help Index
-
-
-    General
-        
-
-    
-        Logging in for the first time
-    
-    
-        Set up scheduled programs
-    
-
-
-
-
-    How To Help
-        
-
-    
-        Add or correct Help documents
-    
-    
-        Installation notes when running from source
-    
-
-
-
-
-    Right-hand panels
-        
-
-    
-        Planets
-        
-            
-                One of my Space Stations is showing up as a 
-                planet!
-            
-            
-                Glyphs Screen
-            
-            
-                Lottery Screen
-            
-            
-                Rearrange Screen
-            
-            
-                Repair Screen
-            
-            
-                Spies Screen
-            
-        
-    
-    
-        Space Stations
-        
-            
-                One of my Space Stations is showing up as a 
-                planet!
-            
-            
-                Fire BFG Screen
-            
-            
-                Health Alerts
-            
-            
-                Propositions Screen
-            
-            
-                Rearrange Screen
-            
-        
-    
-
-
-
-
-    Menu
-        
-
-    
-        File
-        
-            
-                Connect
-            
-            
-                Exit
-            
-        
-    
-
-    
-        Edit
-        
-            
-                Preferences
-            
-        
-    
-
-    
-        Tools
-        
-            
-                Calculator
-            
-            
-                Log Viewer
-            
-            
-                Mail
-            
-            
-                Sitter Manager
-            
-        
-    
-
-    
-        Help
-        
-            
-                About
-            
-            
-                Help
-            
-        
-    
-
-
-
-filenamelottery_pane.htmltitleLottery Setupsummary
- Start LacunaWaX, choose a planet that has an Entertainment District on it, and expand it in the tree on the left. Click the Lottery leaf.content$Lottery Setup
-
-Setting up preferences
-To set up a lottery schedule, you must make sure that you haven't played in the last 24 
-hours. The setup screen asks the server for the current lottery links, and if you've 
-clicked those links in-game already, they won't be available.
-
-
-Start LacunaWaX, choose a planet that has an Entertainment District on it, and expand it 
-in the tree on the left. Click the Lottery leaf.
-
-
-Enter the number of links you want to play the lottery on this planet, and click the 
-Assign button. If you break your 15 lottery plays up over several planets in different 
-zones, repeat the process for your other planets.
-
-
-If you mess anything up, just click the "Clear all assignments" button on any of the 
-Lottery screens and start over.
-
-
-LacunaWaX Lottery Links
-The links displayed on the Lottery screen within LacunaWaX go directly to the voting sites 
-- they do not play the lottery for you! This means that you can safely click on them any 
-time you want to.
-
-
-Please do click those links periodically, and go actually vote up TLE on those voting 
-sites.
-
-
-Having the lottery scheduled is convenient from the player's point of view, but it means 
-you'll never actually be visiting those voting sites, which is bad from the game's point 
-of view.
-
-
-So please do help the game out by going and voting on those sites as often as possible.
-
-
-Setting up the schedule
-You can only click lottery links once every 24 hours. This means you must set your lottery 
-scheduler to run twice per day. If it only ran once per day, you'd get this:
-
-
-
-    Day 1 - The lottery links are all clicked by the scheduled task.
-    
-        Day 2 - The scheduled task runs just a hair quicker than it did yesterday, 
-        which means it runs in just less than 24 hours from the previous run.  
-        Since you're still within the 24 hour window, the lottery does not get 
-        played today at all!
-    
-
-
-
-So set it up to run every 12 hours. 
-
-filenamemenu_tools_mail.htmltitleTools... Mailsummary4 Simply check the boxes of the types of mails you want to delete, then click the Clear Selected Messages button. If desired, you can choose to only delete mail you've already read.contentŠ2Tools... Mail
-
-This option will be disabled until you have connected to a game server.
-
-
-Clear Mail
-This allows you to clear messages from your Inbox, which is handy when SS owners get 
-upgrade-happy, or when fireartist's mapping script gets to your little corner of the 
-expanse and you're inundated with probe messages.
-
-
-Simply check the boxes of the types of mails you want to delete, then click the Clear 
-Selected Messages button.  If desired, you can choose to only delete mail you've already 
-read.
-
-
-Send Intra-Alliance Mail
-This allows you to send mail to members of your alliance, either to the entire alliance or 
-to select members.  Choose as many recipients as you wish from the drop-down box, then 
-enter your desired Subject and Body and click Send.
-
-
-If you accidentally chose a recipient you didn't mean to, just click the Clear button next 
-to the To: field and start over.
-
-
-Note that mail sent from this form is bypassing the sometimes overzealous in-game 
-profanity filter, which is why the form can only be used to send mail to your alliance 
-members.
-
-
-Even though it's restricted to alliance members, keep in mind that your alliance may have 
-members who don't appreciate a mailbox full of profanity.  So say what you need to say, 
-but use some judgement, and be aware of who's on your recipients list.
-
-
-filenamemenu_tools_log_viewer.htmltitleTools... Log ViewersummaryB Choose the type of log entry you're interested in by clicking the appropriate radio button up top. You'll see log entries from both the "Schedule" component and the component you just selected.content‡!Tools... Log Viewer
-
-The Log Viewer tool provides information about what the various scheduled programs have 
-been up to.  They produce no visible output, and you'll sometimes want to check on them to 
-make sure they're all doing The Right Thing.
-
-
-Choose the type of log entry you're interested in by clicking the appropriate radio button 
-up top.  You'll see log entries from both the "Schedule" component and the component you 
-just selected.
-
-
-Each time either LacunaWaX itself or any of its scheduled components is run, that run is 
-assigned a unique "Run" number.  Log entries in the Log Viewer are grouped together by 
-this Run number, showing the most recent runs first.  Within each run, log entries are 
-displayed from oldest to newest (so, from the beginning of the run till the end of it).
-
-
-Log entries older than seven days get auto-pruned by LacunaWaX, so you don't have to worry 
-about the log growing forever.
-
-
-filenamerepair_pane.htmltitleRepair Screensummary„n When buildings are listed on the left, you'll want to select the buildings you want to repair, and move them to the right-hand list: You can move a single building by highlighting the building and clicking the > button. You can just move all of your buildings in one shot by clicking the >> button. You can move just the glyph buildings by clicking the Glyphs button. Remember that glyph buildings repair free of charge, so you likely want to repair those first. If you accidentally moved buildings that you didn't mean to move over to the right-hand list, you can put them back in the same way with the < and << buttons.content“-Repair Screen
-
-If a planet has been damaged by attack or fissure (or whatever), this pane allows you to 
-repair your buildings in bulk, in the order you specify.
-
-
-Using
-The list on the left will show all damaged buildings on the planet.  Most of the time, 
-this list will just be empty, which means that none of your buildings are damaged, and 
-life is good.
-
-
-When buildings are listed on the left, you'll want to select the buildings you want to 
-repair, and move them to the right-hand list:
-
-    
-        You can move a single building by highlighting the building and clicking the 
-        > button.
-    
-    
-        You can just move all of your buildings in one shot by clicking the 
-        >> button.
-    
-    
-        You can move just the glyph buildings by clicking the Glyphs 
-        button.  Remember that glyph buildings repair free of charge, so you likely want 
-        to repair those first.
-    
-    
-        If you accidentally moved buildings that you didn't mean to move over to the 
-        right-hand list, you can put them back in the same way with the 
-        < and << buttons.
-    
-
-
-
-Buildings will be repaired in the order they appear in the list on the right side.  Each 
-time you add a new building by clicking > , that new building will 
-appear at the top of the list on the right .  So, if you want your buildings 
-repaired in a specific order, add the ones you want repaired last to the list first.
-
-
-Once your buildings are all arranged as you want them, click the Repair 
-button, and your repairs will begin.  A window will pop up giving you a running commentary 
-on what's happening.  If you need to, you can cancel the repairs in progress at any time 
-by simply closing that pop up window.
-
-
-Resources (Important!)
-Your current stored resources are shown at the bottom of the screen; those numbers will be 
-updated each time you complete a round of repairs.  When you begin repairing a list of 
-buildings, all of the buildings in the list will be repaired as much as possible.  If you 
-were hit hard (like, by a fissure), you very probably will not have enough resources on 
-your planet to be able to repair all of your buildings.
-
-
-If you try to repair more buildings than you have the resources for, your stored resources 
-will be taken almost down to nothing.  If running all the way out of resources is going to 
-be a problem, you'll need to be careful about which buildings you add to the "to be 
-repaired" list on the right.
-
-
-
-
-filenamemenu_edit_preferences.htmltitleEdit... Preferencessummary‚ Username - your empire's name Password - your empire's password, either sitter or full (sitter is recommended, though full is required to fire the BFG). Protocol - either 'http' or 'https'. Https is recommended unless you're having a specific problem with it.content‰4Edit... Preferences
-
-Before connecting to a server, only the Server tab will available under Preferences.  
-After connecting, a second tab, "Autovote", will appear.
-
-
-Server Tab
-Allows you to set up your connection preferences for each of the game servers.
-
-    
-        Username - your empire's name
-    
-    
-        Password - your empire's password, either sitter or full (sitter is recommended, 
-        though full is required to fire the BFG).
-    
-    
-        Protocol - either 'http' or 'https'.  Https is recommended unless you're having a 
-        specific problem with it.
-    
-
-
-Autovote Tab
-
-This does absolutely nothing useful unless you set up the Schedule_autovote.exe program .  Once you do that, your 
-preferences on this tab determine which propositions you will automatically vote for.
-
-
-You can chose 'None' (no voting at all), 'Owner' (vote only for propositions that were 
-submitted by the current owner of the station), or 'All' (vote for all propositions 
-submitted at this station).
-
-
-Those preferences apply to all stations in your alliance.  There is currently no 
-way to eg set one station to vote for Owner and another to vote for All.
-
-
-'All' is generally recommended.
-
-
-filenamemenu_tools_sitter_manager.htmltitleTools... Sitter Managersummary‚ This allows you to record any sitter passwords friends and alliance members may have given you. When you enter a new empire name and sitter password, the Add button will automatically test the given credentials to make sure they're valid, and then save them if they are.contentŠTools... Sitter Manager
-
-This option will be disabled until you have connected to a game server.
-
-
-This allows you to record any sitter passwords friends and alliance members may have given 
-you.
-
-
-When you enter a new empire name and sitter password, the Add button will automatically 
-test the given credentials to make sure they're valid, and then save them if they are.
-
-
-If a friend has changed their sitter and sends you their new one, you can simply type the 
-new sitter in place of the old one and click Update, which will also test the new sitter 
-before saving it.
-
-
-If you've had a sitter in your list for a while and are unsure if it's still valid, you 
-can click the Test button, which will simply test the displayed credentials and let you 
-know if they're good or not.
-
-
-The credentials listed here are used by the vote pusher on the Propositions Screen .
-
-
-Caution - ALL passwords recorded by LacunaWaX need to be passed to the 
-game server in plaintext, and they are therefore stored in LacunaWaX's internal database 
-in plaintext.  This database is stored on your machine in
-
-    [%user_dir%][%dir_sep%]lacuna_app.sqlite
-
-If you ever send that file to anyone, you're effectively handing them your own login 
-credentials along with every sitter you have stored.
-
-
-So don't do that.
-
-filenameadd_help_pages.htmltitleAdding Help DocumentssummaryƒO All of the pages of this help system are stored on your machine in [% html_dir %] Browse to that directory and edit any of the .html files you find there. You can edit existing help files and see your edits immediately in the Help browser window - browse to the page you're editing, make your changes, then click 'back' and then 'forward' again to get back to the page on which you're working. Upon coming back to that page, you should be able to see your edits.content”NAdding Help Documents
-
-Adding new help documents is easy.  Even if you don't know any HTML, the markup used in 
-the help files is very simple, and you should be able to figure it out just by looking at 
-what's already there.
-
-
-All of the pages of this help system are stored on your machine in
-
-    [% html_dir %]
-
-
-Browse to that directory and edit any of the .html files you find there.  You can edit 
-existing help files and see your edits immediately in the Help browser window - browse to 
-the page you're editing, make your changes, then click 'back' and then 'forward' again to 
-get back to the page on which you're working.  Upon coming back to that page, you should 
-be able to see your edits.
-
-
-If you want to make a new Help file, your best bet is to copy one of the existing ones 
-( ss_as_planet.html is probably a good candidate), give your copy a good 
-descriptive name (make sure it ends in ".html"), and edit away.
-
-
-When you're finished editing, link your new help document in index.html where 
-ever it makes sense to do so; follow the existing examples.
-
-
-Make your changes show up in the search index
-
-In that same directory with the help files is a subdirectory (folder) called
-
-    [% lucy_index %]
-
-
-...that subdirectory is the search index.  Delete it completely .  Then close and 
-restart LacunaWaX.  The next time you open the Help browser, that search index will be 
-automatically re-created, and will include any edits or new files you just added, so 
-searches will turn up your new documents.
-
-"I do know some HTML, and these help files look awfully sparse!"
-
-The help documents themselves are actually templates, and all the standard HTML 
-boilerplate header and footer stuff is being dealt with elsewhere.
-
-
-So most of the Help files consist of a few headers (<h1>, <h2>, etc), some 
-paragraph breaks (<p>), the help content itself, and not much else.
-
-
-You may notice that the help files are not using any CSS, and are using (ack!) font tags 
-in a few places.  This is not because I'm a horrible human being.  It's because the HTML 
-parser being used in this window is fairly basic, and simply does not understand CSS.
-
-"I've made some updates or edits to help documents.  What now?"
-
-All you need to do now is submit a pull request to the main LacunaWaX github repository .  If 
-you're not sure how to do that, you might be able to find a friend or alliance member who 
-does know, and just send the help files to them and have them submit the pull request on 
-your behalf.  Most alliances have at least one member who can manage that, since it's the 
-same way that the alliance logos had to be submitted.
-
-filenamemenu_file_connect.htmltitleFile... Connectsummary„ Edit... Preferences If you're already connected to one server, you can switch to the other this way. However, connecting this way will not refresh your credentials! Generally you'll probably use your sitter password to connect. If you decide you want to fire the BFG, you'll need to use your full password. Changing your password in Preferences to your full, and then re-connecting using File... Connect will not connect you using your full password. You'll need to close and re-start LacunaWaX to use your newly-entered credentials.content…,File... Connect
-
-Connects you to one of the two game servers.  Only servers for which you've entered 
-credentials in Edit... Preferences will be 
-enabled.
-
-
-If you're already connected to one server, you can switch to the other this way.
-
-
-However, connecting this way will not refresh your credentials!  Generally you'll probably 
-use your sitter password to connect.  If you decide you want to fire the BFG, you'll need 
-to use your full password.  Changing your password in Preferences to your full, and then 
-re-connecting using File... Connect will not connect you using your full 
-password.  You'll need to close and re-start LacunaWaX to use your newly-entered 
-credentials.
-
-
-filenamespies_pane.htmltitleSpies Screensummary‚% The dropdown boxes at the top of the section are meant to alleviate most of that tedium. When you select a type of training in the first dropdown box, all of your spies who: are currently not assigned to anythingare not maxed out in that training type will be assigned to train in that skill.content”HSpies Screen
-
-Here you can rename your spies either individually or in bulk.  You can also set up how 
-you'd like your spies to be trained.
-
-Spy Training Preferences
-
-This can be mildly confusing.  The first section of this screen allows you to assign the 
-type of training you want each spy to undergo.  But you can have up to 90 spies per 
-planet, and assigning each one individually on all of your planets would be awful and 
-tedious.
-
-
-The dropdown boxes at the top of the section are meant to alleviate most of that tedium.  
-When you select a type of training in the first dropdown box, all of your spies who:
-
-    are currently not assigned to anything
-    are not maxed out in that training type
-
-will be assigned to train in that skill.
-
-
-If you had spies who were maxed out in that first skill, you can move on to the 
-second dropdown box and select a different skill there.  It will assign spies using the 
-same constraints as the first box.
-
-
-If you don't like your current assignments, you can clear all of them and start over again 
-with the "Clear Spy Assignments" button.
-
-
-Important - The maximum score a spy can have in any skill is 2600.  If 
-you've assigned a spy to be trained in (eg) Intel, and he eventually reaches the maximum 
-score, he will remain assigned to train in Intel until you return to this screen and 
-re-assign him!  So come back here periodically to make sure your spies are not 
-languishing.
-
-
-Also Important - After setting your spy assignments, don't forget to go 
-click the "Save Spy Assignments" button at the bottom of the section.  You'll probably 
-need to scroll down to see the button.
-
-
-Renaming Spies
-
-You can rename any spy individually by simply clicking on his current name and typing a 
-new name in the text box that appears.  Rename as many spies as you want, then click the 
-"Rename Spies" button at the bottom.
-
-
-Alternately, you can rename all of your spies at once using the Batch Rename form at the 
-very bottom of the screen.
-
-
-To perform a batch rename, first type a "name root" in the text box.  Next, chose whether 
-you want to tack on a prefix or suffix per spy.
-
-
-Example Prefix - If you enter a "name root" of "Bond", and chose to use a 
-prefix, all of your spies will be named "1 Bond", "2 Bond" .. "90 Bond".
-
-
-Example Suffix - If you chose suffix instead of prefix, your spies will 
-be named "Bond 1", "Bond 2" ...  "Bond 90".
-
-
-Example None - If you chose "None" (no prefix or suffix), all of your 
-spies will be named simply "Bond".  Multiple spies with the same name is legal to the 
-game, but might be somewhat confusing to you, so this is not recommended.
-
-
-filenamess_health_alerts_pane.htmltitleMonitor Health Alertssummary! To receive alerts for a station, simply check the box to enable alerts, and enter the minimum amount of resources per hour that the station should be receiving.content—Monitor Health Alerts
-
-This panel allows you to choose to be alerted when possibly negative things happen to a 
-station.
-
-
-To receive alerts for a station, simply check the box to enable alerts, and enter the 
-minimum amount of resources per hour that the station should be receiving.
-
-
-Mail
-Alerts will be sent to you in game mail.  If you're in the habit of ignoring your mail or 
-deleting it all by repeating Select All... Delete without looking at all of your messages, 
-you must fix that habit!  You should always choose "Correspondence" from the 
-dropdown box in the in-game mailbox before deleting a bunch of mail.  This will hide all 
-the junk mail you've received, and only show mails from players.
-
-
-Since the health alert mails are sent from your own account to yourself, they count as 
-"mails sent from players".
-
-
-What triggers an alert?
-Several things:
-
-    
-        Any resource income on the station drops below the number you set in LacunaWaX.  
-        You'll be pestered a bit if you try to set that number below 10 million, but you 
-        can do so if you wish.
-    
-    
-        Any non-alliance ships are inbound to your station.
-    
-    
-        Any spies are found on the station who are not currently set to Counter Espionage.
-            When spies are found on a station, their originating planet and even 
-            empire name is not available.  However, the task to which they're currently 
-            set is available.  So the closest we can come to identifying enemy 
-            spies is by finding spies who aren't actively defending the station.
-
-            If you have alliance mates who have spies on your station who aren't doing 
-            anything, and you keep getting alerted that they may be enemies, tell your 
-            silly alliance mates to set their spies to Counter as long as they're taking 
-            advantage of your hospitality.
-    
-    
-        If the star that your station is orbiting is unseized, the station is vulnerable, 
-        and this will trigger an alert.  A station should always seize its own star.
-    
-    
-        If the star that your station is orbiting is seized by another station, your 
-        station may be more than just vulnerable; it may be under active attack.
-
-        If your station's star has been seized by an alliance-mate's station, it's 
-        certainly not under attack, but you're going to get alerted anyway.  It's a silly 
-        situation; seize your own star.
-    
-
-
-
-Who should be watching a station?
-You should definitely set up alerts for each station you have personally launched.  But 
-some redundancy here is not a bad thing - each station should be watched by at least two 
-players.  So if somebody goes on vacation or just isn't paying attention to their mail or 
-whatever, your alliance will still be notified if something goes wrong.
-
-
-You can choose to be alerted to problems on every station in your alliance if you wish.
-
-filenamess_as_planet.htmltitle"Space Station thinks it's a Planetsummaryx The problem with this list of known bodies is that it does not indicate whether a given body is a Planet or a Space Station. To figure that out, LacunaWaX needs to send a question to the server ("Hey, what kind of Thing is this particular body?").content7Space Station thinks it's a Planet
-
-The Short Version
-
-Double-click on the name of the station in the tree on the left, which will bring up a 
-summary page about that station.  It will also refresh that tree, adding the correct 
-Station-specific child leaves under your station.  You'll only need to do this one time 
-(per station).
-
-
-The Longer Explanation
-
-When you log in to the game, your connection information includes a list of "bodies" that 
-belong to you.  In TLE, a "body" is any thing that can orbit a star, the main ones being 
-Planets, Space Stations, and Asteroids.
-
-
-The problem with this list of known bodies is that it does not indicate whether a given 
-body is a Planet or a Space Station.  To figure that out, LacunaWaX needs to send a 
-question to the server ("Hey, what kind of Thing is this particular body?").
-
-
-It's not uncommon to have 20 or more planets, and as many (or more) space stations.  It's 
-not practical to check with the TLE server to determine what each one of those bodies is 
-(planet or space station) each time the application runs.
-
-
-So instead of asking the server about each body every time, LacunaWaX waits until you have 
-checked the summary screen for that body.  Once you've done that one time, LacunaWaX will 
-learn what kind of Thing that Body is (Planet or Space Station).  Once LacunaWaX has that 
-information one time, it remembers it forever.
-
-
-So the first time you start LacunaWaX after one of your alliance mates launches a new SS, 
-LacunaWaX won't know yet that this new body is an SS, and will treat it as a planet.  
-Bring up the Station's Summary page by clicking the station's name in the left tree, and 
-the body will be seen as a Space Station forever.
-
-
-filenameglyphs_pane.htmltitleGlyphs Screensummaryƒ Schedule_archmin.exe To push glyphs from the current planet to an assembly planet, choose that assembly planet's name from the drop-down, they enter the name of the ship you'd like to use to send the glyphs. It's most common to rename a single Smuggler Ship to "Glyph Pusher" or some such and then use that to push glyphs. However, you can use any cargo-type ship with any name you wish.content`Glyphs Screen
-
-This is where you set up your preferences for the Schedule_archmin.exe 
-scheduled task, and can create glyph plans, en masse if desired.
-
-
-Graphical Glyphs List
-This is a list of the glyphs currently on the planet.  The list doesn't do anything except 
-look pretty and provide information.
-
-
-Push Selected Glyphs
-Many players prefer to push all the glyphs they've collected to a single planet where they 
-assemble plans from recipes (mainly halls).
-
-
-To push glyphs from the current planet to an assembly planet, choose that assembly 
-planet's name from the drop-down, they enter the name of the ship you'd like to use to 
-send the glyphs.  It's most common to rename a single Smuggler Ship to "Glyph Pusher" or 
-some such and then use that to push glyphs.  However, you can use any cargo-type ship with 
-any name you wish.
-
-
-Since you need a few glyphs to complete some of the missions, you can choose to leave a 
-few on the planet instead of pushing all of them.  You'll normally only want to do this on 
-planets that have a Mission Command.  I leave 5 glyphs on my Mission planet, but you can 
-choose to keep any number you wish.  Enter this number in the "Reserve glyphs for 
-missions" box before setting your Glyph Push.
-
-
-Requires running of Schedule_archmin.exe to actually do anything.
-
-
-Arch Min Search
-Along with managing Excavators, the Archaeology Ministry can be used, every six hours, to 
-sift through extra ore on the planet for a glyph.  If you have enough ore, you can tell 
-the Arch Min what type of ore to look for.  Generally you'll assign this to look for a 
-glyph type you're low on.
-
-
-Requires running of Schedule_archmin.exe to actually do anything.
-
-
-Cook Glyph Recipes
-Here you can create glyph plans from your existing glyphs.  Recipes for all plans are 
-included, but this section is most frequently used to combine as many glyphs as possible 
-into Halls of Vrbansk.  If that's all you want to do, just click the "Build as Many Halls 
-as Possible" button and watch it go.
-
-                           ¾      ş      k      œ      &Ç      1Æ      4E      4ä      8…      9D      9‰      AU      IÇ      Oô      Tª      a      g      m‘      yü      	      Š·      —4      Ÿ<      ¨ã                                                                                                       	       
-                                                                                                   add_help_pag  fire_bfg_pan 
-glyphs_pan html  indexHitial_login lottery_pan menu_edit_preferfile_connect
-exit
-help_about
-helptools_calcullog_viewmailsitter_manag propositions_pan rearrange_panpair_pans schedule_setupource_install_notpies_pans_as_planethealth_alerts_pan                        a boutdlert bfg calculonnect document editxit filere glyph healthlp indexitistalt logintteri mailnagonitor note planetreferogramposit rearrangpairs schedulreenetupitterourcpaceitation theinkool up viewer                    a bl1ccidentountddgainlertleviiancowreadiso	mountndi;ythingarpproprirchessembligntutomatvailwar backseecausenlowtweenfgin_dirodithtomxrowseruildttony calcul	nrgoseushangrg	eckoossenlearickoseolonimemonponnnecttainrrectredentiurrent decidletsirtinidn'trectorisappeartancrictocumenten'twnropdown eachditithermpirnabltertainrixeist
-pand figurlendrestoolrwardundreeiendomullnction gameeneraltivenlyphoodt handlsveelpyighlightourwev	tml	_dirtps i
-'vfmmediportnclud5dicviduputstalterestost just kindnown 	lacunawaxidtereafftssikestog	ngtteri machinilnkenagxyeantmbernussaginimumorestveust	y nameeedwliotew of
-	ten+nelirtherutver	wn pagerticularssworder ickecemlaceintextnetyointreferobabllemcess	gramposit	tocolvidtushert question radioeadrrangsonceivntommendrdfreshmembnampairlacquestirsourctartultightun same	vechedul	e_archmin	
-utovot	lotteri		train_spireenearchctionurelectndtrvert	up	hipot	uldimplinc	gltterkilllowlimuggleromeurcpaceecifiquarstarttionoreuchfficiggestmmarirewitchystem takeediumsthat
-e-mnrey'ringsoseughimeleopZrain	veleewoype ubuntunlesspons1ernam validote wantyhatentherichomillndowsh	thork yesou'dIllrvr	          html_dir‡K‡$send.;                           00 234689 10
-24
-568 20
-1245600 30 5 90 abl)outvsolutccidentountkrosstivualdd
-vantagftergainlarmertleviGiancow4mostongreadisoternwaymountndi
-!oth3yonthwayppearlicrecioprirchaeologen'tArangs
-k@semblignteroidttack=empt	ntribututomatvotvailwary backdseictchtle	caus~enforginhalf	longwnefitsttweenfgin_dirtlack	indodiilerplndeheadthtomundarixreak&ingows
-er	uildt+lkncht
-ton
-3y
-6pass: calcullncelfdidnotrelessgoseustionertainhangrgeckboxildoosse#nircllearickockWsestmdollectonimbinemandentarionplain	etonnceivfirmusnectsist(trainttainentveniok
-rdinpirnerrectsponduldnterverreatdentiosshairssurrent
- d*amagtabasyealtcidsfaultendinitletscribptirtinterminvelopialogdn't
-fferr_sepectorisablppearplaytancrict
-ocument;esn'tn'teublwnloadrawopdown
-ure each	si0erditffectgitherlsewhermpirtinabld
-emioughtertain7irrispionagtcventuriythxactmplcavepteisttpandslantendra fairrstestewieldgurleterndishreartiststssur$xloppiolderlow
-ntolterrevVget
-mward
-undreequentiendom	ullBnction game
-eneral.t	ithub+venlypho&egopuffodtraphicyeenoupwuinman h12abitdirllndilppenirdsven't^eaderlthlpre(yiddeneghlightmstorriblorspiturwevtml_dirtpsuman
- i'dmvcond
-ea
-ntififgnorummediportnboundxcludomdexicviduform
-itiputstaleadructtelndrestnora
-undsn'tt'll}self jazz
-ournaludgementnkst	 keep5indnown 
-lacuna_appwaxidCnguishstterunchyouteaderfrnstvft	galendsstvelicensfekenkstttl(ocatgin"onngeroktteriw	ucy_index machinde
-ilbox#ntainkenagiprkupsstehematximumyeantmbernussagiddlghtldlionndimumstriutssiontakonitorrestveruchltiplsty nameeed:gat6verwest)lixtonermalteLh
-icfiwumber occasion$ffic+tenlderstncqeli	Bpen$tionrbitEdereigintherut	
-put"sidverzealwner p	agenelragraphliamentserticularsswordt%yendrformiodsonsterickecemlaceintext
-n	etyUereasointprtssiblracticefer
-ix.tti	viousobablelemcessducfangramessposittocolvidunetullrposshert questionickert radionteeachd
-rrangsonceiv	ntipiommendrd
-ducndfreshload
-mainembnampaireatlacositoriquestirservtourctartrict	ultturnightootundsulen	 s=afemeveychedul	e_archmin*
-utovot
-	lotteri			train_spiorereenipt?ollearchcondtionurenizlectnds!trvert#up9venrhip
-orttuldwnideftllimplinc"glteteruat(xkillplowlimuggleromeLbodithimwhaterurcpacersecifi
-edi
-	linterwar0qliteuars
-_as_planettandardrtupteionep=ill	oreuffubdirectorijectmitchfficixggestmmarire
-fac$witchystem	ray tabckgkenrgetskediousumllmplatstxthan	kte
-irƒmselv$n	re*forsey'r vingks osevugh#reeoughillme
-tl8lemto"day‚gethoklprainvelyeateiggerlaterurnwiceoype ubuntultimncheckommondergostandiqulessseizurtilpdatUgradons1er_dirKnamual vacatlidriouserisioniew
-er	sibl	toterbanskulner waitntsGtchy
-e'llrehat
-ev,enre1therichle.om#illndownsh$thin>out
-on'trkriuldriteong x yellowsterdaytou%'dqll
-r@v	;r!(self3 zone      bulk*†N	entertain› jinbox¨N”=note¶7›ruleÃ:¢!threeÕp©                                     (       2       <'y 	y 1y yyyyyyyyyyyyyyyyyyyyyyyyy y y #y )y y y y y y y %y y y !y y y y +y /y -y /vy'x -x	xy)y'x#y yy #y 	x 1y -xy y y xyy x/vxyy y%x-x x/v#yxy y !y | xyyyyyx y%xx /v +y /v	x/vy y x x xxo<pmpqr	rnq"pprpo*o%nP!nTmrp'n<,r
-pn+n p+pr
-p
-%ppqnr-rro
-o)pp#mrq
-
-rqnKp	nn;ro4%pn
-o?+p'o@qoo2p!np.np	0o*p%p-'pop(po7m1mngn8
-op
-pm0;p'nOp0rpqp2p	pmZqn+o.p
-o*qqp/qpr	&n'n+oBpn	m/qp,my	qqn&.pq	np
-m
-e	rqn-nn
-	o=1o@m<m+	pn5n3!nIqrmrqq oo1qp)mvrqq
-n$n7p"!nMo(mnH1o'qp(mgnpr%p"n>o9p#p#o)n%qqp!nY'nm~p	r	qr/pq1o1o*pr		pmn"n "qmDqpm#rm`p)rpnVrorqo
-
-	/o'n r/p	p*n	n@'n	p mXqn)p	r	nQpmom-!5rrr'n;o!nG%pmsrqopqn1	mP
-m$Qr n'n>pppon;o qq nJoqrmqrq!prn	/p&!n -rpqrmSn	o;'n'nm!q
-mqqq p pm+qnRp,n!'n'mjo(p
-m 8@prrrqn/9nn6p	o/pop-qrqp*
-mpqp
-pmpr	q&p
-o%qn)/p(p/p	p%mR
-rnQpp"mrrnmi!nLo nJppmrqpo$r'nq
-mb%%p$n3r+p)%p!nZ+p
-rpmqo-rr pmO!po& n		p0qmEqpo,m^n-p%p)nUy y y y p m?%n-p$prpmkop.qqn,nprp$op o	mqr
-nn
-9pn0	nqm(r
-q
-po1)np#'p*p!n]q&n-
-/p-pm4	rqpn -rp	qp
-m9o=rpoo"p	p mun6)nm,q$pqoqr
-omqo2
-mo.o61o0!ne/p"q	p' n=qp+p,rp"qrp)n!nB1o) n6	po'	pq-rp$p% nJm&qr!njmxp*o r	qo	/o oo o)mo+pm@qn$.qqn
-p/p o"m7mnp%o	mrqp$o!n1'nNr	p&q rml!no+o:pmKrq	pno/)p6m'1o,pnJ1o2r/p#q#o,)p por nP,rp'n	1o3mMmyyyy%p%mn'np+p%ppm2	qrnCn:p	rp	o)o#pp
-m6pqrrrq
-q
-n
- 
-qpnnp rp $op(nSp+	p!q	p)n6n<	o5'n%p-o%p&/p*mgp nnp)!nP#qp0r
-mC	pm 70p
-qrqn	:qp n
-n
-pr 
-po
-mqpo+(pprpqqpoAq#qp	rq'nG
-m|rno mAq %p'orp'mVpq
-n?	n'p%qnkn/p'p	pr	n pp/pm=nD+p!rp	p,m5Hppn-p/m|q	n,1oGo>pp	mLnlq%poC	p.nFrpp*m	'pr
-q	qnpn0n	po<
-1om]qnn	ppqq n1no0qopp
-m3n-qnnp    iƒ +iƒLiƒ!iƒMiƒ",iƒOiƒ#j‚iƒiƒP+i0iƒ$-j‚UiƒRiƒ%j`iƒSiƒ&.j‚"iƒiƒU-kiƒ'iƒVjf;	j+iQiƒ+1j=*i<‚_i_$6nlGjU
-l>jK!"Io#tm(tn(j+ul|FmZ
-j[h!29l8l)	i7`%*
-ic;+`1		iP>1k<k.
-}j"3!Fi6lj‚ki\‚%	jjmktnXm	jƒk(	j‚y#lRljl@#i'i‚Ui4,i}fixj‚j6i‚
-jbC&i ~	k'njE<l+-i‚*iE-ll	i‚k}i‚lLB#ifi>iM8nEi	
-M-::lkmjz!2m$j%HT'lu
-li*teiF&L>+iF j:p+i[j‚.js
-m"
-lXPlliƒ%i<HQNk‚ijAlIjlli(i!jƒ%lSjhi‚#lQKtj+lTi(niƒ(j_ml^itk#+i‚N,iZk-i%j‚!j7i/-k‚jSi<)2-1l5(j,"V'1	=lrjpo/
-tj#,13l0OFm+j>KMl&l'i#D= 8nQi@O"AWi!Tg4,kd:tjNaj-j~+mOj‚li1;ViN[i%	kVj<	j‚$l'i‚U%lJi-jjtivi‚j+9C-i‚|	j)	tj:l	i‚=#li‚Q-k>olMium5iIU.je$1jmi82ln	jrj‚mdj<.8l>4 i2h3iX	i >	j‚9,i|!jtjs?mEn'jlloju\
-i*i
-kwj‚D	jfjkC0jEjZ!mYi+3#	j‚/kei‚u@lzj‚+2j‚Xm_	j‚LjPJlti&ƒiRB7iN‚Y!j	i‚d	j‚+	j‚3%iƒ5j
-miEiljnlkl.iti‚*\ l:ilj‚j/	l
-ib
-l#i‚iLlXl`jui)i‚lJl3j)ib
-ixjWiƒiQti‚q*i‚Z	j‚i‚6lDj3PYlE;jU#?6mij."l--	j3
-li\z5<44n	i,5X=i
-$qtB&
-k`LjpljRi‚_iƒrlj‚ho7mji‚j#llc	ifjWmj‚@'iƒ;/kNi@jx iimsi	'i
-jB	jj*lnBl=nAi‚Xi;l)i'i‚o	j‚5l kL
-!)'i‚"*iƒ		jƒiA*	lj‚{o-m?l|j‚.
-i‚7jƒiƒj/'l9@iQ06iCjVj^i‚<i‚,k‚ i‚R$i9l#
-"iUiwl,,	jj	U'&j‚Wi!ji-iii'd	lVj8~o1mX	jJlZi6ƒi2D"jCxlyj!l
-	j[!lIIm7jh.Kl,QiDO'j‚]iB‚je8m25*jYJT>l~li$i‚,iG1\:k‚l#jIIDnQ'iWi(> Rj.)l1ejmj$QlMcj\-nlolM,iH‚|n 	i
-\"\)i4=UkYju'*'!j‚j‚R0!ijƒmjjƒ	j‚p1j	lcjƒlR%l	j‚o%i‚rl1jElCi_enI!jl7mik)'io/k,i‚}j~l+j2lN m)iS‚ljVI'i\jujjllpi‚sifi‚5jyl1Ki7
-iY7!l63j^lj‚j&/
-G%lD>m3jfJ/lZ iai‚ k
-‚j‚UiN	/iz‚xjOj‚icnc-ioi‚p1j>i]jƒ1j‚Cl2	mGiriwir1j:!j‚im1jp	j#!j‚:iajmB	j‚E	ja*i!ƒ2jUl	8gnLl
-llnkF'i‚2+i)lR'i‚@j4`jC1j‚(j&j+	P&il,j‚p)nk)-i\	j‚Do-i	,iPTj%i~:l+#iv
-j‚$l2RCn>	j‚c&i‚Q&inj?jm	j j‚'l irA~iMj#-j‚A j$l4j‚
-m'i‚)l%n;mQ	j-i~-iƒlBi_iD	j‚x'ilK2jlOj‚hlfk/ttj‚A3j‚-lji5mL	jhi%l@j&i<l	ll%iƒwjmwlj$	
-+j9i!F	l$jHm[j1m%l_l\i<O|i5Yk5j*1C-oBni,Whi*jj‚G	lQi‚t4	kq1j)i‚(1o;lLml[ii0Ziƒf-kYi‚-k	lKjDlxjƒi‚j^il-lwij]iƒ(iP0i_	j‚i‚w
-jwm(mI)jBul"i2iƒk1
-'ii'	jLl,nNl 	i>"*Nn%lLj‚=l	i[lemKl/	i'i‚E'i‚+
-lNl)l%	i^!j41jl3ni	j‚Fm	i$,iu$!j‚dj‚iƒji-;llj$H#4m	jIl{	l"n\iƒi"j`mj8lhm."-iQiƒW%i‚9	j‚dl;i	i]i‚ ;5+i_%lEi7iƒ	,
-j{YlU	iƒNkIjrlo#	j‚um?'iAiƒ 1jk1j,i?
-	~!l[jSCj‚TiJG/j‚3xnMj=jƒl//k=	j‚1jx'i‚pjtj‚%&i‚5%
-jli%i 	k x jWnKlH
-i-	;K,cn Vl*jDiE‚\iy'i,
-j -s4lnAl;n?l%l&l#jOnmpj[
-i#F(=kx j‚R-iUiƒdi‚M%iVi=%i>'i‚Vl5'i‚%iN‚1j2DlT!5j6JemnjO1j‚~l!Llnni‚zkTj
-J)mku=iƒZ)i‚l!i‚\'iei9l(iFi#j	1j‚@$l)iƒ#i$Nl0jƒlj%2onjDal^*m>:i]	jGVj8lPl2nG	lw
-lKQj‚<j*0	ll%ln	iƒNi8,kDj0nl.n0	j‚l?j	ij,\o"j‚6l m	ihi‚g'iƒi‚Djmaj‚i	j‚jD@lkviBjn*j}j  (%i‚j#1jƒi‚i‚xj‚a,iƒ.yo>t	jAlio&1jli‚4memi&	j‚rj‚>'i‚7'i‚8,i>lj‚glhiƒPi	j‚)j$jJ‚ j‚bnjYJlMli@t
-!j‚i	j‚.l"!j‚Yiƒqo6mK	j6jlB	i‚ikmiJRj
-l"j+o<tm'	j>l	@mj‚clHl
-;iƒ3i9i‚k6j7Klj*i^&i‚#nDi|t t n Djai	2+ $4/%liwiƒj‚+/ki‚c-in!jb+iu	j‚#i‚0!j‚X'i‚bi-i‚-iƒ
-jf;i)jtjWwo?t	niƒilzj‚}n'icj&i3RYG'i8lHl@
-lClB'i‚ci‚\
-lo:i‚
-j;o'i‚`o%i‚xiO8/j#GJj:-iti‚2lM0j+x2B#l;+jƒoj$8lJ:jF5Fl<':i
-u‚n!i'$0
-i:nJ-GjiM-i@'iQlj‚%
-iE?i:(!M8l!
-
-j
-!%*ol8@jME)&+m,nj(Ll'm1/	jY9%83llS?		i$Sn:
-i\	>N6i7%>‚/k0SjP-i?li=jt	iy	kHj‚:-ini4i‚3-ksiH(i	;gjcemkG(j1l 	j^jsi &o1nij,‚!#iƒ#kAj'i?*i\	j‚P	jpm0%l3jpY%j‚IlWl2ieljr2^Ml.jQm	tn$jBl
-mTj@‚Ql4Ul9
-it
->L6iPz	i`=JkU
-%0)j‚!-iƒ3i	+7,%H!lj‚0l5jEB6Yom0!j;A l=mQ6lMlei!(ci"iE‚kO%M!jnriƒ{i)mM	i‚Al*omtl]-iqi<Qtj@/$jv1lmGj29i#]+i‚]Uj‚Ti‚mjolBi‚jH.kSjVwDli	k‚	jY#kl%lAi
-‚/l)xjRlr
-oj1UmLFl!if+ngi"kHlo+i‚jjj	jwl:-iƒk‚lHl/Smg	jjH	jƒ'k_	jm`iƒ@iƒ(/k-j!i‚jDj"&k‚+iƒK	j‚klj‚5%l	jj	t!j?	j‚)jL
-ijgj"%;(G i.m9t	lfjJW	Ylm#
-kJ j	iLl+j‚q6ibj4#l7nO	m)"k@llQ'iƒOinjX!i‚&/k<i1$i%niMj-ciYn,j 	& #8.1j‚'iXj‚?l!l=i6it%i‚y	jj4nTl.>	i0		)‚-lOieil	%iƒ	k^jIm7idzj jm!l4i]&	i|m/nVliƒEjjlpi‚@k j5‚l&'i1j,i‚Qk‚j‚g*iy*iGlH	li‚Gi‚Bo	j!+31lj6f+iYjs
-m#
-laM		liƒ&l*nJjsj5liRl	j‚iƒiƒP+i -i1iJU.jf$lD-i$1jniƒ	l0j	jƒ-i 	j‚mj‚wi‚[kl]lv	mYmmj+i‚-i\joPl<j‚ IjT	il	jOoj‚Ri‚D	j<#iƒDi/j]juiTi‚h,<lo2
-n!j@i‚<jkplNj-gl*l&i i‚25i_k‚jZ,l%lj-lWj‚l"iƒnCi‚k3Qj-ijNi;$jGl$&i+Mi‚6k‚m{)nkiT{.jGlihi‚r	jj9+mmlr)	iƒ7-i;!j8lqiƒ21j.i+cZj% %2lf%oj.j‚bli‚C!n,-is	XiL*kr$onl!jƒlS'i‚H-iƒ@i„ ldliƒijxKjjKm]j‚3ijJj)Ui3p?l(j_+x2lj	?))7	om:n jL3Il-%om,$0j,5I\' l#_lUi+Oni%	L^<'	i&Ak= $$ 	j C73/*m5jFjm%lWm
-myiR}lj8l,j{o,tm	j:)/lcmj x6ZAlcl#i49‚LiEQJi/3&k	j$ ;$	jajzjol]	i‚WkWil[j‚bj‚P&njrtl lKi‚/niCk7(S)jƒojvlPalqnivk2j/l j\j‚ikl	l	jlO	mnl#GmNj
-l1Dli| (i
-‚r=iC‚nk{ 0jzjsfH$i‚5kZ j+0jy
--iZjxjon$ilpjljdjƒi"izkmjƒlrjd!lji=l&i3jƒ o3lPiD;llv$'i‚=&i--
-k‚!jni'i‚;	j'i‚i/k%l%j9l ;m*l+lun6iƒ8	j‚2%iƒ4mj‚	i>‚@i(k9+i‚ej3iz-iƒ-i%l@	o8jPlTi‚[l`l+	j7(j2jirl
-j'`Jj7y		"6nj4"
-j&‚>
-i?
-i[k\#01	j&M:iWj?9/jFiz‚j6j.1
-j/
-p
-jGi‚sjdj‚jx	j‚j1Ijoj‚Tij‚H/k'iDjMl-ujonOjlB.n9ij	.*i‚{t!j.j‚;!j‚`in2i‚j‚zl4lSjƒlKiƒLkgo5jlml))i4‚
-l
-(
-onml\!j‚iPm nF
-lhllBl>igjƒmj0m
-l8&iƒ+mAiCmBj26'2%ljy!j'/kj‚*lm6j‚j	jTiunSisj\Ui`lUl "En.j}+jH,iEl^mn0jHblq\"l5j	iƒZj‚  m+l	j	j‚--iƒl'%n-k$l+if!jks*i‚
-	
-jrn0j ?6	$*
-'	/jjiHlX'iƒi\j"iƒ+j*Pl9j\C1jRl j‚$<i'ojQiel>jk+iniXnm'jXJQ*i‚m!j‚<y mMi‚C,8lGo$nj‚
-mUj‚
- k?j]Cj‚@j%i3j‚;j,iM}i(‚ iƒX	ll:*i‚lTiG
-#,cenj
-72m4ji>.jSCiK‚!lZiUi^*iHl"j&lmn+jhj‚0li&JrkSjl'+i‚iF$iIjg#l	i*i$3Bj‚=lgi‚Rl/m;iN.i‚!j#k‚-,i‚Fi‚?'lG%mHjL
-ib;iIj3jmT
-lV%2lGiƒ,	kjk'i:	j
-l^li4Ml.jllln
-k"	i $%+E	l9n	jjMl;Hivi "6njRo4jmm3	jeij^)6G		!i=je/k	j‚{js&i\i-,kBij&mn%mkj$iEiw!j‚+!jA1jv,i‚c'il5j"1l6j‚lN2i‚si‚-ilj‚=iƒGi{jjƒ"j_jA3ioj&j<lrm)nU
-l0lln5-iƒ 1jsid(i/	jXlN1jui9S$l jljdj^plSm|jMlZi=E*iv`i67>k@6	j‚'l\
-i‚-@iƒj{-iƒ--iƒBl%m+iƒR	jEo njxn"k b&0G'i‚!jblJk+!jj
-7Hia8n2i 
-2)		*iD#i%%lBlPiOj	lk‚'iti‚ jnlbj‚| i‚0k\iilj0Tlnfi<k{iai‚j	j)mn#
-l
-
-in(((
-		-k
-
-)&02iAo	j‚j‚?lv	iƒ> j‚(Xl0
-i3'i‚&&iUl~"l}iƒ
-+1j|lt*i‚}!lE	j*&k6Kiejjijƒjm"l5i"ui}l*llFn!i!&‚%i1i‚
-icj‚l
-	7+i‚x'i‚Wj[B6Y!i‚)!jƒjq
-+H/j^9"6i	f‚-j‚ iej+iN+i_-i‚j‚'i‚$l/0	j~"i‚:6i*j‚j‚+mj‚yi‚\lik89lp
-j*):9O,l%4	j	,=Mo*j&ml)mVj7N2Ul`lG	i;:WZR+i^	,i*,Whk(T
-
-jW)6i5*"	*l%j	<	
-
-/l
-6"j
-1$om-8tnj!	#	%
-l.
-
-"
-m
-"j
- 
-0l&l* 
-i%/	*	(	ni"
-#0.
-Xi!+
-0	k	$!&$j/
-,N$lDiYHluj(mjUSPl;iƒ1i:j,'i‚i^kPlBj%)&	lC7	l9i`~nRi‚Ej~j‚cli)i!%l/j~i‚mFj,lmj9l=pijDm#l6Tih@1j=m(i‚kW9S/ki‚kl!j,lyj)
-tm6tjUK^lIFmhj!lP)l'i/‚-n%i	JgiiQk63)zjG'i
-jC‚"j'
-
-j lk4l<l6iƒ
-2mDjwmi‚x{j=ljv!6Ynj*mJj.Yiik8i‚H
-ljj9kRZi‚Uij-.
-<lDjGE?5#	l#$70j	
-+U6o!tm6!njKDYLl	"m
-Zj9:K'W	lXl p#i
-
-/C!	n
-i
-@D@i
-Q%,V=	k40j8
-	j‚Kmfo i‚Vj nPl m l iƒ	l)m9jRiTi`,(i7Vj`! iS/k‚	j jAk‚ij‚ti*,i/j(#'i‚j‚iƒF
-j.
-aniƒ)iƒ*l<m+lOi-766j
-lo0mOiq/k#l
-i‚bk.+i5'i‚vm["lF-i‚7%lsl	lilkM
-iID#]lA	jebjn
-j\C9`m'j‚l;iF@i)iƒk‚ j!j‚6l[i‚{j#l!'iq
-l/|i"^lj‚Tj2omX
-l3(jlTli‚=n3i&25jijP%l?lhl'j‚N-iƒ0$l7@m!j‚_ii‚_i6t
-k	jjInSm^mjQiMm$j!lll1j‚L,i‚;#/kLim{<l:.jJl}jCm\jO]l@mjJ?Min=i1‚2j0!l$,iƒj‚_lr	j‚eo+j-`liƒKn&jJ!ipj`!j‚Wl|	iij‚]olUm
-j‚i'‚Zik#0j‚j‚Ejiƒ:iƒzlRjjenljB}l i*i`iFk>lD	j;i6
-j?+i‚tktl-ldj‚ijUZlj5‚hlgl\"innigk%lp	j‚s
-mR
-lK
-iƒ'ipiJ1ym%i0<Gl>j!8)&;{lKHj<06YYl
-j#20!l
-Ul(0"irn-i$B/i2;Qk
-<5i}(Et	l#o j‚Dj‚ iV‚	jj	lti9‚j<islYj6l6Lj‚^Bl3j.lLlTiO[i?‚khBj]j0mq-iLj-k‚lj[j=o$tipmiƒI)iJ	jA-iƒDj)Yj*Yi‚Lm	j‚Bj‚.i‚,	l%k‚
-iP
-2> ^I+l9j'*4)Hl	'jC"*]otm-
-
-j>-I	l,LmFNj
-4&%l<
-l		',=i)0	jG>ni
-*'89&!i0G
-
-Jz	1k?~,j 
-'6'$j‚ijfiIl$j‚ljy*jMm!jI‚Nn1i‚i#k1j-fij>$BjIoj‚>l1m/lGlKi[<jni;‚<j‚ielj%lS	lgniSiskX
-i2!v3<mll,
-
-j7
-
-&j.l>
-j
-	T)"6mPj_l9<
-j&5n(A	l
-55llP
-i5D3n.i3&DL	M>iA2>I	9k/;jQYmiji      0gi
-~fRqwyW‚&U94,     

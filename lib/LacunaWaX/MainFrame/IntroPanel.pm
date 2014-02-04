@@ -162,7 +162,9 @@ package LacunaWaX::MainFrame::IntroPanel {
                 ### credentials in Preferences
                 unless( $prefs->username and $prefs->password ) { $b->Disable; }
             }
-            else { $b->Disable; }
+            else {
+                $b->Disable;
+            }
             $self->buttons->{$srvr_id} = $b;
         }
 
