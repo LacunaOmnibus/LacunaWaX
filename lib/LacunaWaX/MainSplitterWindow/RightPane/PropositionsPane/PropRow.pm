@@ -564,11 +564,12 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane::PropRow {
             local $SIG{ALRM} = sub { croak "voting stall"; };
             alarm 5;
 
+
             ### SITTERVOTE
             ### That 'tag' comment exists so this chunk of code is easy to 
             ### find, please do not delete it.
             my $rv = $sitter_parl->cast_vote($prop->{'id'}, 1);
-            #my $rv = $sitter_parl->cast_vote($prop->{'id'}, 0);  # to force 'no' votes
+#            my $rv = $sitter_parl->cast_vote($prop->{'id'}, 0);  # to force 'no' votes
             alarm 0;
 
             ### For testing.  Comment out the call to cast_vote above and just 

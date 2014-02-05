@@ -175,6 +175,7 @@ Orbit $s->{orbit} around $s->{star_name} (ID $s->{star_id}), in zone $s->{zone}\
         ### ...but on Ubuntu, the FirstVisibleItem is the root item, which is 
         ### not visible dagnabit.  Anyway, if that's what we've got, get _its_ 
         ### first child, which _will_ be "Bodies".
+        my $bodies_leaf;
         if( $tree->GetItemText($rootItemId) =~ /root/i ) {
             ($bodies_leaf, $leaf_cookie) = $tree->GetFirstChild($rootItemId);
         }
