@@ -7,7 +7,7 @@ package LacunaWaX::Dialog::Help {
     use File::Slurp;
     use File::Spec;
     use File::Util;
-    use HTML::Strip;
+    use HTML::Scrubber;
     use HTML::TreeBuilder::XPath;
     use Lucy::Analysis::PolyAnalyzer;
     use Lucy::Index::Indexer;
@@ -256,14 +256,13 @@ package LacunaWaX::Dialog::Help {
     }#}}}
     sub get_docs {#{{{
         my $self    = shift;
-        my $kandi   = HTML::Strip->new();
+        my $loofa   = HTML::Scrubber->new();
         my $docs    = {};
         my $dir     = $self->bb->resolve(service => '/Directory/html');
         foreach my $f(glob("\"$dir\"/*.html")) {
             my $html = read_file($f);
 
-            my $content = $kandi->parse( $html );
-            $kandi->eof;
+            my $content = $loofa->scrub( $html );
 
             ### The templates we're parsing are not full HTML documents, since 
             ### the wrapper contains our header and footer.  Tack on opening 
