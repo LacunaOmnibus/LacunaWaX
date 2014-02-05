@@ -1,8 +1,8 @@
-#!/home/jon/opt/pdk/bin/perlapp-gui
+#!c:\Program Files (x86)\ActiveState Perl Dev Kit 9.2.1\bin\perlapp-gui.exe
 PAP-Version: 1.0
-Packer: /home/jon/opt/pdk/bin/perlapp
+Packer: c:\Program Files (x86)\ActiveState Perl Dev Kit 9.2.1\bin\perlapp.exe
 Script: ../../bin/LacunaWaX.pl
-Cwd: /home/jon/work/LacunaWaX/perlapp_projects/linux_64
+Cwd: C:\Users\Jon\Documents\work\LacunaWaX\perlapp_projects\windows_64
 Add: Wx::
 Add: JSON::RPC::Common::
 Add: Params::Validate::*
@@ -23,17 +23,17 @@ Add: Games::Lacuna::Client::
 Add: Games::Lacuna::Client
 Add: Games::Lacuna::Client::Buildings::**
 Clean: 0
-Date: 2014-01-29 18:00:05
+Date: 2014-02-05 17:04:07
 Debug: 
 Dependent: 0
 Dyndll: 0
-Exe: build/bin/LacunaWaX
+Exe: build/bin/LacunaWaX.exe
 Force: 1
 Gui: 0
-Hostname: gandalf
+Hostname: frodo
 Icon: ../../unpackaged assets/frai.ico
 Icon: ../../unpackaged assets/frai.ico
-Lib: lib:../../lib
+Lib: lib:..\..\lib
 Manifest: 
 No-Compress: 0
 No-Logo: 0
