@@ -1,0 +1,7 @@
+
+This directory is currently just a copy of the linux_64 directory, so it needs some love.
+
+build.sh will obviously need to become build.bat, and all the project files are referencing the linux_64 directory.
+
+Fix that up, and get rid of this file.
+
