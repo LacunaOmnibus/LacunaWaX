@@ -162,90 +162,15 @@ Orbit $s->{orbit} around $s->{star_name} (ID $s->{star_id}), in zone $s->{zone}\
 
         ### Still here?  The current body is a Space Station.
 
-        ### leaf_cookie needs to be declared now.  Might as well declare 
-        ### orbital_leaf while we're at it.
-        my($orbital_leaf, $leaf_cookie);
-
-        ### On Windows, the FirstVisibleItem is "Bodies", which is what we 
-        ### want...
-        my $tree        = $self->get_left_pane->bodies_tree->treectrl;
-        my $rootItemId  = $tree->GetRootItem;
-        #my $bodies_leaf = $tree->GetFirstVisibleItem;
-
-        ### ...but on Ubuntu, the FirstVisibleItem is the root item, which is 
-        ### not visible dagnabit.  Anyway, if that's what we've got, get _its_ 
-        ### first child, which _will_ be "Bodies".
-        my $bodies_leaf;
-        if( $tree->GetItemText($rootItemId) =~ /root/i ) {
-            ($bodies_leaf, $leaf_cookie) = $tree->GetFirstChild($rootItemId);
-        }
-
-        ### Find the $orbital_leaf that represents the current body, which we 
-        ### now know to be a Space Station.
-        ($orbital_leaf, $leaf_cookie) = $tree->GetFirstChild($bodies_leaf);
-
-# Pants off
-# Delete from BodyTypes where body_id = 182510
-        my $orbital_leafname = $tree->GetItemText($orbital_leaf);
-        while( $orbital_leafname ne $self->planet_name ) {
-say "-$orbital_leafname-";
-            ($orbital_leaf, $leaf_cookie) = $tree->GetNextChild($bodies_leaf, $leaf_cookie); 
-            last unless $orbital_leaf->IsOk;
-            $orbital_leafname = $tree->GetItemText($orbital_leaf);
-        }
-        if( $orbital_leafname ne $self->planet_name ) {
-            say "No leaf on the tree matches our current planet.  Wat?";
-            return;
-        }
-say "Found it! -$orbital_leafname-";
-return;
-
-        ### Now search the child leaves of our current Space Station.  If it's 
-        ### already displaying Station-specific child leaves, we're ok 
-        ### (meaning that this station is known to the application as a 
-        ### station).
-        my($body_child, $child_cookie) = $tree->GetFirstChild($orbital_leaf);
-        my $body_child_leafname = $tree->GetItemText($body_child);
-        while( 1 ) {
-
-            ### These are SS-only leaves.  If we find one, the app already 
-            ### knows this body is a station and we're done.
-            return if (
-                   $body_child_leafname eq 'Fire the BFG'
-                or $body_child_leafname eq 'Health Alerts'
-                or $body_child_leafname eq 'Incoming'
-                or $body_child_leafname eq 'Propositions'
-            );
-
-            ### These are Planet-only leaves.  If we find one, the app does 
-            ### _NOT_ already know that this body is a station.  Break out of 
-            ### our loop and go fix the tree.
-            last if (
-                   $body_child_leafname eq 'Glyphs'
-                or $body_child_leafname eq 'Lottery'
-                or $body_child_leafname eq 'Spies'
-            );
-
-            ($body_child, $child_cookie) = $tree->GetNextChild($orbital_leaf, $child_cookie); 
-            last unless $body_child->IsOk;
-            $body_child_leafname = $tree->GetItemText($body_child);
-        }
-
-        ### Still here?  We have a station whose tree is currently showing the 
-        ### default 'body' child leaves.  Fix that.
-
-        #$self->get_left_pane->bodies_tree->fill_tree();
-        #$self->get_left_pane->bodies_tree->add_fresh_tree();
-        $self->get_left_pane->add_fresh_tree(); 
-        $self->get_left_pane->bodies_tree->_set_events();
-        $self->get_left_pane->main_panel->Layout();
-    }#}}}
-    sub fix_tree_for_stations_orig {#{{{
-        my $self = shift;
-
-        return unless defined $self->status->{'influence'};
-
-        ### Still here?  The current body is a Space Station.
+        ### This code is a friggin mess, and it only works some of the time; I'm
+        ### aware of that.
+        ###
+        ### But the TreeCtrl works differently on linux and windows, and trying
+        ### to get this actually right is just too much of a pain with switching
+        ### between OSs to test.
+        ###
+        ### If I were to do it again, I'd scrap the whole mess and find
+        ### something more workable.  For now, this is officially Good Enough©.
 
         ### leaf_cookie needs to be declared now.  Might as well declare 
         ### orbital_leaf while we're at it.
