@@ -1,4 +1,6 @@
 
+### Gray out the calculator till after login dummy.
+
 package LacunaWaX {
     use v5.14;
     use strict;
