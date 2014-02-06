@@ -1,0 +1,49 @@
+#!c:\Program Files (x86)\ActiveState Perl Dev Kit 9.2.1\bin\perlapp-gui.exe
+PAP-Version: 1.0
+Packer: c:\Program Files (x86)\ActiveState Perl Dev Kit 9.2.1\bin\perlapp.exe
+Script: ..\..\bin\Schedule_sshealth.pl
+Cwd: C:\Users\Jon\Documents\work\LacunaWaX\perlapp_projects\windows_32
+Add: Wx::
+Add: JSON::RPC::Common::
+Add: Params::Validate::*
+Add: DateTime::Locale::*
+Add: Bread::Board::
+Add: Moose::
+Add: MooseX::
+Add: SQL::Translator::
+Add: SQL::Abstract
+Add: Log::Dispatch::*
+Add: DateTime::Format::*
+Add: CHI::Driver::
+Add: Moose
+Clean: 0
+Date: 2014-02-06 13:16:17
+Debug: 
+Dependent: 0
+Dyndll: 0
+Exe: Schedule_sshealth.exe
+Force: 1
+Gui: 0
+Hostname: frodo
+Icon: ../../unpackaged assets/leela.ico
+Lib: lib:../../lib
+Manifest: 
+No-Compress: 0
+No-Logo: 0
+Runlib: 
+Scan: ../extra_scan.pl
+Shared: private
+Tmpdir: 
+Verbose: 0
+Version-Comments: 
+Version-CompanyName: 
+Version-FileDescription: 
+Version-FileVersion: 
+Version-InternalName: 
+Version-LegalCopyright: 
+Version-LegalTrademarks: 
+Version-OriginalFilename: 
+Version-ProductName: 
+Version-ProductVersion: 
+Warnings: 0
+Xclude: 0
