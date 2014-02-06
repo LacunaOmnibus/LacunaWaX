@@ -17,4 +17,6 @@
         - Debian
 
 - windows_32
-    - Works so far.
+    - build.pl works.
+    - LacunaWaX.exe appears to work.  The other executables are being created, 
+      but currently un-tested.
