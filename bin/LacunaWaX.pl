@@ -12,7 +12,19 @@ use LacunaWaX::Model::DefaultData;
 
 no if $] >= 5.017011, warnings => 'experimental::smartmatch';
 
-my $root_dir = "$FindBin::Bin/..";
+###
+### CHECK
+### This should keep windows data in appdata and linux data in ./user/.
+###
+### Works on Windows when actually installed using the .msi installer.  Would 
+### be nice to have the installer set some ENV variable so we'd know we were 
+### running from an .msi version, and could use APPDATA only then.
+###
+
+#my $root_dir = "$FindBin::Bin/..";
+my $root_dir = ($^O eq 'MSWin32')
+    ? $ENV{'APPDATA'} . '/LacunaWaX'
+    : "$FindBin::Bin/..";
 my $app_db   = "$root_dir/user/lacuna_app.sqlite";
 my $log_db   = "$root_dir/user/lacuna_log.sqlite";
 

@@ -78,7 +78,6 @@ package LacunaWaX::MainFrame::MenuBar::File {
             $self->parent,
             'Select a database file',
             '', # default dir
-            #'/home/jon/Desktop', # default dir
             'lacuna_app.sqlite', # default file
             '*.sqlite',
             wxFD_OPEN|wxFD_FILE_MUST_EXIST
@@ -91,7 +90,7 @@ package LacunaWaX::MainFrame::MenuBar::File {
             wxTheApp->import_old_database($db_file)
         }
         catch {
-            wxTheApp->poperr( "error is: $_");
+            wxTheApp->poperr( "error is: $_ ($db_file)");
             return;
         } or return;
         wxTheApp->popmsg("The import completed successfully.", "Import Complete.");

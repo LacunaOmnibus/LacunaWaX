@@ -51,4 +51,5 @@ use Games::Lacuna::Client::Buildings::WaterStorage;
 use LacunaWaX::Model::Schema;
 use LacunaWaX::Model::LogsSchema;
 use LacunaWaX::Model::DBILogger;
+use Wx::Perl::SplashFast;
 
