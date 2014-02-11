@@ -4,7 +4,7 @@ use v5.14;
 use strict;
 use File::Copy;
 use FindBin;
-use IO::Handle;
+use IO::All;
 use Wx qw(:allclasses);
 use lib $FindBin::Bin . '/../lib';
 use LacunaWaX;
@@ -12,19 +12,20 @@ use LacunaWaX::Model::DefaultData;
 
 no if $] >= 5.017011, warnings => 'experimental::smartmatch';
 
-###
-### CHECK
-### This should keep windows data in appdata and linux data in ./user/.
-###
-### Works on Windows when actually installed using the .msi installer.  Would 
-### be nice to have the installer set some ENV variable so we'd know we were 
-### running from an .msi version, and could use APPDATA only then.
-###
-
-#my $root_dir = "$FindBin::Bin/..";
-my $root_dir = ($^O eq 'MSWin32')
-    ? $ENV{'APPDATA'} . '/LacunaWaX'
-    : "$FindBin::Bin/..";
+my $root_dir = "$FindBin::Bin/..";
+{
+    ### $env is going to get modified by the build process to "msi", so the 
+    ### installed version can know it is the installed version, not the source 
+    ### version.
+    ###
+    ### That modification is a simple regex in the build script - do not mess 
+    ### with the $env assignment line below, or you're likely to break that 
+    ### part of the build script.
+    my $env = 'source';    
+    if( $^O eq 'MSWin32' ) {
+        $root_dir = $ENV{'APPDATA'} . '/LacunaWaX' if $env eq 'msi';
+    }
+}
 my $app_db   = "$root_dir/user/lacuna_app.sqlite";
 my $log_db   = "$root_dir/user/lacuna_log.sqlite";
 
