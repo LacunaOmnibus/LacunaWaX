@@ -10,8 +10,9 @@ use Moose;
 use lib $FindBin::Bin . '/../lib';
 use LacunaWaX::Model::Container;
 use LacunaWaX::Schedule;
+use LacunaWaX::Util;
 
-my $root_dir    = "$FindBin::Bin/..";
+my $root_dir    = LacunaWaX::Util::find_root();
 my $db_file     = join '/', ($root_dir, 'user', 'lacuna_app.sqlite');
 my $db_log_file = join '/', ($root_dir, 'user', 'lacuna_log.sqlite');
 

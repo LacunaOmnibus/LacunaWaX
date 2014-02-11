@@ -6,10 +6,14 @@ use Try::Tiny;
 
 use lib $FindBin::Bin . '/../lib';
 
+### This must exist here for perlApp to understand it needs Moose in time.
+use Moose;
+
 use LacunaWaX::Model::Container;
 use LacunaWaX::Schedule;
+use LacunaWaX::Util;
 
-my $root_dir    = "$FindBin::Bin/..";
+my $root_dir    = LacunaWaX::Util::find_root();
 my $db_file     = join '/', ($root_dir, 'user', 'lacuna_app.sqlite');
 my $db_log_file = join '/', ($root_dir, 'user', 'lacuna_log.sqlite');
 

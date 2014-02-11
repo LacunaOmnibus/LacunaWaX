@@ -15,6 +15,30 @@ use LacunaWaX::Model::DefaultData;
 use LacunaWaX::Model::LogsSchema;
 use LacunaWaX::Model::Schema;
 
+BEGIN {#{{{
+    sub filter_source {#{{{
+        my $file    = shift;
+        my $str     = shift;
+
+        my @lines = io->file($file)->slurp;
+        for my $l(@lines) {
+            if( $l =~ s/^(\s+my\s+\$env\s*=\s*['"])(\w+)(["'].*)/$1${str}$3/ ) {
+                #say "old was $2.  Current is $str;"
+            }
+        }
+        io->file($file)->binmode("raw")->print(@lines);
+    }#}}}
+
+    ### Change the $env variable from 'source' to 'msi' so the executables 
+    ### know they're the installed version.
+    filter_source("../../lib/LacunaWaX/Util.pm", "msi");
+}#}}}
+END {#{{{
+    ### Change the $env setting back to 'source'.  In END block in case some 
+    ### part of the build process dies after changing $env.
+    filter_source("../../lib/LacunaWaX/Util.pm", "source");
+}#}}}
+
 STDOUT->autoflush(1);
 
 system('cls');
@@ -77,55 +101,73 @@ say "Deploying default (empty) databases...";
 };#}}}
 die "Database deploy failed! ($exit)" if $exit;
 
+
 ### LacunaWaX (main GUI)
 say "Building LacunaWaX executable...";
 ($out,$err,$exit) = capture {#{{{
-    ### Change the $env variable from 'source' to 'msi' so the executable 
-    ### knows it's the installed version.
-    filter_source("../../bin/LacunaWaX.pl", "msi");
 
 =pod
-    ### Don't hide the GUI
-    system('perlapp --trim Games::Lacuna::Client --add Wx::;JSON::RPC::Common::;Params::Validate::*;DateTime::Locale::*;Bread::Board::;Moose::;MooseX::;SQL::Translator::;SQL::Abstract;Log::Dispatch::*;DateTime::Format::*;CHI::Driver::;LacunaWaX::;Games::Lacuna::Client::;Games::Lacuna::Cache;Games::Lacuna::Client::;Games::Lacuna::Client::;Games::Lacuna::Client;Games::Lacuna::Client::Buildings::**;Class::MOP:: --icon "..\..\unpackaged assets\frai.ico" --scan ..\extra_scan.pl --lib ..\..\lib --shared private --norunlib --force --exe build\bin\LacunaWaX.exe --perl C:\Perl\bin\perl.exe ..\..\bin\LacunaWaX.pl') and return 1;
+    ### Don't hide the console
+    system('perlapp --trim Games::Lacuna::Client --add Wx::;JSON::RPC::Common::;Params::Validate::*;DateTime::Locale::*;Bread::Board::;Moose::;MooseX::;SQL::Translator::;SQL::Abstract;Log::Dispatch::*;DateTime::Format::*;CHI::Driver::;LacunaWaX::;Games::Lacuna::Client::;Games::Lacuna::Cache;Games::Lacuna::Client::;Games::Lacuna::Client::;Games::Lacuna::Client;Games::Lacuna::Client::Buildings::**;Class::MOP::;HTML::TreeBuilder::XPath --icon "..\..\unpackaged assets\frai.ico" --scan ..\extra_scan.pl --lib ..\..\lib --shared private --norunlib --force --exe build\bin\LacunaWaX.exe --perl C:\Perl\bin\perl.exe ..\..\bin\LacunaWaX.pl') and return 1;
 =cut
-    ### Hide the GUI
-    system('perlapp --trim Games::Lacuna::Client --add Wx::;JSON::RPC::Common::;Params::Validate::*;DateTime::Locale::*;Bread::Board::;Moose::;MooseX::;SQL::Translator::;SQL::Abstract;Log::Dispatch::*;DateTime::Format::*;CHI::Driver::;LacunaWaX::;Games::Lacuna::Client::;Games::Lacuna::Cache;Games::Lacuna::Client::;Games::Lacuna::Client::;Games::Lacuna::Client;Games::Lacuna::Client::Buildings::**;Class::MOP:: --icon "..\..\unpackaged assets\frai.ico" --scan ..\extra_scan.pl --lib ..\..\lib --shared private --norunlib --gui --force --exe build\bin\LacunaWaX.exe --perl C:\Perl\bin\perl.exe ..\..\bin\LacunaWaX.pl') and return 1;
 
-    ### Clean up after yourself, and remember to return a false value to 
-    ### $exit.
-    filter_source("../../bin/LacunaWaX.pl", "source");
-    return 0;
+    ### Hide the console
+    system('perlapp --trim Games::Lacuna::Client --add Wx::;JSON::RPC::Common::;Params::Validate::*;DateTime::Locale::*;Bread::Board::;Moose::;MooseX::;SQL::Translator::;SQL::Abstract;Log::Dispatch::*;DateTime::Format::*;CHI::Driver::;LacunaWaX::;Games::Lacuna::Client::;Games::Lacuna::Cache;Games::Lacuna::Client::;Games::Lacuna::Client::;Games::Lacuna::Client;Games::Lacuna::Client::Buildings::**;Class::MOP::;HTML::TreeBuilder::XPath --icon "..\..\unpackaged assets\frai.ico" --scan ..\extra_scan.pl --lib ..\..\lib --shared private --norunlib --gui --force --exe build\bin\LacunaWaX.exe --perl C:\Perl\bin\perl.exe ..\..\bin\LacunaWaX.pl') and return 1;
+
 };#}}}
 die "Building LacunaWaX.exe failed!" if $exit;
 
 ### Archmin
 say "Building Archmin executable...";
 ($out,$err,$exit) = capture {#{{{
-    system('perlapp --add Wx::;JSON::RPC::Common::;Params::Validate::*;DateTime::Locale::*;Bread::Board::;Moose::;MooseX::;SQL::Translator::;SQL::Abstract;Log::Dispatch::*;DateTime::Format::*;CHI::Driver::;Moose --icon "../../unpackaged assets/leela.ico" --scan ../extra_scan.pl --lib ..\..\lib --shared private --norunlib --force --exe build\bin\Schedule_archmin.exe --perl C:\Perl\bin\perl.exe ..\..\bin\Schedule_archmin.pl');
+
+    ### Hide the console
+    system('perlapp --add Wx::;JSON::RPC::Common::;Params::Validate::*;DateTime::Locale::*;Bread::Board::;Moose::;MooseX::;SQL::Translator::;SQL::Abstract;Log::Dispatch::*;DateTime::Format::*;CHI::Driver::;Moose;Class::MOP:: --icon "../../unpackaged assets/leela.ico" --scan ../extra_scan.pl --lib ..\..\lib --shared private --norunlib --gui --force --exe build\bin\Schedule_archmin.exe --perl C:\Perl\bin\perl.exe ..\..\bin\Schedule_archmin.pl');
+
+=pod
+    ### Don't hide the console
+    system('perlapp --add Wx::;JSON::RPC::Common::;Params::Validate::*;DateTime::Locale::*;Bread::Board::;Moose::;MooseX::;SQL::Translator::;SQL::Abstract;Log::Dispatch::*;DateTime::Format::*;CHI::Driver::;Moose;Class::MOP:: --icon "../../unpackaged assets/leela.ico" --scan ../extra_scan.pl --lib ..\..\lib --shared private --norunlib --force --exe build\bin\Schedule_archmin.exe --perl C:\Perl\bin\perl.exe ..\..\bin\Schedule_archmin.pl');
+=cut
+
 };#}}}
 die "Building Schedule_archmin.exe failed!" if $exit;
 
 ### Autovote
 say "Building Autovote executable...";
 ($out,$err,$exit) = capture {#{{{
-    system('perlapp --add Wx::;JSON::RPC::Common::;Params::Validate::*;DateTime::Locale::*;Bread::Board::;Moose::;MooseX::;SQL::Translator::;SQL::Abstract;Log::Dispatch::*;DateTime::Format::*;CHI::Driver::;Moose --icon "../../unpackaged assets/leela.ico" --scan ../extra_scan.pl --lib ../../lib --shared private --norunlib --force --exe build\bin\Schedule_autovote.exe --perl C:\Perl\bin\perl.exe ..\..\bin\Schedule_autovote.pl');
+
+    ### Hide the console
+    system('perlapp --add Wx::;JSON::RPC::Common::;Params::Validate::*;DateTime::Locale::*;Bread::Board::;Moose::;MooseX::;SQL::Translator::;SQL::Abstract;Log::Dispatch::*;DateTime::Format::*;CHI::Driver::;Moose;Class::MOP:: --icon "../../unpackaged assets/leela.ico" --scan ../extra_scan.pl --lib ../../lib --shared private --norunlib --gui --force --exe build\bin\Schedule_autovote.exe --perl C:\Perl\bin\perl.exe ..\..\bin\Schedule_autovote.pl');
+
+=pod
+    ### Don't hide the console
+    system('perlapp --add Wx::;JSON::RPC::Common::;Params::Validate::*;DateTime::Locale::*;Bread::Board::;Moose::;MooseX::;SQL::Translator::;SQL::Abstract;Log::Dispatch::*;DateTime::Format::*;CHI::Driver::;Moose;Class::MOP:: --icon "../../unpackaged assets/leela.ico" --scan ../extra_scan.pl --lib ../../lib --shared private --norunlib --force --exe build\bin\Schedule_autovote.exe --perl C:\Perl\bin\perl.exe ..\..\bin\Schedule_autovote.pl');
+=cut
+
 };#}}}
 die "Building Schedule_autovote failed!" if $exit;
 
 ### SS Health
 say "Building SS Health executable...";
 ($out,$err,$exit) = capture {#{{{
-    system('perlapp --add Wx::;JSON::RPC::Common::;Params::Validate::*;DateTime::Locale::*;Bread::Board::;Moose::;MooseX::;SQL::Translator::;SQL::Abstract;Log::Dispatch::*;DateTime::Format::*;CHI::Driver::;Moose --icon "../../unpackaged assets/leela.ico" --scan ../extra_scan.pl --lib ../../lib --shared private --norunlib --force --exe build\bin\Schedule_sshealth.exe --perl C:\Perl\bin\perl.exe ..\..\bin\Schedule_sshealth.pl');
+
+    ### Hide the console
+    system('perlapp --add Wx::;JSON::RPC::Common::;Params::Validate::*;DateTime::Locale::*;Bread::Board::;Moose::;MooseX::;SQL::Translator::;SQL::Abstract;Log::Dispatch::*;DateTime::Format::*;CHI::Driver::;Moose;Class::MOP:: --icon "../../unpackaged assets/leela.ico" --scan ../extra_scan.pl --lib ../../lib --shared private --norunlib --gui --force --exe build\bin\Schedule_sshealth.exe --perl C:\Perl\bin\perl.exe ..\..\bin\Schedule_sshealth.pl');
+
+=pod
+    ### Don't hide the console
+    system('perlapp --add Wx::;JSON::RPC::Common::;Params::Validate::*;DateTime::Locale::*;Bread::Board::;Moose::;MooseX::;SQL::Translator::;SQL::Abstract;Log::Dispatch::*;DateTime::Format::*;CHI::Driver::;Moose;Class::MOP:: --icon "../../unpackaged assets/leela.ico" --scan ../extra_scan.pl --lib ../../lib --shared private --norunlib --force --exe build\bin\Schedule_sshealth.exe --perl C:\Perl\bin\perl.exe ..\..\bin\Schedule_sshealth.pl');
+=cut
+
 };#}}}
 die "Building Schedule_sshealth failed!" if $exit;
 =pod
 =cut
-
-
+    
 my $zip = Archive::Zip->new();
 $zip->addDirectory( $build_dir );
 unless( $zip->writeToFileNamed($ARCHIVE_FILENAME_FULL->stringify) == AZ_OK ) {
-    die "Unable to write to archive $ARCHIVE_FILENAME_FULL.";
+die "Unable to write to archive $ARCHIVE_FILENAME_FULL.";
 }
 
 say "";
@@ -133,16 +175,4 @@ say "Done!  $ARCHIVE_FILENAME_FULL has been created.  build/ has been left for t
 say "";
 
 
-sub filter_source {#{{{
-    my $file    = shift;
-    my $str     = shift;
-
-    my @lines = io->file($file)->slurp;
-    for my $l(@lines) {
-        if( $l =~ s/^(\s+my\s+\$env\s*=\s*['"])(\w+)(["'].*)/$1${str}$3/ ) {
-            #say "old was $2.  Current is $str;"
-        }
-    }
-    io->file($file)->binmode("raw")->print(@lines);
-}#}}}
 
