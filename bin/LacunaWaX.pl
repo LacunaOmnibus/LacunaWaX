@@ -8,24 +8,12 @@ use IO::All;
 use Wx qw(:allclasses);
 use lib $FindBin::Bin . '/../lib';
 use LacunaWaX;
+use LacunaWaX::Util;
 use LacunaWaX::Model::DefaultData;
 
 no if $] >= 5.017011, warnings => 'experimental::smartmatch';
 
-my $root_dir = "$FindBin::Bin/..";
-{
-    ### $env is going to get modified by the build process to "msi", so the 
-    ### installed version can know it is the installed version, not the source 
-    ### version.
-    ###
-    ### That modification is a simple regex in the build script - do not mess 
-    ### with the $env assignment line below, or you're likely to break that 
-    ### part of the build script.
-    my $env = 'source';    
-    if( $^O eq 'MSWin32' ) {
-        $root_dir = $ENV{'APPDATA'} . '/LacunaWaX' if $env eq 'msi';
-    }
-}
+my $root_dir = LacunaWaX::Util::find_root();
 my $app_db   = "$root_dir/user/lacuna_app.sqlite";
 my $log_db   = "$root_dir/user/lacuna_log.sqlite";
 

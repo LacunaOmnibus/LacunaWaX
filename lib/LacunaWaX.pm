@@ -1,6 +1,4 @@
 
-### Gray out the calculator till after login dummy.
-
 package LacunaWaX {
     use v5.14;
     use strict;
@@ -29,7 +27,7 @@ package LacunaWaX {
     use MooseX::NonMoose;
     extends 'Wx::App';
 
-    our $VERSION = '1.22';
+    our $VERSION = '2.0';
 
     has 'root_dir'          => (is => 'rw', isa => 'Str',                               required   => 1);
     has 'bb'                => (is => 'rw', isa => 'LacunaWaX::Model::Container',       lazy_build => 1);
