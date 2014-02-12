@@ -7,7 +7,7 @@ package LacunaWaX::Dialog::Help {
     use File::Slurp;
     use File::Spec;
     use File::Util;
-    use HTML::Strip;
+    use HTML::Scrubber;
     use HTML::TreeBuilder::XPath;
     use Lucy::Analysis::PolyAnalyzer;
     use Lucy::Index::Indexer;
@@ -256,45 +256,55 @@ package LacunaWaX::Dialog::Help {
     }#}}}
     sub get_docs {#{{{
         my $self    = shift;
-        my $kandi   = HTML::Strip->new();
+        my $loofa   = HTML::Scrubber->new();
         my $docs    = {};
         my $dir     = $self->bb->resolve(service => '/Directory/html');
+
+        use HTML::TreeBuilder;
         foreach my $f(glob("\"$dir\"/*.html")) {
             my $html = read_file($f);
 
-            my $content = $kandi->parse( $html );
-            $kandi->eof;
+            my $content = $loofa->scrub( $html );
 
-            ### The templates we're parsing are not full HTML documents, since 
-            ### the wrapper contains our header and footer.  Tack on opening 
-            ### and closing html and body tags to the content to make XPath 
-            ### happy.
-            my $x = HTML::TreeBuilder::XPath->new();
+            my $x = HTML::TreeBuilder->new();
             $x->parse("<html><body>$html</body></html>");
-            my $title   = $x->findvalue('/html/body/h1') || 'No Title';
-            my $summary = $self->get_doc_summary($x) || 'No Summary';
+
+            my $title_elem  = ($x->find_by_tag_name('h1'))[0];
+            my $title_text  = (ref $title_elem eq 'HTML::Element') ? $title_elem->as_text : 'No Title';
+            my $summary     = $self->get_doc_summary($x) || 'No Summary';
 
             $docs->{$f} = {
                 content     => $content,
                 summary     => $summary,
-                title       => $title,
+                title       => $title_text,
             }
         }
         return $docs;
     }#}}}
     sub get_doc_summary {#{{{
-        my $self  = shift;
-        my $xpath = shift;
+        my $self = shift;
+        my $tree = shift;
 
-        my @nodeset = $xpath->findnodes('/html/body/*');
-        my $summary  = q{};
-        NODE:
-        for my $n(@nodeset) {
-            next if $n->getName =~ /^h/i;   # skip headers
-            $summary .= $self->clean_text($n->getValue);
-            last NODE if length $summary > $self->summary_length;
-        }
-        return $summary;
+        ### TBD
+        ### This used to avoid the H1 tag contents before summarizing the body 
+        ### tag contents.
+        ###
+        ### But HTML::TreeBuilder::XPath, which I was using before, does not 
+        ### play well with being packaged by perlapp.
+        ###
+        ### I'm sure there's a way to remove the H1 tag contents using 
+        ### TreeBuilder like I'm doing now, but having that H1 contents in the 
+        ### summary is extremely minor and I doubt anybody but me will ever 
+        ### even notice, and I want this thing out the door.
+        ###
+        ### So I'm gonna punt.
+
+        my $body_elem = ($tree->find_by_tag_name('body'))[0];
+        my $body_text = (ref $body_elem eq 'HTML::Element') ? $body_elem->as_text : 'No Body Text';
+        $body_text = $self->clean_text( $body_text );
+        $body_text = substr($body_text, 0, $self->summary_length);
+        return $body_text;
+
     }#}}}
     sub get_html_width {#{{{
         my $self = shift;

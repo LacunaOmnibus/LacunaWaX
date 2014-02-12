@@ -4,15 +4,16 @@ use v5.14;
 use strict;
 use File::Copy;
 use FindBin;
-use IO::Handle;
+use IO::All;
 use Wx qw(:allclasses);
 use lib $FindBin::Bin . '/../lib';
 use LacunaWaX;
+use LacunaWaX::Util;
 use LacunaWaX::Model::DefaultData;
 
 no if $] >= 5.017011, warnings => 'experimental::smartmatch';
 
-my $root_dir = "$FindBin::Bin/..";
+my $root_dir = LacunaWaX::Util::find_root();
 my $app_db   = "$root_dir/user/lacuna_app.sqlite";
 my $log_db   = "$root_dir/user/lacuna_log.sqlite";
 

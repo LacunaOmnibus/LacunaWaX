@@ -11,7 +11,7 @@ package LacunaWaX::MainFrame::MenuBar::Tools {
     use LacunaWaX::Dialog::Mail;
     use LacunaWaX::Dialog::SitterManager;
     use LacunaWaX::Dialog::Test;
-use LacunaWaX::Dialog::Captcha;
+    use LacunaWaX::Dialog::Captcha;
 
     ### Wx::Menu is a non-hash object.  Extending such requires 
     ### MooseX::NonMoose::InsideOut instead of plain MooseX::NonMoose.
@@ -115,12 +115,14 @@ use LacunaWaX::Dialog::Captcha;
         my $self = shift;
         $self->Enable($self->itm_mail->GetId, 1);
         $self->Enable($self->itm_sitter->GetId, 1);
+        $self->Enable($self->itm_calc->GetId, 1);
         return 1;
     }#}}}
     sub show_not_connected {#{{{
         my $self = shift;
         $self->Enable($self->itm_mail->GetId, 0);
         $self->Enable($self->itm_sitter->GetId, 0);
+        $self->Enable($self->itm_calc->GetId, 0);
         return 1;
     }#}}}
 

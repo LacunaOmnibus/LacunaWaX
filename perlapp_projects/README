@@ -5,3 +5,18 @@
       the file as a "scanned script" in the Files tab is much easier than 
       adding them each as Implicit Modules individually.
 
+- linux_32
+- linux_64
+    - At least one of these works, on at least some Linux dists.  Need better 
+      notes on which works where.
+    - Works on
+        - Ubuntu
+        - ZorinOS
+    - Does not work on
+        - Fedora
+        - Debian
+
+- windows_32
+    - build.pl works.
+    - LacunaWaX.exe appears to work.  The other executables are being created, 
+      but currently un-tested.

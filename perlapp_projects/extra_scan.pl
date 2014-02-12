@@ -1,4 +1,6 @@
 
+use HTML::TreeBuilder;
+
 use Games::Lacuna::Client::Buildings::Archaeology;
 use Games::Lacuna::Client::Buildings::ArtMuseum;
 use Games::Lacuna::Client::Buildings::BlackHoleGenerator;
@@ -51,4 +53,5 @@ use Games::Lacuna::Client::Buildings::WaterStorage;
 use LacunaWaX::Model::Schema;
 use LacunaWaX::Model::LogsSchema;
 use LacunaWaX::Model::DBILogger;
+use Wx::Perl::SplashFast;
 
