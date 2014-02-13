@@ -342,27 +342,27 @@ Returns true if the database passed in contains the correct tables and columns.
 
         ### Ensure the tables we're going to try to import exist in the old 
         ### database
-        my %tables = ();
-        map{ $tables{$_} = 0 }(keys %{$tables} );
+        my %checked_tables = ();
+        map{ $checked_tables{$_} = 0 }(keys %{$tables} );
         my $tbl_sth = try {
             $dbh->table_info(undef, undef, undef, 'TABLE');
         }
         catch { return };
         return 0 unless $tbl_sth;
         while( my $r = $tbl_sth->fetchrow_hashref ) {
-            delete $tables{$r->{'TABLE_NAME'}};
+            delete $checked_tables{$r->{'TABLE_NAME'}};
         }
-        return 0 if keys %tables;
+        return 0 if keys %checked_tables;
 
         ### Ensure each of those tables contains the correct columns
         foreach my $tbl( keys %{$tables} ) {
-            my %cols = ();
-            map{ $cols{$_} = 0 }(@{$tables->{$tbl}});
+            my %checked_cols = ();
+            map{ $checked_cols{$_} = 0 }(@{$tables->{$tbl}});
             my $sth = $dbh->column_info(undef, undef, $tbl, undef);
             while( my $r = $sth->fetchrow_hashref ) {
-                delete $cols{$r->{'COLUMN_NAME'}};
+                delete $checked_cols{$r->{'COLUMN_NAME'}};
             }
-            return 0 if keys %cols;
+            return 0 if keys %checked_cols;
         }
 
         return 1;
