@@ -603,7 +603,7 @@ see what you're doing.
 
         ### Train the first spy just to see if we need a captcha.
         my $row = shift @{ $self->spy_table};
-        try {
+        my $rv = try {
             my $chosen_training_str = $row->chc_train->GetString( $row->chc_train->GetSelection );
             $self->int_min->assign_spy( $row->spy->id, $chosen_training_str );
         }
@@ -615,11 +615,15 @@ see what you're doing.
                     ancestor    => $self->ancestor,
                     parent      => $self->parent,
                 );
+                return if $c->error;
             }
             my $chosen_training_str = $row->chc_train->GetString( $row->chc_train->GetSelection );
             $self->int_min->assign_spy( $row->spy->id, $chosen_training_str );
-            return;
+            return 1;
         };
+
+        ### The captcha blew up; don't try to do anything.
+        return unless $rv;
 
         ### Set each spy to train
         $self->throb();

@@ -33,6 +33,19 @@ package LacunaWaX::Dialog::Captcha {
         lazy_build  => 1
     );
 
+    has 'error' => (
+        is          => 'rw',
+        isa         => 'Maybe[Str]',
+        documentation => q{
+            Will be set if we're unable to access the captcha image.  If they forget to renew the cert again, the
+            game will be up at http, but captchas require https; in that case, LW will work, but captcha images 
+            will not be available.
+
+            So any code trying to implement a LacunaWaX::Dialog::Captcha should check this error attribute.  If 
+            it's non-false, then something went haywire and nothing that requires a captcha should be attempted.
+        },
+    );
+
     has 'bmp_captcha'   => (is => 'rw', isa => 'Wx::StaticBitmap'                                                       );
     has 'btn_reload'    => (is => 'rw', isa => 'Wx::Button',        lazy_build => 1                                     );
     has 'btn_solution'  => (is => 'rw', isa => 'Wx::Button',        lazy_build => 1                                     );
@@ -47,7 +60,12 @@ package LacunaWaX::Dialog::Captcha {
         $self->SetSize( $self->size );
         $self->Centre();
 
-        $self->bmp_captcha( $self->get_image() );
+        my $bmp;
+        unless( $bmp = $self->get_image() ) {
+            $self->error("Unable to retrieve captcha image");
+            return;
+        }
+        $self->bmp_captcha( $bmp );
         $self->szr_image->Add($self->bmp_captcha, 0, 0, 0);
 
         $self->szr_solution->Add($self->txt_solution, 0, 0, 0);
@@ -131,6 +149,10 @@ package LacunaWaX::Dialog::Captcha {
         my $puzzle = $self->captcha->fetch();
         my $resp = $self->ua->get($puzzle->{'url'});
         unless( $resp->is_success ) {
+            ### Remember that it _is_ possible for this to happen while the 
+            ### rest of the game continues to work.  If we're accessing the 
+            ### game over http, but https is down (bad cert or whatever), we 
+            ### will not be able to get captcha images.
             $self->poperr("Unable to retrieve captcha image!");
             return;
         }

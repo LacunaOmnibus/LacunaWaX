@@ -126,7 +126,6 @@ package LacunaWaX::MainFrame::MenuBar::File {
             'Select a database file',
             '', # default dir
             'lacuna_app.sqlite', # default file
-            #'SQLite Databases (*.sqlite)|All Files (*.*)',
             'SQLite Databases (*.sqlite)|*.sqlite|All Files (*.*)|*.*',
             wxFD_OPEN|wxFD_FILE_MUST_EXIST
         );
