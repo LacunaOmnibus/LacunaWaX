@@ -289,7 +289,7 @@ package LacunaWaX::Dialog::Mail {
             wxDefaultPosition, 
             Wx::Size->new(200, $self->addy_height)
         );
-        $v->SetToolTip("Optional - choose the 'Custom' checkbox and type a subject here; all mails with that exact subject will be deleted regardless of tag.  Setting the Custom checkbox will override all other checkboxes.");
+        $v->SetToolTip("Optional - type a subject here; all mails with that exact subject will be deleted regardless of tag.");
         return $v;
     }#}}}
     sub _build_inbox {#{{{
