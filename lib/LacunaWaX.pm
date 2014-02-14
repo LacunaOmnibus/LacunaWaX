@@ -25,6 +25,7 @@ package LacunaWaX {
     use LacunaWaX::Servers;
 
     use MooseX::NonMoose;
+    $Wx::App::VERSION = "1.0";
     extends 'Wx::App';
 
     our $VERSION = '2.0';
@@ -486,6 +487,7 @@ Returns the number of halls needed to get from one level to another.
 
         ### Sanity-check old database.
         unless( $self->database_checks_out($old_dbh, $imports) ) {
+            $old_dbh->disconnect();
             die "$db_file is not a LacunaWaX database.\n";
         }
 

@@ -126,12 +126,21 @@ package LacunaWaX::MainFrame::MenuBar::File {
             'Select a database file',
             '', # default dir
             'lacuna_app.sqlite', # default file
-            '*.sqlite',
+            #'SQLite Databases (*.sqlite)|All Files (*.*)',
+            'SQLite Databases (*.sqlite)|*.sqlite|All Files (*.*)|*.*',
             wxFD_OPEN|wxFD_FILE_MUST_EXIST
         );
         $file_browser->ShowModal();
 
         my $db_file = join '/', ($file_browser->GetDirectory, $file_browser->GetFilename);
+        unless( $file_browser->GetFilename ) {
+            wxTheApp->popmsg("No file selected.");
+            return;
+        }
+        unless( -e $db_file ) {
+            wxTheApp->popmsg("$db_file: No such file or directory.");
+            return;
+        }
 
         my $rv = try {
             wxTheApp->import_old_database($db_file)
