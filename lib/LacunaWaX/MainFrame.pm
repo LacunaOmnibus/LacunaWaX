@@ -65,8 +65,8 @@ package LacunaWaX::MainFrame {
 
         ### The intro panel could really live without the status bar.  If you 
         ### wanted to skip it there for a cleaner look, this line could be 
-        ### removed.  The status bar would then be created on subsequent panels 
-        ### by its lazy builder.
+        ### removed.  The status bar would then be created on subsequent 
+        ### panels by its lazy builder.
         $self->_build_status_bar;
 
         $self->_set_events;

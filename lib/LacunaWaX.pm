@@ -109,6 +109,15 @@ package LacunaWaX {
         my $logger = $self->bb->resolve( service => '/Log/logger' );
         $logger->debug('Starting application');
 
+        unless( $self->main_frame->intro_panel->has_enabled_button ) {
+            ### Many people are not able to figure this out on their own; 
+            ### provide a hint so they'll stop asking me in-game.
+            $self->popmsg(
+                "Before you can do anything, you have to go to Edit... Preferences and enter your login info, or import preferences from a previously-installed version of LacunaWaX.",
+                "Set up Login Info"
+            );
+        }
+
         $self->_set_events;
         return $self;
     }

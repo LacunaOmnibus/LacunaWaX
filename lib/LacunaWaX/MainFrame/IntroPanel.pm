@@ -21,6 +21,12 @@ package LacunaWaX::MainFrame::IntroPanel {
 
     has 'logo' => (is => 'rw', isa => 'Wx::StaticBitmap', lazy_build => 1);
 
+    has 'has_enabled_button' => (
+        is      => 'rw', 
+        isa     => 'Bool',
+        default => 0,
+    );
+
     has 'buttons' => (
         is => 'rw', isa => 'HashRef[Wx::Button]', lazy_build => 1,
         documentation => q{ server_id => Wx::Button },
@@ -160,7 +166,12 @@ package LacunaWaX::MainFrame::IntroPanel {
             ) {
                 ### Disable the connect buttons until the user has entered their 
                 ### credentials in Preferences
-                unless( $prefs->username and $prefs->password ) { $b->Disable; }
+                if( $prefs->username and $prefs->password ) {
+                    $self->has_enabled_button(1);
+                }
+                else {
+                    $b->Disable; 
+                }
             }
             else {
                 $b->Disable;
@@ -173,6 +184,7 @@ package LacunaWaX::MainFrame::IntroPanel {
         ### connect to the first server listed (which should be US1).
         my $first_id = (sort{$a<=>$b}(keys %{$self->buttons}))[0];
         $self->buttons->{$first_id}->SetFocus;
+
         return 1;
     }#}}}
     sub hide {#{{{
