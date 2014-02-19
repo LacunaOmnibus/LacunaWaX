@@ -183,7 +183,6 @@ package LacunaWaX::Model::Schema::SSAlerts {#{{{
         hostile_spies   => {data_type => 'integer',                         is_nullable => 0, default_value => '0' },
         min_res         => {data_type => 'bigint',                          is_nullable => 0, default_value => '0' },
         own_star_seized => {data_type => 'integer',                         is_nullable => 0, default_value => '0' },
-        FLURBLE         => {data_type => 'varchar', size => 32,             is_nullable => 1,  },
     );
     __PACKAGE__->set_primary_key( 'id' ); 
     __PACKAGE__->add_unique_constraint( 'one_alert_per_station' => [qw(server_id station_id)] ); 
