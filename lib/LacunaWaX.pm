@@ -468,17 +468,11 @@ Returns the number of halls needed to get from one level to another.
         ###
         ### The previous and current databases may not be in exactly the same 
         ### format.  That's OK as long as the previous database contains the 
-        ### tables and column listed in $imports, below.
-        ###
-        ### Dies with message on failure, so wrap in try/catch.
+        ### tables and column listed in $sanity.
 
         ### These tables and columns must exist in any database we attempt to 
         ### import.  They've existed in LW long enough that any database that 
         ### does not have these is simply not an LW database.
-        ###
-        ### You should likely NEVER mess with this.
-        ###
-        ### See $imports, below, if you've added new schema members.
         my $sanity = {
             ArchMinPrefs => [qw(
                 server_id body_id glyph_home_id pusher_ship_name auto_search_for 
@@ -491,29 +485,13 @@ Returns the number of halls needed to get from one level to another.
             )],
         };
 
-        ### These are the tables and columns we're going to try to import.  
-        ### Some have not existed for the entire lifespan of LW, so they may 
-        ### not exist in the user's old database.  That's OK - a missing table 
-        ### or even a missing column will be handled properly.
+        ### These are the tables we're going to try to import.  If any of them  
+        ### don't exist in the old database, they'll just be skipped.
         ###
-        ### If you add new schema members, be sure to include them here.
-        my $imports = {
-            ArchMinPrefs => [qw(
-                server_id body_id glyph_home_id reserve_glyphs pusher_ship_name auto_search_for 
-            )],
-            BodyTypes => [qw(
-                body_id server_id type_general 
-            )],
-            SSAlerts => [qw(
-                server_id station_id enabled hostile_ships hostile_spies min_res own_star_seized FLURBLE
-            )],
-            ServerAccounts => [qw(
-                server_id username password default_for_server 
-            )],
-            SitterPasswords => [qw(
-                server_id player_id player_name sitter 
-            )],
-        };
+        ### The old database may contain these tables sans some columns that 
+        ### have been added since. Those will be dealt with; only the existing 
+        ### columns will be imported.
+        my $imports = [qw( ArchMinPrefs BodyTypes SSAlerts ServerAccounts SitterPasswords )];
 
         ### Connect to the old database.
         my $options = {sqlite_unicode => 1, quote_names => 1};
@@ -529,135 +507,41 @@ Returns the number of halls needed to get from one level to another.
         my $schema  = $self->bb->resolve( service => '/Database/schema' );
         my $new_dbh = $schema->storage->dbh;
 
-        ### Attempt to import the full tables
+        ### Import
         my @redo_tables = ();
-        foreach my $table_name(keys %{$imports}) {#{{{
-            my $cols        = $imports->{$table_name};
-            my $comma_cols  = join ', ', @{$cols};
+        foreach my $table_name( @{$imports} ) {#{{{
+            my $sel_sth = $old_dbh->prepare("SELECT * FROM $table_name");
+            $sel_sth->execute();
+
+            ### Pull one rec off $sel_sth so we can get its column names.
+            my $rec  = $sel_sth->fetchrow_hashref;
+            my @cols = keys %{$rec};
+            my @vals = ();
+            map{ push @vals, $rec->{$_} }@cols;
+
+            my $comma_cols  = join ', ', @cols;
             my @ques_arr    = ();
-            push @ques_arr, '?' for @$cols;
+            push @ques_arr, '?' for @cols;
             my $ques        = join ',', @ques_arr;
 
-### 
-### CHECK
-### Select *
-### derive the field names in *
-### use that to insert into the new table
-### DONE - STOP FUCKING AROUND
-###
-            try {
-                my $sel_sth = $old_dbh->prepare("SELECT $comma_cols FROM $table_name") or die "no such column";
-                my $ins_sth = $new_dbh->prepare("INSERT OR IGNORE INTO $table_name ($comma_cols) VALUES ($ques)");
-                $sel_sth->execute();
-                $new_dbh->begin_work;
-                while(my $rec = $sel_sth->fetchrow_arrayref) {
-                    $ins_sth->execute(@{$rec});
-                }
-                $new_dbh->commit;
+            ### Do that first record that we pulled off the $sel_sth before 
+            ### looping the rest of the way through it.
+            my $ins_stmt = "INSERT OR IGNORE INTO $table_name ($comma_cols) VALUES ($ques)";
+            my $ins_sth = $new_dbh->prepare( $ins_stmt ) or die "no prepare";
+
+            try { $ins_sth->execute(@vals) or die; }
+                catch { die "single exe failed"; };
+
+            $new_dbh->begin_work;
+            while( my $rec = $sel_sth->fetchrow_hashref ) {
+                my @vals = ();
+                map{ push @vals, $rec->{$_} }@cols;
+                try { $ins_sth->execute(@vals) or die; } 
+                    catch { die "loop exe failed"; };
             }
-            catch {
-                ### The user is importing from an old database.
-                ###
-                ### If the old database is missing a whole table, there's 
-                ### nothing to do.
-                ###
-                ### However, if the old database has a given table, but that 
-                ### table is missing one or more columns we're now expecting, 
-                ### that table has currently not been imported at all, and 
-                ### we'll need to fix that.
-                if( $_ =~ /no such column/i ) {
-                    push @redo_tables, $table_name;
-                }
-            };
+            $new_dbh->commit;
 
         }#}}}
-
-=pod
-        foreach my $table_name(keys %{$imports}) {#{{{
-            my $cols        = $imports->{$table_name};
-            my $comma_cols  = join ', ', @{$cols};
-            my @ques_arr    = ();
-            push @ques_arr, '?' for @$cols;
-            my $ques        = join ',', @ques_arr;
-
-            try {
-                my $sel_sth = $old_dbh->prepare("SELECT $comma_cols FROM $table_name") or die "no such column";
-                my $ins_sth = $new_dbh->prepare("INSERT OR IGNORE INTO $table_name ($comma_cols) VALUES ($ques)");
-                $sel_sth->execute();
-                $new_dbh->begin_work;
-                while(my $rec = $sel_sth->fetchrow_arrayref) {
-                    $ins_sth->execute(@{$rec});
-                }
-                $new_dbh->commit;
-            }
-            catch {
-                ### The user is importing from an old database.
-                ###
-                ### If the old database is missing a whole table, there's 
-                ### nothing to do.
-                ###
-                ### However, if the old database has a given table, but that 
-                ### table is missing one or more columns we're now expecting, 
-                ### that table has currently not been imported at all, and 
-                ### we'll need to fix that.
-                if( $_ =~ /no such column/i ) {
-                    push @redo_tables, $table_name;
-                }
-            };
-
-            foreach my $t(@redo_tables) {#{{{
-                ### Any of the user's old tables that are missing now-expected 
-                ### columns get imported one column at a time so we don't lose 
-                ### any of the user's previous preferences.
-                ###
-                ### THIS WILL ONLY WORK if every single table has a unique 
-                ### 'id' column (which they should have).
-                my $cols        = $imports->{$t};
-                my $comma_cols  = join ', ', @{$cols};
-
-                my @ques_arr    = ();
-                push @ques_arr, '?' for @$cols;
-                my $ques        = join ',', @ques_arr;
-
-                my @ohs_arr    = ();
-                push @ohs_arr, q{"0"} for @$cols;
-                my $ohs        = join ',', @ohs_arr;
-say "========== $t ==========";
-next unless $t eq 'SSAlerts'; 
-say "STILL HERE";
-
-                foreach my $col( @{ $imports->{$t} } )  {
-                    try {
-                        my $sel_stmt = "SELECT id, $col FROM $t";
-                        #my $ins_stmt = "INSERT INTO $t (id, $comma_cols) VALUES (?, $ques)";
-                        my $ins_stmt = "INSERT OR IGNORE INTO $t (id, $comma_cols) VALUES (?, $ques)";
-                        my $upd_stmt = "UPDATE $t SET $col = ? where id = ?";
-
-
-say $sel_stmt;
-say $ins_stmt;
-say $upd_stmt;
-say $ohs;
-say '--------------';
-
-                        my $sel_sth = $old_dbh->prepare($sel_stmt);
-                        my $ins_sth = $new_dbh->prepare($ins_stmt);
-                        my $upd_sth = $new_dbh->prepare($upd_stmt);
-                        $sel_sth->execute();
-                        while(my $rec = $sel_sth->fetchrow_hashref) {
-                            $new_dbh->begin_work;
-                            $ins_sth->execute( $rec->{'id'}, @ohs_arr );
-                            $upd_sth->execute( $rec->{$col}, $rec->{'id'} );
-                            $new_dbh->commit;
-                        }
-                    }
-                    catch {
-                        say "individual import problem - $_";
-                    };
-                }
-            }#}}}
-        }#}}}
-=cut
 
         return 1;
     }#}}}

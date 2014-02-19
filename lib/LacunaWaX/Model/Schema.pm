@@ -8,6 +8,11 @@ post_install_script.pl.
 So any changes made to this schema must also be made, by hand, to 
 post_install_script.pl.
 
+
+*** NOT NULL ***
+If you set a column to not nullable (other than the id), you MUST include a 
+default value, or you'll break the ability to import from old databases.
+
 =cut
 
 package LacunaWaX::Model::Schema::AppPrefsKeystore {#{{{
@@ -16,9 +21,9 @@ package LacunaWaX::Model::Schema::AppPrefsKeystore {#{{{
 
     __PACKAGE__->table('AppPrefsKeystore');
     __PACKAGE__->add_columns( 
-        id      => {data_type => 'integer', is_auto_increment => 1, is_nullable => 0, extra => {unsigned => 1} },
-        name    => {data_type => 'varchar', size => 64, is_nullable => 0},
-        value   => {data_type => 'varchar', size => 64, is_nullable => 1},
+        id      => {data_type => 'integer', is_auto_increment => 1, is_nullable => 0, extra => {unsigned => 1}  },
+        name    => {data_type => 'varchar', size => 64,             is_nullable => 0, default_value => "unset"  },
+        value   => {data_type => 'varchar', size => 64,             is_nullable => 1                            },
     );
     __PACKAGE__->set_primary_key( 'id' ); 
 
@@ -32,7 +37,7 @@ package LacunaWaX::Model::Schema::ArchMinPrefs {#{{{
         id                  => {data_type => 'integer', is_auto_increment => 1, is_nullable => 0, extra => {unsigned => 1} },
         server_id           => {data_type => 'integer',                         is_nullable => 0, extra => {unsigned => 1} },
         body_id             => {data_type => 'integer',                         is_nullable => 0, extra => {unsigned => 1} },
-        glyph_home_id       => {data_type => 'integer',                         is_nullable => 1, extra => {unsigned => 1} },
+        glyph_home_id       => {data_type => 'integer',                         is_nullable => 0, extra => {unsigned => 1} },
         reserve_glyphs      => {data_type => 'integer',                         is_nullable => 0, default_value => '0' },
         pusher_ship_name    => {data_type => 'varchar', size => 32,             is_nullable => 1 },
         auto_search_for     => {data_type => 'varchar', size => 32,             is_nullable => 1 },
@@ -57,7 +62,7 @@ package LacunaWaX::Model::Schema::BodyTypes {#{{{
     __PACKAGE__->add_columns( 
         id              => {data_type => 'integer', is_auto_increment => 1, is_nullable => 0, extra => {unsigned => 1}  },
         body_id         => {data_type => 'integer',                         is_nullable => 0, extra => {unsigned => 1}  },
-        server_id       => {data_type => 'integer',                         is_nullable => 1, extra => {unsigned => 1}  },
+        server_id       => {data_type => 'integer',                         is_nullable => 0, extra => {unsigned => 1}  },
         type_general    => {data_type => 'varchar', size => 16,             is_nullable => 1                            },
     );
     __PACKAGE__->set_primary_key( 'id' ); 
@@ -81,7 +86,7 @@ package LacunaWaX::Model::Schema::LotteryPrefs {#{{{
         id          => {data_type => 'integer', is_auto_increment => 1, is_nullable => 0, extra => {unsigned => 1} },
         server_id   => {data_type => 'integer',                         is_nullable => 0, extra => {unsigned => 1} },
         body_id     => {data_type => 'integer',                         is_nullable => 0, extra => {unsigned => 1} },
-        count       => {data_type => 'integer',                         is_nullable => 1 },
+        count       => {data_type => 'integer',                         is_nullable => 0, default_value => 1, },
     );
     __PACKAGE__->set_primary_key( 'id' ); 
     __PACKAGE__->add_unique_constraint( 'LotteryPrefs_body' => [qw(body_id server_id)] ); 
@@ -94,9 +99,7 @@ package LacunaWaX::Model::Schema::ScheduleAutovote {#{{{
     __PACKAGE__->add_columns( 
         id              => {data_type => 'integer', is_auto_increment => 1, is_nullable => 0, extra => {unsigned => 1} },
         server_id       => {data_type => 'integer',                         is_nullable => 0, extra => {unsigned => 1} },
-
-        ### 'none', 'owner', or 'all'
-        proposed_by    => {data_type => 'varchar', size => 16, is_nullable => 0, default_value => 'all'},
+        proposed_by    => {data_type => 'varchar', size => 16, is_nullable => 0, default_value => 'all'}, # 'none', 'owner', or 'all'
     );
     __PACKAGE__->set_primary_key( 'id' ); 
 
@@ -107,11 +110,11 @@ package LacunaWaX::Model::Schema::ServerAccounts {#{{{
 
     __PACKAGE__->table('ServerAccounts');
     __PACKAGE__->add_columns( 
-        id                  => {data_type => 'integer', is_auto_increment => 1, is_nullable => 0, extra => {unsigned => 1} },
-        server_id           => {data_type => 'integer', is_nullable => 0, extra => {unsigned => 1} },
-        username            => {data_type => 'varchar', size => 64, is_nullable => 1},
-        password            => {data_type => 'varchar', size => 64, is_nullable => 1},
-        default_for_server  => {data_type => 'integer', is_nullable => 1, extra => {unsigned => 1} },
+        id                  => {data_type => 'integer', is_auto_increment => 1, is_nullable => 0, extra => {unsigned => 1}          },
+        server_id           => {data_type => 'integer',                         is_nullable => 0, extra => {unsigned => 1}          },
+        username            => {data_type => 'varchar', size => 64,             is_nullable => 0, default_value => 'YOUR USERNAME', },
+        password            => {data_type => 'varchar', size => 64,             is_nullable => 0, default_value => 'YOUR PASSWORD', },
+        default_for_server  => {data_type => 'integer',                         is_nullable => 1, extra => {unsigned => 1}          },
     );
     __PACKAGE__->set_primary_key( 'id' ); 
     __PACKAGE__->has_one(
@@ -143,10 +146,10 @@ package LacunaWaX::Model::Schema::Servers {#{{{
 
     __PACKAGE__->table('Servers');
     __PACKAGE__->add_columns( 
-        id          => {data_type => 'integer', is_auto_increment => 1, is_nullable => 0, extra => {unsigned => 1} },
-        name        => {data_type => 'varchar', size => 32, is_nullable => 0 },
-        url         => {data_type => 'varchar', size => 64, is_nullable => 0 },
-        protocol    => {data_type => 'varchar', size =>  8, is_nullable => 1, default_value => 'http' },
+        id          => {data_type => 'integer', is_auto_increment => 1, is_nullable => 0, extra => {unsigned => 1}                  },
+        name        => {data_type => 'varchar', size => 32,             is_nullable => 0, default_value => 'US1'                    },
+        url         => {data_type => 'varchar', size => 64,             is_nullable => 0, default_value => 'us1.lacunaexpanse.com'  },
+        protocol    => {data_type => 'varchar', size =>  8,             is_nullable => 1, default_value => 'http'                   },
     );
     __PACKAGE__->set_primary_key( 'id' ); 
     __PACKAGE__->add_unique_constraint( 'unique_by_name' => [qw(name)] ); 
@@ -158,8 +161,8 @@ package LacunaWaX::Model::Schema::SitterPasswords {#{{{
     __PACKAGE__->table('SitterPasswords');
     __PACKAGE__->add_columns( 
         id          => {data_type => 'integer', is_auto_increment => 1, is_nullable => 0, extra => {unsigned => 1} },
-        server_id   => {data_type => 'integer',                         is_nullable => 1, extra => {unsigned => 1} },
-        player_id   => {data_type => 'integer',                         is_nullable => 1, extra => {unsigned => 1} },
+        server_id   => {data_type => 'integer',                         is_nullable => 0, extra => {unsigned => 1} },
+        player_id   => {data_type => 'integer',                         is_nullable => 0, extra => {unsigned => 1} },
         player_name => {data_type => 'varchar', size => 64,             is_nullable => 1 },
         sitter      => {data_type => 'varchar', size => 64,             is_nullable => 1 },
     );
@@ -180,7 +183,7 @@ package LacunaWaX::Model::Schema::SSAlerts {#{{{
         hostile_spies   => {data_type => 'integer',                         is_nullable => 0, default_value => '0' },
         min_res         => {data_type => 'bigint',                          is_nullable => 0, default_value => '0' },
         own_star_seized => {data_type => 'integer',                         is_nullable => 0, default_value => '0' },
-        FLURBLE         => {data_type => 'varchar', size => 32,             is_nullable => 0,  },
+        FLURBLE         => {data_type => 'varchar', size => 32,             is_nullable => 1,  },
     );
     __PACKAGE__->set_primary_key( 'id' ); 
     __PACKAGE__->add_unique_constraint( 'one_alert_per_station' => [qw(server_id station_id)] ); 

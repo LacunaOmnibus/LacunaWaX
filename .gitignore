@@ -1,6 +1,7 @@
 .svn/
 *.msi
 *.sqlite
+*.sqlite-journal
 *.swo
 *.swp
 perlapp_projects/linux_64/LacunaWaX/
