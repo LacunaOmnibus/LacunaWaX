@@ -585,27 +585,25 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane::PropRow {
             alarm 0;
             my $msg = (ref $_) ? $_->text : $_;
 
-            given($msg) {
-                when( m/you have already voted/i ) {
-                    $self->dialog_status_say("$player has already voted on this prop.");
-                    $self->ancestor->already_voted->{$player} = $sitter_rec;
-                }
-                when( m/this proposition has already passed/i ) {
-                    return { passed => 1 };
-                }
-                when( m/(slow down|internal error)/i ) {
-                    $self->dialog_status_say("*** $player just hit the 60 RPC limit! ***");
-                }
-                when( m/stall/i ) {
-                    $self->dialog_status_say("Voting stalled.");
-                }
-                when( m/has already made the maximum number of requests/i ) {
-                    $self->dialog_status_say("*** $player has used all 10,000 RPCs for the day! ***");
-                    $self->ancestor->over_rpc->{$player}++;
-                }
-                default {
-                    $self->dialog_status_say("*** Attempt to vote for $player failed for an unexpected reason:\n\t$msg ***");
-                }
+            if( $msg =~ m/you have already voted/i ) {
+                $self->dialog_status_say("$player has already voted on this prop.");
+                $self->ancestor->already_voted->{$player} = $sitter_rec;
+            }
+            elsif( $msg =~ m/this proposition has already passed/i ) {
+                return { passed => 1 };
+            }
+            elsif( $msg =~ m/(slow down|internal error)/i ) {
+                $self->dialog_status_say("*** $player just hit the 60 RPC limit! ***");
+            }
+            elsif( $msg =~ m/stall/i ) {
+                $self->dialog_status_say("Voting stalled.");
+            }
+            elsif( $msg =~ m/has already made the maximum number of requests/i ) {
+                $self->dialog_status_say("*** $player has used all 10,000 RPCs for the day! ***");
+                $self->ancestor->over_rpc->{$player}++;
+            }
+            else {
+                $self->dialog_status_say("*** Attempt to vote for $player failed for an unexpected reason:\n\t$msg ***");
             }
 
             return;
@@ -790,7 +788,6 @@ sitters.
             $self->dialog_status_say("Voting on prop '" . $row->prop->{'name'} . "'");
             $self->dialog_status_say_recsep();
             $row->btn_sitters_yes->Enable(0);  # Disable the button to keep the user from double-clicking.
-            $self->endthrob;
             $self->sitter_vote_on_prop($row);
         }
         if( $self->ancestor->chk_close_status->IsChecked ) {
