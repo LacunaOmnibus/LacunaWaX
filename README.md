@@ -6,11 +6,7 @@ Copyright 2012-2013 Jonathan D. Barton (tmtowtdi@gmail.com)
 
 STATUS
 ------
-<<<<<<< HEAD
-Installing BLARG FLURBLE and running the executable on Windows is reasonably straightforward and stable.
-=======
 Installing MASTERFOOBAR and running the executable on Windows is reasonably straightforward and stable.
->>>>>>> 634b43122da4d3c8d714fff3531e26ec07cfe2c7
 Running from source takes a bit of tweaking.  See the wiki for what information there is.
 
 CAUTION
