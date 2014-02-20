@@ -6,7 +6,7 @@ Copyright 2012-2013 Jonathan D. Barton (tmtowtdi@gmail.com)
 
 STATUS
 ------
-FOOBAR Installing and running the executable on Windows is reasonably straightforward and stable. BARFOO
+Installing and running the executable on Windows is reasonably straightforward and stable.
 Running from source takes a bit of tweaking.  See the wiki for what information there is.
 
 CAUTION
