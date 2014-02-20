@@ -509,8 +509,11 @@ Returns the number of halls needed to get from one level to another.
 
         ### Import
         my @redo_tables = ();
+        TABLE:
         foreach my $table_name( @{$imports} ) {#{{{
-            my $sel_sth = $old_dbh->prepare("SELECT * FROM $table_name");
+            my $sel_sth = try { $old_dbh->prepare("SELECT * FROM $table_name") or die; }
+                catch { return; }
+                or next TABLE;
             $sel_sth->execute();
 
             ### Pull one rec off $sel_sth so we can get its column names.
