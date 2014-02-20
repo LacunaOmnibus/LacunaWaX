@@ -1,4 +1,6 @@
 
+use Class::Load::PP;
+use Class::Load::XS;
 use HTML::TreeBuilder;
 
 use Games::Lacuna::Client::Buildings::Archaeology;
@@ -50,6 +52,7 @@ use Games::Lacuna::Client::Buildings::WasteExchanger;
 use Games::Lacuna::Client::Buildings::WasteRecycling;
 use Games::Lacuna::Client::Buildings::WaterStorage;
 
+use JSON::RPC::Common::Marshal::Text;
 use LacunaWaX::Model::Schema;
 use LacunaWaX::Model::LogsSchema;
 use LacunaWaX::Model::DBILogger;
