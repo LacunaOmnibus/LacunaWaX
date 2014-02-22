@@ -519,6 +519,7 @@ Returns the number of halls needed to get from one level to another.
             ### Pull one rec off $sel_sth so we can get its column names.
             my $rec  = $sel_sth->fetchrow_hashref;
             my @cols = keys %{$rec};
+            @cols or next TABLE;
             my @vals = ();
             map{ push @vals, $rec->{$_} }@cols;
 

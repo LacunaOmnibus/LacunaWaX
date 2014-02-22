@@ -417,7 +417,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::GlyphsPane {
 
         my $v = Wx::TextCtrl->new(
             $self->parent, -1, 
-            $self->prefs_rec->reserve_glyphs,
+            $self->prefs_rec->reserve_glyphs || 0,
             wxDefaultPosition, 
             Wx::Size->new(50,25)
         );
