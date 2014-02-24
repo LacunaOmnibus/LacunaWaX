@@ -116,7 +116,6 @@ package LacunaWaX::MainFrame::MenuBar::File {
         my $self  = shift;
 
         unless( wxYES == wxTheApp->popconf("This will import preferences from a previous install of LacunaWaX - is that what you want to do?", "Import") ) {
-            wxTheApp->popmsg("OK - bailing.");
             return;
         }
 
@@ -155,7 +154,7 @@ package LacunaWaX::MainFrame::MenuBar::File {
         ### imported previous prefs data that included the username/password, 
         ### enable the appropriate button(s).
         if( $self->intro_panel_exists ) {
-            my $schema          = $self->bb->resolve( service => '/Database/schema' );
+            my $schema = wxTheApp->main_schema;
             my $server_accounts = $schema->resultset('ServerAccounts')->search();
             while(my $sa = $server_accounts->next ) {
                 if( $sa->username and $sa->password ) {

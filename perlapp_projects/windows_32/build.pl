@@ -4,7 +4,7 @@
 
 Don't run this yet.  I've been customizing build\lib\, and running this will blow away and re-create that build directory with no lib/ in it.
 
-
+I kinda suspect that the perlapp file is somehow goofy, but I can't tell how.
 
 
 

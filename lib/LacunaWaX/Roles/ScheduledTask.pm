@@ -15,9 +15,9 @@ package LacunaWaX::Roles::ScheduledTask {
         },
     );
 
-    has 'bb' => (
+    has 'globals' => (
         is          => 'rw',
-        isa         => 'LacunaWaX::Model::Container',
+        isa         => 'LacunaWaX::Model::Globals',
         required    => 1,
     );
     has 'logger' => (
@@ -33,11 +33,11 @@ package LacunaWaX::Roles::ScheduledTask {
 
     sub _build_logger {#{{{
         my $self = shift;
-        return $self->bb->resolve( service => '/Log/logger' );
+        return $self->globals->logger;
     }#}}}
     sub _build_schema {#{{{
         my $self = shift;
-        return $self->bb->resolve( service => '/Database/schema' );
+        return $self->globals->main_schema;
     }#}}}
 
     sub game_connect {#{{{
@@ -48,7 +48,6 @@ package LacunaWaX::Roles::ScheduledTask {
         ### includes if they haven't got a PT account.
         my $client = try {
             LacunaWaX::Model::Client->new (
-                bb          => $self->bb,
                 server_id   => $server_id,
                 interactive => 0,
                 allow_sleep => 1,   # allow to sleep 60 seconds on RPC Limit error

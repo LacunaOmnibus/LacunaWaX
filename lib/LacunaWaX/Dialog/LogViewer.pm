@@ -319,7 +319,7 @@ package LacunaWaX::Dialog::LogViewer {
         my $cmp_label  = $self->rdo_component->GetString( $self->rdo_component->GetSelection );
         my $cmp_search = $self->component_values->{$cmp_label} || q{};
 
-        my $schema = $self->get_log_schema;
+        my $schema = $self->app->globals->db_log->schema;
         my $rs = $schema->resultset('Logs')->search(
             [
                 {component => $cmp_search},
