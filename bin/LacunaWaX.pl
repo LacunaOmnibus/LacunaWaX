@@ -3,6 +3,14 @@
 use v5.14;
 use strict;
 
+
+### Regular BreadBoard container has been excised.
+###
+### Next step is to remove the wxbb (I'll need an additional Globals module, 
+### WxGlobals maybe, to replace it.) 
+
+
+
 BEGIN {#{{{
 
     ### Step 2
