@@ -3,6 +3,7 @@ package LacunaWaX::Model::Globals::Database {
     use v5.14;
     use Moose;
 
+    use LacunaWaX::Model::LogsSchema;
     use LacunaWaX::Model::Schema;
 
     has 'db_file'     => (
@@ -27,7 +28,7 @@ package LacunaWaX::Model::Globals::Database {
 
     has 'schema'     => (
         is          => 'rw', 
-        isa         => 'LacunaWaX::Model::Schema',
+        isa         => 'Object',
         lazy_build  => 1,
     );
 
@@ -57,7 +58,13 @@ package LacunaWaX::Model::Globals::Database {
         sub _build_schema {#{{{
             my $self = shift;
 
-            my $schema = LacunaWaX::Model::Schema->connect( $self->dsn, $self->sql_options );
+            my $schema;
+            if( $self->db_file->stringify =~ /log/ ) {
+                $schema = LacunaWaX::Model::LogsSchema->connect( $self->dsn, $self->sql_options );
+            }
+            else {
+                $schema = LacunaWaX::Model::Schema->connect( $self->dsn, $self->sql_options );
+            }
             return $schema;
         }#}}}
 
@@ -68,4 +75,41 @@ package LacunaWaX::Model::Globals::Database {
 1;
 
 __END__
+
+=head1 NAME
+
+LacunaWaX::Model::Globals::Database - LacunaWaX Databases 
+
+=head1 SYNOPSIS
+
+ my $main = LacunaWaX::Model::Globals::Database->new(
+  db_file => 'lacuna_app.sqlite'
+ );
+
+ my $log = LacunaWaX::Model::Globals::Database->new(
+  db_file => 'lacuna_log.sqlite'
+ );
+
+ say "I'm connected to " . $main->dsn;
+
+ ### Use this as a regular DBI db handle
+ my $dbh = $main->connection;
+
+ ### DBIC schema
+ my $schema = $main->schema;
+
+=head1 DESCRIPTION
+
+LacunaWaX uses two database files; C<lacuna_app.sqlite> and 
+C<lacuna_log.sqlite>, each of which has its own DBIC schema.
+
+When instantiating a LacunaWaX::Model::Globals::Database object, the module 
+itself will decide whether you want the main or the logs schema, based upon 
+whether the name of the logfile you send contains the string "log" or not.
+
+If you go renaming database files, you can pass in your own schema if you 
+like.  But adding the string "log" to the main database filename, or removing 
+it from the log database filename, is silly.  Just leave it there.
+
+=cut
 

@@ -20,7 +20,6 @@ package LacunaWaX::Model::Globals {
 
     use LacunaWaX::Model::DBILogger;
     use LacunaWaX::Model::Globals::Database;
-    use LacunaWaX::Model::Globals::DatabaseLog;
 
     has 'root_dir' => (
         is          => 'rw', 
@@ -52,7 +51,7 @@ package LacunaWaX::Model::Globals {
 
     has 'db_log'     => (
         is          => 'rw', 
-        isa         => 'LacunaWaX::Model::Globals::DatabaseLog',
+        isa         => 'LacunaWaX::Model::Globals::Database',
         lazy_build  => 1,
         handles     => {
             log_schema => 'schema',
@@ -201,7 +200,7 @@ package LacunaWaX::Model::Globals {
     sub _build_db_log {#{{{
         my $self = shift;
 
-        my $db = LacunaWaX::Model::Globals::DatabaseLog->new(
+        my $db = LacunaWaX::Model::Globals::Database->new(
             db_file => $self->db_log_file,
         );
         return $db;
