@@ -133,9 +133,9 @@ package LacunaWaX {
 
         $self->SetAppName('LacunaWaX');
 
-        $self->SetTopWindow($self->main_frame->frame);
-        $self->main_frame->frame->SetIcons( $self->icon_bundle );
-        $self->main_frame->frame->Show(1);
+        $self->SetTopWindow($self->main_frame);
+        $self->main_frame->SetIcons( $self->icon_bundle );
+        $self->main_frame->Show(1);
 
         $self->logger->debug('Starting application');
 
@@ -192,7 +192,7 @@ package LacunaWaX {
         my $self = shift;
 
         my $args = {
-            app     => $self,
+            #app     => $self,
             title   => wxTheApp->GetAppName,
         };
 
@@ -226,7 +226,7 @@ package LacunaWaX {
     }#}}}
     sub _set_events {#{{{
         my $self = shift;
-        EVT_CLOSE( $self->main_frame->frame, sub{$self->OnClose(@_)} );
+        EVT_CLOSE( $self->main_frame, sub{$self->OnClose(@_)} );
         return;
     }#}}}
 
@@ -538,7 +538,7 @@ Returns the number of halls needed to get from one level to another.
         my $self    = shift;
         my $message = shift || 'Unknown error occurred';
         my $title   = shift || 'Error!';
-        Wx::MessageBox($message, $title, wxICON_EXCLAMATION, $self->main_frame->frame );
+        Wx::MessageBox($message, $title, wxICON_EXCLAMATION, $self->main_frame );
         return;
     }#}}}
     sub popmsg {#{{{
@@ -548,7 +548,7 @@ Returns the number of halls needed to get from one level to another.
         Wx::MessageBox($message,
                         $title,
                         wxOK | wxICON_INFORMATION,
-                        $self->main_frame->frame );
+                        $self->main_frame );
         return;
     }#}}}
     sub popconf {#{{{
@@ -595,7 +595,7 @@ Instead, you need something like this...
         my $resp = Wx::MessageBox($message,
                                     $title,
                                     wxYES_NO|wxYES_DEFAULT|wxICON_QUESTION|wxSTAY_ON_TOP,
-                                    $self->main_frame->frame );
+                                    $self->main_frame );
         return $resp;
     }#}}}
     sub secs_to_human {#{{{

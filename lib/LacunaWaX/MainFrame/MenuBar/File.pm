@@ -73,9 +73,12 @@ package LacunaWaX::MainFrame::MenuBar::File {
     }#}}}
     sub _set_events {#{{{
         my $self = shift;
-        EVT_MENU($self->parent,  $self->itm_exit->GetId,    sub{$self->OnQuit(@_)}      );
-        EVT_MENU($self->parent,  $self->itm_import->GetId,  sub{$self->OnImport(@_)}    );
-        EVT_MENU($self->parent,  $self->itm_export->GetId,  sub{$self->OnExport(@_)}    );
+        EVT_MENU( $self->parent,  $self->itm_exit->GetId,    sub{$self->OnQuit(@_)}      );
+        EVT_MENU( $self->parent,  $self->itm_import->GetId,  sub{$self->OnImport(@_)}    );
+        EVT_MENU( $self->parent,  $self->itm_export->GetId,  sub{$self->OnExport(@_)}    );
+        #EVT_MENU( wxTheApp->main_frame->frame,  $self->itm_exit->GetId,    sub{$self->OnQuit(@_)}      );
+        #EVT_MENU( wxTheApp->main_frame->frame,  $self->itm_import->GetId,  sub{$self->OnImport(@_)}    );
+        #EVT_MENU( wxTheApp->main_frame->frame,  $self->itm_export->GetId,  sub{$self->OnExport(@_)}    );
         return 1;
     }#}}}
 

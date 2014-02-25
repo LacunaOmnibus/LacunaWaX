@@ -58,40 +58,45 @@ package LacunaWaX::MainFrame::MenuBar {
         my $self = shift;
         return LacunaWaX::MainFrame::MenuBar::File->new(
             ancestor    => $self,
-            app         => $self->app,
+            app         => wxTheApp,
             parent      => $self->parent,   # MainFrame, not this Menu, is the parent.
+            #parent      => wxTheApp->main_frame,   # MainFrame, not this Menu, is the parent.
         );
     }#}}}
     sub _build_menu_file_connect {#{{{
         my $self = shift;
         return LacunaWaX::MainFrame::MenuBar::File::Connect->new(
             ancestor    => $self,
-            app         => $self->app,
+            app         => wxTheApp,
             parent      => $self->parent,   # MainFrame, not this Menu, is the parent.
+            #parent      => wxTheApp->main_frame,   # MainFrame, not this Menu, is the parent.
         );
     }#}}}
     sub _build_menu_edit {#{{{
         my $self = shift;
         return LacunaWaX::MainFrame::MenuBar::Edit->new(
             ancestor    => $self,
-            app         => $self->app,
+            app         => wxTheApp,
             parent      => $self->parent,   # MainFrame, not this Menu, is the parent.
+            #parent      => wxTheApp->main_frame,   # MainFrame, not this Menu, is the parent.
         );
     }#}}}
     sub _build_menu_help {#{{{
         my $self = shift;
         return LacunaWaX::MainFrame::MenuBar::Help->new(
             ancestor    => $self,
-            app         => $self->app,
+            app         => wxTheApp,
             parent      => $self->parent,   # MainFrame, not this Menu, is the parent.
+            #parent      => wxTheApp->main_frame,   # MainFrame, not this Menu, is the parent.
         );
     }#}}}
     sub _build_menu_tools {#{{{
         my $self = shift;
         return LacunaWaX::MainFrame::MenuBar::Tools->new(
             ancestor    => $self,
-            app         => $self->app,
+            app         => wxTheApp,
             parent      => $self->parent,   # MainFrame, not this Menu, is the parent.
+            #parent      => wxTheApp->main_frame,   # MainFrame, not this Menu, is the parent.
             show_test   => $self->show_test,
         );
     }#}}}

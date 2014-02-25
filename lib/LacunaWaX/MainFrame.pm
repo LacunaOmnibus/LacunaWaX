@@ -7,7 +7,9 @@ package LacunaWaX::MainFrame {
     use Try::Tiny;
     use Wx qw(:everything);
     use Wx::Event qw(EVT_CLOSE EVT_SET_FOCUS EVT_KILL_FOCUS EVT_SIZE);
-    with 'LacunaWaX::Roles::GuiElement';
+
+    use MooseX::NonMoose::InsideOut;
+    extends 'Wx::Frame';
 
     use LacunaWaX::Dialog::Status;
     use LacunaWaX::MainFrame::IntroPanel;
@@ -18,16 +20,20 @@ package LacunaWaX::MainFrame {
 
     has 'position'  => (is => 'rw', isa => 'Maybe[Wx::Point]',
         documentation => q{
-            Optional - if sent, it will be the point of the upper-left corner of the app.
-            If no position is passed in, the app will be displayed centered on the screen.
+            Optional - if sent, it will be the point of the upper-left corner of the ap.
+            If no position is passed in, the ap will be displayed centered on the screen.
         }
     );
 
     has 'style'     => (is => 'rw', isa => 'Int',       lazy_build => 1);
-    has 'frame'     => (is => 'rw', isa => 'Wx::Frame', lazy_build => 1);
     has 'title'     => (is => 'rw', isa => 'Str',       lazy_build => 1);
     has 'size'      => (is => 'rw', isa => 'Wx::Size',  lazy_build => 1);
     has 'icon'      => (is => 'rw', isa => 'Wx::Icon',  lazy_build => 1);
+
+    ### If you change these from 800 and 900, see FOREIGNBUILDARGS, where the 
+    ### values are hardcoded again.
+    has 'default_width'     => (is => 'ro', isa => 'Int', default => 800);
+    has 'default_height'    => (is => 'ro', isa => 'Int', default => 900);
 
     has 'status_bar'    => (is => 'rw', isa => 'LacunaWaX::MainFrame::StatusBar',   lazy_build => 1 );
     has 'menu_bar'      => (is => 'rw', isa => 'LacunaWaX::MainFrame::MenuBar',     lazy_build => 1 );
@@ -55,13 +61,28 @@ package LacunaWaX::MainFrame {
     has 'intro_panel_sizer' => (is => 'rw', isa => 'Wx::Sizer', lazy_build => 1 );
     has 'splitter_sizer'    => (is => 'rw', isa => 'Wx::Sizer', lazy_build => 1 );
 
-    sub BUILD {
-        my($self, @params) = @_;
+    sub FOREIGNBUILDARGS {## no critic qw(RequireArgUnpacking) {{{
+        my $self = shift;
+        my $args = $_[0]; # hashref
 
-        $self->frame->Show(0);
-        $self->frame->SetMenuBar($self->menu_bar);
+        my $pos = $args->{'position'} // wxDefaultPosition;
+        my $size = get_size_from_prefs();
+
+        return (
+            undef, -1, 
+            $args->{'title'},           # the title
+            $pos,
+            $size,
+            wxCAPTION|wxCLOSE_BOX|wxMINIMIZE_BOX|wxMAXIMIZE_BOX|wxSYSTEM_MENU|wxRESIZE_BORDER|wxCLIP_CHILDREN,
+        );
+    }#}}}
+    sub BUILD {#{{{
+        my $self = shift;
+
+        $self->Show(0);
+        $self->SetMenuBar($self->menu_bar);
         $self->intro_panel_sizer->Add( $self->intro_panel->main_panel, 1, wxEXPAND );
-        $self->frame->SetSizer($self->intro_panel_sizer);
+        $self->SetSizer($self->intro_panel_sizer);
 
         ### The intro panel could really live without the status bar.  If you 
         ### wanted to skip it there for a cleaner look, this line could be 
@@ -70,28 +91,15 @@ package LacunaWaX::MainFrame {
         $self->_build_status_bar;
 
         $self->_set_events;
-        $self->frame->Show(1);
+        $self->Show(1);
         return $self;
-    };
-    sub _build_frame {#{{{
-        my $self = shift;
-        my $y = Wx::Frame->new(
-            undef, -1, 
-            $self->title, 
-            $self->position || wxDefaultPosition, 
-            $self->size,
-            $self->style
-        );
-        unless( $self->position ) {
-            $y->Centre();
-        }
-        return $y;
-    }#}}}
+    };#}}}
+
     sub _build_icon {#{{{
         my $self = shift;
 
         my $icon = Wx::Icon->new(
-            join q{/}, $self->app->dir_assets, 'Futurama', '128', 'frai_128.png',
+            join q{/}, wxTheApp->dir_assets, 'Futurama', '128', 'frai_128.png',
             wxBITMAP_TYPE_ANY,
         );
 
@@ -105,17 +113,17 @@ package LacunaWaX::MainFrame {
     sub _build_intro_panel {#{{{
         my $self = shift;
         return LacunaWaX::MainFrame::IntroPanel->new(
-            app         => $self->app,
+            app         => wxTheApp,
             ancestor    => $self,
-            parent      => $self->frame,
+            parent      => $self,
         );
     }#}}}
     sub _build_menu_bar {#{{{
         my $self = shift;
         my $mb = LacunaWaX::MainFrame::MenuBar->new(
-            app         => $self->app,
+            app         => wxTheApp,
             ancestor    => $self,
-            parent      => $self->frame
+            parent      => $self,
         );
         return $mb;
     }#}}}
@@ -152,7 +160,7 @@ package LacunaWaX::MainFrame {
         ### Regardless of which method of generating $s you used, the 
         ### following all produce the same output.
         ### But only starting with wxDefaultSize has any effect on the actual 
-        ### starting size of the app.
+        ### starting size of the ap.
         #say ref $s;
         #say $s->width;
         #say $s->height;
@@ -163,8 +171,8 @@ package LacunaWaX::MainFrame {
     sub _build_splitter {#{{{
         my $self = shift;
         my $y = LacunaWaX::MainSplitterWindow->new(
-            app         => $self->app, 
-            parent      => $self->frame,
+            app         => wxTheApp,
+            parent      => $self,
             ancestor    => $self,
         );
         return $y;
@@ -177,9 +185,9 @@ package LacunaWaX::MainFrame {
     sub _build_status_bar {#{{{
         my $self = shift;
         my $sb = LacunaWaX::MainFrame::StatusBar->new(
-            app         => $self->app, 
+            app         => wxTheApp,
             ancestor    => $self,
-            parent      => $self->frame
+            parent      => $self,
         );
         return $sb;
     }#}}}
@@ -193,7 +201,7 @@ package LacunaWaX::MainFrame {
     }#}}}
     sub _set_events {#{{{
         my $self = shift;
-        EVT_CLOSE($self->frame, sub{$self->OnClose(@_)});
+        EVT_CLOSE($self, sub{$self->OnClose(@_)});
         return;
     }#}}}
 
@@ -206,6 +214,30 @@ package LacunaWaX::MainFrame {
         $self->splitter->splitter_window->Destroy();
         return;
     };#}}}
+
+
+    ### Subroutine, not a method!
+    sub get_size_from_prefs {#{{{
+
+        ### Called from FOREIGNBUILDARGS as a sub, so we don't yet have any 
+        ### access to $self.
+
+        my $schema = wxTheApp->main_schema;
+
+        my($w,$h) = (800, 900);
+        if( my $db_w = $schema->resultset('AppPrefsKeystore')->find({ name => 'MainWindowW' }) ) {
+            $w = $db_w->value if( $db_w->value > 0);
+        }
+        if( my $db_h = $schema->resultset('AppPrefsKeystore')->find({ name => 'MainWindowH' }) ) {
+            $h = $db_h->value if( $db_h->value > 0);
+        }
+
+        my $size = wxDefaultSize;
+        $size->SetWidth($w);
+        $size->SetHeight($h);
+        return $size;
+    }#}}}
+
 
     sub OnClose {#{{{
         my $self    = shift;
@@ -236,19 +268,20 @@ package LacunaWaX::MainFrame {
             $self->clear_splitter;
         }
 
-        my $schema = $self->get_main_schema;
+        my $schema = wxTheApp->main_schema;
         if( my $server = $schema->resultset('Servers')->find({id => $server_id}) ) {
-            $self->set_connected_server( $server );
+            wxTheApp->server( $server );
 
-            $self->set_caption("Connecting...");
-            $self->throb();
+            #$self->set_caption("Connecting...");
+            wxTheApp->caption("Connecting...");
+            wxTheApp->throb();
 
-            unless($self->game_connect) {
+            unless( wxTheApp->game_connect ) {
                 ### Probably bad creds filled out in Prefs frame.  Undef 
                 ### set_connected_server so we don't get told we're "Already 
                 ### Connected" on our next attempt.
                 $self->set_connected_server(undef);
-                $self->endthrob();
+                wxTheApp->endthrob();
                 $self->set_caption("Connection Failed!  Correct your login credentials in Edit... Preferences.");
                 return;
             }
@@ -261,13 +294,13 @@ package LacunaWaX::MainFrame {
             $self->menu_bar->show_connected();
 
             $self->splitter_sizer->Add( $self->splitter->splitter_window, 1, wxEXPAND );
-            $self->frame->Layout();
+            $self->Layout();
 
-            $self->endthrob();
-            $self->set_caption("Connected to " . $server->name . " as " . $self->connected_account->username);
+            wxTheApp->endthrob();
+            wxTheApp->caption("Connected to " . $server->name . " as " . wxTheApp->account->username);
         }
         else {
-            Wx::MessageBox("Invalid Server!", "Whoops", wxICON_EXCLAMATION, $self->frame);
+            Wx::MessageBox("Invalid Server!", "Whoops", wxICON_EXCLAMATION, $self);
         }
 
         return;

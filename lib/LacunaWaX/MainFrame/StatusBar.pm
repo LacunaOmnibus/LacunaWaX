@@ -80,7 +80,8 @@ package LacunaWaX::MainFrame::StatusBar {
 
         if( $self->has_main_frame ) {
             my $mf = $self->get_main_frame;
-            my $current_size = $mf->frame->GetSize;
+            #my $current_size = $mf->frame->GetSize;
+            my $current_size = $mf->GetSize;
             if( $current_size->width != $self->old_w or $current_size->height != $self->old_h ) {
                 $self->bar_reset;    # otherwise the throbber gauge gets all screwy
                 $self->old_w( $current_size->width );
