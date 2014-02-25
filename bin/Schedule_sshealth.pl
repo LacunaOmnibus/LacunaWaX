@@ -29,9 +29,10 @@ my $bb = LacunaWaX::Model::Container->new(
     db_log_file     => $db_log_file,
     log_time_zone   => $dt,
 );
+my $globals = LacunaWaX::Model::Globals->new( root_dir => $root_dir );
 
 my $scheduler = LacunaWaX::Schedule->new( 
-    bb       => $bb,
+    globals     => $globals,
     schedule => 'ss_health',
 );
 

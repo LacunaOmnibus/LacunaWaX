@@ -307,7 +307,7 @@ test_sitter_gui(), is unacceptable.
 =cut
 
         my $uri     = $self->get_connected_server->protocol . '://' . $self->get_connected_server->url;
-        my $api_key = $self->bb->resolve( service => '/Globals/api_key' );
+        my $api_key = wxTheApp->globals->api_key;
 
         my $client = Games::Lacuna::Client->new(
             name        => $name,

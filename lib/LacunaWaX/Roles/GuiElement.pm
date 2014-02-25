@@ -152,13 +152,14 @@ package LacunaWaX::Roles::GuiElement {
     use Try::Tiny;
     use Wx qw(:everything);
 
+    ### This is braindead, and was added before I understood that 'wxTheApp' 
+    ### existed.  This all needs to be carefully excised.
     has 'app' => (
         is          => 'rw',
         isa         => 'LacunaWaX',
         required    => 1,
         weak_ref    => 1,
         handles => {
-            app_name                => sub{ return shift->bb->resolve(service => '/Strings/app_name') },
             bb                      => 'bb',
             cartesian_distance      => 'cartesian_distance',
             connected_account       => 'account',
@@ -170,10 +171,8 @@ package LacunaWaX::Roles::GuiElement {
             get_font                => sub{ return shift->wxbb->resolve(service => '/Fonts' . shift) },
             get_image               => sub{ return shift->wxbb->resolve(service => '/Assets/images' . shift) },
             get_left_pane           => 'left_pane',
-            get_log_schema          => sub{ return shift->bb->resolve(service => '/DatabaseLog/schema') },
-            get_logger              => sub{ shift->bb->resolve( service => '/Log/logger' ) },
             get_right_pane          => 'right_pane',
-            get_main_schema         => sub{ return shift->bb->resolve(service => '/Database/schema') },
+            get_main_schema         => sub{ return shift->app->main_schema },
             get_main_frame          => 'main_frame',
             get_splitter            => 'splitter',
             halls_to_level          => 'halls_to_level',

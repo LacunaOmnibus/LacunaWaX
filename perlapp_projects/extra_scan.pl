@@ -1,7 +1,10 @@
 
-use Class::Load::PP;
-use Class::Load::XS;
-use HTML::TreeBuilder;
+### Including a module in here forces PerlApp to include it, but does not 
+### force your code to load it!
+###
+### So in cases where you need to pre-load something because 
+### Module::Implementation cannot find it, load it in your code; don't just 
+### put it here.
 
 use Games::Lacuna::Client::Buildings::Archaeology;
 use Games::Lacuna::Client::Buildings::ArtMuseum;
@@ -52,9 +55,11 @@ use Games::Lacuna::Client::Buildings::WasteExchanger;
 use Games::Lacuna::Client::Buildings::WasteRecycling;
 use Games::Lacuna::Client::Buildings::WaterStorage;
 
-use JSON::RPC::Common::Marshal::Text;
-use LacunaWaX::Model::Schema;
-use LacunaWaX::Model::LogsSchema;
-use LacunaWaX::Model::DBILogger;
-use Wx::Perl::SplashFast;
+use HTML::TreeBuilder;
+#use JSON::RPC::Common::Marshal::Text;
+
+#use LacunaWaX::Model::Schema;
+#use LacunaWaX::Model::LogsSchema;
+#use LacunaWaX::Model::DBILogger;
+#use LacunaWaX::Roles::GuiElement;
 

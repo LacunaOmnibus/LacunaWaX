@@ -91,7 +91,7 @@ package LacunaWaX::MainFrame {
         my $self = shift;
 
         my $icon = Wx::Icon->new(
-            join q{/}, $self->bb->resolve(service => '/Directory/assets'), 'Futurama', '128', 'frai_128.png',
+            join q{/}, $self->app->dir_assets, 'Futurama', '128', 'frai_128.png',
             wxBITMAP_TYPE_ANY,
         );
 
@@ -189,7 +189,7 @@ package LacunaWaX::MainFrame {
     }#}}}
     sub _build_title {#{{{
         my $self = shift;
-        return $self->bb->resolve(service => '/Strings/app_name')
+        return wxTheApp->GetAppName();
     }#}}}
     sub _set_events {#{{{
         my $self = shift;

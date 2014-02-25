@@ -18,7 +18,8 @@ package LacunaWaX {
     use LacunaWaX::Preload::Cava;
     use LacunaWaX::MainFrame;
     use LacunaWaX::MainSplitterWindow;
-    use LacunaWaX::Model::Client;
+    use LacunaWaX::Model::Client;   
+    use LacunaWaX::Model::Globals;
     use LacunaWaX::Model::Container;
     use LacunaWaX::Model::WxContainer;
     use LacunaWaX::Schedule;
@@ -36,6 +37,17 @@ package LacunaWaX {
     has 'db_file'           => (is => 'rw', isa => 'Str',                               lazy_build => 1);
     has 'db_log_file'       => (is => 'rw', isa => 'Str',                               lazy_build => 1);
     has 'icon_bundle'       => (is => 'rw', isa => 'Wx::IconBundle',                    lazy_build => 1);
+
+    has 'globals' => (
+        is          => 'rw', 
+        isa         => 'LacunaWaX::Model::Globals',
+        lazy_build  => 1,
+        handles     => {
+            logger          => 'logger',
+            log_schema      => 'log_schema',
+            main_schema     => 'main_schema',
+        }
+    );
 
     ### X and Y of the current screen resolution
     has 'display_x'     => (is => 'rw', isa => 'Int', lazy_build => 1);
@@ -103,11 +115,13 @@ package LacunaWaX {
     sub BUILD {
         my $self = shift;
 
+        $self->SetAppName('LacunaWaX');
+
         $self->SetTopWindow($self->main_frame->frame);
         $self->main_frame->frame->SetIcons( $self->icon_bundle );
         $self->main_frame->frame->Show(1);
-        my $logger = $self->bb->resolve( service => '/Log/logger' );
-        $logger->debug('Starting application');
+
+        $self->logger->debug('Starting application');
 
         unless( $self->main_frame->intro_panel->has_enabled_button ) {
             ### Many people are not able to figure this out on their own; 
@@ -121,6 +135,10 @@ package LacunaWaX {
         $self->_set_events;
         return $self;
     }
+    sub _build_globals {#{{{
+        my $self = shift;
+        return LacunaWaX::Model::Globals->new( root_dir => $self->root_dir );
+    }#}}}
     sub _build_bb {#{{{
         my $self = shift;
         return LacunaWaX::Model::Container->new(
@@ -152,7 +170,7 @@ package LacunaWaX {
         my $self = shift;
 
         my $bundle = Wx::IconBundle->new();
-        my @images = map{ join q{/}, ($self->bb->resolve(service => q{/Directory/ico}), qq{frai_$_.png}) }qw(16 24 32 48 64 72 128 256);
+        my @images = map{ join q{/}, ($self->globals->dir_ico, qq{frai_$_.png}) }qw(16 24 32 48 64 72 128 256);
         foreach my $i(@images) {
             $bundle->AddIcon( Wx::Icon->new($i, wxBITMAP_TYPE_ANY) );
         }
@@ -163,13 +181,13 @@ package LacunaWaX {
         my $self = shift;
 
         my $args = {
-            app         => $self,
-            title       => $self->bb->resolve(service => '/Strings/app_name'),
+            app     => $self,
+            title   => wxTheApp->GetAppName,
         };
 
         ### Coords to place frame if we saved them from a previous run.
         ### If not, we'll start the main_frame in the center of the display.
-        my $schema = $self->bb->resolve( service => '/Database/schema' );
+        my $schema = wxTheApp->main_schema;
         if( my $db_x = $schema->resultset('AppPrefsKeystore')->find({ name => 'MainWindowX' }) ) {
             if( my $db_y = $schema->resultset('AppPrefsKeystore')->find({ name => 'MainWindowY' }) ) {
                 my( $x, $y ) = ($db_x->value, $db_y->value );
@@ -193,8 +211,7 @@ package LacunaWaX {
     }#}}}
     sub _build_servers {#{{{
         my $self        = shift;
-        my $schema      = $self->bb->resolve( service => '/Database/schema' );
-        return LacunaWaX::Servers->new( schema => $schema );
+        return LacunaWaX::Servers->new( schema => wxTheApp->main_schema );
     }#}}}
     sub _build_wxbb {#{{{
         my $self = shift;
@@ -400,13 +417,12 @@ Returns true/false on success/fail.
 
 =cut
 
-        my $logger = $self->bb->resolve( service => '/Log/logger' );
-        $logger->component('LacunaWaX');
-        $logger->debug("Attempting to create client connection");
+        $self->logger->component('LacunaWaX');
+        $self->logger->debug("Attempting to create client connection");
 
-        my $schema = $self->bb->resolve( service => '/Database/schema' );
+        my $schema = wxTheApp->main_schema;
         unless( $self->server ) {
-            $logger->debug("No server set up yet; cannot connect.");
+            $self->logger->debug("No server set up yet; cannot connect.");
             return;
         }
         if( 
@@ -415,13 +431,12 @@ Returns true/false on success/fail.
                 default_for_server => 1
             })->single
         ) {
-            $logger->debug("Server is set up; attempting to connect.");
+            $self->logger->debug("Server is set up; attempting to connect.");
             $self->Yield;
             $self->account( $server_account );
 
             my $game_client = LacunaWaX::Model::Client->new (
                     app         => $self,
-                    bb          => $self->bb,
                     wxbb        => $self->wxbb,
                     server_id   => $self->server->id,
                     rpc_sleep   => 0,
@@ -504,7 +519,7 @@ Returns the number of halls needed to get from one level to another.
         }
 
         ### Get DBI connection to the new (current) database.
-        my $schema  = $self->bb->resolve( service => '/Database/schema' );
+        my $schema = wxTheApp->main_schema;
         my $new_dbh = $schema->storage->dbh;
 
         ### Import
@@ -708,9 +723,8 @@ Returns the triangle sum of a given int.
     sub OnClose {#{{{
         my($self, $frame, $event) = @_;
 
-        my $schema = $self->bb->resolve( service => '/Database/schema' );
-        my $logger = $self->bb->resolve( service => '/Log/logger' );
-        $logger->component('LacunaWaX');
+        my $schema = wxTheApp->main_schema;
+        $self->logger->component('LacunaWaX');
 
         ### Save main window position
         my $db_x = $schema->resultset('AppPrefsKeystore')->find_or_create({ name => 'MainWindowX' });
@@ -730,9 +744,9 @@ Returns the triangle sum of a given int.
         my $now   = DateTime->now();
         my $dur   = DateTime::Duration->new(days => 7);     # TBD this duration should perhaps be configurable
         my $limit = $now->subtract_duration( $dur );
-        $logger->debug('Pruning old log entries');
-        $logger->prune_bydate( $limit );
-        $logger->debug('Closing application');
+        $self->logger->debug('Pruning old log entries');
+        $self->logger->prune_bydate( $limit );
+        $self->logger->debug('Closing application');
 
         ### Set the current app version
         ### TBD doing this here is somewhat questionable; see UPGRADING in the 
@@ -760,6 +774,7 @@ Returns the triangle sum of a given int.
         ### The point being that any code in here should relate only to the 
         ### Wx::App, not to the LacunaWaX.
         Wx::InitAllImageHandlers();
+
         return 1;
     }#}}}
 

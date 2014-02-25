@@ -7,7 +7,7 @@ package LacunaWaX::Model::Mutex {
     use Moose;
     use Try::Tiny;
 
-    has 'bb'            => (is => 'rw', isa => 'LacunaWaX::Model::Container',   required   => 1);
+    has 'globals'       => (is => 'rw', isa => 'LacunaWaX::Model::Globals',     required   => 1);
     has 'name'          => (is => 'rw', isa => 'Str',                           required   => 1);
     has 'lockfile'      => (is => 'rw', isa => 'Str',                           lazy_build => 1);
     has 'filehandle'    => (is => 'rw', isa => 'FileHandle',                    lazy_build => 1);
@@ -31,7 +31,7 @@ package LacunaWaX::Model::Mutex {
     }#}}}
     sub _build_lockfile {#{{{
         my $self = shift;
-        my $dir = $self->bb->resolve( service => '/Directory/user' );
+        my $dir = $self->globals->dir_user;
         my $f = join q{/}, ($dir, $self->name);
         return $f;
     }#}}}
@@ -87,8 +87,7 @@ LacunaWaX::Model::Mutex - Provide mutual exclusion facilities for LacunaWaX.
 
 =head1 SYNOPSIS
 
- $bb = <LacunaWaX::Model::Container object>;
- $m  = LacunaWaX::Model::Mutex->new( bb => $bb, name => 'schedule' );
+ $m  = LacunaWaX::Model::Mutex->new( globals => wxTheApp->globals, name => 'schedule' );
 
  unless( $m->lock_shnb ) {
   $log->info("Shared lock not possible right now; I'll have to block to get one.");
@@ -108,8 +107,8 @@ Meant to resemble flock, but allows for locking of a process rather than a file
 (though it can certainly also be used to lock a file).  Multiple exclusive 
 locks may be obtained, provided each mutex has a different name:
 
- $m1 = LacunaWaX::Model::Mutex->new( bb => $bb, name => 'lock_one' );
- $m2 = LacunaWaX::Model::Mutex->new( bb => $bb, name => 'lock_two' );
+ $m1 = LacunaWaX::Model::Mutex->new( ..., name => 'lock_one' );
+ $m2 = LacunaWaX::Model::Mutex->new( ..., name => 'lock_two' );
 
  $m1->lock_ex;
  $m2->lock_ex;  
@@ -128,8 +127,8 @@ non-blocking methods first, as in the synopsis.
 
 =head3 Constructor
 
- $bb = <LacunaWaX::Model::Container object>;
- $m  = LacunaWaX::Model::Mutex->new( bb => $bb, name => 'schedule' );
+ $globals = <LacunaWaX::Model::Globals object>;
+ $m  = LacunaWaX::Model::Mutex->new( globals => $globals, name => 'schedule' );
 
 Requires a LacunaWaX::Model::Container to be passed in so Model::Mutex can determine where it 
 should create its lockfiles.

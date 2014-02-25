@@ -36,7 +36,7 @@ package LacunaWaX::Dialog::Help {
     has 'index_file'    => (is => 'rw', isa => 'Str',       lazy_build => 1);
     has 'history'       => (is => 'rw', isa => 'ArrayRef',  lazy_build => 1);
     has 'history_idx'   => (is => 'rw', isa => 'Int',       lazy_build => 1);
-    has 'html_dir' => (is => 'rw', isa => 'Str', lazy_build => 1);
+
     has 'prev_click_href' => (is => 'rw', isa => 'Str', lazy => 1, default => q{},
         documentation => q{ See OnLinkClicked for details.  }
     );
@@ -181,10 +181,6 @@ package LacunaWaX::Dialog::Help {
         );
         return $v;
     }#}}}
-    sub _build_html_dir {#{{{
-        my $self = shift;
-        return $self->bb->resolve(service => '/Directory/html');
-    }#}}}
     sub _build_index_file {#{{{
         return 'index.html';
     }#}}}
@@ -213,9 +209,9 @@ package LacunaWaX::Dialog::Help {
     sub _build_tt {#{{{
         my $self = shift;
         my $tt = Template->new(
-            INCLUDE_PATH => $self->html_dir,
+            INCLUDE_PATH => wxTheApp->globals->dir_html,
             INTERPOLATE => 1,
-            OUTPUT_PATH => $self->html_dir,
+            OUTPUT_PATH => wxTheApp->globals->dir_html,
             WRAPPER => 'wrapper',
         );
         return $tt;
@@ -258,7 +254,7 @@ package LacunaWaX::Dialog::Help {
         my $self    = shift;
         my $loofa   = HTML::Scrubber->new();
         my $docs    = {};
-        my $dir     = $self->bb->resolve(service => '/Directory/html');
+        my $dir     = wxTheApp->globals->dir_html;
 
         use HTML::TreeBuilder;
         foreach my $f(glob("\"$dir\"/*.html")) {
@@ -318,7 +314,7 @@ package LacunaWaX::Dialog::Help {
         my $self = shift;
         my $file = shift || return;
 
-        my $fqfn = join q{/}, ($self->html_dir, $file);
+        my $fqfn = join q{/}, (wxTheApp->globals->dir_html, $file);
         unless(-e $fqfn) {
             $self->poperr("$fqfn: No such file or directory");
             return;
@@ -326,11 +322,11 @@ package LacunaWaX::Dialog::Help {
 
         my $vars = {
             ### fix the .. in the paths, since it might confuse muggles.
-            bin_dir     => File::Spec->rel2abs($self->bb->resolve(service => '/Directory/bin')),
+            bin_dir     => wxTheApp->globals->dir_bin,
             dir_sep     => File::Util->SL,
-            html_dir    => File::Spec->rel2abs($self->html_dir),
-            user_dir    => File::Spec->rel2abs($self->bb->resolve(service => '/Directory/user')),
-            lucy_index  => File::Spec->rel2abs($self->bb->resolve(service => '/Lucy/index')),
+            html_dir    => wxTheApp->globals->dir_html,
+            user_dir    => wxTheApp->globals->dir_user,
+            lucy_index  => wxTheApp->globals->dir_html_idx,
         };
 
         my $output  = q{};
@@ -341,8 +337,7 @@ package LacunaWaX::Dialog::Help {
     sub make_search_index {#{{{
         my $self = shift;
 
-        my $idx = $self->bb->resolve(service => '/Lucy/index');
-        return if -e $idx;
+        return if -e wxTheApp->globals->dir_html_idx;
         my $docs = $self->get_docs;
 
         # Create a Schema which defines index fields.
@@ -361,7 +356,7 @@ package LacunaWaX::Dialog::Help {
         # Create the index and add documents.
         my $indexer = Lucy::Index::Indexer->new(
             schema => $schema,  
-            index  => $idx,
+            index  => wxTheApp->globals->dir_html_idx,
             create => 1,
             truncate => 1,  # if index already exists with content, trash them before adding more.
         );
@@ -524,7 +519,7 @@ package LacunaWaX::Dialog::Help {
 
         ### Search results do not get recorded in history.
 
-        my $searcher = $self->bb->resolve(service => '/Lucy/searcher');
+        my $searcher = wxTheApp->globals->lucy_searcher;
         my $hits = $searcher->hits( query => $term );
         my $vars = {
             term => $term,

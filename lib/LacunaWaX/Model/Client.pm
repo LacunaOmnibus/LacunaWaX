@@ -7,7 +7,6 @@ LacunaWaX::Model::Client - Game server client
 
  my $game_client = LacunaWaX::Model::Client->new (
   app         => C<LacunaWaX object>,
-  bb          => C<LacunaWaX::Model::Container object>,
   wxbb        => C<LacunaWaX::Model::WxContainer object>,
   server_id   => C<Integer ID (in local Servers table) of server to connect to>
   allow_sleep => 0,
@@ -38,16 +37,12 @@ Which just feels hackneyed, you can skip the separate call to client:
 The user's default empire name and password are saved in the database, so those 
 creds do not generally need to be sent.
 
-Database connection is passed in the LacunaWaX::Model::Container (bb attribute), and 
-the integer server_id allows Client to find the actual game connection creds.
-
 If you need to create a client using credentials other than what are stored as 
 the current LacunaWaX user's default creds, you may also pass empire_name and 
 empire_pass:
 
  my $other_client = LacunaWaX::Model::Client->new (
   app         => C<LacunaWaX object>,
-  bb          => C<LacunaWaX::Model::Container object>,
   wxbb        => C<LacunaWaX::Model::WxContainer object>,
   server_id   => C<ID of server>
   allow_sleep => 0,
@@ -61,10 +56,6 @@ empire_pass:
 =head2 app (Required)
 
 A LacunaWaX object
-
-=head2 bb (Required)
-
-A LacunaWaX::Model::Container object
 
 =head2 server_id (Required)
 
@@ -171,7 +162,6 @@ package LacunaWaX::Model::Client {
     our $AUTOLOAD;
 
     has 'app'           => (is => 'rw', isa => 'LacunaWaX',                     weak_ref => 1   ); 
-    has 'bb'            => (is => 'rw', isa => 'LacunaWaX::Model::Container',   required => 1   );
     has 'server_id'     => (is => 'rw', isa => 'Int',                           required => 1   );
 
     has 'wxbb' => (is => 'rw', isa => 'LacunaWaX::Model::WxContainer',
@@ -270,7 +260,7 @@ package LacunaWaX::Model::Client {
     sub _build_account_rec {#{{{
         my $self = shift;
 
-        my $schema = $self->bb->resolve( service => '/Database/schema' );
+        my $schema = $self->app->main_schema;
         my $rec = $schema->resultset('ServerAccounts')->search({
             server_id           => $self->server_id,
             default_for_server  => '1'
@@ -368,7 +358,7 @@ package LacunaWaX::Model::Client {
     sub _build_server_rec {#{{{
         my $self = shift;
 
-        my $schema = $self->bb->resolve( service => '/Database/schema' );
+        my $schema = $self->app->main_schema;
         my $rec = $schema->resultset('Servers')->find({
             id => $self->server_id
         }) or croak "Could not find server with id '" . $self->server_id . q{'.};
@@ -447,7 +437,7 @@ false and never die.
 
 =cut
 
-        my $logger = $self->bb->resolve( service => '/Log/logger' );
+        my $logger = $self->app->logger;
         $logger->component('Client');
         $logger->debug('ping() called');
         $self->app->Yield if $self->app;
@@ -561,7 +551,6 @@ doing so returns much more quickly than having to recreate them.
             uri         => $self->uri,
             server_id   => $self->server_id,
             api_key     => $self->api_key,
-            bb          => $self->bb,
             allow_sleep => $self->allow_sleep,
             rpc_sleep   => $self->rpc_sleep,
         );
@@ -843,7 +832,7 @@ planet.
             $cbs = $cbs->{'body'};
 
             if( defined $cbs->{'empire'} and $cbs->{'empire'}{'alignment'} eq 'self' ) { # this is my planet
-                my $schema = $self->bb->resolve( service => '/Database/schema' );
+                my $schema = $self->app->main_schema;
 
                 my $body_type_rec = $schema->resultset('BodyTypes')->find_or_create({ 
                     body_id   => $cbs->{'id'}, 
@@ -1463,7 +1452,7 @@ hashref.
 
 =cut
 
-        my $logger = $self->bb->resolve( service => '/Log/logger' );
+        my $logger = $self->app->logger;
         $logger->component('Client');
 
         my $am = $self->get_building($planet_id, 'Archaeology Ministry');
