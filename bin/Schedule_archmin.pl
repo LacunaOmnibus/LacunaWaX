@@ -22,17 +22,8 @@ my $dt = try {
 };
 $dt ||= 'UTC';
 
-my $bb = LacunaWaX::Model::Container->new(
-    name            => 'ScheduleContainer',
-    root_dir        => $root_dir,
-    db_file         => $db_file,
-    db_log_file     => $db_log_file,
-    log_time_zone   => $dt,
-);
 my $globals = LacunaWaX::Model::Globals->new( root_dir => $root_dir );
-
 my $scheduler = LacunaWaX::Schedule->new( 
-    #bb          => $bb,
     globals     => $globals,
     schedule    => 'archmin',
 );
