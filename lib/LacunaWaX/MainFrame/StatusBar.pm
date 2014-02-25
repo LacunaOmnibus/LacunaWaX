@@ -31,7 +31,7 @@ package LacunaWaX::MainFrame::StatusBar {
     }#}}}
     sub _build_caption {#{{{
         my $self = shift;
-        return $self->app_name;
+        return wxTheApp->GetAppName;
     }#}}}
     sub _build_gauge {#{{{
         my $self = shift;

@@ -207,7 +207,7 @@ arg is not necessary there.
         my $panel   = shift;    # Wx::Panel or Wx::ScrolledWindow
         my $event   = shift;    # Wx::CommandEvent
 
-        my $logger = $self->get_logger;
+        my $logger = $self->app->logger;
         $self->throb();
 
         my $recipe_name     = $self->recipe_name;

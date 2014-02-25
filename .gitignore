@@ -1,4 +1,5 @@
 .svn/
+Thumbs.db
 *.msi
 *.sqlite
 *.sqlite-journal
