@@ -20,8 +20,7 @@ package LacunaWaX {
     use LacunaWaX::MainSplitterWindow;
     use LacunaWaX::Model::Client;   
     use LacunaWaX::Model::Globals;
-    use LacunaWaX::Model::Container;
-    use LacunaWaX::Model::WxContainer;
+    use LacunaWaX::Model::Globals::Wx;
     use LacunaWaX::Schedule;
     use LacunaWaX::Servers;
 
@@ -32,8 +31,6 @@ package LacunaWaX {
     our $VERSION = '2.0';
 
     has 'root_dir'          => (is => 'rw', isa => 'Str',                               required   => 1);
-    has 'bb'                => (is => 'rw', isa => 'LacunaWaX::Model::Container',       lazy_build => 1);
-    has 'wxbb'              => (is => 'rw', isa => 'LacunaWaX::Model::WxContainer',     lazy_build => 1);
     has 'db_file'           => (is => 'rw', isa => 'Str',                               lazy_build => 1);
     has 'db_log_file'       => (is => 'rw', isa => 'Str',                               lazy_build => 1);
     has 'icon_bundle'       => (is => 'rw', isa => 'Wx::IconBundle',                    lazy_build => 1);
@@ -46,6 +43,25 @@ package LacunaWaX {
             logger          => 'logger',
             log_schema      => 'log_schema',
             main_schema     => 'main_schema',
+        }
+    );
+
+    has 'wxglobals' => (
+        is          => 'rw', 
+        isa         => 'LacunaWaX::Model::Globals::Wx',
+        lazy_build  => 1,
+        handles     => {
+            del_image   => 'del_image',
+            get_image   => 'get_image',
+            has_image   => 'has_image',
+            num_images  => 'num_images',
+            set_image   => 'set_image',
+
+            get_font   => 'get_font',
+            has_font   => 'has_font',
+            num_fonts  => 'num_fonts',
+
+            get_cache  => 'cache',
         }
     );
 
@@ -139,14 +155,9 @@ package LacunaWaX {
         my $self = shift;
         return LacunaWaX::Model::Globals->new( root_dir => $self->root_dir );
     }#}}}
-    sub _build_bb {#{{{
+    sub _build_wxglobals {#{{{
         my $self = shift;
-        return LacunaWaX::Model::Container->new(
-            name            => 'my container',
-            root_dir        => $self->root_dir,
-            db_file         => $self->db_file,
-            db_log_file     => $self->db_log_file,
-        );
+        return LacunaWaX::Model::Globals::Wx->new( globals => $self->globals );
     }#}}}
     sub _build_db_file {#{{{
         my $self = shift;
@@ -213,13 +224,6 @@ package LacunaWaX {
         my $self        = shift;
         return LacunaWaX::Servers->new( schema => wxTheApp->main_schema );
     }#}}}
-    sub _build_wxbb {#{{{
-        my $self = shift;
-        return LacunaWaX::Model::WxContainer->new(
-            name        => 'wx container',
-            root_dir    => $self->root_dir,
-        );
-    }#}}}
     sub _set_events {#{{{
         my $self = shift;
         EVT_CLOSE( $self->main_frame->frame, sub{$self->OnClose(@_)} );
@@ -258,46 +262,12 @@ called.
         my $img_list = Wx::ImageList->new( '39', '50', '0', '20' );
         foreach my $g( @{$self->game_client->glyphs} ) {#{{{
 
-            my $img = $self->wxbb->resolve(service => "/Assets/images/glyphs/$g.png");
+            my $img  = $self->get_image( "glyphs/$g.png" );
             $img->Rescale('39', '50');
             my $bmp = Wx::Bitmap->new($img);
 
             $img_list->Add($bmp, wxNullBitmap);
         }#}}}
-        return $img_list;
-    }#}}}
-    sub build_img_list_warships {#{{{
-        my $self = shift;
-
-=head2 build_img_list_warships
-
-Returns a Wx::ImageList of warships.  ImageList contains one image per warship  
-as returned by $self->warships.
-
-Does I<not> return a singleton; a new ImageList is created each time this is 
-called.
-
-04/30/2013 - I've added the code to resolve the ship images out of the 
-assets.zip file, but because this code is not being used, that zip file does not 
-contain any ships images.  If this becomes needed, add the ships images to that 
-assets file and this method /should/ just work.
-
-04/05/2013 - this is not being used by anything, so I'm removing the ships 
-images from user/assets/ to keep them from having to be installed each time.
-
-=cut
-
-        my $img_list = Wx::ImageList->new( '50', '50', '0', '4' );
-        foreach my $ship( @{$self->game_client->warships} ) {
-
-            my $img = $self->wxbb->resolve(service => "/Assets/images/ships/$ship.png");
-            $img->Rescale('50', '50');
-            my $bmp = Wx::Bitmap->new($img);
-
-            $img_list->Add($bmp, wxNullBitmap);
-            $self->Yield;
-        }
-
         return $img_list;
     }#}}}
     sub caption {#{{{
@@ -437,10 +407,10 @@ Returns true/false on success/fail.
 
             my $game_client = LacunaWaX::Model::Client->new (
                     app         => $self,
-                    wxbb        => $self->wxbb,
                     server_id   => $self->server->id,
                     rpc_sleep   => 0,
                     allow_sleep => 0,   # Treat '> RPC Limit' error as any other error from the GUI
+                    use_gui     => 1,   # Allows use of the cache
             );
             $self->game_client( $game_client );
 

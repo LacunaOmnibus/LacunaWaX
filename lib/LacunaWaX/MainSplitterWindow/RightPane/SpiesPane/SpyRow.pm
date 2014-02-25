@@ -115,7 +115,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::SpiesPane::SpyRow {
                     )
                 );
 
-                $self->$header->SetFont( $self->get_font('/header_7') );
+                $self->$header->SetFont( $self->app->get_font('header_7') );
                 $self->szr_main->Add($self->$header, 0, 0, 0);
             }
             return;
@@ -160,7 +160,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::SpiesPane::SpyRow {
             $selection = $v->FindString( ucfirst $rec->train ) if $rec->train;
         }
         $v->SetSelection($selection);
-        $v->SetFont( $self->get_font('/para_text_1') );
+        $v->SetFont( $self->app->get_font('para_text_1') );
         return $v;
     }#}}}
     sub _build_int_min {#{{{
@@ -184,7 +184,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::SpiesPane::SpyRow {
             wxDefaultPosition, 
             Wx::Size->new(60, $self->row_height)
         );
-        $y->SetFont( $self->get_font('/para_text_1') );
+        $y->SetFont( $self->app->get_font('para_text_1') );
         return $y;
     }#}}}
     sub _build_lbl_intel {#{{{
@@ -195,7 +195,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::SpiesPane::SpyRow {
             wxDefaultPosition, 
             Wx::Size->new($self->skill_width, $self->row_height - 10)
         );
-        $y->SetFont( $self->get_font('/para_text_1') );
+        $y->SetFont( $self->app->get_font('para_text_1') );
         return $y;
     }#}}}
     sub _build_lbl_level {#{{{
@@ -207,7 +207,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::SpiesPane::SpyRow {
             wxDefaultPosition, 
             Wx::Size->new($self->level_width, $self->row_height)
         );
-        $y->SetFont( $self->get_font('/para_text_1') );
+        $y->SetFont( $self->app->get_font('para_text_1') );
         return $y;
     }#}}}
     sub _build_lbl_loc {#{{{
@@ -231,7 +231,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::SpiesPane::SpyRow {
         );
         $y->SetToolTip($tooltip);
 
-        $y->SetFont( $self->get_font('/para_text_1') );
+        $y->SetFont( $self->app->get_font('para_text_1') );
         return $y;
     }#}}}
     sub _build_lbl_mayhem {#{{{
@@ -242,7 +242,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::SpiesPane::SpyRow {
             wxDefaultPosition, 
             Wx::Size->new($self->skill_width, $self->row_height - 10)
         );
-        $y->SetFont( $self->get_font('/para_text_1') );
+        $y->SetFont( $self->app->get_font('para_text_1') );
         return $y;
     }#}}}
     sub _build_lbl_name {#{{{
@@ -260,7 +260,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::SpiesPane::SpyRow {
             Wx::Size->new($self->name_width - 12, $self->row_height)
         );
 
-        $y->SetFont( $self->get_font('/para_text_1') );
+        $y->SetFont( $self->app->get_font('para_text_1') );
         return $y;
     }#}}}
     sub _build_lbl_task {#{{{
@@ -280,7 +280,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::SpiesPane::SpyRow {
             $y->SetToolTip($tt);
         }
 
-        $y->SetFont( $self->get_font('/para_text_1') );
+        $y->SetFont( $self->app->get_font('para_text_1') );
         return $y;
     }#}}}
     sub _build_lbl_offense {#{{{
@@ -292,7 +292,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::SpiesPane::SpyRow {
             wxDefaultPosition, 
             Wx::Size->new(60, $self->row_height)
         );
-        $y->SetFont( $self->get_font('/para_text_1') );
+        $y->SetFont( $self->app->get_font('para_text_1') );
         return $y;
     }#}}}
     sub _build_lbl_politics {#{{{
@@ -303,7 +303,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::SpiesPane::SpyRow {
             wxDefaultPosition, 
             Wx::Size->new($self->skill_width, $self->row_height - 10)
         );
-        $y->SetFont( $self->get_font('/para_text_1') );
+        $y->SetFont( $self->app->get_font('para_text_1') );
         return $y;
     }#}}}
     sub _build_lbl_placeholder {#{{{
@@ -328,7 +328,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::SpiesPane::SpyRow {
             wxDefaultPosition, 
             Wx::Size->new($self->skill_width, $self->row_height - 10)
         );
-        $y->SetFont( $self->get_font('/para_text_1') );
+        $y->SetFont( $self->app->get_font('para_text_1') );
         return $y;
     }#}}}
     sub _build_szr_task {#{{{

@@ -63,7 +63,7 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
             |wxSUNKEN_BORDER
             |wxTR_HIDE_ROOT
         );
-        $v->SetFont( $self->get_font('/para_text_1') );
+        $v->SetFont( $self->app->get_font('para_text_1') );
         return $v;
     }#}}}
     sub _set_events {#{{{
@@ -128,7 +128,7 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
                     $self->bodies_id, $pname, -1, -1, Wx::TreeItemData->new($b64_planet)
                 );
                 $self->treectrl->SetItemFont(
-                    $planet_name_id, $self->get_font('/bold_para_text_1')
+                    $planet_name_id, $self->app->get_font('bold_para_text_1')
                 );
 
                 ### Both Planets and Space Stations get a Rearrange leaf, and 

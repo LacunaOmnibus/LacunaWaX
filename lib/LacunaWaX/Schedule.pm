@@ -14,7 +14,6 @@ package LacunaWaX::Schedule {
     use Carp;
     use Data::Dumper;
     use LacunaWaX::Preload::Cava;
-    use LacunaWaX::Model::Container;
     use LacunaWaX::Model::Mutex;
     use LacunaWaX::Model::Client;
     use LWP::UserAgent;

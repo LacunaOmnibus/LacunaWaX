@@ -201,7 +201,7 @@ package LacunaWaX::Dialog::Calculator {
             wxDefaultPosition, 
             Wx::Size->new(100, $self->line_height)
         );
-        $y->SetFont( $self->get_font('/bold_para_text_1') );
+        $y->SetFont( $self->app->get_font('bold_para_text_1') );
         return $y;
     }#}}}
     sub _build_lbl_halls_lvl_to {#{{{
@@ -212,7 +212,7 @@ package LacunaWaX::Dialog::Calculator {
             wxDefaultPosition, 
             Wx::Size->new(120, $self->line_height)
         );
-        $y->SetFont( $self->get_font('/bold_para_text_1') );
+        $y->SetFont( $self->app->get_font('bold_para_text_1') );
         return $y;
     }#}}}
     sub _build_szr_halls {#{{{
@@ -265,7 +265,7 @@ package LacunaWaX::Dialog::Calculator {
             wxDefaultPosition, 
             Wx::Size->new(13, $self->line_height)
         );
-        $y->SetFont( $self->get_font('/bold_para_text_1') );
+        $y->SetFont( $self->app->get_font('bold_para_text_1') );
         return $y;
     }#}}}
     sub _build_lbl_from_y {#{{{
@@ -276,7 +276,7 @@ package LacunaWaX::Dialog::Calculator {
             wxDefaultPosition, 
             Wx::Size->new(13, $self->line_height)
         );
-        $y->SetFont( $self->get_font('/bold_para_text_1') );
+        $y->SetFont( $self->app->get_font('bold_para_text_1') );
         return $y;
     }#}}}
     sub _build_lbl_to_x {#{{{
@@ -287,7 +287,7 @@ package LacunaWaX::Dialog::Calculator {
             wxDefaultPosition, 
             Wx::Size->new(13, $self->line_height)
         );
-        $y->SetFont( $self->get_font('/bold_para_text_1') );
+        $y->SetFont( $self->app->get_font('bold_para_text_1') );
         return $y;
     }#}}}
     sub _build_lbl_to_y {#{{{
@@ -298,7 +298,7 @@ package LacunaWaX::Dialog::Calculator {
             wxDefaultPosition, 
             Wx::Size->new(13, $self->line_height)
         );
-        $y->SetFont( $self->get_font('/bold_para_text_1') );
+        $y->SetFont( $self->app->get_font('bold_para_text_1') );
         return $y;
     }#}}}
     sub _build_szr_distance {#{{{
@@ -377,7 +377,7 @@ package LacunaWaX::Dialog::Calculator {
             wxDefaultPosition, 
             Wx::Size->new(55, $self->line_height)
         );
-        $y->SetFont( $self->get_font('/bold_para_text_1') );
+        $y->SetFont( $self->app->get_font('bold_para_text_1') );
         return $y;
     }#}}}
     sub _build_txt_distance {#{{{
@@ -396,7 +396,7 @@ package LacunaWaX::Dialog::Calculator {
             wxDefaultPosition, 
             Wx::Size->new(40, $self->line_height)
         );
-        $y->SetFont( $self->get_font('/bold_para_text_1') );
+        $y->SetFont( $self->app->get_font('bold_para_text_1') );
         return $y;
     }#}}}
     sub _build_txt_speed {#{{{
@@ -438,7 +438,7 @@ package LacunaWaX::Dialog::Calculator {
             Wx::Size->new(110, 25), 
             ['', @{$self->sorted_planets}],
         );
-        $v->SetFont( $self->get_font('/para_text_1') );
+        $v->SetFont( $self->app->get_font('para_text_1') );
         return $v;
     }#}}}
 
@@ -473,7 +473,7 @@ package LacunaWaX::Dialog::Calculator {
             wxDefaultPosition, 
             Wx::Size->new(350, 30)
         );
-        $y->SetFont( $self->get_font('/para_text_1') );
+        $y->SetFont( $self->app->get_font('para_text_1') );
         return $y;
     }#}}}
     sub _build_lbl_p1_rate {#{{{
@@ -484,7 +484,7 @@ package LacunaWaX::Dialog::Calculator {
             wxDefaultPosition, 
             Wx::Size->new(45, $self->line_height)
         );
-        $y->SetFont( $self->get_font('/bold_para_text_1') );
+        $y->SetFont( $self->app->get_font('bold_para_text_1') );
         $y->SetToolTip("Enter the speed as an integer, as it appears in-game.");
         return $y;
     }#}}}
@@ -496,7 +496,7 @@ package LacunaWaX::Dialog::Calculator {
             wxDefaultPosition, 
             Wx::Size->new(40, $self->line_height)
         );
-        $y->SetFont( $self->get_font('/bold_para_text_1') );
+        $y->SetFont( $self->app->get_font('bold_para_text_1') );
         $y->SetToolTip( "Enter the time as given in-game, eg hh:mm:ss" );
         return $y;
     }#}}}
@@ -528,7 +528,7 @@ package LacunaWaX::Dialog::Calculator {
             wxDefaultPosition, 
             Wx::Size->new(45, $self->line_height)
         );
-        $y->SetFont( $self->get_font('/bold_para_text_1') );
+        $y->SetFont( $self->app->get_font('bold_para_text_1') );
         $y->SetToolTip("Enter the speed as an integer, as it appears in-game.");
         return $y;
     }#}}}
@@ -540,7 +540,7 @@ package LacunaWaX::Dialog::Calculator {
             wxDefaultPosition, 
             Wx::Size->new(40, $self->line_height)
         );
-        $y->SetFont( $self->get_font('/bold_para_text_1') );
+        $y->SetFont( $self->app->get_font('bold_para_text_1') );
         $y->SetToolTip( "Enter the time as given in-game, eg hh:mm:ss" );
         return $y;
     }#}}}
@@ -574,7 +574,7 @@ package LacunaWaX::Dialog::Calculator {
             wxDefaultPosition, 
             Wx::Size->new(400, 35)
         );
-        $y->SetFont( $self->get_font('/header_1') );
+        $y->SetFont( $self->app->get_font('header_1') );
         return $y;
     }#}}}
     sub _build_lbl_instructions {#{{{
@@ -586,7 +586,7 @@ package LacunaWaX::Dialog::Calculator {
             wxDefaultPosition, 
             Wx::Size->new( $self->width - 20, 35 )
         );
-        $y->SetFont( $self->get_font('/para_text_2') );
+        $y->SetFont( $self->app->get_font('para_text_2') );
         return $y;
     }#}}}
     sub _build_szr_header {#{{{

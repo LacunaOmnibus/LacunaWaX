@@ -1,6 +1,4 @@
 
-### See CHECK
-
 package LacunaWaX::MainSplitterWindow::RightPane::SpiesPane {
     use v5.14;
     use LacunaWaX::Model::Client;
@@ -221,19 +219,19 @@ see what you're doing.
     sub _build_btn_clear {#{{{
         my $self = shift;
         my $v = Wx::Button->new($self->parent, -1, "Clear Spy Assignments");
-        $v->SetFont( $self->get_font('/para_text_2') );
+        $v->SetFont( $self->app->get_font('para_text_2') );
         return $v;
     }#}}}
     sub _build_btn_rename {#{{{
         my $self = shift;
         my $v = Wx::Button->new($self->parent, -1, "Rename Spies");
-        $v->SetFont( $self->get_font('/para_text_2') );
+        $v->SetFont( $self->app->get_font('para_text_2') );
         return $v;
     }#}}}
     sub _build_btn_save {#{{{
         my $self = shift;
         my $v = Wx::Button->new($self->parent, -1, "Save Spy Assignments");
-        $v->SetFont( $self->get_font('/para_text_2') );
+        $v->SetFont( $self->app->get_font('para_text_2') );
         return $v;
     }#}}}
     sub _build_chc_train_1 {#{{{
@@ -245,7 +243,7 @@ see what you're doing.
             [$self->text_none, @{$self->game_client->spy_training_choices}],
         );
         $v->SetSelection(0);
-        $v->SetFont( $self->get_font('/para_text_2') );
+        $v->SetFont( $self->app->get_font('para_text_2') );
         return $v;
     }#}}}
     sub _build_chc_train_2 {#{{{
@@ -257,7 +255,7 @@ see what you're doing.
             [$self->text_none, @{$self->game_client->spy_training_choices}],
         );
         $v->SetSelection(0);
-        $v->SetFont( $self->get_font('/para_text_2') );
+        $v->SetFont( $self->app->get_font('para_text_2') );
         return $v;
     }#}}}
     sub _build_chc_train_3 {#{{{
@@ -269,7 +267,7 @@ see what you're doing.
             [$self->text_none, @{$self->game_client->spy_training_choices}],
         );
         $v->SetSelection(0);
-        $v->SetFont( $self->get_font('/para_text_2') );
+        $v->SetFont( $self->app->get_font('para_text_2') );
         return $v;
     }#}}}
     sub _build_chc_train_4 {#{{{
@@ -281,7 +279,7 @@ see what you're doing.
             [$self->text_none, @{$self->game_client->spy_training_choices}],
         );
         $v->SetSelection(0);
-        $v->SetFont( $self->get_font('/para_text_2') );
+        $v->SetFont( $self->app->get_font('para_text_2') );
         return $v;
     }#}}}
     sub _build_dialog_status {#{{{
@@ -317,7 +315,7 @@ see what you're doing.
             wxDefaultPosition, 
             Wx::Size->new(25, 40)
         );
-        $y->SetFont( $self->get_font('/para_text_1') );
+        $y->SetFont( $self->app->get_font('para_text_1') );
         return $y;
     }#}}}
     sub _build_lbl_train_2 {#{{{
@@ -328,7 +326,7 @@ see what you're doing.
             wxDefaultPosition, 
             Wx::Size->new(25, 40)
         );
-        $y->SetFont( $self->get_font('/para_text_1') );
+        $y->SetFont( $self->app->get_font('para_text_1') );
         return $y;
     }#}}}
     sub _build_lbl_train_3 {#{{{
@@ -339,7 +337,7 @@ see what you're doing.
             wxDefaultPosition, 
             Wx::Size->new(25, 40)
         );
-        $y->SetFont( $self->get_font('/para_text_1') );
+        $y->SetFont( $self->app->get_font('para_text_1') );
         return $y;
     }#}}}
     sub _build_lbl_train_4 {#{{{
@@ -350,7 +348,7 @@ see what you're doing.
             wxDefaultPosition, 
             Wx::Size->new(25, 40)
         );
-        $y->SetFont( $self->get_font('/para_text_1') );
+        $y->SetFont( $self->app->get_font('para_text_1') );
         return $y;
     }#}}}
     sub _build_lbl_header {#{{{
@@ -361,7 +359,7 @@ see what you're doing.
             wxDefaultPosition, 
             Wx::Size->new($self->screen_width, 40)
         );
-        $y->SetFont( $self->get_font('/header_1') );
+        $y->SetFont( $self->app->get_font('header_1') );
         return $y;
     }#}}}
     sub _build_lbl_save_button_reminder {#{{{
@@ -372,7 +370,7 @@ see what you're doing.
             wxDefaultPosition, 
             Wx::Size->new($self->screen_width, 28)
         );
-        $y->SetFont( $self->get_font('/para_text_2') );
+        $y->SetFont( $self->app->get_font('para_text_2') );
         $y->SetForegroundColour( Wx::Colour->new(255,0,0) );    # Not 'color'.  Silly brits.
         return $y;
     }#}}}
@@ -404,7 +402,7 @@ see what you're doing.
             wxDefaultPosition, 
             Wx::Size->new(-1, 130)
         );
-        $y->SetFont( $self->get_font('/para_text_2') );
+        $y->SetFont( $self->app->get_font('para_text_2') );
         $y->Wrap($self->screen_width);
 
         return $y;
@@ -547,6 +545,7 @@ see what you're doing.
         SPY_ROW:
         foreach my $row( @{$self->spy_table} ) {
             next SPY_ROW if( $row->new_name and $row->new_name eq $row->spy->name );
+            next SPY_ROW unless $row->new_name;
 
             if( $self->stop_renaming ) {
                 ### User closed the status dialog box, so get out.
@@ -578,16 +577,14 @@ see what you're doing.
         if( $cnt >= 1 ) {
             ### Spies have been renamed, so expire the spies currently in the 
             ### cache so the new names show up on the next screen load.
-            if( $self->wxbb ) {
-                #my $chi  = $self->app->wxbb->resolve( service => '/Cache/raw_memory' );
-                my $chi  = $self->get_chi;
-                my $key  = join q{:}, ('BODIES', 'SPIES', $self->planet_id);
-                $chi->remove($key);
-            }
+            my $chi  = wxTheApp->get_cache;
+            my $key  = join q{:}, ('BODIES', 'SPIES', $self->planet_id);
+            $chi->remove($key);
         }
-
+        
+        my $v = ($cnt == 1) ? "spy has" : "spies have";
         $self->popmsg(
-            "$cnt spies have been renamed.",
+            "$cnt $v been renamed.",
             "Success!"
         );
         return 1;

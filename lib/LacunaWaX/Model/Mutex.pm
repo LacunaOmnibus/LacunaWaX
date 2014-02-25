@@ -3,7 +3,6 @@ package LacunaWaX::Model::Mutex {
     use v5.14;
     use Carp;
     use English qw( -no_match_vars );
-    use LacunaWaX::Model::Container;
     use Moose;
     use Try::Tiny;
 
@@ -130,8 +129,8 @@ non-blocking methods first, as in the synopsis.
  $globals = <LacunaWaX::Model::Globals object>;
  $m  = LacunaWaX::Model::Mutex->new( globals => $globals, name => 'schedule' );
 
-Requires a LacunaWaX::Model::Container to be passed in so Model::Mutex can determine where it 
-should create its lockfiles.
+Requires a LacunaWaX::Model::Globals object to be passed in so we can determine 
+where it lockfiles should be created.
 
 Also requires a name.  Mutexes will only block other mutexes that have the same 
 name.  The lockfiles use by Mutex.pm are created using that name, so do not pass 

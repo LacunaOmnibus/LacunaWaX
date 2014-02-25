@@ -61,7 +61,7 @@ package LacunaWaX::Dialog::Captcha {
         $self->Centre();
 
         my $bmp;
-        unless( $bmp = $self->get_image() ) {
+        unless( $bmp = $self->get_captcha_image() ) {
             $self->error("Unable to retrieve captcha image");
             return;
         }
@@ -143,7 +143,7 @@ package LacunaWaX::Dialog::Captcha {
         return 1;
     }#}}}
 
-    sub get_image {#{{{
+    sub get_captcha_image {#{{{
         my $self = shift;
 
         my $puzzle = $self->captcha->fetch();
@@ -187,7 +187,7 @@ package LacunaWaX::Dialog::Captcha {
         my $old_bmp = $self->bmp_captcha;
 
         $self->clear_captcha;
-        my $new_bmp = $self->get_image;
+        my $new_bmp = $self->get_captcha_image;
         $self->bmp_captcha( $new_bmp );
 
         $self->szr_image->Replace( $old_bmp, $new_bmp );

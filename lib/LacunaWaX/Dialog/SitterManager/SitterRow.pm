@@ -110,8 +110,8 @@ over the dialog while the row is being created.
                 )
             );
 
-            $self->name_header->SetFont( $self->get_font('/header_5') );
-            $self->pass_header->SetFont( $self->get_font('/header_5') );
+            $self->name_header->SetFont( $self->app->get_font('header_5') );
+            $self->pass_header->SetFont( $self->app->get_font('header_5') );
 
             $self->row_panel_sizer->Add($self->name_header, 0, 0, 0);
             $self->row_panel_sizer->Add($self->pass_header, 0, 0, 0);

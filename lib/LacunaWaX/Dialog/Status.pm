@@ -265,7 +265,7 @@ package LacunaWaX::Dialog::Status {
             wxDefaultPosition, 
             $s,
         );
-        $v->SetFont( $self->get_font('/header_1') );
+        $v->SetFont( $self->app->get_font('header_1') );
 
         ### This needs to be here, or the header will report itself as being 
         ### 34 pixels high immediately after creation, regardless of what we 

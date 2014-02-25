@@ -92,7 +92,7 @@ package LacunaWaX::MainFrame::IntroPanel {
 
         ### The logo is already the correct size and does not need to be 
         ### rescaled.
-        my $img  = $self->wxbb->resolve(service => '/Assets/images/app/logo-280x70.png');
+        my $img  = wxTheApp->get_image( 'app/logo-280x70.png');
         my $bmp  = Wx::Bitmap->new($img);
         return Wx::StaticBitmap->new(
             $self->top_panel, -1, 
@@ -159,7 +159,7 @@ package LacunaWaX::MainFrame::IntroPanel {
                 Wx::Size->new(200, 30),
                 0,
             );
-            $b->SetFont( $self->wxbb->resolve(service => '/Fonts/para_text_2') );
+            $b->SetFont( wxTheApp->get_font('para_text_2') );
 
             if(
                 my $prefs = $schema->resultset('ServerAccounts')->find({ server_id => $srvr_id, default_for_server => 1 })

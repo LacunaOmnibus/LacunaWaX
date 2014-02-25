@@ -107,7 +107,7 @@ package LacunaWaX::Generics::ResBar {
     sub _build_img_food {#{{{
         my $self = shift;
 
-        my $img  = $self->wxbb->resolve(service => '/Assets/images/res_l/food.png');
+        my $img  = wxTheApp->get_image('res_l/food.png');
         $img->Rescale(45, 45);
         my $bmp  = Wx::Bitmap->new($img);
         return Wx::StaticBitmap->new(
@@ -122,7 +122,7 @@ package LacunaWaX::Generics::ResBar {
     sub _build_img_ore {#{{{
         my $self = shift;
 
-        my $img  = $self->wxbb->resolve(service => '/Assets/images/res_l/ore.png');
+        my $img  = wxTheApp->get_image('res_l/ore.png');
         $img->Rescale(39, 45);
         my $bmp  = Wx::Bitmap->new($img);
         return Wx::StaticBitmap->new(
@@ -136,7 +136,7 @@ package LacunaWaX::Generics::ResBar {
     sub _build_img_water {#{{{
         my $self = shift;
 
-        my $img  = $self->wxbb->resolve(service => '/Assets/images/res_l/water.png');
+        my $img  = wxTheApp->get_image('res_l/water.png');
         $img->Rescale(36, 45);
         my $bmp  = Wx::Bitmap->new($img);
         return Wx::StaticBitmap->new(
@@ -150,7 +150,7 @@ package LacunaWaX::Generics::ResBar {
     sub _build_img_energy {#{{{
         my $self = shift;
 
-        my $img  = $self->wxbb->resolve(service => '/Assets/images/res_l/energy.png');
+        my $img  = wxTheApp->get_image('res_l/energy.png');
         $img->Rescale(31, 45);
         my $bmp  = Wx::Bitmap->new($img);
         return Wx::StaticBitmap->new(
@@ -168,7 +168,7 @@ package LacunaWaX::Generics::ResBar {
             q{},
             wxDefaultPosition, Wx::Size->new($self->lbl_w, $self->lbl_h)
         );
-        $y->SetFont( $self->get_font('/bold_modern_text_2') );
+        $y->SetFont( $self->app->get_font('bold_modern_text_2') );
         return $y;
     }#}}}
     sub _build_lbl_ore {#{{{
@@ -178,7 +178,7 @@ package LacunaWaX::Generics::ResBar {
             q{},
             wxDefaultPosition, Wx::Size->new($self->lbl_w, $self->lbl_h)
         );
-        $y->SetFont( $self->get_font('/bold_modern_text_2') );
+        $y->SetFont( $self->app->get_font('bold_modern_text_2') );
         return $y;
     }#}}}
     sub _build_lbl_water {#{{{
@@ -188,7 +188,7 @@ package LacunaWaX::Generics::ResBar {
             q{},
             wxDefaultPosition, Wx::Size->new($self->lbl_w, $self->lbl_h)
         );
-        $y->SetFont( $self->get_font('/bold_modern_text_2') );
+        $y->SetFont( $self->app->get_font('bold_modern_text_2') );
         return $y;
     }#}}}
     sub _build_lbl_energy {#{{{
@@ -198,7 +198,7 @@ package LacunaWaX::Generics::ResBar {
             q{},
             wxDefaultPosition, Wx::Size->new($self->lbl_w, $self->lbl_h)
         );
-        $y->SetFont( $self->get_font('/bold_modern_text_2') );
+        $y->SetFont( $self->app->get_font('bold_modern_text_2') );
         return $y;
     }#}}}
     sub _build_planet_id {#{{{

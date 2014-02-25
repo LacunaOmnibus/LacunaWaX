@@ -234,7 +234,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane::PropRow {
             wxDefaultPosition, 
             Wx::Size->new($self->name_width,$self->row_height)
         );
-        $v->SetFont( $self->get_font('/para_text_1') );
+        $v->SetFont( $self->app->get_font('para_text_1') );
 
         my $tt = Wx::ToolTip->new( $desc );
         $v->SetToolTip($tt);
@@ -255,7 +255,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane::PropRow {
             wxDefaultPosition, 
             Wx::Size->new($self->proposed_by_width,$self->row_height)
         );
-        $v->SetFont( $self->get_font('/para_text_1') );
+        $v->SetFont( $self->app->get_font('para_text_1') );
 
         unless($text eq $orig_text) {
             my $tt = Wx::ToolTip->new( $orig_text );
@@ -274,7 +274,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane::PropRow {
             wxDefaultPosition, 
             Wx::Size->new($self->votes_needed_width,$self->row_height)
         );
-        $v->SetFont( $self->get_font('/para_text_1') );
+        $v->SetFont( $self->app->get_font('para_text_1') );
 
         return $v;
     }#}}}
@@ -288,7 +288,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane::PropRow {
             wxDefaultPosition, 
             Wx::Size->new($self->votes_yes_width,$self->row_height)
         );
-        $v->SetFont( $self->get_font('/para_text_1') );
+        $v->SetFont( $self->app->get_font('para_text_1') );
 
         return $v;
     }#}}}
@@ -302,7 +302,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane::PropRow {
             wxDefaultPosition, 
             Wx::Size->new($self->votes_no_width,$self->row_height)
         );
-        $v->SetFont( $self->get_font('/para_text_1') );
+        $v->SetFont( $self->app->get_font('para_text_1') );
 
         return $v;
     }#}}}
@@ -315,7 +315,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane::PropRow {
             wxDefaultPosition, 
             Wx::Size->new($self->my_vote_width,$self->row_height)
         );
-        $v->SetFont( $self->get_font('/para_text_1') );
+        $v->SetFont( $self->app->get_font('para_text_1') );
 
         return $v;
     }#}}}
@@ -331,7 +331,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane::PropRow {
             wxDefaultPosition, 
             Wx::Size->new($self->button_width, $self->row_height)
         );
-        $v->SetFont( $self->get_font('/para_text_1') );
+        $v->SetFont( $self->app->get_font('para_text_1') );
         my $enabled = ($self->my_vote eq 'None') ? 1 : 0;
         $v->Enable($enabled);
 
@@ -345,7 +345,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane::PropRow {
             wxDefaultPosition, 
             Wx::Size->new($self->button_width,$self->row_height)
         );
-        $v->SetFont( $self->get_font('/para_text_1') );
+        $v->SetFont( $self->app->get_font('para_text_1') );
         my $enabled = ($self->my_vote eq 'None') ? 1 : 0;
         $v->Enable($enabled);
 
@@ -361,7 +361,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane::PropRow {
             ### + 20 to make the sitters button stand out a bit
             Wx::Size->new($self->button_width + 20, $self->row_height)
         );
-        $v->SetFont( $self->get_font('/para_text_1') );
+        $v->SetFont( $self->app->get_font('para_text_1') );
 
         return $v;
     }#}}}
@@ -375,7 +375,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane::PropRow {
             ### + 20 to make the sitters button stand out a bit
             Wx::Size->new(100, $self->row_height)
         );
-        $v->SetFont( $self->get_font('/para_text_1') );
+        $v->SetFont( $self->app->get_font('para_text_1') );
 
         return $v;
     }#}}}
@@ -490,14 +490,14 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane::PropRow {
             )
         );
 
-        $self->name_header->SetFont                 ( $self->get_font('/header_7') );
-        $self->proposed_by_header->SetFont          ( $self->get_font('/header_7') );
-        $self->votes_needed_header->SetFont         ( $self->get_font('/header_7') );
-        $self->votes_yes_header->SetFont            ( $self->get_font('/header_7') );
-        $self->votes_no_header->SetFont             ( $self->get_font('/header_7') ); 
-        $self->my_vote_header->SetFont              ( $self->get_font('/header_7') ); 
-        $self->cast_my_vote_header->SetFont         ( $self->get_font('/header_7') ); 
-        $self->cast_sitters_vote_header->SetFont    ( $self->get_font('/header_7') ); 
+        $self->name_header->SetFont                 ( $self->app->get_font('header_7') );
+        $self->proposed_by_header->SetFont          ( $self->app->get_font('header_7') );
+        $self->votes_needed_header->SetFont         ( $self->app->get_font('header_7') );
+        $self->votes_yes_header->SetFont            ( $self->app->get_font('header_7') );
+        $self->votes_no_header->SetFont             ( $self->app->get_font('header_7') ); 
+        $self->my_vote_header->SetFont              ( $self->app->get_font('header_7') ); 
+        $self->cast_my_vote_header->SetFont         ( $self->app->get_font('header_7') ); 
+        $self->cast_sitters_vote_header->SetFont    ( $self->app->get_font('header_7') ); 
 
         $self->main_sizer->Add($self->name_header, 0, 0, 0);
         $self->main_sizer->Add($self->proposed_by_header, 0, 0, 0);

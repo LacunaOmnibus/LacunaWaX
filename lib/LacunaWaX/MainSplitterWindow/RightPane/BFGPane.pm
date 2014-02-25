@@ -71,7 +71,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::BFGPane {
             wxDefaultPosition,
             Wx::Size->new(400, 50),
         );
-        $v->SetFont( $self->get_font('/bold_para_text_3') );
+        $v->SetFont( $self->app->get_font('bold_para_text_3') );
         $v->SetBackgroundColour(Wx::Colour->new(200,0,0));      # Brits!
         $v->SetForegroundColour(Wx::Colour->new(255,255,255));  # Brits!
         my $tt = Wx::ToolTip->new("Dispatch war rocket Ajax to bring back his body!");
@@ -88,7 +88,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::BFGPane {
             Wx::Size->new(50, 25), 
             [1..8],
         );
-        $v->SetFont( $self->get_font('/bold_para_text_1') );
+        $v->SetFont( $self->app->get_font('bold_para_text_1') );
 
         return $v;
     }#}}}
@@ -110,7 +110,7 @@ ${indent}Remember that this form only creates a proposition to fire the BFG, and
             wxDefaultPosition, 
             Wx::Size->new(-1, 270)
         );
-        $y->SetFont( $self->get_font('/para_text_2') );
+        $y->SetFont( $self->app->get_font('para_text_2') );
         $y->Wrap(560);
 
         return $y;
@@ -124,7 +124,7 @@ ${indent}Remember that this form only creates a proposition to fire the BFG, and
             wxDefaultPosition, 
             Wx::Size->new(-1, 25)
         );
-        $y->SetFont( $self->get_font('/para_text_2') );
+        $y->SetFont( $self->app->get_font('para_text_2') );
 
         return $y;
     }#}}}
@@ -137,7 +137,7 @@ ${indent}Remember that this form only creates a proposition to fire the BFG, and
             wxDefaultPosition, 
             Wx::Size->new(-1, 25)
         );
-        $y->SetFont( $self->get_font('/para_text_2') );
+        $y->SetFont( $self->app->get_font('para_text_2') );
 
         return $y;
     }#}}}
@@ -150,7 +150,7 @@ ${indent}Remember that this form only creates a proposition to fire the BFG, and
             wxDefaultPosition, 
             Wx::Size->new(-1, 25)
         );
-        $y->SetFont( $self->get_font('/para_text_2') );
+        $y->SetFont( $self->app->get_font('para_text_2') );
 
         return $y;
     }#}}}
@@ -163,7 +163,7 @@ ${indent}Remember that this form only creates a proposition to fire the BFG, and
             wxDefaultPosition, 
             Wx::Size->new(-1, 40)
         );
-        $y->SetFont( $self->get_font('/para_text_2') );
+        $y->SetFont( $self->app->get_font('para_text_2') );
 
         return $y;
     }#}}}
@@ -174,7 +174,7 @@ ${indent}Remember that this form only creates a proposition to fire the BFG, and
             "Fire BFG on " . $self->planet_name, 
             wxDefaultPosition, Wx::Size->new(-1, 40)
         );
-        $y->SetFont( $self->get_font('/header_1') );
+        $y->SetFont( $self->app->get_font('header_1') );
         return $y;
     }#}}}
     sub _build_parl {#{{{
@@ -229,7 +229,7 @@ ${indent}Remember that this form only creates a proposition to fire the BFG, and
             wxDefaultPosition, 
             Wx::Size->new(250,25)
         );
-        $v->SetFont( $self->get_font('/para_text_1') );
+        $v->SetFont( $self->app->get_font('para_text_1') );
         my $tt = Wx::ToolTip->new("This can be anything - feel free to change the default.");
         $v->SetToolTip($tt);
         return $v;
@@ -246,7 +246,7 @@ ${indent}Remember that this form only creates a proposition to fire the BFG, and
             wxDefaultPosition, 
             Wx::Size->new(200,25)
         );
-        $v->SetFont( $self->get_font('/bold_para_text_1') );
+        $v->SetFont( $self->app->get_font('bold_para_text_1') );
         my $tt = Wx::ToolTip->new("You or somebody in your alliances must have this star probed.");
         $v->SetToolTip($tt);
         return $v;
@@ -259,7 +259,7 @@ ${indent}Remember that this form only creates a proposition to fire the BFG, and
             wxDefaultPosition, 
             Wx::Size->new(70,25)
         );
-        $v->SetFont( $self->get_font('/bold_para_text_1') );
+        $v->SetFont( $self->app->get_font('bold_para_text_1') );
         return $v;
     }#}}}
     sub _set_events {#{{{

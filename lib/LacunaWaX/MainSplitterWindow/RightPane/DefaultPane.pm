@@ -36,7 +36,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::DefaultPane {
             wxDefaultPosition, 
             Wx::Size->new(-1, 30)
         );
-        $v->SetFont( $self->get_font('/header_1') );
+        $v->SetFont( $self->app->get_font('header_1') );
         return $v;
     }#}}}
     sub _build_lbl_text {#{{{
@@ -47,7 +47,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::DefaultPane {
             wxDefaultPosition, 
             Wx::Size->new(500,400)
         );
-        $v->SetFont( $self->get_font('/para_text_2') );
+        $v->SetFont( $self->app->get_font('para_text_2') );
         return $v;
     }#}}}
     sub _build_text {#{{{

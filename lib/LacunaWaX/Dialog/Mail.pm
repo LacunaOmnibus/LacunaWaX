@@ -311,7 +311,7 @@ package LacunaWaX::Dialog::Mail {
             wxDefaultPosition, 
             Wx::Size->new(50, $self->addy_height)
         );
-        $y->SetFont( $self->get_font('/bold_para_text_1') );
+        $y->SetFont( $self->app->get_font('bold_para_text_1') );
         return $y;
     }#}}}
     sub _build_lbl_body {#{{{
@@ -322,7 +322,7 @@ package LacunaWaX::Dialog::Mail {
             wxDefaultPosition, 
             Wx::Size->new(50, $self->addy_height)
         );
-        $y->SetFont( $self->get_font('/bold_para_text_1') );
+        $y->SetFont( $self->app->get_font('bold_para_text_1') );
         return $y;
     }#}}}
     sub _build_lbl_btn_send {#{{{
@@ -336,7 +336,7 @@ package LacunaWaX::Dialog::Mail {
             wxDefaultPosition, 
             Wx::Size->new(50, $self->addy_height)
         );
-        $y->SetFont( $self->get_font('/bold_para_text_1') );
+        $y->SetFont( $self->app->get_font('bold_para_text_1') );
         return $y;
     }#}}}
     sub _build_lbl_instructions {#{{{
@@ -351,7 +351,7 @@ package LacunaWaX::Dialog::Mail {
             wxDefaultPosition, $size
         );
         $y->Wrap( $self->size->GetWidth - 35 ); # - 35 accounts for the vertical scrollbar
-        $y->SetFont( $self->get_font('/bold_para_text_1') );
+        $y->SetFont( $self->app->get_font('bold_para_text_1') );
 
         return $y;
     }#}}}
@@ -363,7 +363,7 @@ package LacunaWaX::Dialog::Mail {
             wxDefaultPosition, 
             Wx::Size->new(400, 30)
         );
-        $y->SetFont( $self->get_font('/header_2') );
+        $y->SetFont( $self->app->get_font('header_2') );
         return $y;
     }#}}}
     sub _build_lbl_hdr_page {#{{{
@@ -374,7 +374,7 @@ package LacunaWaX::Dialog::Mail {
             wxDefaultPosition, 
             Wx::Size->new(400, 35)
         );
-        $y->SetFont( $self->get_font('/header_1') );
+        $y->SetFont( $self->app->get_font('header_1') );
         return $y;
     }#}}}
     sub _build_lbl_hdr_send {#{{{
@@ -385,7 +385,7 @@ package LacunaWaX::Dialog::Mail {
             wxDefaultPosition, 
             Wx::Size->new(400, 30)
         );
-        $v->SetFont( $self->get_font('/header_2') );
+        $v->SetFont( $self->app->get_font('header_2') );
         $v->SetToolTip(
 "Messages sent by this form are doing an end-run around the profanity filter.  Use your head."
         );
@@ -399,7 +399,7 @@ package LacunaWaX::Dialog::Mail {
             wxDefaultPosition, 
             Wx::Size->new(50, $self->addy_height)
         );
-        $y->SetFont( $self->get_font('/bold_para_text_1') );
+        $y->SetFont( $self->app->get_font('bold_para_text_1') );
         return $y;
     }#}}}
     sub _build_lbl_to {#{{{
@@ -410,7 +410,7 @@ package LacunaWaX::Dialog::Mail {
             wxDefaultPosition, 
             Wx::Size->new(50, $self->addy_height)
         );
-        $y->SetFont( $self->get_font('/bold_para_text_1') );
+        $y->SetFont( $self->app->get_font('bold_para_text_1') );
         return $y;
     }#}}}
     sub _build_size {#{{{

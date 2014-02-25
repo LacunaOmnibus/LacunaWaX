@@ -65,7 +65,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::GlyphsPane::RecipeForm {
             wxDefaultPosition, 
             Wx::Size->new(150, $self->height)
         );
-        $v->SetFont( $self->get_font('/para_text_1') );
+        $v->SetFont( $self->app->get_font('para_text_1') );
         return $v;
     }#}}}
     sub _build_lbl_recipe {#{{{
@@ -76,7 +76,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::GlyphsPane::RecipeForm {
             wxDefaultPosition, 
             Wx::Size->new(270, $self->height)
         );
-        $v->SetFont( $self->get_font('/para_text_1') );
+        $v->SetFont( $self->app->get_font('para_text_1') );
         return $v;
     }#}}}
     sub _build_spin_quantity {#{{{
@@ -88,7 +88,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::GlyphsPane::RecipeForm {
             wxSP_ARROW_KEYS, 
             0, 5000, 0
         );
-        $v->SetFont( $self->get_font('/para_text_1') );
+        $v->SetFont( $self->app->get_font('para_text_1') );
         return $v;
     }#}}}
     sub _build_btn_assemble {#{{{
@@ -97,7 +97,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::GlyphsPane::RecipeForm {
             $self->parent, -1,
             "Assemble"
         );
-        $v->SetFont( $self->get_font('/para_text_1') );
+        $v->SetFont( $self->app->get_font('para_text_1') );
         return $v;
     }#}}}
     sub _build_list_glyphs {#{{{
