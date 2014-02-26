@@ -149,7 +149,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::SSHealth {
     sub _build_btn_save {#{{{
         my $self = shift;
         my $v = Wx::Button->new($self->parent, -1, "Save Alert Preferences");
-        $v->SetFont( $self->get_font('/para_text_1') );
+        $v->SetFont( $self->app->get_font('para_text_1') );
         return $v;
     }#}}}
 
@@ -162,7 +162,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::SSHealth {
             Wx::Size->new(-1,-1), 
         );
 
-        $v->SetFont( $self->get_font('/para_text_2') );
+        $v->SetFont( $self->app->get_font('para_text_2') );
         $v->SetValue( $self->alert_record->enabled );
 
         return $v;
@@ -175,7 +175,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::SSHealth {
             wxDefaultPosition, 
             Wx::Size->new(-1, 20)
         );
-        $v->SetFont( $self->get_font('/para_text_2') );
+        $v->SetFont( $self->app->get_font('para_text_2') );
         my $tt = Wx::ToolTip->new( "If off, NO alerts will be produced for this station." );
         $v->SetToolTip($tt);
         return $v;
@@ -194,7 +194,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::SSHealth {
             Wx::Size->new(-1,-1), 
         );
 
-        $v->SetFont( $self->get_font('/para_text_2') );
+        $v->SetFont( $self->app->get_font('para_text_2') );
         $v->SetValue( $self->alert_record->hostile_ships );
 
         return $v;
@@ -207,7 +207,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::SSHealth {
             wxDefaultPosition, 
             Wx::Size->new(-1, 20)
         );
-        $v->SetFont( $self->get_font('/para_text_2') );
+        $v->SetFont( $self->app->get_font('para_text_2') );
         my $tt = Wx::ToolTip->new( "Alerts for incoming foreign ships." );
         $v->SetToolTip($tt);
         return $v;
@@ -226,7 +226,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::SSHealth {
             Wx::Size->new(-1,-1), 
         );
 
-        $v->SetFont( $self->get_font('/para_text_2') );
+        $v->SetFont( $self->app->get_font('para_text_2') );
         $v->SetValue( $self->alert_record->hostile_spies );
 
         return $v;
@@ -239,7 +239,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::SSHealth {
             wxDefaultPosition, 
             Wx::Size->new(-1, 20)
         );
-        $v->SetFont( $self->get_font('/para_text_2') );
+        $v->SetFont( $self->app->get_font('para_text_2') );
         my $tt = Wx::ToolTip->new( "Alerts for spies onsite who are not set to Counter Espionage." );
         $v->SetToolTip($tt);
         return $v;
@@ -258,7 +258,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::SSHealth {
             Wx::Size->new(-1,-1), 
         );
 
-        $v->SetFont( $self->get_font('/para_text_2') );
+        $v->SetFont( $self->app->get_font('para_text_2') );
         $v->SetValue( $self->alert_record->own_star_seized );
 
         return $v;
@@ -271,7 +271,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::SSHealth {
             wxDefaultPosition, 
             Wx::Size->new(-1, 20)
         );
-        $v->SetFont( $self->get_font('/para_text_2') );
+        $v->SetFont( $self->app->get_font('para_text_2') );
         my $tt = Wx::ToolTip->new( "Alerts if the station's own star is not seized by this station." );
         $v->SetToolTip($tt);
         return $v;
@@ -289,7 +289,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::SSHealth {
             wxDefaultPosition, 
             Wx::Size->new(-1, 68)
         );
-        $v->SetFont( $self->get_font('/header_1') );
+        $v->SetFont( $self->app->get_font('header_1') );
         $v->Wrap( $self->parent->GetSize->GetWidth - 130 ); # accounts for the vertical scrollbar
         return $v;
     }#}}}
@@ -313,7 +313,7 @@ There's actually no way to truly tell if a foreign spy is 'hostile' or not.  So 
             Wx::Size->new(-1, 270)
         );
         $v->Wrap( $self->parent->GetSize->GetWidth - 130 ); # accounts for the vertical scrollbar
-        $v->SetFont( $self->get_font('/para_text_2') );
+        $v->SetFont( $self->app->get_font('para_text_2') );
         return $v;
     }#}}}
     sub _build_lbl_min_res_pre {#{{{
@@ -324,7 +324,7 @@ There's actually no way to truly tell if a foreign spy is 'hostile' or not.  So 
             wxDefaultPosition, 
             Wx::Size->new(-1, -1)
         );
-        $v->SetFont( $self->get_font('/para_text_2') );
+        $v->SetFont( $self->app->get_font('para_text_2') );
         return $v;
     }#}}}
     sub _build_lbl_min_res_suf {#{{{
@@ -335,7 +335,7 @@ There's actually no way to truly tell if a foreign spy is 'hostile' or not.  So 
             wxDefaultPosition, 
             Wx::Size->new(-1, -1)
         );
-        $v->SetFont( $self->get_font('/para_text_2') );
+        $v->SetFont( $self->app->get_font('para_text_2') );
         return $v;
     }#}}}
     sub _build_planet_id {#{{{

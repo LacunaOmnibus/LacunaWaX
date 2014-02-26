@@ -65,7 +65,7 @@ package LacunaWax::Dialog::Prefs::TabAutovote {
             wxDefaultPosition, 
             Wx::Size->new(365,25)
         );
-        $v->SetFont( $self->get_font('/bold_para_text_1') );
+        $v->SetFont( $self->app->get_font('bold_para_text_1') );
         return $v;
     }#}}}
     sub _build_list_known_ss {#{{{

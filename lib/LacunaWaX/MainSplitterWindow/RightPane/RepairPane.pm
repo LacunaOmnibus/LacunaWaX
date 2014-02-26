@@ -179,7 +179,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::RepairPane {
             wxDefaultPosition,
             Wx::Size->new($self->btn_w, $self->btn_h),
         );
-        $v->SetFont( $self->get_font('/bold_para_text_1') );
+        $v->SetFont( $self->app->get_font('bold_para_text_1') );
         my $tt = Wx::ToolTip->new("Add");
         $v->SetToolTip($tt);
         return $v;
@@ -192,7 +192,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::RepairPane {
             wxDefaultPosition,
             Wx::Size->new($self->btn_w, $self->btn_h),
         );
-        $v->SetFont( $self->get_font('/bold_para_text_1') );
+        $v->SetFont( $self->app->get_font('bold_para_text_1') );
         my $tt = Wx::ToolTip->new("Add All");
         $v->SetToolTip($tt);
         return $v;
@@ -205,7 +205,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::RepairPane {
             wxDefaultPosition,
             Wx::Size->new($self->btn_w, $self->btn_h),
         );
-        $v->SetFont( $self->get_font('/para_text_1') );
+        $v->SetFont( $self->app->get_font('para_text_1') );
         my $tt = Wx::ToolTip->new("Glyph buildings are free to repair, so you usually want to do them first.");
         $v->SetToolTip($tt);
         return $v;
@@ -218,7 +218,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::RepairPane {
             wxDefaultPosition,
             Wx::Size->new($self->btn_w, $self->btn_h),
         );
-        $v->SetFont( $self->get_font('/bold_para_text_1') );
+        $v->SetFont( $self->app->get_font('bold_para_text_1') );
         my $tt = Wx::ToolTip->new("Remove");
         $v->SetToolTip($tt);
         return $v;
@@ -231,7 +231,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::RepairPane {
             wxDefaultPosition,
             Wx::Size->new($self->btn_w, $self->btn_h),
         );
-        $v->SetFont( $self->get_font('/bold_para_text_1') );
+        $v->SetFont( $self->app->get_font('bold_para_text_1') );
         my $tt = Wx::ToolTip->new("Remove All");
         $v->SetToolTip($tt);
         return $v;
@@ -244,7 +244,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::RepairPane {
             wxDefaultPosition,
             Wx::Size->new(100, 50),
         );
-        $v->SetFont( $self->get_font('/bold_para_text_1') );
+        $v->SetFont( $self->app->get_font('bold_para_text_1') );
         my $tt = Wx::ToolTip->new("Repair all buildings listed on the right");
         $v->SetToolTip($tt);
         return $v;
@@ -351,7 +351,7 @@ call it as
             "Repair Damaged Buildings on " . $self->planet_name,
             wxDefaultPosition, Wx::Size->new(-1, 40)
         );
-        $y->SetFont( $self->get_font('/header_1') );
+        $y->SetFont( $self->app->get_font('header_1') );
         return $y;
     }#}}}
     sub _build_lbl_instructions {#{{{
@@ -368,7 +368,7 @@ If many buildings are damaged, you may run out of resources before you can repai
             wxDefaultPosition, 
             Wx::Size->new(-1, 50)
         );
-        $y->SetFont( $self->get_font('/para_text_2') );
+        $y->SetFont( $self->app->get_font('para_text_2') );
         $y->Wrap( 560 );
 
         return $y;

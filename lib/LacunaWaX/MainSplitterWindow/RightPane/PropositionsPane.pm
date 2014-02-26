@@ -125,7 +125,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane {
             wxDefaultPosition, 
             Wx::Size->new(-1, -1)
         );
-        $v->SetFont( $self->get_font('/para_text_2') );
+        $v->SetFont( $self->app->get_font('para_text_2') );
         return $v;
     }#}}}
     sub _build_lbl_instructions {#{{{
@@ -141,7 +141,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane {
             wxDefaultPosition, 
             Wx::Size->new(-1, 190)
         );
-        $v->SetFont( $self->get_font('/para_text_2') );
+        $v->SetFont( $self->app->get_font('para_text_2') );
         $v->Wrap(550);
 
         return $v;
@@ -159,7 +159,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane {
             "Propositions on " . $self->planet_name, wxDefaultPosition, 
             Wx::Size->new(-1, 40)
         );
-        $v->SetFont( $self->get_font('/header_1') );
+        $v->SetFont( $self->app->get_font('header_1') );
         return $v;
     }#}}}
     sub _build_planet_id {#{{{
@@ -174,7 +174,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane {
             wxDefaultPosition, 
             Wx::Size->new(-1,-1), 
         );
-        $v->SetFont( $self->get_font('/para_text_2') );
+        $v->SetFont( $self->app->get_font('para_text_2') );
         return $v;
     }#}}}
     sub _build_szr_header {#{{{

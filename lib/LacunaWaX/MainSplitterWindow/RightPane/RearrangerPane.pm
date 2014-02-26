@@ -60,7 +60,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::RearrangerPane {
     }
     sub _build_blank_image {#{{{
         my $self = shift;
-        my $img = $self->get_image('/planetside/blank.png');
+        my $img = $self->app->get_image('planetside/blank.png');
         $img->Rescale(50, 50);
         return Wx::Bitmap->new($img);
     }#}}}
@@ -85,13 +85,13 @@ package LacunaWaX::MainSplitterWindow::RightPane::RearrangerPane {
     sub _build_btn_rearrange {#{{{
         my $self = shift;
         my $v = Wx::Button->new($self->parent, -1, 'Rearrange');
-        $v->SetFont( $self->get_font('/para_text_2') );
+        $v->SetFont( $self->app->get_font('para_text_2') );
         return $v;
     }#}}}
     sub _build_btn_reload {#{{{
         my $self = shift;
         my $v = Wx::Button->new($self->parent, -1, 'Reload');
-        $v->SetFont( $self->get_font('/para_text_2') );
+        $v->SetFont( $self->app->get_font('para_text_2') );
         return $v;
     }#}}}
     sub _build_gridszr_buttons {#{{{
@@ -106,7 +106,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::RearrangerPane {
             wxDefaultPosition, 
             Wx::Size->new(640, 40)
         );
-        $v->SetFont( $self->get_font('/header_1') );
+        $v->SetFont( $self->app->get_font('header_1') );
         return $v;
     }#}}}
     sub _build_planet_id {#{{{
@@ -284,7 +284,7 @@ building, then makes the one the user just clicked out currently-saved.
 
                 my $bitmap;
                 if( defined $bldg_hr->{'image'} ) {
-                    my $img = $self->get_image("/planetside/$bldg_hr->{'image'}.png");
+                    my $img = $self->app->get_image("planetside/$bldg_hr->{'image'}.png");
                     $img->Rescale(50, 50);
                     $bitmap = Wx::Bitmap->new($img);
                 }

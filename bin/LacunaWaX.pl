@@ -4,14 +4,18 @@ use v5.14;
 use strict;
 
 
-### Regular BreadBoard container has been excised.
+### Next step is to start pulling the requirement on GuiElement role from 
+### everything; it's silly.
 ###
-### Next step is to remove the wxbb (I'll need an additional Globals module, 
-### WxGlobals maybe, to replace it.) 
+### That'll mean that I'm going to need to move build_sizer somewhere else.  
+### LacunaWaX.pm makes sense.
 
 
 
 BEGIN {#{{{
+
+    use FindBin;
+    use lib "$FindBin::Bin/../lib";
 
     ### Step 2
     use Class::Load::XS;
@@ -67,20 +71,47 @@ BEGIN {#{{{
     ### Step 17
     use MooseX::Clone;
 
-    ### Step 16
-    use Bread::Board::Traversable;
+### Restarted counting steps here after removing Bread::Board
+
+    ### Step 19
+    use SQL::Translator::Role::Error;
 
     ### Step 20
-    use Bread::Board::Service::WithClass;
+    use SQL::Translator::Role::BuildArgs;
 
     ### Step 21
-    use Bread::Board::Service::WithParameters;
+    use SQL::Translator::Schema::Role::Extra;
 
-    ### Step 24
-    use Moose::Meta::Attribute::Native::Trait;
+    ### Step 22
+    use SQL::Translator::Schema::Role::Compare;
 
     ### Step 23
-    use Moose::Meta::Attribute::Native::Trait::Code;
+    use SQL::Translator::Role::Debug;
+
+    ### Step 18
+    use SQL::Translator::Schema::Object;
+
+    ### Step 24
+    use LacunaWaX::Roles::GuiElement;
+
+#use Moose::Exception::Role::Class;
+#use Moose::Exception::MethodNameNotFoundInInheritanceHierarchy;
+#use Moose::Exception::IncompatibleMetaclassOfSuperclass;
+
+    ### Step 16
+    #use Bread::Board::Traversable;
+
+    ### Step 20
+    #use Bread::Board::Service::WithClass;
+
+    ### Step 21
+    #use Bread::Board::Service::WithParameters;
+
+    ### Step 24
+    #use Moose::Meta::Attribute::Native::Trait;
+
+    ### Step 23
+    #use Moose::Meta::Attribute::Native::Trait::Code;
 
     ##########################################################################
     ###
@@ -88,28 +119,24 @@ BEGIN {#{{{
     ### comes first, but step 27 requires step 26 come first.
     ###
     ### Step 26
-    use Moose::Exception::Role::Class;
+    #use Moose::Exception::Role::Class;
 
     ### Step 27
-    use Moose::Exception::MethodNameNotFoundInInheritanceHierarchy;
+    #use Moose::Exception::MethodNameNotFoundInInheritanceHierarchy;
     ##########################################################################
 
     ### Step 25
-    use Moose::Exception::IncompatibleMetaclassOfSuperclass;
+    #use Moose::Exception::IncompatibleMetaclassOfSuperclass;
 
     ### Step 22
-    use Bread::Board::Service::WithDependencies;
-
-
+    #use Bread::Board::Service::WithDependencies;
 
 }#}}}
 
 use File::Copy;
-use FindBin;
 use IO::All;
 use Wx qw(:allclasses);
 
-use lib "$FindBin::Bin/../lib";
 use LacunaWaX;
 use LacunaWaX::Util;
 use LacunaWaX::Model::DefaultData;
@@ -127,22 +154,17 @@ Running for the first time, so databases must be deployed first.
 
 This takes a few seconds; please be patient...  ";
 
-    my $c = LacunaWaX::Model::Container->new(
-        name        => 'my container',
-        root_dir    => $FindBin::Bin . "/..",
-        db_file     => $app_db,
-        db_log_file => $log_db,
-    );
+    my $g = LacunaWaX::Model::Globals->new( root_dir => "$FindBin::Bin/.." );
 
     unless(-e $app_db ) {
-        my $app_schema = $c->resolve( service => '/Database/schema' );
+        my $app_schema = $g->main_schema;
         $app_schema->deploy;
         my $d = LacunaWaX::Model::DefaultData->new();
         $d->add_servers($app_schema);
         $d->add_stations($app_schema);
     }
     unless(-e $log_db ) {
-        my $log_schema = $c->resolve( service => '/DatabaseLog/schema' );
+        my $log_schema = $g->logs_schema;
         $log_schema->deploy;
     }
 

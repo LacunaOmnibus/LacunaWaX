@@ -55,7 +55,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::SpiesPane::BatchRenameForm {
             $self->parent, -1,
             "Rename all spies"
         );
-        $v->SetFont( $self->get_font('/para_text_1') );
+        $v->SetFont( $self->app->get_font('para_text_1') );
         return $v;
     }#}}}
     sub _build_dialog_status {#{{{
@@ -109,7 +109,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::SpiesPane::BatchRenameForm {
             wxDefaultPosition, 
             Wx::Size->new(150, 20)
         );
-        $v->SetFont( $self->get_font('/para_text_1') );
+        $v->SetFont( $self->app->get_font('para_text_1') );
         $v->SetToolTip( 'This will be the name of all of your spies, modified by the Pre- or Suf- fix' );
         return $v;
     }#}}}
@@ -253,11 +253,9 @@ package LacunaWaX::MainSplitterWindow::RightPane::SpiesPane::BatchRenameForm {
         if( $renamed ) {
             ### Spies have been renamed, so expire the spies currently in the 
             ### cache so the new names show up on the next screen load.
-            if( $self->wxbb ) {
-                my $chi  = $self->get_chi;
-                my $key  = join q{:}, ('BODIES', 'SPIES', $self->ancestor->planet_id);
-                $chi->remove($key);
-            }
+            my $chi  = $self->app->get_cache;
+            my $key  = join q{:}, ('BODIES', 'SPIES', $self->ancestor->planet_id);
+            $chi->remove($key);
         }
 
         $self->game_client->rpc_sleep($old_rpc_sleep);

@@ -198,7 +198,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::LotteryPane {
             wxDefaultPosition, 
             Wx::Size->new(-1, 35)
         );
-        $v->SetFont( $self->get_font('/header_1') );
+        $v->SetFont( $self->app->get_font('header_1') );
         return $v;
     }#}}}
     sub _build_lbl_links_hdr {#{{{
@@ -209,7 +209,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::LotteryPane {
             wxDefaultPosition, 
             Wx::Size->new(-1, 35)
         );
-        $v->SetFont( $self->get_font('/header_2') );
+        $v->SetFont( $self->app->get_font('header_2') );
         return $v;
     }#}}}
     sub _build_lbl_links_inst {#{{{
@@ -230,7 +230,7 @@ show up in this list until a new version of LacunaWaX is released.";
             wxDefaultPosition, 
             Wx::Size->new(-1, 140)
         );
-        $v->SetFont( $self->get_font('/para_text_2') );
+        $v->SetFont( $self->app->get_font('para_text_2') );
         return $v;
     }#}}}
     sub _build_lbl_total {#{{{
@@ -248,7 +248,7 @@ show up in this list until a new version of LacunaWaX is released.";
             wxDefaultPosition, 
             Wx::Size->new(500,$th)
         );
-        $v->SetFont( $self->get_font('/para_text_2') );
+        $v->SetFont( $self->app->get_font('para_text_2') );
         return $v;
     }#}}}
     sub _build_lbl_other {#{{{
@@ -265,7 +265,7 @@ show up in this list until a new version of LacunaWaX is released.";
             wxDefaultPosition, 
             Wx::Size->new(500,25)
         );
-        $v->SetFont( $self->get_font('/para_text_2') );
+        $v->SetFont( $self->app->get_font('para_text_2') );
         $v->SetLabel( $self->update_lbl_other_assignments );
         return $v;
     }#}}}
@@ -279,7 +279,7 @@ show up in this list until a new version of LacunaWaX is released.";
             wxDefaultPosition, 
             Wx::Size->new(55,25)
         );
-        $v->SetFont( $self->get_font('/para_text_2') );
+        $v->SetFont( $self->app->get_font('para_text_2') );
         
         return $v;
     }#}}}
@@ -314,7 +314,7 @@ show up in this list until a new version of LacunaWaX is released.";
             wxDefaultPosition, 
             Wx::Size->new(180,25)
         );
-        $v->SetFont( $self->get_font('/para_text_2') );
+        $v->SetFont( $self->app->get_font('para_text_2') );
         
         return $v;
     }#}}}
@@ -423,7 +423,7 @@ far in tests, and a bullet getting through this is not fatal.
                 Wx::Size->new(-1, 20),
                 wxHL_DEFAULT_STYLE
             );
-            $v->SetFont( $self->get_font('/para_text_3') );
+            $v->SetFont( $self->app->get_font('para_text_3') );
 
             ### Windows, at least:
             ### Mousing over a link should display its hover color (default 

@@ -2,7 +2,6 @@ use v5.14;
 
 package LacunaWaX::Roles::ScheduledTask {
     use LacunaWaX::Model::Client;
-    use LacunaWaX::Model::Container;
     use Moose::Role;
     use Try::Tiny;
 

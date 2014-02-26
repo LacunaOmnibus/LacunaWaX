@@ -133,19 +133,19 @@ package LacunaWaX::MainSplitterWindow::RightPane::GlyphsPane {
     sub _build_btn_auto_search {#{{{
         my $self = shift;
         my $v = Wx::Button->new($self->parent, -1, "Set Auto Search");
-        $v->SetFont( $self->get_font('/para_text_1') );
+        $v->SetFont( $self->app->get_font('para_text_1') );
         return $v;
     }#}}}
     sub _build_btn_build_all_halls {#{{{
         my $self = shift;
         my $v = Wx::Button->new($self->parent, -1, "Build as Many Halls as Possible");
-        $v->SetFont( $self->get_font('/para_text_1') );
+        $v->SetFont( $self->app->get_font('para_text_1') );
         return $v;
     }#}}}
     sub _build_btn_push_glyphs {#{{{
         my $self = shift;
         my $v = Wx::Button->new($self->parent, -1, "Set Glyph Push");
-        $v->SetFont( $self->get_font('/para_text_1') );
+        $v->SetFont( $self->app->get_font('para_text_1') );
         return $v;
     }#}}}
     sub _build_chc_auto_search {#{{{
@@ -175,7 +175,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::GlyphsPane {
             ['None', @{$ore_types}],
         );
         $v->SetSelection($selection_ss);
-        $v->SetFont( $self->get_font('/para_text_1') );
+        $v->SetFont( $self->app->get_font('para_text_1') );
         return $v;
     }#}}}
     sub _build_chc_glyph_home {#{{{
@@ -218,7 +218,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::GlyphsPane {
             ['None', @sorted_planets],
         );
         $v->SetSelection($selection_ss);
-        $v->SetFont( $self->get_font('/para_text_1') );
+        $v->SetFont( $self->app->get_font('para_text_1') );
         return $v;
     }#}}}
     sub _build_glyph_pusher_box {#{{{
@@ -267,7 +267,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::GlyphsPane {
             wxDefaultPosition, 
             Wx::Size->new(100, 30)
         );
-        $lbl_glyph_home->SetFont( $self->get_font('/para_text_1') );
+        $lbl_glyph_home->SetFont( $self->app->get_font('para_text_1') );
         return $lbl_glyph_home;
     }#}}}
     sub _build_lbl_pusher_ship {#{{{
@@ -278,7 +278,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::GlyphsPane {
             wxDefaultPosition, 
             Wx::Size->new(70, 30)
         );
-        $lbl_pusher_ship->SetFont( $self->get_font('/para_text_1') );
+        $lbl_pusher_ship->SetFont( $self->app->get_font('para_text_1') );
         return $lbl_pusher_ship;
     }#}}}
     sub _build_lbl_reserve_glyphs {#{{{
@@ -289,7 +289,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::GlyphsPane {
             wxDefaultPosition, 
             Wx::Size->new(160, 30)
         );
-        $lbl_pusher_ship->SetFont( $self->get_font('/para_text_1') );
+        $lbl_pusher_ship->SetFont( $self->app->get_font('para_text_1') );
         return $lbl_pusher_ship;
     }#}}}
     sub _build_list_glyphs {#{{{
@@ -343,7 +343,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::GlyphsPane {
             $self->yield;
         }#}}}
 
-        $list_ctrl->SetFont( $self->get_font('/para_text_1') );
+        $list_ctrl->SetFont( $self->app->get_font('para_text_1') );
 
         $self->endthrob();
         return $list_ctrl;
@@ -356,7 +356,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::GlyphsPane {
             wxDefaultPosition, 
             Wx::Size->new(640, 40)
         );
-        $v->SetFont( $self->get_font('/header_1') );
+        $v->SetFont( $self->app->get_font('header_1') );
         return $v;
     }#}}}  
     sub _build_list_sizer {#{{{

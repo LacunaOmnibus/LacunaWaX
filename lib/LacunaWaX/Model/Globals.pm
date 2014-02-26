@@ -54,7 +54,9 @@ package LacunaWaX::Model::Globals {
         isa         => 'LacunaWaX::Model::Globals::Database',
         lazy_build  => 1,
         handles     => {
-            log_schema => 'schema',
+            ### I'm almost certain to call this both ways.
+            log_schema  => 'schema',
+            logs_schema => 'schema',
         }
     );
 
@@ -213,7 +215,7 @@ package LacunaWaX::Model::Globals {
     }#}}}
     sub _build_dir_bin {#{{{
         my $self = shift;
-        my $p = path( join q{/}, $self->dir_root, 'assets' );
+        my $p = path( join q{/}, $self->dir_root, 'bin' );
         return $p;
     }#}}}
     sub _build_dir_html {#{{{
@@ -291,12 +293,12 @@ I want all log entries from a given run of the app to have the same 'run'
 value, to make it easy to eyeball all of what happened last run.  I did think 
 about just using a pid for this, but I wanted the number sequential.
 
-The Model::DBILogger output class will lazy_build its run attribute, setting it one 
-higher than the current highest run value in the Logs table.
+The Model::DBILogger output class will lazy_build its run attribute, setting 
+it one higher than the current highest run value in the Logs table.
 
-The problem is that my logger class is not a singleton.  This is so I can 
-resolve a logger, set its component one time, and have that component setting 
-stick for the life of that logger.
+The problem is that my logger class is not a singleton.  This is so I can get 
+a logger, set its component one time, and have that component setting stick 
+for the life of that logger.
 
 Previously, when the logger was a singleton, this would happen:
     

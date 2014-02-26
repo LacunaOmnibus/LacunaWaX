@@ -136,7 +136,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::SSIncoming {
             wxDefaultPosition, 
             Wx::Size->new(50, 30)
         );
-        $v->SetFont( $self->get_font('/para_text_1') );
+        $v->SetFont( $self->app->get_font('para_text_1') );
         ### Disable next button unless we have more than 25 incoming.
         my $enabled = ($self->count > 25) ? 1 : 0;
         $v->Enable($enabled);
@@ -149,7 +149,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::SSIncoming {
             wxDefaultPosition, 
             Wx::Size->new(50, 30)
         );
-        $v->SetFont( $self->get_font('/para_text_1') );
+        $v->SetFont( $self->app->get_font('para_text_1') );
         ### Always start the Prev button disabled.
         $v->Enable(0);
         return $v;
@@ -162,7 +162,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::SSIncoming {
             wxDefaultPosition, 
             Wx::Size->new(-1, 40)
         );
-        $v->SetFont( $self->get_font('/header_1') );
+        $v->SetFont( $self->app->get_font('header_1') );
         return $v;
     }#}}}
     sub _build_lbl_instructions {#{{{
@@ -176,7 +176,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::SSIncoming {
             wxDefaultPosition, 
             Wx::Size->new(-1, 20)
         );
-        $v->SetFont( $self->get_font('/para_text_2') );
+        $v->SetFont( $self->app->get_font('para_text_2') );
         return $v;
     }#}}}
     sub _build_lbl_incoming {#{{{
@@ -189,7 +189,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::SSIncoming {
             wxDefaultPosition, 
             Wx::Size->new(-1, 20)
         );
-        $v->SetFont( $self->get_font('/para_text_2') );
+        $v->SetFont( $self->app->get_font('para_text_2') );
         return $v;
     }#}}}
     sub _build_lbl_page {#{{{
@@ -202,7 +202,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::SSIncoming {
             wxDefaultPosition, 
             Wx::Size->new(-1, 20)
         );
-        $v->SetFont( $self->get_font('/para_text_2') );
+        $v->SetFont( $self->app->get_font('para_text_2') );
         return $v;
     }#}}}
     sub _build_lst_incoming {#{{{

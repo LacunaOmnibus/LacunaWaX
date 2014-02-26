@@ -7,7 +7,6 @@ LacunaWaX::Model::Client - Game server client
 
  my $game_client = LacunaWaX::Model::Client->new (
   app         => C<LacunaWaX object>,
-  wxbb        => C<LacunaWaX::Model::WxContainer object>,
   server_id   => C<Integer ID (in local Servers table) of server to connect to>
   allow_sleep => 0,
  );
@@ -43,7 +42,6 @@ empire_pass:
 
  my $other_client = LacunaWaX::Model::Client->new (
   app         => C<LacunaWaX object>,
-  wxbb        => C<LacunaWaX::Model::WxContainer object>,
   server_id   => C<ID of server>
   allow_sleep => 0,
 
@@ -62,13 +60,13 @@ A LacunaWaX object
 The integer ID of the server, in the local Servers table, to which to connect.  
 This must currently be either 1 (US1) or 2 (PT).
 
-=head2 wxbb
+=head2 use_gui
 
-A LacunaWaX::Model::WxContainer object
+Indicates whether we're attached to a GUI or not.  If so, we can use Wx-related 
+globals, as well as the CHI cache.  If we're not (eg from a scheduled task), we 
+won't use those.
 
-Contains services pertaining to the GUI.  Clients that should not attempt to 
-interact with the GUI (such as clients created during a scheduled task) should 
-not include a wxbb upon construction.
+Defaults to false.
 
 =head2 allow_sleep
 
@@ -164,16 +162,17 @@ package LacunaWaX::Model::Client {
     has 'app'           => (is => 'rw', isa => 'LacunaWaX',                     weak_ref => 1   ); 
     has 'server_id'     => (is => 'rw', isa => 'Int',                           required => 1   );
 
-    has 'wxbb' => (is => 'rw', isa => 'LacunaWaX::Model::WxContainer',
+    has 'empire_status'   => (is => 'rw', isa => 'HashRef');
+
+    has 'use_gui' => (
+        is          => 'rw',
+        isa         => 'Int',
+        default     => 0,
         documentation => q{
-            This should be passed in on construction if you've got one, meaning that you're creating 
-            this client in the context of a GUI app.
-            If this client is being created by a non-GUI, eg one of the scheduled tools, this will 
-            be undef.
+            If true, will use the cache and any Wx-related items needed.  If 
+            false, will avoid those.
         }
     );
-
-    has 'empire_status'   => (is => 'rw', isa => 'HashRef');
 
     has 'allow_sleep'   => (is => 'rw', isa => 'Int', lazy => 1,  default => 0,
         trigger => \&_change_allow_sleep,
@@ -647,8 +646,8 @@ where rate is a ship's listed speed.
         ### if the user is not in an alliance.
 
         my $alliance_id;
-        if( $self->wxbb ) {
-            my $chi  = $self->wxbb->resolve( service => '/Cache/raw_memory' );
+        if( $self->use_gui ) {
+            my $chi  = $self->app->get_cache;
             my $key  = $self->make_key('ALLIANCE_ID');
             $alliance_id = $chi->compute($key, '1 hour', sub {
                 my $emp = $self->client->empire;
@@ -683,8 +682,8 @@ where rate is a ship's listed speed.
         ### ...get the alliance object for that ID...
         my $alliance;
         my $alliance_profile;
-        if( $self->wxbb ) {
-            my $chi  = $self->wxbb->resolve( service => '/Cache/raw_memory' );
+        if( $self->use_gui ) {
+            my $chi  = $self->app->get_cache;
             my $a_key  = join q{:}, ('ALLIANCE', $alliance_id);
             $alliance = $chi->compute($a_key, '1 hour', sub {
                 $self->alliance( id => $alliance_id );
@@ -774,8 +773,8 @@ If you want just a subset, send an arrayref of the types you're interested in:
         my $filter = {task => 'Docked'};
 
         my $ships;
-        if( $self->wxbb ) {
-            my $chi  = $self->wxbb->resolve( service => '/Cache/raw_memory' );
+        if( $self->use_gui ) {
+            my $chi  = $self->app->get_cache;
             my $key  = $self->make_key('BODIES', 'SHIPS', 'AVAILABLE', (sort @{$types}), $pid);
             $filter->{type} = $types;
             $self->app->Yield if $self->app;
@@ -795,8 +794,8 @@ If you want just a subset, send an arrayref of the types you're interested in:
         my $pid  = shift;
 
         my $body;
-        if( $self->wxbb ) {
-            my $chi  = $self->wxbb->resolve( service => '/Cache/raw_memory' );
+        if( $self->use_gui ) {
+            my $chi  = $self->app->get_cache;
             my $key  = $self->make_key('BODIES', $pid);
             $body = $chi->compute($key, '1 hour', sub {
                 $self->client->body(id => $pid);
@@ -851,8 +850,8 @@ planet.
         };
 
         my $bs;
-        if( $self->wxbb and not $force ) {
-            my $chi = $self->wxbb->resolve( service => '/Cache/raw_memory' );
+        if( $self->use_gui and not $force ) {
+            my $chi  = $self->app->get_cache;
             my $key = $self->make_key('BODIES', 'STATUS', $pid);
             $bs     = $chi->compute($key, '1 hour', $code_to_cache);
             ### Something failed; don't keep the failure in the cache.
@@ -933,8 +932,8 @@ sending a true value as the third ('force') arg:
 
 
         my $all_bldgs;
-        if( $self->wxbb ) {
-            my $chi = $self->wxbb->resolve( service => '/Cache/raw_memory' );
+        if( $self->use_gui ) {
+            my $chi  = $self->app->get_cache;
             my $key = $self->make_key('BODIES', 'BULIDINGS', $pid);
             $chi->remove($key) if $force;
             $all_bldgs = $chi->compute($key, '1 hour', $code_to_cache);
@@ -987,9 +986,8 @@ GLC building object.
         my $type = substr $bldg_hr->{'url'}, 1;   # remove the leading slash from the url
         
         my $obj;
-        if( $self->wxbb ) {
-            ### wxbb only present from the GUI; it's where the cache lives.
-            my $chi = $self->wxbb->resolve( service => '/Cache/raw_memory' );
+        if( $self->use_gui ) {
+            my $chi  = $self->app->get_cache;
             my $key = $self->make_key('BODIES', 'BULIDINGS', 'OBJECTS', $pid, $id);
             $chi->remove($key) if $force;
             $obj = $chi->compute($key, '1 hour', sub {
@@ -1043,9 +1041,8 @@ Returns a hashref containing 'status' (sigh) and 'building', which is what you w
         my $bid = $bldg_obj->{'building_id'};
 
         my $view;
-        if( $self->wxbb ) {
-            ### wxbb only present from the GUI; it's where the cache lives.
-            my $chi = $self->wxbb->resolve( service => '/Cache/raw_memory' );
+        if( $self->use_gui ) {
+            my $chi  = $self->app->get_cache;
             my $key = $self->make_key('BODIES', 'BULIDINGS', 'VIEWS', $pid, $bid);
             $view = $chi->compute($key, '1 hour', sub {
                 $bldg_obj->view();
@@ -1143,8 +1140,8 @@ game, this returns all glyphs, including those we have zero of.
         };
 
         my $sorted_glyphs;
-        if( $self->wxbb ) {
-            my $chi = $self->wxbb->resolve( service => '/Cache/raw_memory' );
+        if( $self->use_gui ) {
+            my $chi  = $self->app->get_cache;
             my $key = $self->make_key('BODIES', 'GLYPHS', $pid);
             $sorted_glyphs = $chi->compute($key, '1 hour', $code_to_cache);
             $self->app->Yield if $self->app;
@@ -1210,8 +1207,8 @@ access those links in the first place; hence the need for the planet_id.
 
         my $chi;
         my $key = $self->make_key('LOTTERY', 'OPTIONS');
-        if( $self->wxbb ) {
-            $chi  = $self->wxbb->resolve( service => '/Cache/raw_memory' );
+        if( $self->use_gui ) {
+            $chi  = $self->app->get_cache;
         }
 
 
@@ -1299,8 +1296,8 @@ by GLC's view_all_ships.  The filter for get_ships() differs in that:
         ### resultset ourselves.
 
         my $ships;
-        if( $self->wxbb ) {
-            my $chi  = $self->wxbb->resolve( service => '/Cache/raw_memory' );
+        if( $self->use_gui ) {
+            my $chi  = $self->app->get_cache;
             my $key  = $self->make_key('BODIES', 'SHIPS', $pid);
             $ships = $chi->compute($key, '1 hour', sub {
                 $sp->view_all_ships({no_paging => 1})->{'ships'};
@@ -1395,8 +1392,8 @@ Returns an AoH, one spy per H.
 
 
         my $spies;
-        if( $self->wxbb ) {
-            my $chi  = $self->wxbb->resolve( service => '/Cache/raw_memory' );
+        if( $self->use_gui ) {
+            my $chi  = $self->app->get_cache;
             my $key  = $self->make_key('BODIES', 'SPIES', $pid);
             $spies = $chi->compute($key, '1 hour', $code_to_cache);
             $self->app->Yield if $self->app;

@@ -56,10 +56,4 @@ use Games::Lacuna::Client::Buildings::WasteRecycling;
 use Games::Lacuna::Client::Buildings::WaterStorage;
 
 use HTML::TreeBuilder;
-#use JSON::RPC::Common::Marshal::Text;
-
-#use LacunaWaX::Model::Schema;
-#use LacunaWaX::Model::LogsSchema;
-#use LacunaWaX::Model::DBILogger;
-#use LacunaWaX::Roles::GuiElement;
 

@@ -87,7 +87,7 @@ package LacunaWaX::Dialog::LogViewer {
             wxDefaultPosition, 
             Wx::Size->new(50, 30)
         );
-        $v->SetFont( $self->get_font('/para_text_1') );
+        $v->SetFont( $self->app->get_font('para_text_1') );
         my $enabled = ($self->count > $self->recs_per_page) ? 1 : 0;
         $v->Enable($enabled);
         return $v;
@@ -99,7 +99,7 @@ package LacunaWaX::Dialog::LogViewer {
             wxDefaultPosition, 
             Wx::Size->new(50, 30)
         );
-        $v->SetFont( $self->get_font('/para_text_1') );
+        $v->SetFont( $self->app->get_font('para_text_1') );
         $v->Enable(0); # Always start the Prev button disabled.
         return $v;
     }#}}}
@@ -132,7 +132,7 @@ package LacunaWaX::Dialog::LogViewer {
             wxDefaultPosition, 
             Wx::Size->new(-1, 20)
         );
-        $v->SetFont( $self->get_font('/para_text_2') );
+        $v->SetFont( $self->app->get_font('para_text_2') );
         return $v;
     }#}}}
     sub _build_list_log {#{{{

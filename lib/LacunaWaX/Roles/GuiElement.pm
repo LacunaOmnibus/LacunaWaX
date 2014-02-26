@@ -1,4 +1,101 @@
 
+package LacunaWaX::Roles::GuiElement {#{{{
+    use v5.14;
+    use Moose::Role;
+    use Try::Tiny;
+    use Wx qw(:everything);
+
+    ### This is braindead, and was added before I understood that 'wxTheApp' 
+    ### existed.  This should all be removed, but that'd require that every 
+    ### panel actually extend a Wx object, which is currently not the case.
+    has 'app' => (
+        is          => 'rw',
+        isa         => 'LacunaWaX',
+        required    => 1,
+        weak_ref    => 1,
+        handles => {
+            cartesian_distance      => 'cartesian_distance',
+            connected_account       => 'account',
+            endthrob                => 'endthrob',
+            game_connect            => 'game_connect',
+            game_client             => 'game_client',
+            get_connected_server    => 'server',
+            get_left_pane           => 'left_pane',
+            get_right_pane          => 'right_pane',
+            get_main_schema         => sub{ return shift->app->main_schema },
+            get_main_frame          => 'main_frame',
+            get_splitter            => 'splitter',
+            halls_to_level          => 'halls_to_level',
+            has_main_frame          => 'has_main_frame',
+            intro_panel_exists      => 'has_intro_panel',
+            get_intro_panel         => 'intro_panel',
+            get_top_left_corner     => sub{ return shift->app->GetTopWindow()->GetPosition },
+            menu                    => 'menu_bar',
+            poperr                  => 'poperr',
+            popmsg                  => 'popmsg',
+            popconf                 => 'popconf',
+            secs_to_human           => 'secs_to_human',
+            server                  => 'server',
+            server_ids              => 'server_ids',
+            server_record_by_id     => 'server_record_by_id',
+            set_caption             => 'caption',
+            set_connected_server    => 'server',
+            str_trim                => 'str_trim',
+            throb                   => 'throb',
+            travel_time             => 'travel_time',
+            yield                   => 'Yield',
+            Yield                   => 'Yield',
+        }
+    );
+
+    has 'ancestor'  => (is => 'rw', isa => 'Object',            weak_ref => 1       );
+    has 'parent'    => (is => 'rw', isa => 'Maybe[Wx::Window]'                      );
+
+    has 'sizer_debug' => (is => 'rw', isa => 'Int',  lazy => 1, default => 0,
+        documentation => q{
+            draws boxes with titles around all sizers if true.
+        }
+    );
+
+    has 'sizers' => (is => 'rw', isa => 'HashRef', lazy => 1, default => sub{ {} });
+
+    requires '_set_events';
+
+    after BUILD => sub {
+        my $self = shift;
+        $self->_set_events;
+        return 1;
+    };
+
+    sub build_sizer {#{{{
+        my $self        = shift;
+        my $parent      = shift;
+        my $direction   = shift;
+        my $name        = shift or die "iSizer name is required.";
+        my $force_box   = shift || 0;
+        my $pos         = shift || wxDefaultPosition;
+        my $size        = shift || wxDefaultSize;
+
+        my $hr = { };
+        if( $self->sizer_debug or $force_box ) {
+            $hr->{'box'} = Wx::StaticBox->new($parent, -1, $name, $pos, $size),
+            $hr->{'box'}->SetFont( $self->app->get_font('para_text_1') );
+            $hr->{'sizer'} = Wx::StaticBoxSizer->new($hr->{'box'}, $direction);
+        }
+        else {
+            $hr->{'sizer'} = Wx::BoxSizer->new($direction);
+        }
+        $self->sizers->{$name} = $hr;
+
+        return $hr->{'sizer'};
+    }#}}}
+
+    no Moose::Role;
+}#}}}
+
+1;
+
+__END__
 
 =head1 DESCRIPTION
 
@@ -71,8 +168,6 @@ Any class that inherits from GuiElement gets the following methods:
 
 =item * app_name - string
 
-=item * bb - The non-Wx Bread::Board container - safe for use from non-GUIs
-
 =item * connected_account - LacunaWaX::Model::Schema::ServerAccounts record with which we're connected (may be undef)
 
 =item * throb, endthrob - Starts and stops the throbber
@@ -93,12 +188,6 @@ game_connect has previously been called.
 Retrieves the requested font from the Wx Bread::Board container.  All 
 fonts are in '/Fonts/...', so you only need to pass in (eg) 'para_text_1' to get 
 at '/Fonts/para_text_1'.
-
-=item * get_image
-
-Retrieves the requested image asset from the Wx Bread::Board container.  All 
-images are in '/Assets/images/...', so you only need to pass in (eg) 
-'/app/arrow-left.png' to get at '/Assets/images/app/arrow-left.png'.
 
 =item * get_splitter, get_left_pane, get_right_pane
 
@@ -138,110 +227,8 @@ wxYES or wxNO to indicate which button the user pressed.
 Where $srvr is a LacunaWaX::Model::Schema::Servers object; sets $srvr as the one 
 to which we're currently connected.
 
-=item * wxbb - The Wx Bread::Board container - UNsafe for use from non-GUIs
-
 =item * [yY]ield - Calls wxApp::Yield.  Either casing is allowed.
 
 =back
 
 =cut
-
-package LacunaWaX::Roles::GuiElement {
-    use v5.14;
-    use Moose::Role;
-    use Try::Tiny;
-    use Wx qw(:everything);
-
-    ### This is braindead, and was added before I understood that 'wxTheApp' 
-    ### existed.  This all needs to be carefully excised.
-    has 'app' => (
-        is          => 'rw',
-        isa         => 'LacunaWaX',
-        required    => 1,
-        weak_ref    => 1,
-        handles => {
-            bb                      => 'bb',
-            cartesian_distance      => 'cartesian_distance',
-            connected_account       => 'account',
-            endthrob                => 'endthrob',
-            game_connect            => 'game_connect',
-            game_client             => 'game_client',
-            get_chi                 => sub{ return shift->wxbb->resolve( service => '/Cache/raw_memory' ) },
-            get_connected_server    => 'server',
-            get_font                => sub{ return shift->wxbb->resolve(service => '/Fonts' . shift) },
-            get_image               => sub{ return shift->wxbb->resolve(service => '/Assets/images' . shift) },
-            get_left_pane           => 'left_pane',
-            get_right_pane          => 'right_pane',
-            get_main_schema         => sub{ return shift->app->main_schema },
-            get_main_frame          => 'main_frame',
-            get_splitter            => 'splitter',
-            halls_to_level          => 'halls_to_level',
-            has_main_frame          => 'has_main_frame',
-            intro_panel_exists      => 'has_intro_panel',
-            get_intro_panel         => 'intro_panel',
-            get_top_left_corner     => sub{ return shift->app->GetTopWindow()->GetPosition },
-            menu                    => 'menu_bar',
-            poperr                  => 'poperr',
-            popmsg                  => 'popmsg',
-            popconf                 => 'popconf',
-            secs_to_human           => 'secs_to_human',
-            server                  => 'server',
-            server_ids              => 'server_ids',
-            server_record_by_id     => 'server_record_by_id',
-            set_caption             => 'caption',
-            set_connected_server    => 'server',
-            str_trim                => 'str_trim',
-            throb                   => 'throb',
-            travel_time             => 'travel_time',
-            wxbb                    => 'wxbb',
-            yield                   => 'Yield',
-            Yield                   => 'Yield',
-        }
-    );
-
-    has 'ancestor'  => (is => 'rw', isa => 'Object',            weak_ref => 1       );
-    has 'parent'    => (is => 'rw', isa => 'Maybe[Wx::Window]'                      );
-
-    has 'sizer_debug' => (is => 'rw', isa => 'Int',  lazy => 1, default => 0,
-        documentation => q{
-            draws boxes with titles around all sizers if true.
-        }
-    );
-
-    has 'sizers' => (is => 'rw', isa => 'HashRef', lazy => 1, default => sub{ {} });
-
-    requires '_set_events';
-
-    after BUILD => sub {
-        my $self = shift;
-        $self->_set_events;
-        return 1;
-    };
-
-    sub build_sizer {#{{{
-        my $self        = shift;
-        my $parent      = shift;
-        my $direction   = shift;
-        my $name        = shift or die "iSizer name is required.";
-        my $force_box   = shift || 0;
-        my $pos         = shift || wxDefaultPosition;
-        my $size        = shift || wxDefaultSize;
-
-        my $hr = { };
-        if( $self->sizer_debug or $force_box ) {
-            $hr->{'box'} = Wx::StaticBox->new($parent, -1, $name, $pos, $size),
-            $hr->{'box'}->SetFont( $self->app->wxbb->resolve(service => '/Fonts/para_text_1') );
-            $hr->{'sizer'} = Wx::StaticBoxSizer->new($hr->{'box'}, $direction);
-        }
-        else {
-            $hr->{'sizer'} = Wx::BoxSizer->new($direction);
-        }
-        $self->sizers->{$name} = $hr;
-
-        return $hr->{'sizer'};
-    }#}}}
-
-    no Moose::Role;
-}
-
-1;

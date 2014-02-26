@@ -106,7 +106,7 @@ package LacunaWaX::Dialog::Help {
     };
     sub _build_bmp_home {#{{{
         my $self = shift;
-        my $img = $self->get_image('/app/home.png');
+        my $img = $self->app->get_image('app/home.png');
         $img->Rescale($self->nav_img_w - 10, $self->nav_img_h - 10);    # see build_bmp_left
         my $bmp = Wx::Bitmap->new($img);
         my $v = Wx::BitmapButton->new(
@@ -120,7 +120,7 @@ package LacunaWaX::Dialog::Help {
     }#}}}
     sub _build_bmp_left {#{{{
         my $self = shift;
-        my $img = $self->get_image('/app/arrow-left.png');
+        my $img = $self->app->get_image('app/arrow-left.png');
         ### On Ubuntu, there's a margin inside the button.  If the image is 
         ### the same size as the button, that margin obscures part of the 
         ### image.  So the image must be a bit smaller than the button.
@@ -137,7 +137,7 @@ package LacunaWaX::Dialog::Help {
     }#}}}
     sub _build_bmp_right {#{{{
         my $self = shift;
-        my $img = $self->get_image('/app/arrow-right.png');
+        my $img = $self->app->get_image('app/arrow-right.png');
         $img->Rescale($self->nav_img_w - 10, $self->nav_img_h - 10);    # see build_bmp_left
         my $bmp = Wx::Bitmap->new($img);
         return Wx::BitmapButton->new(
@@ -150,7 +150,7 @@ package LacunaWaX::Dialog::Help {
     }#}}}
     sub _build_bmp_search {#{{{
         my $self = shift;
-        my $img = $self->get_image('/app/search.png');
+        my $img = $self->app->get_image('app/search.png');
         $img->Rescale($self->nav_img_w - 10, $self->nav_img_h - 10);    # see build_bmp_left
         my $bmp = Wx::Bitmap->new($img);
         my $v = Wx::BitmapButton->new(

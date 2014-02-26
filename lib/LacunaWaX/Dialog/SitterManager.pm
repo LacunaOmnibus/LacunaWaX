@@ -76,7 +76,7 @@ package LacunaWaX::Dialog::SitterManager {
             wxDefaultPosition, 
             Wx::Size->new(400, 35)
         );
-        $y->SetFont( $self->get_font('/header_1') );
+        $y->SetFont( $self->app->get_font('header_1') );
         return $y;
     }#}}}
     sub _build_lbl_instructions {#{{{
@@ -91,7 +91,7 @@ package LacunaWaX::Dialog::SitterManager {
             wxDefaultPosition, $size
         );
         $y->Wrap( $self->size->GetWidth - 100 ); # - 255 accounts for the vertical scrollbar
-        $y->SetFont( $self->get_font('/para_text_1') );
+        $y->SetFont( $self->app->get_font('para_text_1') );
 
         return $y;
     }#}}}

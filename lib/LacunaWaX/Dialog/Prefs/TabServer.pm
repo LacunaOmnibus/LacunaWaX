@@ -85,19 +85,19 @@ package LacunaWax::Dialog::Prefs::TabServer {
     sub _build_lbl_server {#{{{
         my $self = shift;
         my $v = Wx::StaticText->new($self->pnl_main, -1, "Server", wxDefaultPosition, Wx::Size->new(80,25));
-        $v->SetFont( $self->get_font('/bold_para_text_1') );
+        $v->SetFont( $self->app->get_font('bold_para_text_1') );
         return $v;
     }#}}}
     sub _build_lbl_user {#{{{
         my $self = shift;
         my $v =  Wx::StaticText->new($self->pnl_main, -1, "Username", wxDefaultPosition, Wx::Size->new(80,25));
-        $v->SetFont( $self->get_font('/bold_para_text_1') );
+        $v->SetFont( $self->app->get_font('bold_para_text_1') );
         return $v;
     }#}}}
     sub _build_lbl_pass {#{{{
         my $self = shift;
         my $v = Wx::StaticText->new($self->pnl_main, -1, "Password", wxDefaultPosition, Wx::Size->new(80,25));
-        $v->SetFont( $self->get_font('/bold_para_text_1') );
+        $v->SetFont( $self->app->get_font('bold_para_text_1') );
         return $v;
     }#}}}
     sub _build_btn_save {#{{{
