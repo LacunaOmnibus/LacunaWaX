@@ -1,4 +1,7 @@
 
+### GuiElement removed through
+###     Dialog::About
+
 package LacunaWaX {
     use v5.14;
     use strict;
@@ -62,6 +65,9 @@ package LacunaWaX {
             num_fonts  => 'num_fonts',
 
             get_cache  => 'cache',
+
+            borders_on  => 'borders_on',
+            borders_off => 'borders_off',
         }
     );
 
@@ -269,6 +275,27 @@ called.
             $img_list->Add($bmp, wxNullBitmap);
         }#}}}
         return $img_list;
+    }#}}}
+    sub build_sizer {#{{{
+        my $self        = shift;
+        my $parent      = shift;
+        my $direction   = shift;
+        my $name        = shift or die "iSizer name is required.";
+        my $force_box   = shift || 0;
+        my $pos         = shift || wxDefaultPosition;
+        my $size        = shift || wxDefaultSize;
+
+        my $hr = { };
+        if( $self->wxglobals->sizer_borders or $force_box ) {
+            $hr->{'box'} = Wx::StaticBox->new($parent, -1, $name, $pos, $size),
+            $hr->{'box'}->SetFont( $self->app->get_font('para_text_1') );
+            $hr->{'sizer'} = Wx::StaticBoxSizer->new($hr->{'box'}, $direction);
+        }
+        else {
+            $hr->{'sizer'} = Wx::BoxSizer->new($direction);
+        }
+
+        return $hr->{'sizer'};
     }#}}}
     sub caption {#{{{
         my $self = shift;

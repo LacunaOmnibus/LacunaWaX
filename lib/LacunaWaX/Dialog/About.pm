@@ -3,7 +3,6 @@ package LacunaWaX::Dialog::About {
     use Moose;
     use Try::Tiny;
     use Wx qw(:everything);
-    with 'LacunaWaX::Roles::GuiElement';
 
     has 'info'  => (is => 'rw', isa => 'Wx::AboutDialogInfo');
 

@@ -37,6 +37,21 @@ package LacunaWaX::Model::Globals::Wx {
         }
     );
 
+    has 'sizer_borders' => (
+        is      => 'rw', 
+        isa     => 'Bool',
+        traits  => ['Bool'],
+        default => 0,
+        handles => {
+            borders_on  => 'set',
+            borders_off => 'unset',
+        },
+        documentation => q{
+            If true, sizers built with wxTheApp->build_sizer() will be drawn with a visible border.
+        }
+
+    );
+
     has 'images' => (
         is          => 'ro', 
         isa         => 'HashRef',
