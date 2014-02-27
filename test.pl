@@ -4,6 +4,7 @@ use lib 'lib';
 use LacunaWaX::Preload::Perlapp;
 use LacunaWaX::Dialog::About;
 use LacunaWaX::Dialog::LogViewer;
+use LacunaWaX::MainSplitterWindow::RightPane::GlyphsPane;
 
 say "blarg";
 

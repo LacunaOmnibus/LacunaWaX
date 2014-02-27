@@ -41,11 +41,6 @@ package LacunaWaX::MainSplitterWindow::RightPane::GlyphsPane {
         isa     => 'Int', 
         lazy    => 1, 
         default => 0,
-        traits  => ['Number'],
-        handles => {
-            set_total       => 'set',
-            add_to_total    => 'add',
-        },
     );
 
     has 'has_arch_min'  => (is => 'rw', isa => 'Int', lazy => 1,        default => 1,
@@ -357,7 +352,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::GlyphsPane {
             my $row_idx = $list_ctrl->InsertImageItem($row, $row);
             $list_ctrl->SetItem($row_idx, 1, $hr->{name});
             $list_ctrl->SetItem($row_idx, 2, $hr->{quantity});
-            $self->add_to_total( $hr->{quantity} );
+            $self->glyph_total( $self->glyph_total + $hr->{quantity} );
             $row++;
             wxTheApp->Yield;
         }#}}}
