@@ -5,7 +5,7 @@ package LacunaWaX::Dialog::LogViewer {
     use Try::Tiny;
     use Wx qw(:everything);
     use Wx::Event qw(EVT_BUTTON EVT_CLOSE EVT_RADIOBOX EVT_SIZE);
-    use LacunaWaX::Dialog::NonScrolled;
+
     extends 'LacunaWaX::Dialog::NonScrolled';
 
     has 'count' => (
@@ -73,7 +73,7 @@ package LacunaWaX::Dialog::LogViewer {
     }
     sub _build_btn_next {#{{{
         my $self = shift;
-        my $v = Wx::Button->new($self, -1, 
+        my $v = Wx::Button->new($self->dialog, -1, 
             "Next",
             wxDefaultPosition, 
             Wx::Size->new(50, 30)
@@ -85,7 +85,7 @@ package LacunaWaX::Dialog::LogViewer {
     }#}}}
     sub _build_btn_prev {#{{{
         my $self = shift;
-        my $v = Wx::Button->new($self, -1, 
+        my $v = Wx::Button->new($self->dialog, -1, 
             "Prev",
             wxDefaultPosition, 
             Wx::Size->new(50, 30)
@@ -119,7 +119,7 @@ package LacunaWaX::Dialog::LogViewer {
         my $self = shift;
         my $cnt  = shift || 0;;
 
-        my $v = Wx::StaticText->new( $self, -1, 
+        my $v = Wx::StaticText->new( $self->dialog, -1, 
             q{Page 1},
             wxDefaultPosition, 
             Wx::Size->new(-1, 20)
@@ -140,7 +140,7 @@ package LacunaWaX::Dialog::LogViewer {
                      - 50;
 
         my $v = Wx::ListCtrl->new(
-            $self, -1, 
+            $self->dialog, -1, 
             wxDefaultPosition, 
             Wx::Size->new($width, $height),
             wxLC_REPORT
@@ -163,7 +163,7 @@ package LacunaWaX::Dialog::LogViewer {
     sub _build_rdo_component {#{{{
         my $self = shift;
         my $v = Wx::RadioBox->new(
-            $self, -1, 
+            $self->dialog, -1, 
             "Component", 
             wxDefaultPosition, 
             Wx::Size->new(500,50), 
@@ -198,11 +198,11 @@ package LacunaWaX::Dialog::LogViewer {
         ### necessary, so I'm currently just skipping it.  But it would be 
         ### nice to figure out why things aren't working the way I want.
 
-        return wxTheApp->build_sizer($self, wxVERTICAL, 'Log List');
+        return wxTheApp->build_sizer($self->dialog, wxVERTICAL, 'Log List');
     }#}}}
     sub _build_szr_pagination {#{{{
         my $self = shift;
-        return wxTheApp->build_sizer($self, wxHORIZONTAL, 'Pagination');
+        return wxTheApp->build_sizer($self->dialog, wxHORIZONTAL, 'Pagination');
     }#}}}
     sub _build_title {#{{{
         my $self = shift;

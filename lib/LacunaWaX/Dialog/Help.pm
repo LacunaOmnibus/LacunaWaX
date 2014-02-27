@@ -20,8 +20,7 @@ package LacunaWaX::Dialog::Help {
     use Wx qw(:everything);
     use Wx::Event qw(EVT_BUTTON EVT_CLOSE EVT_HTML_LINK_CLICKED EVT_SIZE EVT_TEXT_ENTER);
 
-    use MooseX::NonMoose::InsideOut;
-    extends 'Wx::Dialog', 'LacunaWaX::Dialog::NonScrolled';
+    extends 'LacunaWaX::Dialog::NonScrolled';
 
     has 'index_file'    => (is => 'rw', isa => 'Str',       lazy_build => 1);
     has 'history'       => (is => 'rw', isa => 'ArrayRef',  lazy_build => 1);
@@ -34,7 +33,7 @@ package LacunaWaX::Dialog::Help {
     has 'tt'                => (is => 'rw', isa => 'Template',  lazy_build => 1                 );
 
     has 'title' => (is => 'rw', isa => 'Str',       lazy_build => 1);
-    has 'size'  => (is => 'rw', isa => 'Wx::Szie',  lazy_build => 1);
+    has 'size'  => (is => 'rw', isa => 'Wx::Size',  lazy_build => 1);
 
     has 'nav_img_h'     => (is => 'rw', isa => 'Int',  lazy => 1, default => 32     );
     has 'nav_img_w'     => (is => 'rw', isa => 'Int',  lazy => 1, default => 32     );
@@ -56,18 +55,6 @@ package LacunaWaX::Dialog::Help {
     ### main_sizer is required by our NonScrolled parent.
     has 'main_sizer' => (is => 'rw', isa => 'Wx::Sizer', lazy_build => 1, documentation => q{vertical});
 
-    sub FOREIGNBUILDARGS {## no critic qw(RequireArgUnpacking) {{{
-        my $self = shift;
-        my %args = @_;
-
-        return (
-            undef, -1, 
-            q{},        # the title
-            wxDefaultPosition,
-            Wx::Size->new(600, 700),
-            wxRESIZE_BORDER|wxDEFAULT_DIALOG_STYLE
-        );
-    }#}}}
     sub BUILD {
         my($self, @params) = @_;
         $self->Show(0);
@@ -103,7 +90,7 @@ package LacunaWaX::Dialog::Help {
         $img->Rescale($self->nav_img_w - 10, $self->nav_img_h - 10);    # see build_bmp_left
         my $bmp = Wx::Bitmap->new($img);
         my $v = Wx::BitmapButton->new(
-            $self, -1, 
+            $self->dialog, -1, 
             $bmp,
             wxDefaultPosition,
             Wx::Size->new($self->nav_img_w, $self->nav_img_h),
@@ -120,7 +107,7 @@ package LacunaWaX::Dialog::Help {
         $img->Rescale($self->nav_img_w - 10, $self->nav_img_h - 10);
         my $bmp = Wx::Bitmap->new($img);
         my $v = Wx::BitmapButton->new(
-            $self, -1, 
+            $self->dialog, -1, 
             $bmp,
             wxDefaultPosition,
             Wx::Size->new($self->nav_img_w, $self->nav_img_h),
@@ -134,7 +121,7 @@ package LacunaWaX::Dialog::Help {
         $img->Rescale($self->nav_img_w - 10, $self->nav_img_h - 10);    # see build_bmp_left
         my $bmp = Wx::Bitmap->new($img);
         return Wx::BitmapButton->new(
-            $self, -1, 
+            $self->dialog, -1, 
             $bmp,
             wxDefaultPosition,
             Wx::Size->new($self->nav_img_w, $self->nav_img_h),
@@ -147,7 +134,7 @@ package LacunaWaX::Dialog::Help {
         $img->Rescale($self->nav_img_w - 10, $self->nav_img_h - 10);    # see build_bmp_left
         my $bmp = Wx::Bitmap->new($img);
         my $v = Wx::BitmapButton->new(
-            $self, -1, 
+            $self->dialog, -1, 
             $bmp,
             wxDefaultPosition,
             Wx::Size->new($self->nav_img_w, $self->nav_img_h),
@@ -166,7 +153,7 @@ package LacunaWaX::Dialog::Help {
         my $self = shift;
 
         my $v = Wx::HtmlWindow->new(
-            $self, -1, 
+            $self->dialog, -1, 
             wxDefaultPosition, 
             Wx::Size->new($self->get_html_width, $self->get_html_height),
             wxHW_SCROLLBAR_AUTO
@@ -179,22 +166,21 @@ package LacunaWaX::Dialog::Help {
     }#}}}
     sub _build_size {#{{{
         my $self = shift;
-        return Wx::Size->new( 500, 600 );
+        return Wx::Size->new( 600, 700 );
     }#}}}
     sub _build_szr_main {#{{{
         my $self = shift;
-        #my $v = $self->build_sizer($self, wxVERTICAL, 'Main Sizer');
-        my $v = wxTheApp->build_sizer($self, wxVERTICAL, 'Main Sizer');
+        my $v = wxTheApp->build_sizer($self->dialog, wxVERTICAL, 'Main Sizer');
         return $v;
     }#}}}
     sub _build_szr_html {#{{{
         my $self = shift;
-        my $v = wxTheApp->build_sizer($self, wxVERTICAL, 'LacunaWaX Help');
+        my $v = wxTheApp->build_sizer($self->dialog, wxVERTICAL, 'LacunaWaX Help');
         return $v;
     }#}}}
     sub _build_szr_navbar {#{{{
         my $self = shift;
-        my $v = wxTheApp->build_sizer($self, wxHORIZONTAL, 'Nav bar');
+        my $v = wxTheApp->build_sizer($self->dialog, wxHORIZONTAL, 'Nav bar');
         return $v;
     }#}}}
     sub _build_title {#{{{
@@ -213,7 +199,7 @@ package LacunaWaX::Dialog::Help {
     sub _build_txt_search {#{{{
         my $self = shift;
         my $v = Wx::TextCtrl->new(
-            $self, -1, 
+            $self->dialog, -1, 
             q{},
             wxDefaultPosition, 
             Wx::Size->new($self->search_box_w, $self->search_box_h),

@@ -7,6 +7,7 @@ package LacunaWaX::Dialog::Mail {
     use Try::Tiny;
     use Wx qw(:everything);
     use Wx::Event qw(EVT_BUTTON EVT_CHECKBOX EVT_CHOICE EVT_CLOSE EVT_SIZE);
+
     extends 'LacunaWaX::Dialog::NonScrolled';
 
     has 'addy_height'   => (is => 'rw', isa => 'Int',                           lazy => 1,      default => 25   );
@@ -155,7 +156,7 @@ package LacunaWaX::Dialog::Mail {
     sub _build_btn_clear_inbox {#{{{
         my $self = shift;
         my $v = Wx::Button->new(
-            $self, -1, 
+            $self->dialog, -1, 
             "Clear Selected Messages",
             wxDefaultPosition, 
             Wx::Size->new(200, 35)
@@ -165,7 +166,7 @@ package LacunaWaX::Dialog::Mail {
     sub _build_btn_clear_to {#{{{
         my $self = shift;
         my $v = Wx::Button->new(
-            $self, -1, 
+            $self->dialog, -1, 
             "Clear",
             wxDefaultPosition, 
             Wx::Size->new(50, $self->addy_height)
@@ -175,7 +176,7 @@ package LacunaWaX::Dialog::Mail {
     sub _build_btn_send {#{{{
         my $self = shift;
         my $v = Wx::Button->new(
-            $self, -1, 
+            $self->dialog, -1, 
             "Send Message",
             wxDefaultPosition, 
             Wx::Size->new(120, 40)
@@ -185,7 +186,7 @@ package LacunaWaX::Dialog::Mail {
     sub _build_chk_alert {#{{{
         my $self = shift;
         return Wx::CheckBox->new(
-            $self, -1, 
+            $self->dialog, -1, 
             'Alert',
             wxDefaultPosition, 
             Wx::Size->new(-1,-1), 
@@ -197,7 +198,7 @@ package LacunaWaX::Dialog::Mail {
         my @allies = map{ $_->{'name'} }@{$self->ally_members};
 
         return Wx::Choice->new(
-            $self, -1, 
+            $self->dialog, -1, 
             wxDefaultPosition, 
             Wx::Size->new(200, $self->addy_height), 
             \@allies,
@@ -206,7 +207,7 @@ package LacunaWaX::Dialog::Mail {
     sub _build_chk_attacks {#{{{
         my $self = shift;
         return Wx::CheckBox->new(
-            $self, -1, 
+            $self->dialog, -1, 
             'Attacks',
             wxDefaultPosition, 
             Wx::Size->new(-1,-1), 
@@ -215,7 +216,7 @@ package LacunaWaX::Dialog::Mail {
     sub _build_chk_corr {#{{{
         my $self = shift;
         return Wx::CheckBox->new(
-            $self, -1, 
+            $self->dialog, -1, 
             'Corresp.',
             wxDefaultPosition, 
             Wx::Size->new(-1,-1), 
@@ -224,7 +225,7 @@ package LacunaWaX::Dialog::Mail {
     sub _build_chk_excav {#{{{
         my $self = shift;
         return Wx::CheckBox->new(
-            $self, -1, 
+            $self->dialog, -1, 
             'Excavator',
             wxDefaultPosition, 
             Wx::Size->new(-1,-1), 
@@ -233,7 +234,7 @@ package LacunaWaX::Dialog::Mail {
     sub _build_chk_parl {#{{{
         my $self = shift;
         return Wx::CheckBox->new(
-            $self, -1, 
+            $self->dialog, -1, 
             'Parliament',
             wxDefaultPosition, 
             Wx::Size->new(-1,-1), 
@@ -242,7 +243,7 @@ package LacunaWaX::Dialog::Mail {
     sub _build_chk_probe {#{{{
         my $self = shift;
         return Wx::CheckBox->new(
-            $self, -1, 
+            $self->dialog, -1, 
             'Probe',
             wxDefaultPosition, 
             Wx::Size->new(-1,-1), 
@@ -251,7 +252,7 @@ package LacunaWaX::Dialog::Mail {
     sub _build_chk_targ_neut {#{{{
         my $self = shift;
         return Wx::CheckBox->new(
-            $self, -1, 
+            $self->dialog, -1, 
             'Target Neutralized',
             wxDefaultPosition, 
             Wx::Size->new(-1,-1), 
@@ -260,7 +261,7 @@ package LacunaWaX::Dialog::Mail {
     sub _build_chk_cust {#{{{
         my $self = shift;
         return Wx::CheckBox->new(
-            $self, -1, 
+            $self->dialog, -1, 
             'Custom',
             wxDefaultPosition, 
             Wx::Size->new(-1,-1), 
@@ -269,7 +270,7 @@ package LacunaWaX::Dialog::Mail {
     sub _build_chk_read {#{{{
         my $self = shift;
         my $v = Wx::CheckBox->new(
-            $self, -1, 
+            $self->dialog, -1, 
             'Only read',
             wxDefaultPosition, 
             Wx::Size->new(-1,-1), 
@@ -280,7 +281,7 @@ package LacunaWaX::Dialog::Mail {
     sub _build_txt_cust {#{{{
         my $self = shift;
         my $v = Wx::TextCtrl->new(
-            $self, -1, 
+            $self->dialog, -1, 
             q{},
             wxDefaultPosition, 
             Wx::Size->new(200, $self->addy_height)
@@ -302,7 +303,7 @@ package LacunaWaX::Dialog::Mail {
     sub _build_lbl_ally {#{{{
         my $self = shift;
         my $y = Wx::StaticText->new(
-            $self, -1, 
+            $self->dialog, -1, 
             "Allies: ",
             wxDefaultPosition, 
             Wx::Size->new(50, $self->addy_height)
@@ -313,7 +314,7 @@ package LacunaWaX::Dialog::Mail {
     sub _build_lbl_body {#{{{
         my $self = shift;
         my $y = Wx::StaticText->new(
-            $self, -1, 
+            $self->dialog, -1, 
             "Body: ",
             wxDefaultPosition, 
             Wx::Size->new(50, $self->addy_height)
@@ -327,7 +328,7 @@ package LacunaWaX::Dialog::Mail {
         ### the other inputs that have actual labels.  The button doesn't need 
         ### any string label, so this is essentially just a shim.
         my $y = Wx::StaticText->new(
-            $self, -1, 
+            $self->dialog, -1, 
             q{},
             wxDefaultPosition, 
             Wx::Size->new(50, $self->addy_height)
@@ -342,7 +343,7 @@ package LacunaWaX::Dialog::Mail {
         my $size = Wx::Size->new(-1, -1);
 
         my $y = Wx::StaticText->new(
-            $self, -1, 
+            $self->dialog, -1, 
             $text,
             wxDefaultPosition, $size
         );
@@ -354,7 +355,7 @@ package LacunaWaX::Dialog::Mail {
     sub _build_lbl_hdr_clear {#{{{
         my $self = shift;
         my $y = Wx::StaticText->new(
-            $self, -1, 
+            $self->dialog, -1, 
             "Clear Junk Mail",
             wxDefaultPosition, 
             Wx::Size->new(400, 30)
@@ -365,7 +366,7 @@ package LacunaWaX::Dialog::Mail {
     sub _build_lbl_hdr_page {#{{{
         my $self = shift;
         my $y = Wx::StaticText->new(
-            $self, -1, 
+            $self->dialog, -1, 
             "Mail Tool",
             wxDefaultPosition, 
             Wx::Size->new(400, 35)
@@ -376,7 +377,7 @@ package LacunaWaX::Dialog::Mail {
     sub _build_lbl_hdr_send {#{{{
         my $self = shift;
         my $v = Wx::StaticText->new(
-            $self, -1,
+            $self->dialog, -1,
             "Intra-Alliance Mail",
             wxDefaultPosition, 
             Wx::Size->new(400, 30)
@@ -390,7 +391,7 @@ package LacunaWaX::Dialog::Mail {
     sub _build_lbl_subject {#{{{
         my $self = shift;
         my $y = Wx::StaticText->new(
-            $self, -1, 
+            $self->dialog, -1, 
             "Subject: ",
             wxDefaultPosition, 
             Wx::Size->new(50, $self->addy_height)
@@ -401,7 +402,7 @@ package LacunaWaX::Dialog::Mail {
     sub _build_lbl_to {#{{{
         my $self = shift;
         my $y = Wx::StaticText->new(
-            $self, -1, 
+            $self->dialog, -1, 
             "To: ",
             wxDefaultPosition, 
             Wx::Size->new(50, $self->addy_height)
@@ -416,55 +417,55 @@ package LacunaWaX::Dialog::Mail {
     }#}}}
     sub _build_szr_ally {#{{{
         my $self = shift;
-        return wxTheApp->build_sizer($self, wxHORIZONTAL, 'Allies:');
+        return wxTheApp->build_sizer($self->dialog, wxHORIZONTAL, 'Allies:');
     }#}}}
     sub _build_szr_body {#{{{
         my $self = shift;
-        return wxTheApp->build_sizer($self, wxHORIZONTAL, 'Body:');
+        return wxTheApp->build_sizer($self->dialog, wxHORIZONTAL, 'Body:');
     }#}}}
     sub _build_szr_btn_send {#{{{
         my $self = shift;
-        return wxTheApp->build_sizer($self, wxHORIZONTAL, 'Send Button');
+        return wxTheApp->build_sizer($self->dialog, wxHORIZONTAL, 'Send Button');
     }#}}}
     sub _build_szr_clear {#{{{
         my $self = shift;
-        return wxTheApp->build_sizer($self, wxVERTICAL, 'Clear Sizer');
+        return wxTheApp->build_sizer($self->dialog, wxVERTICAL, 'Clear Sizer');
     }#}}}
     sub _build_szr_cust {#{{{
         my $self = shift;
-        return wxTheApp->build_sizer($self, wxHORIZONTAL, 'Custom Text Sizer');
+        return wxTheApp->build_sizer($self->dialog, wxHORIZONTAL, 'Custom Text Sizer');
     }#}}}	
     sub _build_szr_check_outer {#{{{
         my $self = shift;
-        return wxTheApp->build_sizer($self, wxVERTICAL, 'Checkbox Sizer');
+        return wxTheApp->build_sizer($self->dialog, wxVERTICAL, 'Checkbox Sizer');
     }#}}}
     sub _build_szr_check_1 {#{{{
         my $self = shift;
-        return wxTheApp->build_sizer($self, wxHORIZONTAL, 'Checkbox Sizer');
+        return wxTheApp->build_sizer($self->dialog, wxHORIZONTAL, 'Checkbox Sizer');
     }#}}}
     sub _build_szr_check_2 {#{{{
         my $self = shift;
-        return wxTheApp->build_sizer($self, wxHORIZONTAL, 'Checkbox Sizer');
+        return wxTheApp->build_sizer($self->dialog, wxHORIZONTAL, 'Checkbox Sizer');
     }#}}}
     sub _build_szr_header {#{{{
         my $self = shift;
-        return wxTheApp->build_sizer($self, wxVERTICAL, 'Header Sizer');
+        return wxTheApp->build_sizer($self->dialog, wxVERTICAL, 'Header Sizer');
     }#}}}
     sub _build_szr_instructions {#{{{
         my $self = shift;
-        return wxTheApp->build_sizer($self, wxVERTICAL, 'Instructions Sizer');
+        return wxTheApp->build_sizer($self->dialog, wxVERTICAL, 'Instructions Sizer');
     }#}}}
     sub _build_szr_send {#{{{
         my $self = shift;
-        return wxTheApp->build_sizer($self, wxVERTICAL, 'Send Message Sizer');
+        return wxTheApp->build_sizer($self->dialog, wxVERTICAL, 'Send Message Sizer');
     }#}}}
     sub _build_szr_subject {#{{{
         my $self = shift;
-        return wxTheApp->build_sizer($self, wxHORIZONTAL, 'Subject:');
+        return wxTheApp->build_sizer($self->dialog, wxHORIZONTAL, 'Subject:');
     }#}}}
     sub _build_szr_to {#{{{
         my $self = shift;
-        return wxTheApp->build_sizer($self, wxHORIZONTAL, 'To:');
+        return wxTheApp->build_sizer($self->dialog, wxHORIZONTAL, 'To:');
     }#}}}
     sub _build_title {#{{{
         my $self = shift;
@@ -476,7 +477,7 @@ package LacunaWaX::Dialog::Mail {
         ### does.  So a 'line' typed in this text box should also be a line in 
         ### the game client.
         return Wx::TextCtrl->new(
-            $self, -1, 
+            $self->dialog, -1, 
             q{},
             wxDefaultPosition, Wx::Size->new(300,300),
             wxTE_MULTILINE
@@ -485,7 +486,7 @@ package LacunaWaX::Dialog::Mail {
     sub _build_txt_subject {#{{{
         my $self = shift;
         return Wx::TextCtrl->new(
-            $self, -1, 
+            $self->dialog, -1, 
             q{},
             wxDefaultPosition, 
             Wx::Size->new(300, $self->addy_height)
@@ -494,7 +495,7 @@ package LacunaWaX::Dialog::Mail {
     sub _build_txt_to {#{{{
         my $self = shift;
         return Wx::TextCtrl->new(
-            $self, -1, 
+            $self->dialog, -1, 
             q{},
             wxDefaultPosition, 
             Wx::Size->new(300, $self->addy_height),
@@ -516,7 +517,7 @@ package LacunaWaX::Dialog::Mail {
         unless( $status ) {
             $created_own_status = 1;
             $status = LacunaWaX::Dialog::Status->new(
-                parent => $self,
+                parent => $self->dialog,
                 title  => 'Clear Mail',
             );
             $status->show;
@@ -744,7 +745,7 @@ already used 'bless'.
         }
 
         my $status = LacunaWaX::Dialog::Status->new(
-            parent => $self,
+            parent => $self->dialog,
             title  => 'Clear Mail',
         );
         $status->show;

@@ -1,9 +1,15 @@
 
 use v5.14;
 use lib 'lib';
+
 use LacunaWaX::Preload::Perlapp;
 use LacunaWaX::Dialog::About;
-#use LacunaWaX::Dialog::LogViewer;   # still producing incompatible metaclass problems, because of NonScrolled.  Come back to this.
+use LacunaWaX::Dialog::Calculator;
+use LacunaWaX::Dialog::Captcha;
+use LacunaWaX::Dialog::Help;
+use LacunaWaX::Dialog::LogViewer;   # still producing incompatible metaclass problems, because of NonScrolled.  Come back to this.
+use LacunaWaX::Dialog::Mail;
+use LacunaWaX::Dialog::Prefs;
 use LacunaWaX::MainSplitterWindow::RightPane::GlyphsPane;
 use LacunaWaX::MainSplitterWindow::RightPane::RepairPane;
 use LacunaWaX::MainSplitterWindow::RightPane::SSIncoming;
@@ -13,6 +19,8 @@ use LacunaWaX::Model::SStation::Police;
 use LacunaWaX::Schedule::Spies;
 use LacunaWaX::Schedule::SS_Health;
 use LacunaWaX::Servers;
+
+#use LacunaWaX::Dialog::NonScrolledTest;
 
 say "blarg";
 

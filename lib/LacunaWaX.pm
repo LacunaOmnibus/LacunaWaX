@@ -621,6 +621,7 @@ Instead, you need something like this...
                                     $title,
                                     wxYES_NO|wxYES_DEFAULT|wxICON_QUESTION|wxSTAY_ON_TOP,
                                     $self->main_frame );
+        $self->Yield;
         return $resp;
     }#}}}
     sub secs_to_human {#{{{

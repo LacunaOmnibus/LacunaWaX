@@ -6,6 +6,7 @@ package LacunaWaX::Dialog::Calculator {
     use Try::Tiny;
     use Wx qw(:everything);
     use Wx::Event qw(EVT_BUTTON EVT_CHECKBOX EVT_CHOICE EVT_CLOSE EVT_SIZE);
+
     extends 'LacunaWaX::Dialog::NonScrolled';
 
     has 'width'         => (is => 'rw', isa => 'Int',   lazy => 1, default => 460   );
@@ -179,7 +180,7 @@ package LacunaWaX::Dialog::Calculator {
     sub _build_btn_halls {#{{{
         my $self = shift;
         my $v = Wx::Button->new(
-            $self, -1, 
+            $self->dialog, -1, 
             "Calculate Halls",
             wxDefaultPosition, 
             Wx::Size->new(120, $self->line_height)
@@ -189,7 +190,7 @@ package LacunaWaX::Dialog::Calculator {
     sub _build_lbl_halls_lvl_from {#{{{
         my $self = shift;
         my $y = Wx::StaticText->new(
-            $self, -1, 
+            $self->dialog, -1, 
             "Current Level:",
             wxDefaultPosition, 
             Wx::Size->new(100, $self->line_height)
@@ -200,7 +201,7 @@ package LacunaWaX::Dialog::Calculator {
     sub _build_lbl_halls_lvl_to {#{{{
         my $self = shift;
         my $y = Wx::StaticText->new(
-            $self, -1, 
+            $self->dialog, -1, 
             "Destination Level:",
             wxDefaultPosition, 
             Wx::Size->new(120, $self->line_height)
@@ -210,12 +211,12 @@ package LacunaWaX::Dialog::Calculator {
     }#}}}
     sub _build_szr_halls {#{{{
         my $self = shift;
-        return wxTheApp->build_sizer($self, wxHORIZONTAL, 'Halls', 1);
+        return wxTheApp->build_sizer($self->dialog, wxHORIZONTAL, 'Halls', 1);
     }#}}}
     sub _build_txt_halls_lvl_from {#{{{
         my $self = shift;
         return Wx::TextCtrl->new(
-            $self, -1, 
+            $self->dialog, -1, 
             q{},
             wxDefaultPosition, Wx::Size->new(40,$self->line_height),
         );
@@ -223,7 +224,7 @@ package LacunaWaX::Dialog::Calculator {
     sub _build_txt_halls_lvl_to {#{{{
         my $self = shift;
         return Wx::TextCtrl->new(
-            $self, -1, 
+            $self->dialog, -1, 
             q{},
             wxDefaultPosition, Wx::Size->new(40,$self->line_height),
         );
@@ -233,7 +234,7 @@ package LacunaWaX::Dialog::Calculator {
     sub _build_btn_distance {#{{{
         my $self = shift;
         my $v = Wx::Button->new(
-            $self, -1, 
+            $self->dialog, -1, 
             "Calculate Distance",
             wxDefaultPosition, 
             Wx::Size->new(140, $self->line_height)
@@ -243,7 +244,7 @@ package LacunaWaX::Dialog::Calculator {
     sub _build_lbl_blank {#{{{
         my $self = shift;
         my $y = Wx::StaticText->new(
-            $self, -1, 
+            $self->dialog, -1, 
             q{},
             wxDefaultPosition, 
             Wx::Size->new(-1, -1)
@@ -253,7 +254,7 @@ package LacunaWaX::Dialog::Calculator {
     sub _build_lbl_from_x {#{{{
         my $self = shift;
         my $y = Wx::StaticText->new(
-            $self, -1, 
+            $self->dialog, -1, 
             "X:",
             wxDefaultPosition, 
             Wx::Size->new(13, $self->line_height)
@@ -264,7 +265,7 @@ package LacunaWaX::Dialog::Calculator {
     sub _build_lbl_from_y {#{{{
         my $self = shift;
         my $y = Wx::StaticText->new(
-            $self, -1, 
+            $self->dialog, -1, 
             "Y:",
             wxDefaultPosition, 
             Wx::Size->new(13, $self->line_height)
@@ -275,7 +276,7 @@ package LacunaWaX::Dialog::Calculator {
     sub _build_lbl_to_x {#{{{
         my $self = shift;
         my $y = Wx::StaticText->new(
-            $self, -1, 
+            $self->dialog, -1, 
             "X:",
             wxDefaultPosition, 
             Wx::Size->new(13, $self->line_height)
@@ -286,7 +287,7 @@ package LacunaWaX::Dialog::Calculator {
     sub _build_lbl_to_y {#{{{
         my $self = shift;
         my $y = Wx::StaticText->new(
-            $self, -1, 
+            $self->dialog, -1, 
             "Y:",
             wxDefaultPosition, 
             Wx::Size->new(13, $self->line_height)
@@ -296,28 +297,28 @@ package LacunaWaX::Dialog::Calculator {
     }#}}}
     sub _build_szr_distance {#{{{
         my $self = shift;
-        return wxTheApp->build_sizer($self, wxHORIZONTAL, 'Distance from coords', 1);
+        return wxTheApp->build_sizer($self->dialog, wxHORIZONTAL, 'Distance from coords', 1);
     }#}}}
     sub _build_szr_coords {#{{{
         my $self = shift;
-        return wxTheApp->build_sizer($self, wxVERTICAL, 'Coords');
+        return wxTheApp->build_sizer($self->dialog, wxVERTICAL, 'Coords');
     }#}}}
     sub _build_szr_distance_from {#{{{
         my $self = shift;
-        return wxTheApp->build_sizer($self, wxHORIZONTAL, 'From', 1);
+        return wxTheApp->build_sizer($self->dialog, wxHORIZONTAL, 'From', 1);
     }#}}}
     sub _build_szr_distance_to {#{{{
         my $self = shift;
-        return wxTheApp->build_sizer($self, wxHORIZONTAL, 'To', 1);
+        return wxTheApp->build_sizer($self->dialog, wxHORIZONTAL, 'To', 1);
     }#}}}
     sub _build_szr_distance_btn {#{{{
         my $self = shift;
-        return wxTheApp->build_sizer($self, wxVERTICAL, 'Button');
+        return wxTheApp->build_sizer($self->dialog, wxVERTICAL, 'Button');
     }#}}}
     sub _build_txt_from_x {#{{{
         my $self = shift;
         return Wx::TextCtrl->new(
-            $self, -1, 
+            $self->dialog, -1, 
             q{},
             wxDefaultPosition, Wx::Size->new(40,$self->line_height),
         );
@@ -325,7 +326,7 @@ package LacunaWaX::Dialog::Calculator {
     sub _build_txt_from_y {#{{{
         my $self = shift;
         return Wx::TextCtrl->new(
-            $self, -1, 
+            $self->dialog, -1, 
             q{},
             wxDefaultPosition, Wx::Size->new(40,$self->line_height),
         );
@@ -333,7 +334,7 @@ package LacunaWaX::Dialog::Calculator {
     sub _build_txt_to_x {#{{{
         my $self = shift;
         return Wx::TextCtrl->new(
-            $self, -1, 
+            $self->dialog, -1, 
             q{},
             wxDefaultPosition, Wx::Size->new(40,$self->line_height),
         );
@@ -341,7 +342,7 @@ package LacunaWaX::Dialog::Calculator {
     sub _build_txt_to_y {#{{{
         my $self = shift;
         return Wx::TextCtrl->new(
-            $self, -1, 
+            $self->dialog, -1, 
             q{},
             wxDefaultPosition, Wx::Size->new(40,$self->line_height),
         );
@@ -351,7 +352,7 @@ package LacunaWaX::Dialog::Calculator {
     sub _build_btn_time {#{{{
         my $self = shift;
         my $v = Wx::Button->new(
-            $self, -1, 
+            $self->dialog, -1, 
             "Calculate Time",
             wxDefaultPosition, 
             Wx::Size->new(110, $self->line_height)
@@ -360,12 +361,12 @@ package LacunaWaX::Dialog::Calculator {
     }#}}}
     sub _build_szr_time {#{{{
         my $self = shift;
-        return wxTheApp->build_sizer($self, wxHORIZONTAL, 'Time', 1);
+        return wxTheApp->build_sizer($self->dialog, wxHORIZONTAL, 'Time', 1);
     }#}}}
     sub _build_lbl_distance {#{{{
         my $self = shift;
         my $y = Wx::StaticText->new(
-            $self, -1, 
+            $self->dialog, -1, 
             q{Distance:},
             wxDefaultPosition, 
             Wx::Size->new(55, $self->line_height)
@@ -376,7 +377,7 @@ package LacunaWaX::Dialog::Calculator {
     sub _build_txt_distance {#{{{
         my $self = shift;
         return Wx::TextCtrl->new(
-            $self, -1, 
+            $self->dialog, -1, 
             q{},
             wxDefaultPosition, Wx::Size->new(80,$self->line_height),
         );
@@ -384,7 +385,7 @@ package LacunaWaX::Dialog::Calculator {
     sub _build_lbl_speed {#{{{
         my $self = shift;
         my $y = Wx::StaticText->new(
-            $self, -1, 
+            $self->dialog, -1, 
             q{Speed:},
             wxDefaultPosition, 
             Wx::Size->new(40, $self->line_height)
@@ -395,7 +396,7 @@ package LacunaWaX::Dialog::Calculator {
     sub _build_txt_speed {#{{{
         my $self = shift;
         return Wx::TextCtrl->new(
-            $self, -1, 
+            $self->dialog, -1, 
             q{},
             wxDefaultPosition, Wx::Size->new(80,$self->line_height),
         );
@@ -426,7 +427,7 @@ package LacunaWaX::Dialog::Calculator {
         }
 
         my $v = Wx::Choice->new(
-            $self, -1, 
+            $self->dialog, -1, 
             wxDefaultPosition, 
             Wx::Size->new(110, 25), 
             ['', @{$self->sorted_planets}],
@@ -438,7 +439,7 @@ package LacunaWaX::Dialog::Calculator {
     sub _build_btn_tri {#{{{
         my $self = shift;
         my $v = Wx::Button->new(
-            $self, -1, 
+            $self->dialog, -1, 
             "Calculate Location",
             wxDefaultPosition, 
             Wx::Size->new(140, $self->line_height)
@@ -447,21 +448,21 @@ package LacunaWaX::Dialog::Calculator {
     }#}}}
     sub _build_szr_tri {#{{{
         my $self = shift;
-        return wxTheApp->build_sizer($self, wxVERTICAL, 'Trilaterate', 1);
+        return wxTheApp->build_sizer($self->dialog, wxVERTICAL, 'Trilaterate', 1);
     }#}}}
     sub _build_szr_tri_p1 {#{{{
         my $self = shift;
-        return wxTheApp->build_sizer($self, wxHORIZONTAL, 'Planet 1', 1);
+        return wxTheApp->build_sizer($self->dialog, wxHORIZONTAL, 'Planet 1', 1);
     }#}}}
     sub _build_szr_tri_p2 {#{{{
         my $self = shift;
-        return wxTheApp->build_sizer($self, wxHORIZONTAL, 'Planet 2', 1);
+        return wxTheApp->build_sizer($self->dialog, wxHORIZONTAL, 'Planet 2', 1);
     }#}}}
     sub _build_lbl_tri_inst {#{{{
         my $self = shift;
         my $text = "Find an unprobed planet given its known time of travel from two of your planets.";
         my $y = Wx::StaticText->new(
-            $self, -1, 
+            $self->dialog, -1, 
             $text,
             wxDefaultPosition, 
             Wx::Size->new(350, 30)
@@ -472,7 +473,7 @@ package LacunaWaX::Dialog::Calculator {
     sub _build_lbl_p1_rate {#{{{
         my $self = shift;
         my $y = Wx::StaticText->new(
-            $self, -1, 
+            $self->dialog, -1, 
             q{Speed:},
             wxDefaultPosition, 
             Wx::Size->new(45, $self->line_height)
@@ -484,7 +485,7 @@ package LacunaWaX::Dialog::Calculator {
     sub _build_lbl_p1_time {#{{{
         my $self = shift;
         my $y = Wx::StaticText->new(
-            $self, -1, 
+            $self->dialog, -1, 
             q{Time:},
             wxDefaultPosition, 
             Wx::Size->new(40, $self->line_height)
@@ -496,7 +497,7 @@ package LacunaWaX::Dialog::Calculator {
     sub _build_txt_p1_rate {#{{{
         my $self = shift;
         my $y =  Wx::TextCtrl->new(
-            $self, -1, 
+            $self->dialog, -1, 
             q{14066},
             wxDefaultPosition, Wx::Size->new(80,$self->line_height),
         );
@@ -506,7 +507,7 @@ package LacunaWaX::Dialog::Calculator {
     sub _build_txt_p1_time {#{{{
         my $self = shift;
         my $y = Wx::TextCtrl->new(
-            $self, -1, 
+            $self->dialog, -1, 
             q{},
             wxDefaultPosition, Wx::Size->new(80,$self->line_height),
         );
@@ -516,7 +517,7 @@ package LacunaWaX::Dialog::Calculator {
     sub _build_lbl_p2_rate {#{{{
         my $self = shift;
         my $y = Wx::StaticText->new(
-            $self, -1, 
+            $self->dialog, -1, 
             q{Speed:},
             wxDefaultPosition, 
             Wx::Size->new(45, $self->line_height)
@@ -528,7 +529,7 @@ package LacunaWaX::Dialog::Calculator {
     sub _build_lbl_p2_time {#{{{
         my $self = shift;
         my $y = Wx::StaticText->new(
-            $self, -1, 
+            $self->dialog, -1, 
             q{Time:},
             wxDefaultPosition, 
             Wx::Size->new(40, $self->line_height)
@@ -540,7 +541,7 @@ package LacunaWaX::Dialog::Calculator {
     sub _build_txt_p2_rate {#{{{
         my $self = shift;
         my $y = Wx::TextCtrl->new(
-            $self, -1, 
+            $self->dialog, -1, 
             q{14066},
             wxDefaultPosition, Wx::Size->new(80,$self->line_height),
         );
@@ -550,7 +551,7 @@ package LacunaWaX::Dialog::Calculator {
     sub _build_txt_p2_time {#{{{
         my $self = shift;
         my $y = Wx::TextCtrl->new(
-            $self, -1, 
+            $self->dialog, -1, 
             q{},
             wxDefaultPosition, Wx::Size->new(80,$self->line_height),
         );
@@ -562,7 +563,7 @@ package LacunaWaX::Dialog::Calculator {
     sub _build_lbl_header {#{{{
         my $self = shift;
         my $y = Wx::StaticText->new(
-            $self, -1, 
+            $self->dialog, -1, 
             "Calculator",
             wxDefaultPosition, 
             Wx::Size->new(400, 35)
@@ -574,7 +575,7 @@ package LacunaWaX::Dialog::Calculator {
         my $self = shift;
         my $text = q{What's happening here may be a bit confusing, especially the Trilateration section.  See the help documentation for complete information.};
         my $y = Wx::StaticText->new(
-            $self, -1, 
+            $self->dialog, -1, 
             $text,
             wxDefaultPosition, 
             Wx::Size->new( $self->width - 20, 35 )
@@ -584,7 +585,7 @@ package LacunaWaX::Dialog::Calculator {
     }#}}}
     sub _build_szr_header {#{{{
         my $self = shift;
-        return wxTheApp->build_sizer($self, wxVERTICAL, 'Header');
+        return wxTheApp->build_sizer($self->dialog, wxVERTICAL, 'Header');
     }#}}}
     sub _build_size {#{{{
         my $self = shift;

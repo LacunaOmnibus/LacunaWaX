@@ -1,13 +1,49 @@
 
 package LacunaWaX::Dialog::NonScrolled {
     use v5.14;
-    use Moose;
     use Try::Tiny;
     use Wx qw(:everything);
     use Wx::Event qw();
 
-    use MooseX::NonMoose::InsideOut;
-    extends 'Wx::Dialog';
+    use Moose;
+
+    ### Perlapp does not like MooseX::NonMoose::InsideOut one little bit.  
+    ### Outside of perlapp it works just fine.
+    ###
+    ### We'll attempt to at least partially imitate it, by allowing the dialog 
+    ### attribute to handle the Wx-y methods, rather than having the actual 
+    ### object (LogViewer, Calculator, whatever) extend Wx::Dialog.
+    ###
+    ### If your extending class needs to call a Wx::Dialog method that's not 
+    ### listed below, just add it.
+    ###
+    ### So your object should still mostly behave as if it were extending 
+    ### Wx::Dialog.  The exception is when you need to send a parent object 
+    ### along to create another Wx widget; in that case, you must send 
+    ### $self->dialog rather than just $self.
+    ###
+    ### That does not extend to setting up events; $self is fine for that.
+    has 'dialog' => (
+        is          => 'rw',
+        isa         => 'Wx::Dialog',
+        lazy_build  => 1,
+        handles => {
+            Centre              => "Centre",
+            Close               => "Close",
+            Connect             => "Connect",
+            Destroy             => "Destroy",
+            EndModal            => "EndModal",
+            GetClientSize       => "GetClientSize",
+            GetWindowStyleFlag  => "GetWindowStyleFlag",
+            Layout              => "Layout",
+            SetSize             => "SetSize",
+            SetSizer            => "SetSizer",
+            SetTitle            => "SetTitle",
+            SetWindowStyle      => "SetWindowStyle",
+            Show                => "Show",
+            ShowModal           => "ShowModal",
+        },
+    );
 
     has 'page_sizer'    => (is => 'rw', isa => 'Wx::BoxSizer',  lazy_build => 1, documentation => 'horizontal'  );
     has 'main_sizer'    => (is => 'rw', isa => 'Wx::Sizer',     lazy_build => 1, documentation => 'vertical'    );
@@ -15,24 +51,23 @@ package LacunaWaX::Dialog::NonScrolled {
     has 'position'      => (is => 'rw', isa => 'Wx::Point',     lazy_build => 1);
     has 'size'          => (is => 'rw', isa => 'Wx::Size',      lazy_build => 1);
 
-    sub FOREIGNBUILDARGS {## no critic qw(RequireArgUnpacking) {{{
-        my $self = shift;
-        my %args = @_;
-
-        my $pos = $args{'position'} // Wx::Point->new(10,10);
-
-        return (
-            undef, -1, 
-            q{},
-            $pos,
-            wxDefaultSize,
-            wxRESIZE_BORDER|wxDEFAULT_DIALOG_STYLE
-        );
-    }#}}}
     sub BUILD {
         my $self = shift;
         return $self;
     }
+    sub _build_dialog {#{{{
+        my $self = shift;
+
+        my $d = Wx::Dialog->new(
+            undef, -1, 
+            q{},
+            $self->position || Wx::Point->new(10,10),
+            $self->size || wxDefaultSize,
+            wxRESIZE_BORDER|wxDEFAULT_DIALOG_STYLE
+        );
+
+        return $d;
+    }#}}}
     sub _build_main_sizer {#{{{
         my $self = shift;
         my $v = wxTheApp->build_sizer($self, wxVERTICAL, 'Main Sizer');
@@ -94,8 +129,9 @@ without testing it there first.
         return 1;
     }#}}}
 
+
     no Moose;
-    __PACKAGE__->meta->make_immutable; 
+    __PACKAGE__->meta->make_immutable(); 
 }
 
 1;
@@ -174,4 +210,5 @@ CHECK FIX THIS
 A Wx::Point object defining the NW corner of the dialog.  Defaults to (10,10).
 
 =cut
+
 

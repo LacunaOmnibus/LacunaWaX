@@ -5,6 +5,7 @@ package LacunaWaX::Dialog::Prefs {
     use Try::Tiny;
     use Wx qw(:everything);
     use Wx::Event qw(EVT_CLOSE);
+
     extends 'LacunaWaX::Dialog::NonScrolled';
 
     use LacunaWaX::Dialog::Prefs::TabAutovote;
@@ -46,7 +47,7 @@ package LacunaWaX::Dialog::Prefs {
     };
     sub _build_notebook {#{{{
         my $self = shift;
-        my $v = Wx::Notebook->new($self, -1, wxDefaultPosition, $self->notebook_size, 0);
+        my $v = Wx::Notebook->new($self->dialog, -1, wxDefaultPosition, $self->notebook_size, 0);
         return $v;
     }#}}}
     sub _build_notebook_size {#{{{

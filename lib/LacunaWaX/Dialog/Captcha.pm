@@ -13,6 +13,7 @@ package LacunaWaX::Dialog::Captcha {
     use Try::Tiny;
     use Wx qw(:everything);
     use Wx::Event qw(EVT_BUTTON EVT_CLOSE EVT_TEXT_ENTER);
+
     extends 'LacunaWaX::Dialog::NonScrolled';
 
     has 'captcha' => (
@@ -90,7 +91,7 @@ package LacunaWaX::Dialog::Captcha {
     sub _build_btn_solution {#{{{
         my $self = shift;
         my $v = Wx::Button->new(
-            $self, -1, 
+            $self->dialog, -1, 
             "Solve",
             wxDefaultPosition, 
             Wx::Size->new(75, $self->line_height)
@@ -100,7 +101,7 @@ package LacunaWaX::Dialog::Captcha {
     sub _build_btn_reload {#{{{
         my $self = shift;
         my $v = Wx::Button->new(
-            $self, -1, 
+            $self->dialog, -1, 
             "Reload",
             wxDefaultPosition, 
             Wx::Size->new(75, $self->line_height)
@@ -109,16 +110,16 @@ package LacunaWaX::Dialog::Captcha {
     }#}}}
     sub _build_szr_image {#{{{
         my $self = shift;
-        return wxTheApp->build_sizer($self, wxVERTICAL, 'Image', 0);
+        return wxTheApp->build_sizer($self->dialog, wxVERTICAL, 'Image', 0);
     }#}}}
     sub _build_szr_solution {#{{{
         my $self = shift;
-        return wxTheApp->build_sizer($self, wxHORIZONTAL, 'Solution', 0);
+        return wxTheApp->build_sizer($self->dialog, wxHORIZONTAL, 'Solution', 0);
     }#}}}
     sub _build_txt_solution {#{{{
         my $self = shift;
         return Wx::TextCtrl->new(
-            $self, -1, 
+            $self->dialog, -1, 
             q{},
             wxDefaultPosition, Wx::Size->new(150,$self->line_height),
             wxTE_PROCESS_ENTER
@@ -170,7 +171,7 @@ package LacunaWaX::Dialog::Captcha {
         my $bmp = Wx::Bitmap->new($wximg);
 
         my $sbmp = Wx::StaticBitmap->new(
-            $self, -1,
+            $self->dialog, -1,
             $bmp,
             wxDefaultPosition,
             Wx::Size->new(300, 80),
