@@ -7,7 +7,7 @@ use LacunaWaX::Dialog::About;
 use LacunaWaX::Dialog::Calculator;
 use LacunaWaX::Dialog::Captcha;
 use LacunaWaX::Dialog::Help;
-use LacunaWaX::Dialog::LogViewer;   # still producing incompatible metaclass problems, because of NonScrolled.  Come back to this.
+use LacunaWaX::Dialog::LogViewer;
 use LacunaWaX::Dialog::Mail;
 use LacunaWaX::Dialog::Prefs;
 use LacunaWaX::MainSplitterWindow::RightPane::GlyphsPane;
@@ -20,7 +20,10 @@ use LacunaWaX::Schedule::Spies;
 use LacunaWaX::Schedule::SS_Health;
 use LacunaWaX::Servers;
 
-#use LacunaWaX::Dialog::NonScrolledTest;
+### Must continue to remove all references to MooseX::NonMoose.
+
+### Need to get to here.
+#use LacunaWaX;
 
 say "blarg";
 
