@@ -433,6 +433,7 @@ Returns true/false on success/fail.
             my $game_client = LacunaWaX::Model::Client->new (
                     app         => $self,
                     server_id   => $self->server->id,
+                    globals     => $self->globals,
                     rpc_sleep   => 0,
                     allow_sleep => 0,   # Treat '> RPC Limit' error as any other error from the GUI
                     use_gui     => 1,   # Allows use of the cache

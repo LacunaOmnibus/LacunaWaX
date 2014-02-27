@@ -47,6 +47,7 @@ package LacunaWaX::Roles::ScheduledTask {
         ### includes if they haven't got a PT account.
         my $client = try {
             LacunaWaX::Model::Client->new (
+                globals     => $self->globals,
                 server_id   => $server_id,
                 interactive => 0,
                 allow_sleep => 1,   # allow to sleep 60 seconds on RPC Limit error
@@ -54,6 +55,7 @@ package LacunaWaX::Roles::ScheduledTask {
             )
         }
         catch {
+say "--$_--";
             return;
         };
 

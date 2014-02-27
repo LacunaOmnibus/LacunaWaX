@@ -1,149 +1,4 @@
 
-=head1 NAME 
-
-LacunaWaX::Model::Client - Game server client
-
-=head1 SYNOPSIS
-
- my $game_client = LacunaWaX::Model::Client->new (
-  app         => C<LacunaWaX object>,
-  server_id   => C<Integer ID (in local Servers table) of server to connect to>
-  allow_sleep => 0,
- );
-
- if( $game_client->ping ) {
-  ...connected OK...
- }
- else {
-  ...connected NOK...
- }
-
-=head1 DESCRIPTION
-
-Does not technically extend Games::Lacuna::Client, but uses AUTOLOAD to allow 
-treating objects of this class as GLC objects.
-
-So to get a GLC map object, instead of having to do
-
- $game_client->client->map()
-
-Which just feels hackneyed, you can skip the separate call to client:
-
- $game_client->map()
-
-=head1 CONSTRUCTION
-
-The user's default empire name and password are saved in the database, so those 
-creds do not generally need to be sent.
-
-If you need to create a client using credentials other than what are stored as 
-the current LacunaWaX user's default creds, you may also pass empire_name and 
-empire_pass:
-
- my $other_client = LacunaWaX::Model::Client->new (
-  app         => C<LacunaWaX object>,
-  server_id   => C<ID of server>
-  allow_sleep => 0,
-
-  empire_name => 'some other empire',
-  empire_pass => 'some other pass',
- );
-
-=head1 PASSABLE ATTRIBUTES
-
-=head2 app (Required)
-
-A LacunaWaX object
-
-=head2 server_id (Required)
-
-The integer ID of the server, in the local Servers table, to which to connect.  
-This must currently be either 1 (US1) or 2 (PT).
-
-=head2 use_gui
-
-Indicates whether we're attached to a GUI or not.  If so, we can use Wx-related 
-globals, as well as the CHI cache.  If we're not (eg from a scheduled task), we 
-won't use those.
-
-Defaults to false.
-
-=head2 allow_sleep
-
-Defaults to false.  If true, the client will sleep for 61 seconds after 
-receiving the "More than 60 RPCs used per minute" error from the server.  This 
-should generally I<only> be used by non-GUI clients.
-
-=head2 rpc_sleep
-
-Integer number of seconds to pause between each request passed to the game 
-server to avoid soaking up the 60 allowed RPCs per minute.  Defaults to 0, but a 
-value of at least 1 is encouraged.  Scheduled tasks should probably use a value 
-of 2 or 3.
-
-=head1 PROVIDED ATTRIBUTES
-
-=head2 server_rec, account_rec
-
-The Servers and ServerAccounts table records representing the current LacunaWaX 
-user.
-
-Note that these will continue to represent the I<current LacunaWaX user> even if 
-another user's empire_name and empire_pass are being used.
-
-=head2 url, protocol, empire_name, empire_pass
-
-Connection information pertaining to the current client.
-
-=head2 client
-
-This is the actual Games::Lacuna::Client object.  You shouldn't ever need to 
-touch this.
-
-=head2 ore_types, glyph_types
-
-Alphabetically-sorted arrayref of all possible types of ore in the game.  The 
-two methods are identical; both are provided as convenience.  The types are 
-returned as lower-cased strings.
-
-This list is hard-coded, but since it's exhaustive, it's not likely to change.
-
-=head2 warships
-
-Alphabetically-sorted arrayref of all warships in the game.  The names are those 
-recognized by the game, not the human-readable names (so 'placebo4', not 
-'Placebo IV').
-
-This list is hard-coded, and I<not> exhaustive.  I listed the ships that I think 
-look like "war" ships.
-
-=head2 glyph_recipes
-
-HoA keyed off the final product name:
-
- 'Interdimensional Rift' => [qw(methane zircon fluorite)],
- 'Kalavian Ruins'        => [qw(galena gold)],
- 'Library of Jith'       => [qw(anthracite bauxite beryl chalcopyrite)],
- ...
-
-=head2 planets
-
-Hashref of the current empire's planets: C<name =E<gt> ID>
-
-=head1 METHODS
-
-=head2 EXCEPTIONAL METHODS
-
-Many of the methods need to hit the game server, and as such, might encounter 
-various server errors.  These methods will all throw exceptions in that case, 
-and should therefore have their calls wrapped in try/catch blocks.
-
-All methods whose name begins with C<get_>, along with the C<cook_glyphs> and 
-C<rearrange> methods fall into this category, as well as any methods that are 
-actually Games::Lacuna::Client methods.
-
-=cut
-
 package LacunaWaX::Model::Client {
     use v5.14;
     use Carp;
@@ -161,6 +16,17 @@ package LacunaWaX::Model::Client {
 
     has 'app'           => (is => 'rw', isa => 'LacunaWaX',                     weak_ref => 1   ); 
     has 'server_id'     => (is => 'rw', isa => 'Int',                           required => 1   );
+
+    has 'globals' => (
+        is          => 'rw', 
+        isa         => 'LacunaWaX::Model::Globals',
+        lazy_build  => 1,
+        handles     => {
+            logger          => 'logger',
+            log_schema      => 'log_schema',
+            main_schema     => 'main_schema',
+        }
+    );
 
     has 'empire_status'   => (is => 'rw', isa => 'HashRef');
 
@@ -259,7 +125,7 @@ package LacunaWaX::Model::Client {
     sub _build_account_rec {#{{{
         my $self = shift;
 
-        my $schema = $self->app->main_schema;
+        my $schema = $self->globals->main_schema;
         my $rec = $schema->resultset('ServerAccounts')->search({
             server_id           => $self->server_id,
             default_for_server  => '1'
@@ -292,11 +158,13 @@ package LacunaWaX::Model::Client {
     }#}}}
     sub _build_empire_name {#{{{
         my $self = shift;
-        return $self->account_rec->username;
+        my $en = $self->account_rec->username;
+        return $en;
     }#}}}
     sub _build_empire_pass {#{{{
         my $self = shift;
-        return $self->account_rec->password;
+        my $pw = $self->account_rec->password;
+        return $pw;
     }#}}}
     sub _build_glyphs {#{{{
         my $self = shift;
@@ -357,7 +225,7 @@ package LacunaWaX::Model::Client {
     sub _build_server_rec {#{{{
         my $self = shift;
 
-        my $schema = $self->app->main_schema;
+        my $schema = $self->globals->main_schema;
         my $rec = $schema->resultset('Servers')->find({
             id => $self->server_id
         }) or croak "Could not find server with id '" . $self->server_id . q{'.};
@@ -436,7 +304,7 @@ false and never die.
 
 =cut
 
-        my $logger = $self->app->logger;
+        my $logger = $self->globals->logger;
         $logger->component('Client');
         $logger->debug('ping() called');
         $self->app->Yield if $self->app;
@@ -831,7 +699,7 @@ planet.
             $cbs = $cbs->{'body'};
 
             if( defined $cbs->{'empire'} and $cbs->{'empire'}{'alignment'} eq 'self' ) { # this is my planet
-                my $schema = $self->app->main_schema;
+                my $schema = $self->globals->main_schema;
 
                 my $body_type_rec = $schema->resultset('BodyTypes')->find_or_create({ 
                     body_id   => $cbs->{'id'}, 
@@ -1449,7 +1317,7 @@ hashref.
 
 =cut
 
-        my $logger = $self->app->logger;
+        my $logger = $self->globals->logger;
         $logger->component('Client');
 
         my $am = $self->get_building($planet_id, 'Archaeology Ministry');
@@ -1522,3 +1390,149 @@ Returns a hashref which includes an arrayref of moved buildings keyed off
 
 1;
 
+__END__
+
+=head1 NAME 
+
+LacunaWaX::Model::Client - Game server client
+
+=head1 SYNOPSIS
+
+ my $game_client = LacunaWaX::Model::Client->new (
+  app         => C<LacunaWaX object>,
+  server_id   => C<Integer ID (in local Servers table) of server to connect to>
+  allow_sleep => 0,
+ );
+
+ if( $game_client->ping ) {
+  ...connected OK...
+ }
+ else {
+  ...connected NOK...
+ }
+
+=head1 DESCRIPTION
+
+Does not technically extend Games::Lacuna::Client, but uses AUTOLOAD to allow 
+treating objects of this class as GLC objects.
+
+So to get a GLC map object, instead of having to do
+
+ $game_client->client->map()
+
+Which just feels hackneyed, you can skip the separate call to client:
+
+ $game_client->map()
+
+=head1 CONSTRUCTION
+
+The user's default empire name and password are saved in the database, so those 
+creds do not generally need to be sent.
+
+If you need to create a client using credentials other than what are stored as 
+the current LacunaWaX user's default creds, you may also pass empire_name and 
+empire_pass:
+
+ my $other_client = LacunaWaX::Model::Client->new (
+  app         => C<LacunaWaX object>,
+  server_id   => C<ID of server>
+  allow_sleep => 0,
+
+  empire_name => 'some other empire',
+  empire_pass => 'some other pass',
+ );
+
+=head1 PASSABLE ATTRIBUTES
+
+=head2 app (Required)
+
+A LacunaWaX object
+
+=head2 server_id (Required)
+
+The integer ID of the server, in the local Servers table, to which to connect.  
+This must currently be either 1 (US1) or 2 (PT).
+
+=head2 use_gui
+
+Indicates whether we're attached to a GUI or not.  If so, we can use Wx-related 
+globals, as well as the CHI cache.  If we're not (eg from a scheduled task), we 
+won't use those.
+
+Defaults to false.
+
+=head2 allow_sleep
+
+Defaults to false.  If true, the client will sleep for 61 seconds after 
+receiving the "More than 60 RPCs used per minute" error from the server.  This 
+should generally I<only> be used by non-GUI clients.
+
+=head2 rpc_sleep
+
+Integer number of seconds to pause between each request passed to the game 
+server to avoid soaking up the 60 allowed RPCs per minute.  Defaults to 0, but a 
+value of at least 1 is encouraged.  Scheduled tasks should probably use a value 
+of 2 or 3.
+
+=head1 PROVIDED ATTRIBUTES
+
+=head2 server_rec, account_rec
+
+The Servers and ServerAccounts table records representing the current LacunaWaX 
+user.
+
+Note that these will continue to represent the I<current LacunaWaX user> even if 
+another user's empire_name and empire_pass are being used.
+
+=head2 url, protocol, empire_name, empire_pass
+
+Connection information pertaining to the current client.
+
+=head2 client
+
+This is the actual Games::Lacuna::Client object.  You shouldn't ever need to 
+touch this.
+
+=head2 ore_types, glyph_types
+
+Alphabetically-sorted arrayref of all possible types of ore in the game.  The 
+two methods are identical; both are provided as convenience.  The types are 
+returned as lower-cased strings.
+
+This list is hard-coded, but since it's exhaustive, it's not likely to change.
+
+=head2 warships
+
+Alphabetically-sorted arrayref of all warships in the game.  The names are those 
+recognized by the game, not the human-readable names (so 'placebo4', not 
+'Placebo IV').
+
+This list is hard-coded, and I<not> exhaustive.  I listed the ships that I think 
+look like "war" ships.
+
+=head2 glyph_recipes
+
+HoA keyed off the final product name:
+
+ 'Interdimensional Rift' => [qw(methane zircon fluorite)],
+ 'Kalavian Ruins'        => [qw(galena gold)],
+ 'Library of Jith'       => [qw(anthracite bauxite beryl chalcopyrite)],
+ ...
+
+=head2 planets
+
+Hashref of the current empire's planets: C<name =E<gt> ID>
+
+=head1 METHODS
+
+=head2 EXCEPTIONAL METHODS
+
+Many of the methods need to hit the game server, and as such, might encounter 
+various server errors.  These methods will all throw exceptions in that case, 
+and should therefore have their calls wrapped in try/catch blocks.
+
+All methods whose name begins with C<get_>, along with the C<cook_glyphs> and 
+C<rearrange> methods fall into this category, as well as any methods that are 
+actually Games::Lacuna::Client methods.
+
+=cut

@@ -9,7 +9,7 @@ package LacunaWaX::Dialog::LogViewer {
     extends 'LacunaWaX::Dialog::NonScrolled';
 
     has 'count' => (
-        is      => 'ro',
+        is      => 'rw',
         isa     => 'Int',
         default => 0,
         documentation => q{
@@ -26,7 +26,7 @@ package LacunaWaX::Dialog::LogViewer {
         }
     );
     has 'page' => (
-        is      => 'ro',
+        is      => 'rw',
         isa     => 'Int',
         default => 1,
         documentation => q{
@@ -35,7 +35,7 @@ package LacunaWaX::Dialog::LogViewer {
         }
     );
     has 'recs_per_page' => (
-        is      => 'ro',
+        is      => 'rw',
         isa     => 'Int',
         default => 100,
     );

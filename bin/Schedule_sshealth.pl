@@ -9,7 +9,7 @@ use lib $FindBin::Bin . '/../lib';
 ### This must exist here for perlApp to understand it needs Moose in time.
 use Moose;
 
-use LacunaWaX::Model::Container;
+use LacunaWaX::Model::Globals;
 use LacunaWaX::Schedule;
 use LacunaWaX::Util;
 

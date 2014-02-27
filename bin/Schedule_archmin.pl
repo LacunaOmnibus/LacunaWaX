@@ -8,7 +8,6 @@ use Try::Tiny;
 use Moose;
 
 use lib $FindBin::Bin . '/../lib';
-use LacunaWaX::Model::Container;
 use LacunaWaX::Model::Globals;
 use LacunaWaX::Schedule;
 use LacunaWaX::Util;

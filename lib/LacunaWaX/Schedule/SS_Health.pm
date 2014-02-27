@@ -31,16 +31,9 @@ package LacunaWaX::Schedule::SS_Health {
     has 'alerts' => (
         is          => 'rw',
         isa         => 'ArrayRef[Str]',
-        traits      =>['Array'],
         default     => sub{ [] },
-        handles     => {
-            add_alert       => 'push',
-            all_alerts      => 'elements',
-            count_alerts    => 'count',
-            clear_alerts    => 'clear',
-            has_alerts      => 'count',
-        }
     );
+
     has 'inbox' => (
         is          => 'rw',
         isa         => 'Object',
@@ -57,6 +50,16 @@ package LacunaWaX::Schedule::SS_Health {
         return $self->game_client->inbox
     }#}}}
 
+    sub add_alert {#{{{
+        my $self = shift;
+        my $alert = shift;
+        push( @{$self->alerts}, $alert );
+        return 1;
+    }#}}}
+    sub has_alerts {#{{{
+        my $self = shift;
+        return scalar @{$self->alerts};
+    }#}}}
     sub diagnose_all_servers {#{{{
         my $self        = shift;
         my @server_recs = $self->schema->resultset('Servers')->search()->all;   ## no critic qw(ProhibitLongChainsOfMethodCalls)
@@ -107,7 +110,7 @@ package LacunaWaX::Schedule::SS_Health {
         my $ss_rec  = shift;    # SSAlerts table record
 
         return unless $ss_rec->enabled;
-        $self->clear_alerts;
+        $self->alerts([]);
         $self->logger->info("Diagnosing " . $self->station->name);
 
         $self->logger->info("Checking we have sufficient resources");
@@ -173,7 +176,8 @@ The problem I found was:
 --------------------------------------------------
 ";
 
-        foreach my $a( $self->all_alerts ) {
+        #foreach my $a( $self->all_alerts ) {
+        foreach my $a( @{$self->alerts} ) {
             $self->logger->info( "PROBLEM - $a" );    # SS name has already been mentioned in the log
             $body .= "$a\n";
         }
