@@ -7,6 +7,7 @@ use LacunaWaX::Dialog::About;
 use LacunaWaX::MainSplitterWindow::RightPane::GlyphsPane;
 use LacunaWaX::MainSplitterWindow::RightPane::RepairPane;
 use LacunaWaX::MainSplitterWindow::RightPane::SSIncoming;
+use LacunaWaX::Model::Globals::Wx;
 
 say "blarg";
 

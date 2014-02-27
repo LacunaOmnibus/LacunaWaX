@@ -25,46 +25,24 @@ package LacunaWaX::Model::Globals::Wx {
     );
 
     has 'fonts' => (
-        is          => 'ro', 
+        is          => 'rw', 
         isa         => 'HashRef',
         default     => sub{ {} },
-        traits      => [ 'Hash' ],
-        handles     => {
-            get_font    => 'get',
-            has_font    => 'defined',
-            num_fonts   => 'count',
-            set_font    => 'set',
-        }
     );
 
     has 'sizer_borders' => (
         is      => 'rw', 
         isa     => 'Bool',
-        traits  => ['Bool'],
         default => 0,
-        handles => {
-            borders_on      => 'set',
-            borders_off     => 'unset',
-            borders_are_off => 'not',
-        },
         documentation => q{
             If true, sizers built with wxTheApp->build_sizer() will be drawn with a visible border.
         }
-
     );
 
     has 'images' => (
         is          => 'ro', 
         isa         => 'HashRef',
         default     => sub{ {} },
-        traits      => [ 'Hash' ],
-        handles     => {
-            del_image   => 'delete',
-            get_image   => 'get',
-            has_image   => 'defined',
-            num_images  => 'count',
-            set_image   => 'set',
-        }
     );
 
     has 'zip_file' => (
@@ -114,6 +92,20 @@ package LacunaWaX::Model::Globals::Wx {
         return $z;
     }#}}}
 
+    sub borders_on {#{{{
+        my $self = shift;
+        $self->sizer_borders(1);
+        return 1;
+    }#}}}
+    sub borders_off {#{{{
+        my $self = shift;
+        $self->sizer_borders(0);
+        return 1;
+    }#}}}
+    sub borders_are_off {#{{{
+        my $self = shift;
+        return ($self->sizer_borders) ? 0 : 1;
+    }#}}}
     sub cache_fonts {#{{{
         my $self = shift;
 
@@ -194,6 +186,30 @@ package LacunaWaX::Model::Globals::Wx {
             }
         }
 
+        return 1;
+    }#}}}
+    sub get_font {#{{{
+        my $self = shift;
+        my $name = shift;
+        return $self->fonts->{$name} // q{};
+    }#}}}
+    sub get_image {#{{{
+        my $self = shift;
+        my $name = shift;
+        return $self->images->{$name} // q{};
+    }#}}}
+    sub set_font {#{{{
+        my $self = shift;
+        my $name = shift;   # string
+        my $font = shift;   # Wx::Font
+        $self->fonts->{$name} = $font;
+        return 1;
+    }#}}}
+    sub set_image {#{{{
+        my $self = shift;
+        my $name = shift;   # string
+        my $img  = shift;   # Wx::Image
+        $self->images->{$name} = $img;
         return 1;
     }#}}}
 

@@ -51,20 +51,16 @@ package LacunaWaX {
         isa         => 'LacunaWaX::Model::Globals::Wx',
         lazy_build  => 1,
         handles     => {
-            del_image   => 'del_image',
             get_image   => 'get_image',
-            has_image   => 'has_image',
-            num_images  => 'num_images',
             set_image   => 'set_image',
+            get_font    => 'get_font',
+            set_font    => 'set_font',
 
-            get_font   => 'get_font',
-            has_font   => 'has_font',
-            num_fonts  => 'num_fonts',
-
-            get_cache  => 'cache',
+            get_cache   => 'cache',
 
             borders_on      => 'borders_on',
             borders_off     => 'borders_off',
+            borders_are_on  => 'sizer_borders',
             borders_are_off => 'borders_are_off',
         }
     );
