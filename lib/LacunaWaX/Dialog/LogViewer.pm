@@ -11,10 +11,6 @@ package LacunaWaX::Dialog::LogViewer {
         is      => 'ro',
         isa     => 'Int',
         default => 0,
-        traits  => ['Number'],
-        handles => {
-            set_count => 'set',
-        },
         documentation => q{
             The total number of log entries that can be shown.  Changes 
             per-component, so each time a new radio button is chosen.
@@ -32,12 +28,6 @@ package LacunaWaX::Dialog::LogViewer {
         is      => 'ro',
         isa     => 'Int',
         default => 1,
-        traits  => ['Number'],
-        handles => {
-            set_page  => 'set',
-            prev_page => 'sub',
-            next_page => 'add',
-        },
         documentation => q{
             The page we're currently on.  Resets to 1 each time the user choses 
             a new component radio button.
@@ -307,7 +297,7 @@ package LacunaWaX::Dialog::LogViewer {
         my $panel   = shift;
         my $event   = shift;
 
-        $self->next_page(1);
+        $self->page( $self->page + 1 );
         $self->show_page;
 
         return 1;
@@ -345,8 +335,8 @@ package LacunaWaX::Dialog::LogViewer {
         );
 
         $self->results( $rs );
-        $self->set_page(1);
-        $self->set_count( $rs->count );
+        $self->page(1);
+        $self->count( $rs->count );
         $self->show_page();
 
         return 1;
@@ -363,7 +353,7 @@ package LacunaWaX::Dialog::LogViewer {
         my $panel   = shift;
         my $event   = shift;
 
-        $self->prev_page(1);
+        $self->page( $self->page - 1 );
         $self->show_page;
 
         return 1;
