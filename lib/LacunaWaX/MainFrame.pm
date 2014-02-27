@@ -262,9 +262,9 @@ package LacunaWaX::MainFrame {
 
             unless( wxTheApp->game_connect ) {
                 ### Probably bad creds filled out in Prefs frame.  Undef 
-                ### set_connected_server so we don't get told we're "Already 
-                ### Connected" on our next attempt.
-                $self->set_connected_server(undef);
+                ### server so we don't get told we're "Already Connected" on 
+                ### our next attempt.
+                wxTheApp->server(undef);
                 wxTheApp->endthrob();
                 $self->set_caption("Connection Failed!  Correct your login credentials in Edit... Preferences.");
                 return;

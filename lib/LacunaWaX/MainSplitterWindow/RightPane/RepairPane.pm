@@ -65,14 +65,8 @@ package LacunaWaX::MainSplitterWindow::RightPane::RepairPane {
     );
 
     has 'row' => (
-        is => 'rw',
-        isa => 'Int',
-        traits      => ['Counter'],
-        handles => {
-            inc_row   => 'inc',
-            dec_row   => 'dec',
-            reset_row => 'reset',
-        },
+        is      => 'rw',
+        isa     => 'Int',
         default => 0,
         documentation => q{
             Keeps track of which row we're working on while inserting items into a list.
@@ -84,12 +78,6 @@ package LacunaWaX::MainSplitterWindow::RightPane::RepairPane {
         is          => 'rw',
         isa         => 'ArrayRef[Str]',
         lazy_build  => 1,
-        traits      => ['Array'],
-        handles     => {
-            all_glyph_bldgs     => 'elements',
-            add_glyph_bldg      => 'push',
-            find_glyph_bldg     => 'first',
-        },
         documentation => q{
             Just a list of glyph buildings.  Spelling and spacing match the human names
             ("space port" rather than "spaceport"), but all lc().
@@ -99,11 +87,6 @@ package LacunaWaX::MainSplitterWindow::RightPane::RepairPane {
     has 'buildings' => (    # id => bldg_hashref
         is          => 'rw',
         isa         => 'HashRef',
-        traits      => ['Hash'],
-        handles => {
-            bldg_ids => 'keys',
-            get_bldg => 'get',
-        },
         lazy_build  => 1,
     );
 
@@ -549,7 +532,7 @@ inserting.
         $list->SetItem( $row_idx, 3, sprintf("%2d", $y)         );
         $list->SetItem( $row_idx, 4, sprintf("%3d%%", $damage)  );
 
-        $self->inc_row;
+        $self->row( $self->row + 1 );
         return $row_idx;
     }#}}}
     sub byname_rev {#{{{
@@ -668,8 +651,8 @@ assignments intact.
 
         ### Each insert goes _above_ the previous item, so start with a 
         ### reverse sort.
-        foreach my $bldg_id( sort{$self->byname_rev}$self->bldg_ids ) {
-            my $bldg_hr = $self->get_bldg($bldg_id);
+        foreach my $bldg_id( sort{$self->byname_rev}(keys %{$self->buildings}) ) {
+            my $bldg_hr = $self->buildings->{$bldg_id} // next;
 
             $self->add_row(
                 $list,
@@ -681,7 +664,7 @@ assignments intact.
             );
         }
 
-        $self->reset_row;
+        $self->row( 0 );
     }#}}}
     sub post_repair_cleanup {#{{{
         my $self = shift;
@@ -714,8 +697,8 @@ I have not tested the "fails if we're out of res" yet.
 
 =cut
 
-        foreach my $id( $self->bldg_ids ) {
-            my $hr = $self->get_bldg($id);
+        foreach my $id( keys %{ $self->buildings } ) {
+            my $hr = $self->buildings->{$id} // next;
             next unless ($hr->{'name'} eq $name and $hr->{'x'} eq $x and $hr->{'y'} eq $y);
 
             my $obj = wxTheApp->game_client->get_building_object(
@@ -809,7 +792,7 @@ I have not tested the "fails if we're out of res" yet.
             my $itm  = $self->lst_bldgs_onsite->GetItem($row);
             my $id   = wxTheApp->str_trim( $itm->GetText );
             my $name = wxTheApp->str_trim( $self->lst_bldgs_onsite->GetItem($row, 1)->GetText );
-            if( $self->find_glyph_bldg(sub{$_ eq lc $name}) ) {
+            if( my $bldg = first{ $_ eq lc $name }@{$self->glyph_bldgs} ) {
                 my $x = wxTheApp->str_trim( $self->lst_bldgs_onsite->GetItem($row, 2)->GetText );
                 my $y = wxTheApp->str_trim( $self->lst_bldgs_onsite->GetItem($row, 3)->GetText );
                 my $d = wxTheApp->str_trim( $self->lst_bldgs_onsite->GetItem($row, 4)->GetText );

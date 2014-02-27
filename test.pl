@@ -3,10 +3,14 @@ use v5.14;
 use lib 'lib';
 use LacunaWaX::Preload::Perlapp;
 use LacunaWaX::Dialog::About;
-use LacunaWaX::Dialog::LogViewer;
+#use LacunaWaX::Dialog::LogViewer;   # still producing incompatible metaclass problems, because of NonScrolled.  Come back to this.
 use LacunaWaX::MainSplitterWindow::RightPane::GlyphsPane;
+use LacunaWaX::MainSplitterWindow::RightPane::RepairPane;
 
 say "blarg";
+
+
+__END__
 
 package TestClass {#{{{
     use Moose;

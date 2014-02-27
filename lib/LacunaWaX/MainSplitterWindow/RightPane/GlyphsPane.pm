@@ -13,7 +13,6 @@ package LacunaWaX::MainSplitterWindow::RightPane::GlyphsPane {
 
     use LacunaWaX::MainSplitterWindow::RightPane::GlyphsPane::RecipeForm;
 
-
     has 'ancestor' => (
         is          => 'rw',
         isa         => 'LacunaWaX::MainSplitterWindow::RightPane',
