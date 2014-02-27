@@ -12,17 +12,10 @@ package LacunaWaX::Servers {
     has 'servers' => (
         is      => 'ro',
         isa     => 'HashRef[LacunaWaX::Model::Schema::Servers]',
-        traits  => ['Hash'],
-        handles => {
-            ids     => 'keys',
-            records => 'values',
-            pairs   => 'kv',
-            get     => 'get',
-        },
         lazy_build => 1,
     );
 
-    sub _build_servers {
+    sub _build_servers {#{{{
         my $self = shift;
         my $servers_rs  = $self->schema->resultset('Servers')->search();
         my $hr = {};
@@ -30,7 +23,20 @@ package LacunaWaX::Servers {
             $hr->{$rec->id} = $rec;
         }
         return $hr;
-    }
+    }#}}}
+
+    sub get {#{{{
+        my $self = shift;
+        return $self->servers->{shift()} // undef;
+    }#}}}
+    sub ids {#{{{
+        my $self = shift;
+        return keys %{$self->servers};
+    }#}}}
+    sub records {#{{{
+        my $self = shift;
+        return values %{$self->servers};
+    }#}}}
 
     no Moose;
     __PACKAGE__->meta->make_immutable;

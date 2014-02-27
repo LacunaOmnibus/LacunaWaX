@@ -55,7 +55,6 @@ package LacunaWaX::Roles::ScheduledTask {
             )
         }
         catch {
-say "--$_--";
             return;
         };
 

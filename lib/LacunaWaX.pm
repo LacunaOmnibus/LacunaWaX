@@ -88,7 +88,6 @@ package LacunaWaX {
         handles => {
             server_ids              => 'ids',
             server_records          => 'records',
-            server_pairs            => 'pairs',
             server_record_by_id     => 'get',
         },
         lazy_build => 1,
