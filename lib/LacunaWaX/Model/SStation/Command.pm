@@ -4,6 +4,7 @@ package LacunaWaX::Model::SStation::Command {
     use utf8;
     use open qw(:std :utf8);
     use Data::Dumper;
+    use List::Util qw(first);
     use Moose;
     use POSIX qw(ceil);
     use Try::Tiny;
@@ -25,11 +26,7 @@ package LacunaWaX::Model::SStation::Command {
     has 'alliance_members' => (
         is          => 'rw',
         isa         => 'ArrayRef',
-        traits      => ['Array'],
         lazy_build  => 1,
-        handles => {
-            isa_member => 'first',
-        }
     );
 
     sub _build_alliance_members {#{{{
@@ -45,6 +42,7 @@ package LacunaWaX::Model::SStation::Command {
 
         return $ar;
     }#}}}
+
 
     no Moose;
     __PACKAGE__->meta->make_immutable;
