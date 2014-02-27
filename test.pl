@@ -10,6 +10,7 @@ use LacunaWaX::MainSplitterWindow::RightPane::SSIncoming;
 use LacunaWaX::Model::Globals::Wx;
 use LacunaWaX::Model::SStation;
 use LacunaWaX::Model::SStation::Police;
+use LacunaWaX::Schedule::Spies;
 
 say "blarg";
 
