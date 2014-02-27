@@ -12,7 +12,19 @@ package LacunaWaX::MainSplitterWindow::RightPane::SpiesPane {
     use LacunaWaX::MainSplitterWindow::RightPane::SpiesPane::SpyRow;
     use LacunaWaX::MainSplitterWindow::RightPane::SpiesPane::BatchRenameForm;
 
-    has 'sizer_debug'   => (is => 'rw', isa => 'Int', lazy => 1, default => 0);
+    has 'ancestor' => (
+        is          => 'rw',
+        isa         => 'LacunaWaX::MainSplitterWindow::RightPane',
+        required    => 1,
+    );
+
+    has 'parent' => (
+        is          => 'rw',
+        isa         => 'Wx::ScrolledWindow',
+        required    => 1,
+    );
+
+    #########################################
 
     has 'planet_name'   => (is => 'rw', isa => 'Str',                   required => 1   );
     has 'planet_id'     => (is => 'rw', isa => 'Int', lazy_build => 1                   );
@@ -72,6 +84,8 @@ package LacunaWaX::MainSplitterWindow::RightPane::SpiesPane {
 
         return unless $self->int_min_exists_here;
 
+        wxTheApp->borders_off();    # Change to borders_on to see borders around sizers
+
         $self->szr_header->Add($self->lbl_header, 0, 0, 0);
         $self->szr_header->AddSpacer(5);
         $self->szr_header->Add($self->lbl_save_button_reminder, 0, 0, 0);
@@ -96,18 +110,17 @@ package LacunaWaX::MainSplitterWindow::RightPane::SpiesPane {
         $self->content_sizer->AddSpacer(10);
 
         my $spies = try {
-            $self->game_client->get_spies($self->planet_id);
+            wxTheApp->game_client->get_spies($self->planet_id);
         }
         catch {
             my $msg = (ref $_) ? $_->text : $_;
-            $self->poperr($msg);
+            wxTheApp->poperr($msg);
             return;
         };
         $spies or return;
 
         ### Spy list header
         my $header = LacunaWaX::MainSplitterWindow::RightPane::SpiesPane::SpyRow->new(
-            app         => $self->app,
             ancestor    => $self,
             parent      => $self->parent,
             is_header   => 1,
@@ -117,10 +130,10 @@ package LacunaWaX::MainSplitterWindow::RightPane::SpiesPane {
 
         ### Actual spy list
         foreach my $hr( @{$spies} ) {
-            $self->yield;
+            wxTheApp->Yield;
             my $spy = LacunaWaX::Model::Client::Spy->new(hr => $hr);
             my $row = LacunaWaX::MainSplitterWindow::RightPane::SpiesPane::SpyRow->new(
-                app         => $self->app,
+                app         => wxTheApp,
                 ancestor    => $self,
                 parent      => $self->parent,
                 spy         => $spy,
@@ -132,7 +145,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::SpiesPane {
             unless( scalar @{$self->spy_table} % 20 ) {
                 ### Add another header every 20 rows
                 my $header = LacunaWaX::MainSplitterWindow::RightPane::SpiesPane::SpyRow->new(
-                    app         => $self->app,
+                    app         => wxTheApp,
                     ancestor    => $self,
                     parent      => $self->parent,
                     is_header   => 1,
@@ -211,7 +224,7 @@ see what you're doing.
     sub _build_batch_form {#{{{
         my $self = shift;
         return LacunaWaX::MainSplitterWindow::RightPane::SpiesPane::BatchRenameForm->new(
-            app         => $self->app,
+            app         => wxTheApp,
             ancestor    => $self,
             parent      => $self->parent,
         );
@@ -219,19 +232,19 @@ see what you're doing.
     sub _build_btn_clear {#{{{
         my $self = shift;
         my $v = Wx::Button->new($self->parent, -1, "Clear Spy Assignments");
-        $v->SetFont( $self->app->get_font('para_text_2') );
+        $v->SetFont( wxTheApp->get_font('para_text_2') );
         return $v;
     }#}}}
     sub _build_btn_rename {#{{{
         my $self = shift;
         my $v = Wx::Button->new($self->parent, -1, "Rename Spies");
-        $v->SetFont( $self->app->get_font('para_text_2') );
+        $v->SetFont( wxTheApp->get_font('para_text_2') );
         return $v;
     }#}}}
     sub _build_btn_save {#{{{
         my $self = shift;
         my $v = Wx::Button->new($self->parent, -1, "Save Spy Assignments");
-        $v->SetFont( $self->app->get_font('para_text_2') );
+        $v->SetFont( wxTheApp->get_font('para_text_2') );
         return $v;
     }#}}}
     sub _build_chc_train_1 {#{{{
@@ -240,10 +253,10 @@ see what you're doing.
             $self->parent, -1, 
             wxDefaultPosition, 
             Wx::Size->new($self->width_chc, $self->height_chc), 
-            [$self->text_none, @{$self->game_client->spy_training_choices}],
+            [$self->text_none, @{wxTheApp->game_client->spy_training_choices}],
         );
         $v->SetSelection(0);
-        $v->SetFont( $self->app->get_font('para_text_2') );
+        $v->SetFont( wxTheApp->get_font('para_text_2') );
         return $v;
     }#}}}
     sub _build_chc_train_2 {#{{{
@@ -252,10 +265,10 @@ see what you're doing.
             $self->parent, -1, 
             wxDefaultPosition, 
             Wx::Size->new($self->width_chc, $self->height_chc), 
-            [$self->text_none, @{$self->game_client->spy_training_choices}],
+            [$self->text_none, @{wxTheApp->game_client->spy_training_choices}],
         );
         $v->SetSelection(0);
-        $v->SetFont( $self->app->get_font('para_text_2') );
+        $v->SetFont( wxTheApp->get_font('para_text_2') );
         return $v;
     }#}}}
     sub _build_chc_train_3 {#{{{
@@ -264,10 +277,10 @@ see what you're doing.
             $self->parent, -1, 
             wxDefaultPosition, 
             Wx::Size->new($self->width_chc, $self->height_chc), 
-            [$self->text_none, @{$self->game_client->spy_training_choices}],
+            [$self->text_none, @{wxTheApp->game_client->spy_training_choices}],
         );
         $v->SetSelection(0);
-        $v->SetFont( $self->app->get_font('para_text_2') );
+        $v->SetFont( wxTheApp->get_font('para_text_2') );
         return $v;
     }#}}}
     sub _build_chc_train_4 {#{{{
@@ -276,20 +289,19 @@ see what you're doing.
             $self->parent, -1, 
             wxDefaultPosition, 
             Wx::Size->new($self->width_chc, $self->height_chc), 
-            [$self->text_none, @{$self->game_client->spy_training_choices}],
+            [$self->text_none, @{wxTheApp->game_client->spy_training_choices}],
         );
         $v->SetSelection(0);
-        $v->SetFont( $self->app->get_font('para_text_2') );
+        $v->SetFont( wxTheApp->get_font('para_text_2') );
         return $v;
     }#}}}
     sub _build_dialog_status {#{{{
         my $self = shift;
 
         my $v = LacunaWaX::Dialog::Status->new( 
-            app         => $self->app,
-            ancestor    => $self,
-            title       => 'Rename Spies',
-            recsep      => '-=-=-=-=-=-=-',
+            parent  => $self,
+            title   => 'Rename Spies',
+            recsep  => '-=-=-=-=-=-=-',
         );
         $v->hide;
         return $v;
@@ -297,11 +309,11 @@ see what you're doing.
     sub _build_int_min {#{{{
         my $self = shift;
         my $im = try {
-            $self->game_client->get_building($self->planet_id, 'Intelligence Ministry');
+            wxTheApp->game_client->get_building($self->planet_id, 'Intelligence Ministry');
         }
         catch {
             my $msg = (ref $_) ? $_->text : $_;
-            $self->poperr($msg);
+            wxTheApp->poperr($msg);
             return;
         };
 
@@ -315,7 +327,7 @@ see what you're doing.
             wxDefaultPosition, 
             Wx::Size->new(25, 40)
         );
-        $y->SetFont( $self->app->get_font('para_text_1') );
+        $y->SetFont( wxTheApp->get_font('para_text_1') );
         return $y;
     }#}}}
     sub _build_lbl_train_2 {#{{{
@@ -326,7 +338,7 @@ see what you're doing.
             wxDefaultPosition, 
             Wx::Size->new(25, 40)
         );
-        $y->SetFont( $self->app->get_font('para_text_1') );
+        $y->SetFont( wxTheApp->get_font('para_text_1') );
         return $y;
     }#}}}
     sub _build_lbl_train_3 {#{{{
@@ -337,7 +349,7 @@ see what you're doing.
             wxDefaultPosition, 
             Wx::Size->new(25, 40)
         );
-        $y->SetFont( $self->app->get_font('para_text_1') );
+        $y->SetFont( wxTheApp->get_font('para_text_1') );
         return $y;
     }#}}}
     sub _build_lbl_train_4 {#{{{
@@ -348,7 +360,7 @@ see what you're doing.
             wxDefaultPosition, 
             Wx::Size->new(25, 40)
         );
-        $y->SetFont( $self->app->get_font('para_text_1') );
+        $y->SetFont( wxTheApp->get_font('para_text_1') );
         return $y;
     }#}}}
     sub _build_lbl_header {#{{{
@@ -359,7 +371,7 @@ see what you're doing.
             wxDefaultPosition, 
             Wx::Size->new($self->screen_width, 40)
         );
-        $y->SetFont( $self->app->get_font('header_1') );
+        $y->SetFont( wxTheApp->get_font('header_1') );
         return $y;
     }#}}}
     sub _build_lbl_save_button_reminder {#{{{
@@ -370,7 +382,7 @@ see what you're doing.
             wxDefaultPosition, 
             Wx::Size->new($self->screen_width, 28)
         );
-        $y->SetFont( $self->app->get_font('para_text_2') );
+        $y->SetFont( wxTheApp->get_font('para_text_2') );
         $y->SetForegroundColour( Wx::Colour->new(255,0,0) );    # Not 'color'.  Silly brits.
         return $y;
     }#}}}
@@ -402,7 +414,7 @@ see what you're doing.
             wxDefaultPosition, 
             Wx::Size->new(-1, 130)
         );
-        $y->SetFont( $self->app->get_font('para_text_2') );
+        $y->SetFont( wxTheApp->get_font('para_text_2') );
         $y->Wrap($self->screen_width);
 
         return $y;
@@ -415,35 +427,35 @@ see what you're doing.
     }#}}}
     sub _build_planet_id {#{{{
         my $self = shift;
-        return $self->game_client->planet_id( $self->planet_name );
+        return wxTheApp->game_client->planet_id( $self->planet_name );
     }#}}}
     sub _build_szr_batch {#{{{
         my $self = shift;
-        return $self->build_sizer($self->parent, wxHORIZONTAL, 'Batch Spy Rename');
+        return wxTheApp->build_sizer($self->parent, wxHORIZONTAL, 'Batch Spy Rename');
     }#}}}
     sub _build_szr_batch_center {#{{{
         my $self = shift;
-        return $self->build_sizer($self->parent, wxHORIZONTAL, 'Batch Centering');
+        return wxTheApp->build_sizer($self->parent, wxHORIZONTAL, 'Batch Centering');
     }#}}}
     sub _build_szr_bottom_center {#{{{
         my $self = shift;
-        return $self->build_sizer($self->parent, wxHORIZONTAL, 'Bottom Centering');
+        return wxTheApp->build_sizer($self->parent, wxHORIZONTAL, 'Bottom Centering');
     }#}}}
     sub _build_szr_bottom_right {#{{{
         my $self = shift;
-        return $self->build_sizer($self->parent, wxVERTICAL, 'Bottom Right');
+        return wxTheApp->build_sizer($self->parent, wxVERTICAL, 'Bottom Right');
     }#}}}
     sub _build_szr_buttons {#{{{
         my $self = shift;
-        return $self->build_sizer($self->parent, wxHORIZONTAL, 'Bottom Buttons');
+        return wxTheApp->build_sizer($self->parent, wxHORIZONTAL, 'Bottom Buttons');
     }#}}}
     sub _build_szr_header {#{{{
         my $self = shift;
-        return $self->build_sizer($self->parent, wxVERTICAL, 'Header');
+        return wxTheApp->build_sizer($self->parent, wxVERTICAL, 'Header');
     }#}}}
     sub _build_szr_train {#{{{
         my $self = shift;
-        return $self->build_sizer($self->parent, wxHORIZONTAL, 'Training');
+        return wxTheApp->build_sizer($self->parent, wxHORIZONTAL, 'Training');
     }#}}}
 
     sub _set_events {#{{{
@@ -521,15 +533,15 @@ see what you're doing.
         my $panel   = shift;    # Wx::ScrolledWindow
         my $event   = shift;    # Wx::CommandEvent
 
-        $self->throb();
-        my $schema = $self->get_main_schema;
+        wxTheApp->throb();
+        my $schema = wxTheApp->main_schema;
 
         foreach my $row( @{$self->spy_table} ) {
-            $self->yield;
+            wxTheApp->Yield;
             my $selection = $row->chc_train->FindString( $row->text_none );
             $row->chc_train->SetSelection( $selection );
         }
-        $self->endthrob();
+        wxTheApp->endthrob();
         return 1;
     }#}}}
     sub OnRenameButton {#{{{
@@ -539,7 +551,7 @@ see what you're doing.
 
         $self->dialog_status->erase;
         $self->dialog_status->show;
-        $self->yield;
+        wxTheApp->Yield;
 
         my $cnt = 0;
         SPY_ROW:
@@ -559,7 +571,7 @@ see what you're doing.
             }
             catch {
                 my $msg = (ref $_) ? $_->text : $_;
-                $self->poperr($msg);
+                wxTheApp->poperr($msg);
                 $self->clear_dialog_status;
                 return;
             };
@@ -568,7 +580,7 @@ see what you're doing.
                 $row->change_name( $row->new_name );
                 $cnt++;
             }
-            $self->yield;
+            wxTheApp->Yield;
         }
 
         $self->dialog_status->close;
@@ -583,7 +595,7 @@ see what you're doing.
         }
         
         my $v = ($cnt == 1) ? "spy has" : "spies have";
-        $self->popmsg(
+        wxTheApp->popmsg(
             "$cnt $v been renamed.",
             "Success!"
         );
@@ -594,7 +606,7 @@ see what you're doing.
         my $panel   = shift;    # Wx::ScrolledWindow
         my $event   = shift;    # Wx::CommandEvent
 
-        unless( wxYES == $self->popconf("This is going to take one second per spy, is that OK?", "Are you sure?") ) {
+        unless( wxYES == wxTheApp->popconf("This is going to take one second per spy, is that OK?", "Are you sure?") ) {
             return;
         }
 
@@ -608,11 +620,11 @@ see what you're doing.
             my $msg = (ref $_) ? $_->text : $_;
             if( $msg =~ /solve a captcha/i ) {
                 my $c = LacunaWaX::Dialog::Captcha->new(
-                    app         => $self->app,
+                    app         => wxTheApp,
                     ancestor    => $self->ancestor,
                     parent      => $self->parent,
                 );
-                return if $c->error;
+                return if not $c or $c->error;
             }
             my $chosen_training_str = $row->chc_train->GetString( $row->chc_train->GetSelection );
             $self->int_min->assign_spy( $row->spy->id, $chosen_training_str );
@@ -623,10 +635,10 @@ see what you're doing.
         return unless $rv;
 
         ### Set each spy to train
-        $self->throb();
-        my $schema = $self->get_main_schema;
+        wxTheApp->throb();
+        my $schema = wxTheApp->main_schema;
         foreach my $row( @{$self->spy_table} ) {
-            $self->yield;
+            wxTheApp->Yield;
             my $spy = $row->spy;
             my $chosen_training_str = $row->chc_train->GetString( $row->chc_train->GetSelection );
             next if $chosen_training_str eq 'None';
@@ -637,7 +649,7 @@ see what you're doing.
             }
             catch {
                 my $msg = (ref $_) ? $_->text : $_;
-                $self->poperr($msg);
+                wxTheApp->poperr($msg);
                 return;
             };
             return unless $rv;
@@ -650,9 +662,9 @@ see what you're doing.
             });
             $rec->update;
         }
-        $self->endthrob();
+        wxTheApp->endthrob();
 
-        $self->popmsg(
+        wxTheApp->popmsg(
             "Your spy training preferences have been saved.",
             "Success!"
         );

@@ -1,7 +1,4 @@
 
-### GuiElement removed through
-###     Dialog::About
-
 package LacunaWaX {
     use v5.14;
     use strict;
@@ -66,8 +63,9 @@ package LacunaWaX {
 
             get_cache  => 'cache',
 
-            borders_on  => 'borders_on',
-            borders_off => 'borders_off',
+            borders_on      => 'borders_on',
+            borders_off     => 'borders_off',
+            borders_are_off => 'borders_are_off',
         }
     );
 
@@ -288,7 +286,7 @@ called.
         my $hr = { };
         if( $self->wxglobals->sizer_borders or $force_box ) {
             $hr->{'box'} = Wx::StaticBox->new($parent, -1, $name, $pos, $size),
-            $hr->{'box'}->SetFont( $self->app->get_font('para_text_1') );
+            $hr->{'box'}->SetFont( wxTheApp->get_font('para_text_1') );
             $hr->{'sizer'} = Wx::StaticBoxSizer->new($hr->{'box'}, $direction);
         }
         else {
@@ -400,6 +398,10 @@ Returns true if the database passed in contains the correct tables and columns.
         $SIG{ALRM} = undef;     ##no critic qw(RequireLocalizedPunctuationVars) - PC thinks $SIG there is a scalar - whoops
         alarm 0;
         return;
+    }#}}}
+    sub get_top_left_corner {#{{{
+        my $self = shift;
+        return $self->GetTopWindow()->GetPosition;
     }#}}}
     sub game_connect {#{{{
         my $self = shift;

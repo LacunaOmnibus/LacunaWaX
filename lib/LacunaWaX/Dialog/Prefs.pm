@@ -5,13 +5,11 @@ package LacunaWaX::Dialog::Prefs {
     use Try::Tiny;
     use Wx qw(:everything);
     use Wx::Event qw(EVT_CLOSE);
-    use LacunaWaX::Dialog::NonScrolled;
     extends 'LacunaWaX::Dialog::NonScrolled';
 
     use LacunaWaX::Dialog::Prefs::TabAutovote;
     use LacunaWaX::Dialog::Prefs::TabServer;
 
-    has 'sizer_debug'   => (is => 'rw', isa => 'Int',           lazy => 1,          default => 0);
     has 'notebook_size' => (is => 'rw', isa => 'Wx::Size',      lazy_build => 1                 );
     has 'notebook'      => (is => 'rw', isa => 'Wx::Notebook',  lazy_build => 1                 );
 
@@ -31,6 +29,7 @@ package LacunaWaX::Dialog::Prefs {
     sub BUILD {
         my($self, @params) = @_;
     
+        wxTheApp->borders_off();    # Change to borders_on to see borders around sizers
         $self->SetTitle( $self->title );
         $self->SetSize( $self->size );
         $self->make_non_resizable;
@@ -41,6 +40,7 @@ package LacunaWaX::Dialog::Prefs {
         $self->main_sizer->AddSpacer(5);
         $self->main_sizer->Add($self->notebook, 1, wxEXPAND, 0);
 
+        $self->_set_events();
         $self->init_screen();
         return $self;
     };
@@ -60,23 +60,15 @@ package LacunaWaX::Dialog::Prefs {
     sub _build_tab_autovote {#{{{
         my $self = shift;
 
-        if( $self->get_connected_server ) {
-            my $av = LacunaWax::Dialog::Prefs::TabAutovote->new(
-                app         => $self->app,
-                parent      => $self->notebook,
-                ancestor    => $self,
-            );
+        if( wxTheApp->server ) {
+            my $av = LacunaWax::Dialog::Prefs::TabAutovote->new( parent => $self );
             return $av;
         }
     }#}}}
     sub _build_tab_server {#{{{
         my $self = shift;
 
-        my $tab = LacunaWax::Dialog::Prefs::TabServer->new(
-            app         => $self->app,
-            parent      => $self->notebook,
-            ancestor    => $self,
-        );
+        my $tab = LacunaWax::Dialog::Prefs::TabServer->new( parent => $self );
         return $tab;
     }#}}}
     sub _build_size {#{{{
@@ -104,11 +96,11 @@ package LacunaWaX::Dialog::Prefs {
         my $server_name     = $self->tab_server->server_list->[ $self->tab_server->chc_server->GetCurrentSelection ];
         my $username_str    = $self->tab_server->txtbox_user->GetLineText(0);
         my $password_str    = $self->tab_server->txtbox_pass->GetLineText(0);
-        my $schema          = $self->get_main_schema;
+        my $schema          = wxTheApp->main_schema;
 
         ### Sanity check input
         unless( $username_str and $password_str ) {
-            $self->poperr(
+            wxTheApp->poperr(
                 'You must enter both a username and password',
                 'Incomplete Credentials'
             );
@@ -142,7 +134,7 @@ package LacunaWaX::Dialog::Prefs {
         if( $self->tab_autovote ) {
             my $who = lc $self->tab_autovote->rdo_autovote->GetStringSelection();
             my $rec = $schema->resultset('ScheduleAutovote')->find_or_create({
-                server_id  => $self->get_connected_server->id
+                server_id  => wxTheApp->server->id
             });
             $rec->proposed_by($who);
             $rec->update;
@@ -150,18 +142,17 @@ package LacunaWaX::Dialog::Prefs {
 
         ### Enable/Disable connection widgets.
         ### Menu item, two Connect buttons (on the Intro page).
-        my $menu_file  = $self->menu->menu_file;
+        my $menu_file  = wxTheApp->menu_bar->menu_file;
         my $srvr_menu_id = $menu_file->itm_connect->connections->{ $server_account->server_id }->GetId;
         if( $username_str and $password_str ) {
-            if( $self->intro_panel_exists ) {
-                $self->get_intro_panel->buttons->{ $server_account->server->id }->Enable(1);
-                #$self->get_intro_panel->buttons->{ $server_account->server->id }->GetToolTip->SetTip(q{Ready to log in.});
+            if( wxTheApp->has_intro_panel ) {
+                wxTheApp->intro_panel->buttons->{ $server_account->server->id }->Enable(1);
             }
             $menu_file->itm_connect->Enable($srvr_menu_id, 1);
         }
         else {
-            if( $self->intro_panel_exists ) {
-                $self->get_intro_panel->buttons->{ $server_account->server->id }->Disable();
+            if( wxTheApp->has_intro_panel ) {
+                wxTheApp->intro_panel->buttons->{ $server_account->server->id }->Disable();
             }
             $menu_file->itm_connect->Enable($srvr_menu_id, 0);
         }

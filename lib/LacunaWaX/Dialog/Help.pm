@@ -19,7 +19,6 @@ package LacunaWaX::Dialog::Help {
     use Try::Tiny;
     use Wx qw(:everything);
     use Wx::Event qw(EVT_BUTTON EVT_CLOSE EVT_HTML_LINK_CLICKED EVT_SIZE EVT_TEXT_ENTER);
-#    with 'LacunaWaX::Roles::GuiElement';
 
     use MooseX::NonMoose::InsideOut;
     extends 'Wx::Dialog', 'LacunaWaX::Dialog::NonScrolled';
@@ -88,11 +87,12 @@ package LacunaWaX::Dialog::Help {
         $self->main_sizer->Add($self->szr_html, 0, 0, 0);
 
         unless( $self->load_html_file($self->index_file) ) {
-            $self->poperr("GONG!  Unable to load help files!", "GONG!");
+            wxTheApp->poperr("GONG!  Unable to load help files!", "GONG!");
             $self->Destroy;
             return;
         }
 
+        $self->_set_events;
         $self->init_screen();
         $self->Show(1);
         return $self;
@@ -310,7 +310,7 @@ package LacunaWaX::Dialog::Help {
 
         my $fqfn = join q{/}, (wxTheApp->globals->dir_html, $file);
         unless(-e $fqfn) {
-            $self->poperr("$fqfn: No such file or directory");
+            wxTheApp->poperr("$fqfn: No such file or directory");
             return;
         }
 
@@ -441,13 +441,13 @@ package LacunaWaX::Dialog::Help {
             my $ok = Browser::Open::open_browser($info->GetHref);
 
             if( $ok ) {
-                $self->poperr(
+                wxTheApp->poperr(
                     "LacunaWaX encountered an error while attempting to open the URL in your web browser.  The URL you were attempting to reach was '" . $info->GetHref . q{'.},
                     "Error opening web browser"
                 );
             }
             elsif(not defined $ok) {
-                $self->poperr(
+                wxTheApp->poperr(
                     "LacunaWaX was unable to open the URL in your web browser.  The URL you were attempting to reach was '" . $info->GetHref . q{'.},
                     "Unable to open web browser"
                 );
@@ -507,7 +507,7 @@ package LacunaWaX::Dialog::Help {
 
         my $term = $self->txt_search->GetValue;
         unless($term) {
-            $self->popmsg("Searching for nothing isn't going to return many results.");
+            wxTheApp->popmsg("Searching for nothing isn't going to return many results.");
             return;
         }
 

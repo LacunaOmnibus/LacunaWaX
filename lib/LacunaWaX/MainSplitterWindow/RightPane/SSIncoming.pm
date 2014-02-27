@@ -9,8 +9,19 @@ package LacunaWaX::MainSplitterWindow::RightPane::SSIncoming {
     use Wx::Event qw(EVT_BUTTON EVT_CLOSE);
     with 'LacunaWaX::Roles::MainSplitterWindow::RightPane';
 
+    has 'ancestor' => (
+        is          => 'rw',
+        isa         => 'LacunaWaX::MainSplitterWindow::RightPane',
+        required    => 1,
+    );
 
-    has 'sizer_debug' => (is => 'rw', isa => 'Int',  lazy => 1, default => 0);
+    has 'parent' => (
+        is          => 'rw',
+        isa         => 'Wx::ScrolledWindow',
+        required    => 1,
+    );
+
+    #########################################
 
     has 'count' => (
         is      => 'ro',
@@ -110,6 +121,8 @@ package LacunaWaX::MainSplitterWindow::RightPane::SSIncoming {
     sub BUILD {
         my $self = shift;
 
+        wxTheApp->borders_off();    # Change to borders_on to see borders around sizers
+
         $self->get_incoming();
         $self->add_pagination();
 
@@ -127,6 +140,8 @@ package LacunaWaX::MainSplitterWindow::RightPane::SSIncoming {
         $self->content_sizer->Add($self->szr_list, 0, 0, 0);
         $self->content_sizer->AddSpacer(5);
         $self->content_sizer->Add($self->szr_buttons, 0, 0, 0);
+
+        $self->_set_events();
         return $self;
     }
     sub _build_btn_next {#{{{
@@ -136,7 +151,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::SSIncoming {
             wxDefaultPosition, 
             Wx::Size->new(50, 30)
         );
-        $v->SetFont( $self->app->get_font('para_text_1') );
+        $v->SetFont( wxTheApp->get_font('para_text_1') );
         ### Disable next button unless we have more than 25 incoming.
         my $enabled = ($self->count > 25) ? 1 : 0;
         $v->Enable($enabled);
@@ -149,7 +164,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::SSIncoming {
             wxDefaultPosition, 
             Wx::Size->new(50, 30)
         );
-        $v->SetFont( $self->app->get_font('para_text_1') );
+        $v->SetFont( wxTheApp->get_font('para_text_1') );
         ### Always start the Prev button disabled.
         $v->Enable(0);
         return $v;
@@ -162,7 +177,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::SSIncoming {
             wxDefaultPosition, 
             Wx::Size->new(-1, 40)
         );
-        $v->SetFont( $self->app->get_font('header_1') );
+        $v->SetFont( wxTheApp->get_font('header_1') );
         return $v;
     }#}}}
     sub _build_lbl_instructions {#{{{
@@ -176,7 +191,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::SSIncoming {
             wxDefaultPosition, 
             Wx::Size->new(-1, 20)
         );
-        $v->SetFont( $self->app->get_font('para_text_2') );
+        $v->SetFont( wxTheApp->get_font('para_text_2') );
         return $v;
     }#}}}
     sub _build_lbl_incoming {#{{{
@@ -189,7 +204,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::SSIncoming {
             wxDefaultPosition, 
             Wx::Size->new(-1, 20)
         );
-        $v->SetFont( $self->app->get_font('para_text_2') );
+        $v->SetFont( wxTheApp->get_font('para_text_2') );
         return $v;
     }#}}}
     sub _build_lbl_page {#{{{
@@ -202,7 +217,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::SSIncoming {
             wxDefaultPosition, 
             Wx::Size->new(-1, 20)
         );
-        $v->SetFont( $self->app->get_font('para_text_2') );
+        $v->SetFont( wxTheApp->get_font('para_text_2') );
         return $v;
     }#}}}
     sub _build_lst_incoming {#{{{
@@ -236,24 +251,24 @@ package LacunaWaX::MainSplitterWindow::RightPane::SSIncoming {
         $v->SetColumnWidth(4,wxLIST_AUTOSIZE_USEHEADER);
         $v->SetColumnWidth(5,wxLIST_AUTOSIZE_USEHEADER);
         $v->Arrange(wxLIST_ALIGN_TOP);
-        $self->yield;
+        wxTheApp->Yield;
         return $v;
 
         return $v;
     }#}}}
     sub _build_planet_id {#{{{
         my $self = shift;
-        return $self->game_client->planet_id( $self->planet_name );
+        return wxTheApp->game_client->planet_id( $self->planet_name );
     }#}}}
     sub _build_police {#{{{
         my $self = shift;
 
         my $police = try {
-            $self->game_client->get_building($self->planet_id, 'Police Station');
+            wxTheApp->game_client->get_building($self->planet_id, 'Police Station');
         }
         catch {
             my $msg = (ref $_) ? $_->text : $_;
-            $self->poperr($msg);
+            wxTheApp->poperr($msg);
             return;
         };
 
@@ -261,15 +276,15 @@ package LacunaWaX::MainSplitterWindow::RightPane::SSIncoming {
     }#}}}
     sub _build_szr_buttons {#{{{
         my $self = shift;
-        return $self->build_sizer($self->parent, wxHORIZONTAL, 'Buttons');
+        return wxTheApp->build_sizer($self->parent, wxHORIZONTAL, 'Buttons');
     }#}}}
     sub _build_szr_header {#{{{
         my $self = shift;
-        return $self->build_sizer($self->parent, wxVERTICAL, 'Header');
+        return wxTheApp->build_sizer($self->parent, wxVERTICAL, 'Header');
     }#}}}
     sub _build_szr_list {#{{{
         my $self = shift;
-        return $self->build_sizer($self->parent, wxVERTICAL, 'List');
+        return wxTheApp->build_sizer($self->parent, wxVERTICAL, 'List');
     }#}}}
     sub _set_events {#{{{
         my $self = shift;
@@ -330,7 +345,7 @@ The list of ships is an AoH, each H representing a ship:
         }
         catch {
             my $msg = (ref $_) ? $_->text : $_;
-            $self->poperr($msg);
+            wxTheApp->poperr($msg);
             return;
         };
         $rv and ref $rv eq 'HASH' or return undef;
@@ -359,7 +374,7 @@ The list of ships is an AoH, each H representing a ship:
             $self->lst_incoming->SetItem($row, 4, $ship->{'from'}{'empire'}{'name'});
             $self->lst_incoming->SetItem($row, 5, $ship->{'from'}{'empire'}{'id'});
             $row++;
-            $self->yield;
+            wxTheApp->Yield;
         }
         if($row) {
             ### Only resize the ListCtrl if we added data to it (don't bother 

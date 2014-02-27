@@ -9,7 +9,19 @@ package LacunaWaX::MainSplitterWindow::RightPane::BFGPane {
     use Wx::Event qw(EVT_BUTTON);
     with 'LacunaWaX::Roles::MainSplitterWindow::RightPane';
 
-    has 'sizer_debug'   => (is => 'rw', isa => 'Int', lazy => 1, default => 0);
+    has 'ancestor' => (
+        is          => 'rw',
+        isa         => 'LacunaWaX::MainSplitterWindow::RightPane',
+        required    => 1,
+    );
+
+    has 'parent' => (
+        is          => 'rw',
+        isa         => 'Wx::ScrolledWindow',
+        required    => 1,
+    );
+
+    #########################################
 
     has 'planet_name'   => (is => 'rw', isa => 'Str', required => 1);
     has 'planet_id'     => (is => 'rw', isa => 'Int', lazy_build => 1);
@@ -47,6 +59,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::BFGPane {
     sub BUILD {
         my $self = shift;
 
+        wxTheApp->borders_off();    # Change to borders_on to see borders around sizers
         return unless $self->parl_exists_here;
 
         $self->szr_header->Add($self->lbl_planet_name, 0, 0, 0);
@@ -58,6 +71,8 @@ package LacunaWaX::MainSplitterWindow::RightPane::BFGPane {
         $self->content_sizer->Add($self->szr_header, 0, 0, 0);
         $self->content_sizer->AddSpacer(10);
         $self->content_sizer->Add($self->szr_form, 0, 0, 0);
+
+        $self->_set_events();
         return $self;
     }
     sub _build_btn_fire {#{{{
@@ -71,7 +86,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::BFGPane {
             wxDefaultPosition,
             Wx::Size->new(400, 50),
         );
-        $v->SetFont( $self->app->get_font('bold_para_text_3') );
+        $v->SetFont( wxTheApp->get_font('bold_para_text_3') );
         $v->SetBackgroundColour(Wx::Colour->new(200,0,0));      # Brits!
         $v->SetForegroundColour(Wx::Colour->new(255,255,255));  # Brits!
         my $tt = Wx::ToolTip->new("Dispatch war rocket Ajax to bring back his body!");
@@ -88,7 +103,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::BFGPane {
             Wx::Size->new(50, 25), 
             [1..8],
         );
-        $v->SetFont( $self->app->get_font('bold_para_text_1') );
+        $v->SetFont( wxTheApp->get_font('bold_para_text_1') );
 
         return $v;
     }#}}}
@@ -110,7 +125,7 @@ ${indent}Remember that this form only creates a proposition to fire the BFG, and
             wxDefaultPosition, 
             Wx::Size->new(-1, 270)
         );
-        $y->SetFont( $self->app->get_font('para_text_2') );
+        $y->SetFont( wxTheApp->get_font('para_text_2') );
         $y->Wrap(560);
 
         return $y;
@@ -124,7 +139,7 @@ ${indent}Remember that this form only creates a proposition to fire the BFG, and
             wxDefaultPosition, 
             Wx::Size->new(-1, 25)
         );
-        $y->SetFont( $self->app->get_font('para_text_2') );
+        $y->SetFont( wxTheApp->get_font('para_text_2') );
 
         return $y;
     }#}}}
@@ -137,7 +152,7 @@ ${indent}Remember that this form only creates a proposition to fire the BFG, and
             wxDefaultPosition, 
             Wx::Size->new(-1, 25)
         );
-        $y->SetFont( $self->app->get_font('para_text_2') );
+        $y->SetFont( wxTheApp->get_font('para_text_2') );
 
         return $y;
     }#}}}
@@ -150,7 +165,7 @@ ${indent}Remember that this form only creates a proposition to fire the BFG, and
             wxDefaultPosition, 
             Wx::Size->new(-1, 25)
         );
-        $y->SetFont( $self->app->get_font('para_text_2') );
+        $y->SetFont( wxTheApp->get_font('para_text_2') );
 
         return $y;
     }#}}}
@@ -163,7 +178,7 @@ ${indent}Remember that this form only creates a proposition to fire the BFG, and
             wxDefaultPosition, 
             Wx::Size->new(-1, 40)
         );
-        $y->SetFont( $self->app->get_font('para_text_2') );
+        $y->SetFont( wxTheApp->get_font('para_text_2') );
 
         return $y;
     }#}}}
@@ -174,18 +189,18 @@ ${indent}Remember that this form only creates a proposition to fire the BFG, and
             "Fire BFG on " . $self->planet_name, 
             wxDefaultPosition, Wx::Size->new(-1, 40)
         );
-        $y->SetFont( $self->app->get_font('header_1') );
+        $y->SetFont( wxTheApp->get_font('header_1') );
         return $y;
     }#}}}
     sub _build_parl {#{{{
         my $self = shift;
 
         my $parl = try {
-            $self->game_client->get_building($self->planet_id, 'Parliament', 1);
+            wxTheApp->game_client->get_building($self->planet_id, 'Parliament', 1);
         }
         catch {
             my $msg = (ref $_) ? $_->text : $_;
-            $self->poperr($msg);
+            wxTheApp->poperr($msg);
             return;
         };
 
@@ -193,33 +208,33 @@ ${indent}Remember that this form only creates a proposition to fire the BFG, and
     }#}}}
     sub _build_planet_id {#{{{
         my $self = shift;
-        return $self->game_client->planet_id( $self->planet_name );
+        return wxTheApp->game_client->planet_id( $self->planet_name );
     }#}}}
     sub _build_szr_form {#{{{
         my $self = shift;
-        return $self->build_sizer($self->parent, wxVERTICAL, 'Fire BFG Form');
+        return wxTheApp->build_sizer($self->parent, wxVERTICAL, 'Fire BFG Form');
     }#}}}
     sub _build_szr_header {#{{{
         my $self = shift;
-        return $self->build_sizer($self->parent, wxVERTICAL, 'Header');
+        return wxTheApp->build_sizer($self->parent, wxVERTICAL, 'Header');
     }#}}}
     sub _build_szr_lbl_instructions {#{{{
         my $self = shift;
-        my $sizer = $self->build_sizer($self->parent, wxHORIZONTAL, 'Instructions');
+        my $sizer = wxTheApp->build_sizer($self->parent, wxHORIZONTAL, 'Instructions');
         $sizer->Add($self->lbl_instructions, 0, 0, 0);
         return $sizer;
     }#}}}
     sub _build_szr_name_orbit {#{{{
         my $self = shift;
-        return $self->build_sizer($self->parent, wxHORIZONTAL, 'Star Name and Orbit', 1);
+        return wxTheApp->build_sizer($self->parent, wxHORIZONTAL, 'Star Name and Orbit', 1);
     }#}}}
     sub _build_szr_reason {#{{{
         my $self = shift;
-        return $self->build_sizer($self->parent, wxHORIZONTAL, 'Reason');
+        return wxTheApp->build_sizer($self->parent, wxHORIZONTAL, 'Reason');
     }#}}}
     sub _build_szr_target_id {#{{{
         my $self = shift;
-        return $self->build_sizer($self->parent, wxHORIZONTAL, 'Target ID', 1);
+        return wxTheApp->build_sizer($self->parent, wxHORIZONTAL, 'Target ID', 1);
     }#}}}
     sub _build_txt_reason {#{{{
         my $self = shift;
@@ -229,7 +244,7 @@ ${indent}Remember that this form only creates a proposition to fire the BFG, and
             wxDefaultPosition, 
             Wx::Size->new(250,25)
         );
-        $v->SetFont( $self->app->get_font('para_text_1') );
+        $v->SetFont( wxTheApp->get_font('para_text_1') );
         my $tt = Wx::ToolTip->new("This can be anything - feel free to change the default.");
         $v->SetToolTip($tt);
         return $v;
@@ -246,7 +261,7 @@ ${indent}Remember that this form only creates a proposition to fire the BFG, and
             wxDefaultPosition, 
             Wx::Size->new(200,25)
         );
-        $v->SetFont( $self->app->get_font('bold_para_text_1') );
+        $v->SetFont( wxTheApp->get_font('bold_para_text_1') );
         my $tt = Wx::ToolTip->new("You or somebody in your alliances must have this star probed.");
         $v->SetToolTip($tt);
         return $v;
@@ -259,7 +274,7 @@ ${indent}Remember that this form only creates a proposition to fire the BFG, and
             wxDefaultPosition, 
             Wx::Size->new(70,25)
         );
-        $v->SetFont( $self->app->get_font('bold_para_text_1') );
+        $v->SetFont( wxTheApp->get_font('bold_para_text_1') );
         return $v;
     }#}}}
     sub _set_events {#{{{
@@ -351,13 +366,13 @@ without ever having to probe them.
 
         my $star_name = $self->trim( $self->txt_star_name->GetLineText(0) ) or return;
         my $star = try {
-            my $map = $self->game_client->map();
+            my $map = wxTheApp->game_client->map();
             my $star = $map->get_star_by_name($star_name);
             return $star;
         }
         catch {
             my $msg = (ref $_) ? $_->text : $_;
-            $self->poperr("Attempt to find star named '$star_name' failed: $msg", "No such star"); 
+            wxTheApp->poperr("Attempt to find star named '$star_name' failed: $msg", "No such star"); 
             return;
         } or return;
         my $sid = $star->{'star'}{'id'};
@@ -403,7 +418,7 @@ without ever having to probe them.
         my $event   = shift;    # Wx::CommandEvent
 
         my $target = $self->get_target or do {
-            $self->poperr("I was unable to determine the target - something's funky.", "Like George Clinton");
+            wxTheApp->poperr("I was unable to determine the target - something's funky.", "Like George Clinton");
             return;
         };
         my $target_id   = $target->{'id'};
@@ -414,8 +429,8 @@ without ever having to probe them.
         ### orbit
         $self->txt_target_id->SetValue($target_id);
 
-        unless( wxYES == $self->popconf("Fire the BFG at $target_name - are you sure?", "Really really?") ) {
-            $self->popmsg("You seem to have had a change of heart.", "No pew pew"); 
+        unless( wxYES == wxTheApp->popconf("Fire the BFG at $target_name - are you sure?", "Really really?") ) {
+            wxTheApp->popmsg("You seem to have had a change of heart.", "No pew pew"); 
             return;
         }
 
@@ -424,11 +439,11 @@ without ever having to probe them.
         }
         catch {
             my $msg = (ref $_) ? $_->text : $_;
-            $self->poperr("Attempt to fire the BFG failed: $msg", "No pew pew"); 
+            wxTheApp->poperr("Attempt to fire the BFG failed: $msg", "No pew pew"); 
             return;
         } or return;
 
-        $self->popmsg("Proposal to fire the BFG at $target_name has been submitted; don't forget to vote.", "Success!"); 
+        wxTheApp->popmsg("Proposal to fire the BFG at $target_name has been submitted; don't forget to vote.", "Success!"); 
         return 1;
     }#}}}
 

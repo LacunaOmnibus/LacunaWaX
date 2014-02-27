@@ -1,30 +1,5 @@
 use v5.14;
 
-=pod
-
-CREATE TABLE SSAlerts (
-    id INTEGER PRIMARY KEY NOT NULL,
-    server_id integer NOT NULL,
-    station_id integer NOT NULL,
-    enabled integer NOT NULL DEFAULT 0,
-    hostile_ships BOOL NOT NULL DEFAULT 0,
-    hostile_spies BOOL NOT NULL DEFAULT 0,
-    min_res bigint NOT NULL DEFAULT 0,
-    own_star_seized BOOL NOT NULL DEFAULT 0
-)
-
-hostile_spies, if true, looks for spies onsite who are not set to counter.  
-It's only a guess, but there's no direct way to tell if a spy is hostile or 
-not.
-
-own_star_seized, if true, alerts if the station has seized its own star.  It's 
-important that some alliance station has seized each station's star, and 
-that's usually going to be the current station itself.  But there are cases of 
-stations sharing a star; we don't want to report false alerts on those.
-
-=cut
-
-
 package LacunaWaX::MainSplitterWindow::RightPane::SSHealth {
     use Data::Dumper;
     use Moose;
@@ -33,7 +8,19 @@ package LacunaWaX::MainSplitterWindow::RightPane::SSHealth {
     use Wx::Event qw(EVT_BUTTON EVT_CHECKBOX EVT_CLOSE EVT_TEXT);
     with 'LacunaWaX::Roles::MainSplitterWindow::RightPane';
 
-    has 'sizer_debug' => (is => 'rw', isa => 'Int',  lazy => 1, default => 0);
+    has 'ancestor' => (
+        is          => 'rw',
+        isa         => 'LacunaWaX::MainSplitterWindow::RightPane',
+        required    => 1,
+    );
+
+    has 'parent' => (
+        is          => 'rw',
+        isa         => 'Wx::ScrolledWindow',
+        required    => 1,
+    );
+
+    #########################################
 
     has 'police' => (
         is          => 'rw',
@@ -88,6 +75,8 @@ package LacunaWaX::MainSplitterWindow::RightPane::SSHealth {
     sub BUILD {
         my $self = shift;
 
+        wxTheApp->borders_off();    # Change to borders_on to see borders around sizers
+
         $self->szr_header->Add($self->lbl_header, 0, 0, 0);
         $self->szr_header->Add(5, 3, 0);
         $self->szr_header->Add($self->lbl_instructions, 0, 0, 0);
@@ -129,15 +118,17 @@ package LacunaWaX::MainSplitterWindow::RightPane::SSHealth {
         $self->content_sizer->Add($self->szr_min_res, 0, 0, 0);
         $self->content_sizer->AddSpacer(20);
         $self->content_sizer->Add($self->szr_save, 0, 0, 0);
+
+        $self->_set_events();
         return $self;
     }
     sub _build_alert_record {#{{{
         my $self = shift;
         
-        my $schema = $self->get_main_schema;
+        my $schema = wxTheApp->main_schema;
         my $rec = $schema->resultset("SSAlerts")->find_or_create(
             {
-                server_id   => $self->server->id,
+                server_id   => wxTheApp->server->id,
                 station_id  => $self->planet_id,
             },
             {
@@ -149,7 +140,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::SSHealth {
     sub _build_btn_save {#{{{
         my $self = shift;
         my $v = Wx::Button->new($self->parent, -1, "Save Alert Preferences");
-        $v->SetFont( $self->app->get_font('para_text_1') );
+        $v->SetFont( wxTheApp->get_font('para_text_1') );
         return $v;
     }#}}}
 
@@ -162,7 +153,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::SSHealth {
             Wx::Size->new(-1,-1), 
         );
 
-        $v->SetFont( $self->app->get_font('para_text_2') );
+        $v->SetFont( wxTheApp->get_font('para_text_2') );
         $v->SetValue( $self->alert_record->enabled );
 
         return $v;
@@ -175,14 +166,14 @@ package LacunaWaX::MainSplitterWindow::RightPane::SSHealth {
             wxDefaultPosition, 
             Wx::Size->new(-1, 20)
         );
-        $v->SetFont( $self->app->get_font('para_text_2') );
+        $v->SetFont( wxTheApp->get_font('para_text_2') );
         my $tt = Wx::ToolTip->new( "If off, NO alerts will be produced for this station." );
         $v->SetToolTip($tt);
         return $v;
     }#}}}
     sub _build_szr_enable_alert {#{{{
         my $self = shift;
-        return $self->build_sizer($self->parent, wxHORIZONTAL, 'Enable Alert');
+        return wxTheApp->build_sizer($self->parent, wxHORIZONTAL, 'Enable Alert');
     }#}}}
 
     sub _build_chk_hostile_ships {#{{{
@@ -194,7 +185,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::SSHealth {
             Wx::Size->new(-1,-1), 
         );
 
-        $v->SetFont( $self->app->get_font('para_text_2') );
+        $v->SetFont( wxTheApp->get_font('para_text_2') );
         $v->SetValue( $self->alert_record->hostile_ships );
 
         return $v;
@@ -207,14 +198,14 @@ package LacunaWaX::MainSplitterWindow::RightPane::SSHealth {
             wxDefaultPosition, 
             Wx::Size->new(-1, 20)
         );
-        $v->SetFont( $self->app->get_font('para_text_2') );
+        $v->SetFont( wxTheApp->get_font('para_text_2') );
         my $tt = Wx::ToolTip->new( "Alerts for incoming foreign ships." );
         $v->SetToolTip($tt);
         return $v;
     }#}}}
     sub _build_szr_hostile_ships {#{{{
         my $self = shift;
-        return $self->build_sizer($self->parent, wxHORIZONTAL, 'Hostile Ships');
+        return wxTheApp->build_sizer($self->parent, wxHORIZONTAL, 'Hostile Ships');
     }#}}}
 
     sub _build_chk_hostile_spies {#{{{
@@ -226,7 +217,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::SSHealth {
             Wx::Size->new(-1,-1), 
         );
 
-        $v->SetFont( $self->app->get_font('para_text_2') );
+        $v->SetFont( wxTheApp->get_font('para_text_2') );
         $v->SetValue( $self->alert_record->hostile_spies );
 
         return $v;
@@ -239,14 +230,14 @@ package LacunaWaX::MainSplitterWindow::RightPane::SSHealth {
             wxDefaultPosition, 
             Wx::Size->new(-1, 20)
         );
-        $v->SetFont( $self->app->get_font('para_text_2') );
+        $v->SetFont( wxTheApp->get_font('para_text_2') );
         my $tt = Wx::ToolTip->new( "Alerts for spies onsite who are not set to Counter Espionage." );
         $v->SetToolTip($tt);
         return $v;
     }#}}}
     sub _build_szr_hostile_spies {#{{{
         my $self = shift;
-        return $self->build_sizer($self->parent, wxHORIZONTAL, 'Hostile Spies');
+        return wxTheApp->build_sizer($self->parent, wxHORIZONTAL, 'Hostile Spies');
     }#}}}
 
     sub _build_chk_own_star_seized {#{{{
@@ -258,7 +249,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::SSHealth {
             Wx::Size->new(-1,-1), 
         );
 
-        $v->SetFont( $self->app->get_font('para_text_2') );
+        $v->SetFont( wxTheApp->get_font('para_text_2') );
         $v->SetValue( $self->alert_record->own_star_seized );
 
         return $v;
@@ -271,14 +262,14 @@ package LacunaWaX::MainSplitterWindow::RightPane::SSHealth {
             wxDefaultPosition, 
             Wx::Size->new(-1, 20)
         );
-        $v->SetFont( $self->app->get_font('para_text_2') );
+        $v->SetFont( wxTheApp->get_font('para_text_2') );
         my $tt = Wx::ToolTip->new( "Alerts if the station's own star is not seized by this station." );
         $v->SetToolTip($tt);
         return $v;
     }#}}}
     sub _build_szr_own_star_seized {#{{{
         my $self = shift;
-        return $self->build_sizer($self->parent, wxHORIZONTAL, 'Own Star');
+        return wxTheApp->build_sizer($self->parent, wxHORIZONTAL, 'Own Star');
     }#}}}
 
     sub _build_lbl_header {#{{{
@@ -289,7 +280,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::SSHealth {
             wxDefaultPosition, 
             Wx::Size->new(-1, 68)
         );
-        $v->SetFont( $self->app->get_font('header_1') );
+        $v->SetFont( wxTheApp->get_font('header_1') );
         $v->Wrap( $self->parent->GetSize->GetWidth - 130 ); # accounts for the vertical scrollbar
         return $v;
     }#}}}
@@ -313,7 +304,7 @@ There's actually no way to truly tell if a foreign spy is 'hostile' or not.  So 
             Wx::Size->new(-1, 270)
         );
         $v->Wrap( $self->parent->GetSize->GetWidth - 130 ); # accounts for the vertical scrollbar
-        $v->SetFont( $self->app->get_font('para_text_2') );
+        $v->SetFont( wxTheApp->get_font('para_text_2') );
         return $v;
     }#}}}
     sub _build_lbl_min_res_pre {#{{{
@@ -324,7 +315,7 @@ There's actually no way to truly tell if a foreign spy is 'hostile' or not.  So 
             wxDefaultPosition, 
             Wx::Size->new(-1, -1)
         );
-        $v->SetFont( $self->app->get_font('para_text_2') );
+        $v->SetFont( wxTheApp->get_font('para_text_2') );
         return $v;
     }#}}}
     sub _build_lbl_min_res_suf {#{{{
@@ -335,22 +326,22 @@ There's actually no way to truly tell if a foreign spy is 'hostile' or not.  So 
             wxDefaultPosition, 
             Wx::Size->new(-1, -1)
         );
-        $v->SetFont( $self->app->get_font('para_text_2') );
+        $v->SetFont( wxTheApp->get_font('para_text_2') );
         return $v;
     }#}}}
     sub _build_planet_id {#{{{
         my $self = shift;
-        return $self->game_client->planet_id( $self->planet_name );
+        return wxTheApp->game_client->planet_id( $self->planet_name );
     }#}}}
     sub _build_police {#{{{
         my $self = shift;
 
         my $police = try {
-            $self->game_client->get_building($self->planet_id, 'Police Station');
+            wxTheApp->game_client->get_building($self->planet_id, 'Police Station');
         }
         catch {
             my $msg = (ref $_) ? $_->text : $_;
-            $self->poperr($msg);
+            wxTheApp->poperr($msg);
             return;
         };
 
@@ -358,15 +349,15 @@ There's actually no way to truly tell if a foreign spy is 'hostile' or not.  So 
     }#}}}
     sub _build_szr_header {#{{{
         my $self = shift;
-        return $self->build_sizer($self->parent, wxVERTICAL, 'Header');
+        return wxTheApp->build_sizer($self->parent, wxVERTICAL, 'Header');
     }#}}}
     sub _build_szr_min_res {#{{{
         my $self = shift;
-        return $self->build_sizer($self->parent, wxHORIZONTAL, 'Min Res');
+        return wxTheApp->build_sizer($self->parent, wxHORIZONTAL, 'Min Res');
     }#}}}
     sub _build_szr_save {#{{{
         my $self = shift;
-        return $self->build_sizer($self->parent, wxVERTICAL, 'Save');
+        return wxTheApp->build_sizer($self->parent, wxVERTICAL, 'Save');
     }#}}}
     sub _build_txt_min_res {#{{{
         my $self = shift;
@@ -463,12 +454,12 @@ There's actually no way to truly tell if a foreign spy is 'hostile' or not.  So 
            $min_res ||= 0;
 
         if( $min_res and $min_res < 1_000_000 ) {
-            if( wxNO == $self->popconf("You're alerting on less than a million res/hour; that seems awfully low.  Are you sure that shouldn't be set higher?") ) {
-                $self->popmsg("No save performed; fix your alert number and re-save.");
+            if( wxNO == wxTheApp->popconf("You're alerting on less than a million res/hour; that seems awfully low.  Are you sure that shouldn't be set higher?") ) {
+                wxTheApp->popmsg("No save performed; fix your alert number and re-save.");
                 return 0;
             }
 
-            $self->popmsg("OK, it's your funeral.  But think hard about increasing that number or your station could get into trouble.");
+            wxTheApp->popmsg("OK, it's your funeral.  But think hard about increasing that number or your station could get into trouble.");
         }
 
         $self->alert_record->enabled(           $enabled                                    );
@@ -482,7 +473,7 @@ There's actually no way to truly tell if a foreign spy is 'hostile' or not.  So 
             ? "Station alerts for " . $self->planet_name . " have been TURNED ON."
             : "Station alerts for " . $self->planet_name . " have been DISABLED.";
 
-        $self->popmsg($msg);
+        wxTheApp->popmsg($msg);
         return 1;
     }#}}}
     sub OnUpdateMinRes {#{{{

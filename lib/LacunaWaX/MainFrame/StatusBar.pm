@@ -5,7 +5,14 @@ package LacunaWaX::MainFrame::StatusBar {
     use Try::Tiny;
     use Wx qw(:everything);
     use Wx::Event qw(EVT_SIZE EVT_TIMER);
-    with 'LacunaWaX::Roles::GuiElement';
+
+    has 'parent' => (
+        is          => 'rw',
+        isa         => 'LacunaWaX::MainFrame',
+        required    => 1,
+    );
+
+    #########################################
 
     has 'status_bar'        => (is => 'rw', isa => 'Wx::StatusBar', lazy_build => 1                 );
     has 'gauge'             => (is => 'rw', isa => 'Wx::Gauge',     lazy_build => 1                 );
@@ -49,7 +56,7 @@ package LacunaWaX::MainFrame::StatusBar {
     }#}}}
     sub _set_events {#{{{
         my $self = shift;
-        EVT_SIZE(   $self->status_bar,                  sub{$self->OnResize(@_)}    );
+        EVT_SIZE( $self->status_bar, sub{$self->OnResize(@_)} );
         return 1;
     }#}}}
 
@@ -57,11 +64,11 @@ package LacunaWaX::MainFrame::StatusBar {
         my $self = shift;
         $self->status_bar->DestroyChildren();
         $self->status_bar->SetStatusWidths(-5, -1);
-        $self->status_bar->SetStatusText($self->caption, 0);
+        $self->status_bar->SetStatusText( $self->caption, 0 );
 
         my $rect = $self->status_bar->GetFieldRect(1);
         $self->gauge( $self->_build_gauge );
-        $self->yield;
+        wxTheApp->Yield;
 
         $self->status_bar->Update;
         return $self->status_bar;

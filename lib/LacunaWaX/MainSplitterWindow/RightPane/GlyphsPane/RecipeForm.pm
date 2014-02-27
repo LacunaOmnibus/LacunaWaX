@@ -5,7 +5,20 @@ package LacunaWaX::MainSplitterWindow::RightPane::GlyphsPane::RecipeForm {
     use Try::Tiny;
     use Wx qw(:everything);
     use Wx::Event qw(EVT_BUTTON EVT_SPINCTRL);
-    with 'LacunaWaX::Roles::GuiElement';
+
+    has 'parent' => (
+        is          => 'rw',
+        isa         => 'Wx::ScrolledWindow',
+        required    => 1,
+    );
+
+    has 'ancestor' => (
+        is          => 'rw',
+        isa         => 'LacunaWaX::MainSplitterWindow::RightPane::GlyphsPane',
+        required    => 1,
+    );
+
+    #########################################
 
     has 'height'                => (is => 'rw', isa => 'Int',       lazy => 1,      default => 20);
     has 'recipe_name'           => (is => 'rw', isa => 'Str',       required => 1);
@@ -51,6 +64,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::GlyphsPane::RecipeForm {
         $self->main_sizer->Add($self->lbl_recipe,       0, 0, 0);
         $self->main_sizer->Add($self->spin_quantity,    0, 0, 0);
         $self->main_sizer->Add($self->btn_assemble,     0, 0, 0);
+        $self->_set_events();
         return $self;
     }
     sub _build_main_sizer {#{{{
@@ -65,7 +79,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::GlyphsPane::RecipeForm {
             wxDefaultPosition, 
             Wx::Size->new(150, $self->height)
         );
-        $v->SetFont( $self->app->get_font('para_text_1') );
+        $v->SetFont( wxTheApp->get_font('para_text_1') );
         return $v;
     }#}}}
     sub _build_lbl_recipe {#{{{
@@ -76,7 +90,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::GlyphsPane::RecipeForm {
             wxDefaultPosition, 
             Wx::Size->new(270, $self->height)
         );
-        $v->SetFont( $self->app->get_font('para_text_1') );
+        $v->SetFont( wxTheApp->get_font('para_text_1') );
         return $v;
     }#}}}
     sub _build_spin_quantity {#{{{
@@ -88,7 +102,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::GlyphsPane::RecipeForm {
             wxSP_ARROW_KEYS, 
             0, 5000, 0
         );
-        $v->SetFont( $self->app->get_font('para_text_1') );
+        $v->SetFont( wxTheApp->get_font('para_text_1') );
         return $v;
     }#}}}
     sub _build_btn_assemble {#{{{
@@ -97,20 +111,20 @@ package LacunaWaX::MainSplitterWindow::RightPane::GlyphsPane::RecipeForm {
             $self->parent, -1,
             "Assemble"
         );
-        $v->SetFont( $self->app->get_font('para_text_1') );
+        $v->SetFont( wxTheApp->get_font('para_text_1') );
         return $v;
     }#}}}
     sub _build_list_glyphs {#{{{
         my $self = shift;
-        $self->throb();
-        $self->yield;
+        wxTheApp->throb();
+        wxTheApp->Yield;
 
         my $sorted_glyphs = try {
             $self->game_client->get_glyphs($self->parent->planet_id);
         }
         catch {
             $self->has_arch_min(0);
-            $self->poperr($_->text);
+            wxTheApp->poperr($_->text);
             return;
         };
 
@@ -130,8 +144,8 @@ package LacunaWaX::MainSplitterWindow::RightPane::GlyphsPane::RecipeForm {
         $list_ctrl->SetColumnWidth(1,125);
         $list_ctrl->SetColumnWidth(2,100);
         $list_ctrl->Arrange(wxLIST_ALIGN_TOP);
-        $list_ctrl->AssignImageList( $self->app->build_img_list_glyphs, wxIMAGE_LIST_SMALL );
-        $self->yield;
+        $list_ctrl->AssignImageList( wxTheApp->build_img_list_glyphs, wxIMAGE_LIST_SMALL );
+        wxTheApp->Yield;
 
         ### Add glyphs to the listctrl
         my $row = 0;
@@ -143,10 +157,10 @@ package LacunaWaX::MainSplitterWindow::RightPane::GlyphsPane::RecipeForm {
             $list_ctrl->SetItem($row_idx, 2, $hr->{quantity});
 
             $row++;
-            $self->yield;
+            wxTheApp->Yield;
         }#}}}
 
-        $self->endthrob();
+        wxTheApp->endthrob();
         return $list_ctrl;
     }#}}}
     sub _make_dialog_status {#{{{
@@ -173,11 +187,10 @@ arg is not necessary there.
 =cut
 
         return LacunaWaX::Dialog::Status->new( 
-            app         => $self->app,
-            ancestor    => $self,
-            title       => "Building up to $quantity halls per recipe",
-            recsep      => '-=-=-=-=-=-=-',
-            size        => Wx::Size->new(500,300),
+            parent  => $self,
+            title   => "Building up to $quantity halls per recipe",
+            recsep  => '-=-=-=-=-=-=-',
+            size    => Wx::Size->new(500,300),
         );
     }#}}}
     sub _set_events {#{{{
@@ -207,18 +220,18 @@ arg is not necessary there.
         my $panel   = shift;    # Wx::Panel or Wx::ScrolledWindow
         my $event   = shift;    # Wx::CommandEvent
 
-        my $logger = $self->app->logger;
-        $self->throb();
+        my $logger = wxTheApp->logger;
+        wxTheApp->throb();
 
         my $recipe_name     = $self->recipe_name;
         my $quantity        = $self->spin_quantity->GetValue // 0;
         unless( $quantity ) {
-            $self->poperr('You must choose a quantity to assemble.', "Can't Make Zero!");
-            $self->endthrob();
+            wxTheApp->poperr('You must choose a quantity to assemble.', "Can't Make Zero!");
+            wxTheApp->endthrob();
             return;
         }
 
-        my $gc = $self->game_client;
+        my $gc = wxTheApp->game_client;
 
         ### 'Halls of Vrbansk (all)' is not a recipe, it's an indication that 
         ### we're supposed to build each of the 5 halls recipes.
@@ -255,15 +268,15 @@ arg is not necessary there.
                     }
 
                     my $ringredients = $gc->glyph_recipes->{$rname};
-                    $self->yield;
+                    wxTheApp->Yield;
                     my $rv = try {
                         $gc->cook_glyphs($self->ancestor->planet_id, $ringredients, $quantity);
                     }
                     catch {
-                        $self->poperr($_->text);
+                        wxTheApp->poperr($_->text);
                         return;
                     };
-                    $self->yield;
+                    wxTheApp->Yield;
                     if( ref $rv eq 'HASH' ) {
                         my $built = $rv->{'quantity'} // 0;
                         $total_built += $built;
@@ -290,38 +303,38 @@ arg is not necessary there.
         }#}}}
         else {#{{{
             my $plan_plural = ($quantity == 1) ? 'plan' : 'plans';
-            $self->yield;
+            wxTheApp->Yield;
             my $ringredients = $gc->glyph_recipes->{$recipe_name};
             my $built = try {
                 $gc->cook_glyphs($self->ancestor->planet_id, $ringredients, $quantity);
             }
             catch {
-                $self->poperr($_->text);
+                wxTheApp->poperr($_->text);
                 return;
             };
 
-            $self->yield;
+            wxTheApp->Yield;
             if( ref $built eq 'HASH' ) {
                 if( $built->{'error'} ) {
-                    $self->poperr($built->{'error'});
-                    $self->endthrob();
+                    wxTheApp->poperr($built->{'error'});
+                    wxTheApp->endthrob();
                     return;
                 }
                 $response = "Created $built->{'quantity'} $plan_plural of $built->{'item_name'}.";
             }
             else {
                 ### Shouldn't ever happen.
-                $self->endthrob();
+                wxTheApp->endthrob();
                 $logger->error("Glyph assembler event got back non-hashref '-$built-' from cook_glyphs.");
-                $self->poperr("Attempt to build glyphs produced an unexpected error.");
-                $self->endthrob();
+                wxTheApp->poperr("Attempt to build glyphs produced an unexpected error.");
+                wxTheApp->endthrob();
                 return;
             }
         }#}}}
 
-        $self->yield;   # allow throbber to update if it's on
-        $self->endthrob();
-        $self->popmsg($response, "Success!");
+        wxTheApp->Yield;   # allow throbber to update if it's on
+        wxTheApp->endthrob();
+        wxTheApp->popmsg($response, "Success!");
         return 1;
     }#}}}
 

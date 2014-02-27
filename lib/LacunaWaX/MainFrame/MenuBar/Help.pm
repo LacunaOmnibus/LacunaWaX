@@ -4,13 +4,20 @@ package LacunaWaX::MainFrame::MenuBar::Help {
     use Moose;
     use Wx qw(:everything);
     use Wx::Event qw(EVT_MENU);
-    with 'LacunaWaX::Roles::GuiElement';
 
     use LacunaWaX::Dialog::About;
     use LacunaWaX::Dialog::Help;
 
     use MooseX::NonMoose::InsideOut;
     extends 'Wx::Menu';
+
+    has 'parent' => (
+        is          => 'rw',
+        isa         => 'LacunaWaX::MainFrame',
+        required    => 1,
+    );
+
+    #############################################
 
     has 'itm_about' => (is => 'rw', isa => 'Wx::MenuItem',  lazy_build => 1);
     has 'itm_help'  => (is => 'rw', isa => 'Wx::MenuItem',  lazy_build => 1);
@@ -22,6 +29,7 @@ package LacunaWaX::MainFrame::MenuBar::Help {
         my $self = shift;
         $self->Append( $self->itm_about );
         $self->Append( $self->itm_help );
+        $self->_set_events();
         return $self;
     }
 
@@ -56,11 +64,7 @@ package LacunaWaX::MainFrame::MenuBar::Help {
         my $self  = shift;
         my $frame = shift;  # Wx::Frame
         my $event = shift;  # Wx::CommandEvent
-        my $d = LacunaWaX::Dialog::About->new(
-            app         => $self->app,
-            ancestor    => $self,
-            parent      => undef,
-        );
+        my $d = LacunaWaX::Dialog::About->new();
         $d->show();
         return 1;
     }#}}}
@@ -68,11 +72,7 @@ package LacunaWaX::MainFrame::MenuBar::Help {
         my $self  = shift;
         my $frame = shift;  # Wx::Frame
         my $event = shift;  # Wx::CommandEvent
-        my $d = LacunaWaX::Dialog::Help->new(
-            app         => $self->app,
-            ancestor    => $self,
-            parent      => undef,
-        );
+        my $d = LacunaWaX::Dialog::Help->new();
         return 1;
     }#}}}
 

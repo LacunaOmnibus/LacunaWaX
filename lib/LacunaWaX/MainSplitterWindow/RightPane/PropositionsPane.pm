@@ -22,7 +22,13 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane {
 
     use LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane::PropRow;
 
-    has 'sizer_debug' => (is => 'rw', isa => 'Int',  lazy => 1, default => 0);
+    has 'parent' => (
+        is          => 'rw',
+        isa         => 'Wx::ScrolledWindow',
+        required    => 1,
+    );
+
+    #########################################
 
     has 'planet_name'   => (is => 'rw', isa => 'Str', required => 1);
     has 'planet_id'     => (is => 'rw', isa => 'Int', lazy_build => 1);
@@ -68,6 +74,8 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane {
 
         return unless $self->parl_exists_here;
 
+        wxTheApp->borders_off();    # Change to borders_on to see borders around sizers
+
         $self->szr_header->Add($self->lbl_planet_name, 0, 0, 0);
         $self->szr_header->AddSpacer(5);
         $self->szr_header->Add($self->lbl_instructions_box, 0, 0, 0);
@@ -82,16 +90,18 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane {
         $self->content_sizer->Add($self->szr_close_status, 0, 0, 0);
         $self->content_sizer->AddSpacer(20);
         $self->content_sizer->Add($self->szr_props, 0, 0, 0);
+
+        $self->_set_events();
         return $self;
     }
     sub _build_parl {#{{{
         my $self = shift;
         my $parl = try {
-            $self->game_client->get_building($self->planet_id, 'Parliament');
+            wxTheApp->game_client->get_building($self->planet_id, 'Parliament');
         }
         catch {
             my $msg = (ref $_) ? $_->text : $_;
-            $self->poperr($msg);
+            wxTheApp->poperr($msg);
             return;
         };
 
@@ -108,7 +118,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane {
         }
         catch {
             my $msg = (ref $_) ? $_->text : $_;
-            $self->poperr($msg);
+            wxTheApp->poperr($msg);
             return $props;
         };
 
@@ -125,7 +135,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane {
             wxDefaultPosition, 
             Wx::Size->new(-1, -1)
         );
-        $v->SetFont( $self->app->get_font('para_text_2') );
+        $v->SetFont( wxTheApp->get_font('para_text_2') );
         return $v;
     }#}}}
     sub _build_lbl_instructions {#{{{
@@ -141,7 +151,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane {
             wxDefaultPosition, 
             Wx::Size->new(-1, 190)
         );
-        $v->SetFont( $self->app->get_font('para_text_2') );
+        $v->SetFont( wxTheApp->get_font('para_text_2') );
         $v->Wrap(550);
 
         return $v;
@@ -159,12 +169,12 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane {
             "Propositions on " . $self->planet_name, wxDefaultPosition, 
             Wx::Size->new(-1, 40)
         );
-        $v->SetFont( $self->app->get_font('header_1') );
+        $v->SetFont( wxTheApp->get_font('header_1') );
         return $v;
     }#}}}
     sub _build_planet_id {#{{{
         my $self = shift;
-        return $self->game_client->planet_id( $self->planet_name );
+        return wxTheApp->game_client->planet_id( $self->planet_name );
     }#}}}
     sub _build_chk_close_status {#{{{
         my $self = shift;
@@ -174,26 +184,25 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane {
             wxDefaultPosition, 
             Wx::Size->new(-1,-1), 
         );
-        $v->SetFont( $self->app->get_font('para_text_2') );
+        $v->SetFont( wxTheApp->get_font('para_text_2') );
         return $v;
     }#}}}
     sub _build_szr_header {#{{{
         my $self = shift;
-        return $self->build_sizer($self->parent, wxVERTICAL, 'Header');
+        return wxTheApp->build_sizer($self->parent, wxVERTICAL, 'Header');
     }#}}}
     sub _build_szr_close_status {#{{{
         my $self = shift;
-        return $self->build_sizer($self->parent, wxHORIZONTAL, 'Close Status Window?', 0);
+        return wxTheApp->build_sizer($self->parent, wxHORIZONTAL, 'Close Status Window?', 0);
     }#}}}
     sub _set_events { }
 
     sub create_szr_props {#{{{
         my $self = shift;
 
-        my $szr_props = $self->build_sizer($self->parent, wxVERTICAL, 'Props');
+        my $szr_props = wxTheApp->build_sizer($self->parent, wxVERTICAL, 'Props');
 
         my $header = LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane::PropRow->new(
-            app         => $self->app,
             ancestor    => $self,
             parent      => $self->parent,
             planet_id   => $self->planet_id,
@@ -203,7 +212,6 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane {
 
         foreach my $prop( @{$self->props} ) {
             my $row = LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane::PropRow->new(
-                app         => $self->app,
                 ancestor    => $self,
                 parent      => $self->parent,
                 planet_id   => $self->planet_id,
@@ -213,14 +221,14 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane {
             push @{$self->rows}, $row;
             $szr_props->Add( $row->main_sizer, 0, 0, 0 );
             $szr_props->AddSpacer( $self->row_spacer_size );
-            $self->yield;
+            wxTheApp->Yield;
         }
 
         $szr_props->AddSpacer( $self->row_spacer_size * 10 );
 
         if( @{ $self->rows } ) {
             my $footer = LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane::PropRow->new(
-                app         => $self->app,
+                app         => wxTheApp,
                 ancestor    => $self,
                 parent      => $self->parent,
                 planet_id   => $self->planet_id,

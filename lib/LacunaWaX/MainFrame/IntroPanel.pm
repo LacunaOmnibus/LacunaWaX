@@ -6,7 +6,14 @@ package LacunaWaX::MainFrame::IntroPanel {
     use Try::Tiny;
     use Wx qw(:everything);
     use Wx::Event qw(EVT_BUTTON);
-    with 'LacunaWaX::Roles::GuiElement';
+
+    has 'parent' => (
+        is          => 'rw',
+        isa         => 'LacunaWaX::MainFrame',
+        required    => 1,
+    );
+
+    ##########################################
 
     has 'is_on' => (is => 'rw', isa => 'Int', lazy => 1, default => 1);
 
@@ -65,6 +72,7 @@ package LacunaWaX::MainFrame::IntroPanel {
         $self->main_sizer->Add($self->bottom_panel, 4, wxEXPAND, 1);
         $self->main_panel->SetSizer( $self->main_sizer );
 
+        $self->_set_events();
         $self->main_panel->Show(1);
         return $self;
     }
@@ -140,18 +148,18 @@ package LacunaWaX::MainFrame::IntroPanel {
         my $self = shift;
         foreach my $srvr_id(keys %{$self->buttons}) {
             my $btn = $self->buttons->{$srvr_id};
-            EVT_BUTTON( $self->main_panel,  $btn->GetId,   sub{$self->get_main_frame->OnGameServerConnect($srvr_id, @_)} );
+            EVT_BUTTON( $self->main_panel,  $btn->GetId,   sub{wxTheApp->main_frame->OnGameServerConnect($srvr_id, @_)} );
         }
         return 1;
     }#}}}
 
     sub add_connect_buttons {#{{{
         my $self    = shift;
-        my $schema  = $self->get_main_schema;
+        my $schema = wxTheApp->main_schema;
 
         ### One connect button per server
-        for my $srvr_id( sort{$a<=>$b}$self->server_ids ) {
-            my $srvr_rec = $self->server_record_by_id($srvr_id);
+        for my $srvr_id( sort{$a<=>$b}wxTheApp->server_ids ) {
+            my $srvr_rec = wxTheApp->server_record_by_id($srvr_id);
             my $b = Wx::Button->new(
                 $self->bottom_panel, -1,
                 "Connect to " . $srvr_rec->name,

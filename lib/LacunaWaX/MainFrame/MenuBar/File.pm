@@ -9,12 +9,19 @@ package LacunaWaX::MainFrame::MenuBar::File {
     use Try::Tiny;
     use Wx qw(:everything);
     use Wx::Event qw(EVT_MENU);
-    with 'LacunaWaX::Roles::GuiElement';
 
     use MooseX::NonMoose::InsideOut;
     extends 'Wx::Menu';
 
     use LacunaWaX::MainFrame::MenuBar::File::Connect;
+
+    has 'parent' => (
+        is          => 'rw',
+        isa         => 'LacunaWaX::MainFrame',
+        required    => 1,
+    );
+
+    #############################################
 
     has 'itm_exit'      => (is => 'rw', isa => 'Wx::MenuItem',                                  lazy_build => 1);
     has 'itm_connect'   => (is => 'rw', isa => 'LacunaWaX::MainFrame::MenuBar::File::Connect',  lazy_build => 1);
@@ -30,6 +37,7 @@ package LacunaWaX::MainFrame::MenuBar::File {
         $self->Append           ( $self->itm_import                                             );
         $self->Append           ( $self->itm_export                                             );
         $self->Append           ( $self->itm_exit                                               );
+        $self->_set_events();
         return $self;
     }
 
@@ -46,9 +54,7 @@ package LacunaWaX::MainFrame::MenuBar::File {
     sub _build_itm_connect {#{{{
         my $self = shift;
         return LacunaWaX::MainFrame::MenuBar::File::Connect->new(
-            ancestor    => $self,
-            app         => $self->app,
-            parent      => $self->parent,   # MainFrame, not this Menu, is the parent.
+            parent => $self->parent,   # MainFrame, not this Menu, is the parent.
         );
     }#}}}
     sub _build_itm_export {#{{{
@@ -76,9 +82,6 @@ package LacunaWaX::MainFrame::MenuBar::File {
         EVT_MENU( $self->parent,  $self->itm_exit->GetId,    sub{$self->OnQuit(@_)}      );
         EVT_MENU( $self->parent,  $self->itm_import->GetId,  sub{$self->OnImport(@_)}    );
         EVT_MENU( $self->parent,  $self->itm_export->GetId,  sub{$self->OnExport(@_)}    );
-        #EVT_MENU( wxTheApp->main_frame->frame,  $self->itm_exit->GetId,    sub{$self->OnQuit(@_)}      );
-        #EVT_MENU( wxTheApp->main_frame->frame,  $self->itm_import->GetId,  sub{$self->OnImport(@_)}    );
-        #EVT_MENU( wxTheApp->main_frame->frame,  $self->itm_export->GetId,  sub{$self->OnExport(@_)}    );
         return 1;
     }#}}}
 
@@ -96,7 +99,6 @@ package LacunaWaX::MainFrame::MenuBar::File {
             'Select a database file',
             $ENV{'HOME'},           # default dir
             'lacuna_app.sqlite',    # default file
-            #'*.sqlite',
             q{},
             wxFD_SAVE|wxFD_OVERWRITE_PROMPT
         );
@@ -156,12 +158,12 @@ package LacunaWaX::MainFrame::MenuBar::File {
         ### panel, with both connect buttons grayed out.  If they just 
         ### imported previous prefs data that included the username/password, 
         ### enable the appropriate button(s).
-        if( $self->intro_panel_exists ) {
+        if( wxTheApp->has_intro_panel ) {
             my $schema = wxTheApp->main_schema;
             my $server_accounts = $schema->resultset('ServerAccounts')->search();
             while(my $sa = $server_accounts->next ) {
                 if( $sa->username and $sa->password ) {
-                    $self->get_intro_panel->buttons->{ $sa->server->id }->Enable(1);
+                    wxTheApp->intro_panel->buttons->{ $sa->server->id }->Enable(1);
                 }
             }
         }

@@ -7,12 +7,10 @@ package LacunaWaX::MainSplitterWindow::RightPane {
     use Try::Tiny;
     use Wx qw(:everything);
     use Wx::Event qw(EVT_BUTTON EVT_SPINCTRL EVT_CLOSE);
-    with 'LacunaWaX::Roles::GuiElement';
 
     use LacunaWaX::MainSplitterWindow::RightPane::BFGPane;
     use LacunaWaX::MainSplitterWindow::RightPane::DefaultPane;
     use LacunaWaX::MainSplitterWindow::RightPane::GlyphsPane;
-    use LacunaWaX::MainSplitterWindow::RightPane::LotteryPane;
     use LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane;
     use LacunaWaX::MainSplitterWindow::RightPane::RearrangerPane;
     use LacunaWaX::MainSplitterWindow::RightPane::RepairPane;
@@ -20,6 +18,14 @@ package LacunaWaX::MainSplitterWindow::RightPane {
     use LacunaWaX::MainSplitterWindow::RightPane::SSIncoming;
     use LacunaWaX::MainSplitterWindow::RightPane::SSHealth;
     use LacunaWaX::MainSplitterWindow::RightPane::SummaryPane;
+
+    has 'parent' => (
+        is          => 'rw',
+        isa         => 'Wx::SplitterWindow',
+        required    => 1,
+    );
+
+    #########################################
 
     has 'has_focus'     => (is => 'rw', isa => 'Int', lazy => 1, default => 0);
     has 'main_panel'    => (is => 'rw', isa => 'Wx::ScrolledWindow', predicate => 'has_main_panel');
@@ -97,7 +103,6 @@ Should be called after modifying anything in the right pane.
         $self->main_panel->FitInside(); # Force the scrollbars to reset
         return 1;
     }#}}}
-
     sub show_right_pane {#{{{
         my $self  = shift;
         my $class = shift;
@@ -127,12 +132,12 @@ Displays one of the RightPane/*.pm panels in the splitter window's right pane.
 =cut
 
         unless(defined $args->{'nothrob'} and $args->{'nothrob'}) {
-            $self->throb;
-            $self->yield;
+            wxTheApp->throb;
+            wxTheApp->Yield;
         }
         $self->clear_pane;
         $self->main_panel->Show(0);
-        $self->yield;
+        wxTheApp->Yield;
 
         if( defined $args->{'required_buildings'} ) {
             foreach my $bldg_name( keys %{$args->{'required_buildings'}} ) {
@@ -145,7 +150,6 @@ Displays one of the RightPane/*.pm panels in the splitter window's right pane.
         }
 
         my $panel = $class->new(
-            app         => $self->app,
             parent      => $self->main_panel,
             ancestor    => $self,
             planet_name => $pname,
@@ -165,24 +169,25 @@ Displays one of the RightPane/*.pm panels in the splitter window's right pane.
         $self->main_panel->SetSizer($self->panel_obj->main_sizer);
 
         unless(defined $args->{'nothrob'} and $args->{'nothrob'}) {
-            $self->endthrob;
-            $self->yield;
+            wxTheApp->endthrob;
+            wxTheApp->Yield;
         }
-        $self->yield;
+        wxTheApp->Yield;
 
         $self->main_panel->Show(1);
         $self->finish_pane();
         return 1;
     }#}}}
+
     sub _planet_has_building {#{{{
         my $self        = shift;
         my $pid         = shift;
         my $bldg_name   = shift;
 
         my $bldg = try {
-            $self->game_client->get_building($pid, $bldg_name);
+            wxTheApp->game_client->get_building($pid, $bldg_name);
         };
-        $self->yield;
+        wxTheApp->Yield;
         return $bldg || undef;
     }#}}}
     sub _show_default_panel {#{{{
@@ -203,7 +208,7 @@ Displays one of the RightPane/*.pm panels in the splitter window's right pane.
         }
         else {
             ### wtf?
-            $self->poperr("Something has gone horribly wrong.");
+            wxTheApp->poperr("Something has gone horribly wrong.");
             return;
         }
 
@@ -216,7 +221,7 @@ Displays one of the RightPane/*.pm panels in the splitter window's right pane.
         my $bldg_lvl    = shift || 0;
 
         my $error = q{};
-        my $pid   = $self->game_client->planet_id($pname) if $pname;
+        my $pid   = wxTheApp->game_client->planet_id($pname) if $pname;
 
         my $bldg = $self->_planet_has_building($pid, $bldg_name);
         unless($bldg) {
@@ -225,11 +230,11 @@ Displays one of the RightPane/*.pm panels in the splitter window's right pane.
 
         if( $bldg and $bldg_lvl ) {
             my $b_view = try {
-                $self->game_client->get_building_view($pid, $bldg);
+                wxTheApp->game_client->get_building_view($pid, $bldg);
             }
             catch {
                 my $msg = (ref $_) ? $_->text : $_;
-                $self->poperr($msg);
+                wxTheApp->poperr($msg);
                 return;
             };
             $b_view or return;
@@ -239,7 +244,7 @@ Displays one of the RightPane/*.pm panels in the splitter window's right pane.
         }
 
         if( $error ) {
-            $self->popmsg( $error, "Missing building requirements" );
+            wxTheApp->popmsg( $error, "Missing building requirements" );
             $self->_show_default_panel($pname);
             return;
         }
