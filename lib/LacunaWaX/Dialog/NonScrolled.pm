@@ -5,7 +5,6 @@ package LacunaWaX::Dialog::NonScrolled {
     use Try::Tiny;
     use Wx qw(:everything);
     use Wx::Event qw();
-    with 'LacunaWaX::Roles::GuiElement';
 
     use MooseX::NonMoose::InsideOut;
     extends 'Wx::Dialog';
@@ -36,12 +35,12 @@ package LacunaWaX::Dialog::NonScrolled {
     }
     sub _build_main_sizer {#{{{
         my $self = shift;
-        my $v = $self->build_sizer($self, wxVERTICAL, 'Main Sizer');
+        my $v = wxTheApp->build_sizer($self, wxVERTICAL, 'Main Sizer');
         return $v;
     }#}}}
     sub _build_page_sizer {#{{{
         my $self = shift;
-        my $v = $self->build_sizer($self, wxHORIZONTAL, 'Page Sizer');
+        my $v = wxTheApp->build_sizer($self, wxHORIZONTAL, 'Page Sizer');
         return $v;
     }#}}}
     sub _build_position {#{{{
@@ -112,10 +111,6 @@ LacunaWaX::Dialog::NonScrolled - A non-scrolled dialog with margins.
 This is not meant to be used on its own; it's meant to be extended to create a 
 dialog box with just a scoche of margin.
 
-LacunaWaX::Dialog::NonScrolled implements the LacunaWaX::Roles::GuiElement role, 
-so extending classes will require app, ancestor, and parent arguments passed to 
-their constructors.
-
 =head1 SYNOPSIS
 
  package ExtendingClass;
@@ -172,9 +167,7 @@ their constructors.
 
 =head1 ARGUMENTS
 
-=head2 app, ancestor, parent (required)
-
-The standard arguments required by LacunaWaX::Roles::GuiElement
+CHECK FIX THIS
 
 =head2 position (optional)
 

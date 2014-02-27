@@ -1,40 +1,4 @@
 
-=head2 STATUS DIALOGS
-
-Each PropRow has its own dialog_status attribute with a lazy builder method.  If 
-the user closes that dialog with a mouseclick:
-    - Dialog::Status::OnClose gets called, completely destroying the wxwidgets 
-      dialog.
-    - That OnClose event then calls this class's OnDialogStatusClose() 
-      pseudo-event method, which clears the dialog_status from the PropRow 
-      object.
-    - This could happen at any time, without warning.
-    
-So any calls to dialog_status in here (eg dialog_status->say(...);) need to be 
-wrapped in checks that first ensure the thing still exists; dialog_status_say() 
-and dialog_status_say_recsep() methods exist to that end.
-
-
-When removing that dialog_status ourselves (progammatically, rather than when 
-the user closes it with a mouseclick), we need to destroy the actual wxwidgets 
-items as well as remove the Moose dialog_status attribute from the PropRow 
-object.
-
-Simply calling $self->clear_dialog_status _will_ take care of that, due to the 
-'before' method modifier.
-
-
-If you're testing something, search for "SITTERVOTE" in this file.  There's 
-commented-out code there that you can turn on that will pretend to vote but not 
-really vote (so you don't have to keep voting and then going back to the game 
-to create a new prop to test on).
-
-Also, if you need to force a 'No' vote for some specific reason, there's code 
-at that same SITTERVOTE tag to do that.
-
-=cut
-
-
 package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane::PropRow {
     use v5.14;
     use Carp;
@@ -45,10 +9,20 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane::PropRow {
     use Try::Tiny;
     use Wx qw(:everything);
     use Wx::Event qw(EVT_BUTTON EVT_TEXT_ENTER EVT_CLOSE);
-    with 'LacunaWaX::Roles::GuiElement';
-    no if $] >= 5.017011, warnings => 'experimental::smartmatch';
 
-    has 'sizer_debug' => (is => 'rw', isa => 'Int',  lazy => 1, default => 0 );
+    has 'ancestor' => (
+        is          => 'rw',
+        isa         => 'LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane',
+        required    => 1,
+    );
+
+    has 'parent' => (
+        is          => 'rw',
+        isa         => 'Wx::ScrolledWindow',
+        required    => 1,
+    );
+
+    #########################################
 
     has 'main_sizer'    => (is => 'rw', isa => 'Wx::BoxSizer',  lazy_build => 1, documentation => 'vertical');
     has 'planet_id'     => (is => 'rw', isa => 'Int', required => 1);
@@ -157,6 +131,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane::PropRow {
     sub BUILD {
         my $self = shift;
 
+        wxTheApp->borders_off();    # Change to borders_on to see borders around sizers
         return $self->_make_header if $self->is_header;
         return $self->_make_footer if $self->is_footer;
 
@@ -171,7 +146,8 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane::PropRow {
         $self->main_sizer->AddSpacer(5);
         $self->main_sizer->Add($self->cast_sitters_sizer, 0, 0, 0);
 
-        $self->yield;
+        wxTheApp->Yield;
+        $self->_set_events();
         return $self;
     }
     sub _build_ally_members {#{{{
@@ -179,10 +155,10 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane::PropRow {
         my $ally_hash = {};
 
         $ally_hash = try {
-            $self->game_client->get_alliance_members();
+            wxTheApp->game_client->get_alliance_members();
         }
         catch {
-            $self->poperr("Could not find your alliance members.  You're most likely out of RPCs; wait a minute and try again.", "Error!");
+            wxTheApp->poperr("Could not find your alliance members.  You're most likely out of RPCs; wait a minute and try again.", "Error!");
             $self->btn_sitters_yes->Enable(1);
             $self->clear_dialog_status;
             return $ally_hash;
@@ -192,7 +168,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane::PropRow {
     sub _build_cast_me_sizer {#{{{
         my $self = shift;
 
-        my $v = $self->build_sizer($self->parent, wxHORIZONTAL, 'Cast Me');
+        my $v = wxTheApp->build_sizer($self->parent, wxHORIZONTAL, 'Cast Me');
         $v->Add($self->btn_me_yes, 0, 0, 0);
         $v->Add($self->btn_me_no, 0, 0, 0);
 
@@ -201,7 +177,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane::PropRow {
     sub _build_cast_sitters_sizer {#{{{
         my $self = shift;
 
-        my $v = $self->build_sizer($self->parent, wxHORIZONTAL, 'Cast Sitters');
+        my $v = wxTheApp->build_sizer($self->parent, wxHORIZONTAL, 'Cast Sitters');
         $v->Add($self->btn_sitters_yes, 0, 0, 0);
 
         return $v;
@@ -210,10 +186,9 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane::PropRow {
         my $self = shift;
 
         my $v = LacunaWaX::Dialog::Status->new( 
-            app         => $self->app,
-            ancestor    => $self,
-            title       => 'Sitter Voting Status',
-            recsep      => '-=-=-=-=-=-=-',
+            parent  => $self,
+            title   => 'Sitter Voting Status',
+            recsep  => '-=-=-=-=-=-=-',
         );
         $v->hide;
         return $v;
@@ -234,7 +209,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane::PropRow {
             wxDefaultPosition, 
             Wx::Size->new($self->name_width,$self->row_height)
         );
-        $v->SetFont( $self->app->get_font('para_text_1') );
+        $v->SetFont( wxTheApp->get_font('para_text_1') );
 
         my $tt = Wx::ToolTip->new( $desc );
         $v->SetToolTip($tt);
@@ -255,7 +230,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane::PropRow {
             wxDefaultPosition, 
             Wx::Size->new($self->proposed_by_width,$self->row_height)
         );
-        $v->SetFont( $self->app->get_font('para_text_1') );
+        $v->SetFont( wxTheApp->get_font('para_text_1') );
 
         unless($text eq $orig_text) {
             my $tt = Wx::ToolTip->new( $orig_text );
@@ -274,7 +249,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane::PropRow {
             wxDefaultPosition, 
             Wx::Size->new($self->votes_needed_width,$self->row_height)
         );
-        $v->SetFont( $self->app->get_font('para_text_1') );
+        $v->SetFont( wxTheApp->get_font('para_text_1') );
 
         return $v;
     }#}}}
@@ -288,7 +263,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane::PropRow {
             wxDefaultPosition, 
             Wx::Size->new($self->votes_yes_width,$self->row_height)
         );
-        $v->SetFont( $self->app->get_font('para_text_1') );
+        $v->SetFont( wxTheApp->get_font('para_text_1') );
 
         return $v;
     }#}}}
@@ -302,7 +277,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane::PropRow {
             wxDefaultPosition, 
             Wx::Size->new($self->votes_no_width,$self->row_height)
         );
-        $v->SetFont( $self->app->get_font('para_text_1') );
+        $v->SetFont( wxTheApp->get_font('para_text_1') );
 
         return $v;
     }#}}}
@@ -315,13 +290,13 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane::PropRow {
             wxDefaultPosition, 
             Wx::Size->new($self->my_vote_width,$self->row_height)
         );
-        $v->SetFont( $self->app->get_font('para_text_1') );
+        $v->SetFont( wxTheApp->get_font('para_text_1') );
 
         return $v;
     }#}}}
     sub _build_main_sizer {#{{{
         my $self = shift;
-        return $self->build_sizer($self->parent, wxHORIZONTAL, 'Main');
+        return wxTheApp->build_sizer($self->parent, wxHORIZONTAL, 'Main');
     }#}}}
     sub _build_btn_me_yes {#{{{
         my $self = shift;
@@ -331,7 +306,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane::PropRow {
             wxDefaultPosition, 
             Wx::Size->new($self->button_width, $self->row_height)
         );
-        $v->SetFont( $self->app->get_font('para_text_1') );
+        $v->SetFont( wxTheApp->get_font('para_text_1') );
         my $enabled = ($self->my_vote eq 'None') ? 1 : 0;
         $v->Enable($enabled);
 
@@ -345,7 +320,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane::PropRow {
             wxDefaultPosition, 
             Wx::Size->new($self->button_width,$self->row_height)
         );
-        $v->SetFont( $self->app->get_font('para_text_1') );
+        $v->SetFont( wxTheApp->get_font('para_text_1') );
         my $enabled = ($self->my_vote eq 'None') ? 1 : 0;
         $v->Enable($enabled);
 
@@ -361,7 +336,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane::PropRow {
             ### + 20 to make the sitters button stand out a bit
             Wx::Size->new($self->button_width + 20, $self->row_height)
         );
-        $v->SetFont( $self->app->get_font('para_text_1') );
+        $v->SetFont( wxTheApp->get_font('para_text_1') );
 
         return $v;
     }#}}}
@@ -375,7 +350,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane::PropRow {
             ### + 20 to make the sitters button stand out a bit
             Wx::Size->new(100, $self->row_height)
         );
-        $v->SetFont( $self->app->get_font('para_text_1') );
+        $v->SetFont( wxTheApp->get_font('para_text_1') );
 
         return $v;
     }#}}}
@@ -400,10 +375,10 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane::PropRow {
     sub _build_parl {#{{{
         my $self = shift;
         my $parl = try {
-            $self->game_client->get_building($self->ancestor->planet_id, 'Parliament');
+            wxTheApp->game_client->get_building($self->ancestor->planet_id, 'Parliament');
         }
         catch {
-            $self->poperr($_->text);
+            wxTheApp->poperr($_->text);
             return;
         };
 
@@ -490,14 +465,14 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane::PropRow {
             )
         );
 
-        $self->name_header->SetFont                 ( $self->app->get_font('header_7') );
-        $self->proposed_by_header->SetFont          ( $self->app->get_font('header_7') );
-        $self->votes_needed_header->SetFont         ( $self->app->get_font('header_7') );
-        $self->votes_yes_header->SetFont            ( $self->app->get_font('header_7') );
-        $self->votes_no_header->SetFont             ( $self->app->get_font('header_7') ); 
-        $self->my_vote_header->SetFont              ( $self->app->get_font('header_7') ); 
-        $self->cast_my_vote_header->SetFont         ( $self->app->get_font('header_7') ); 
-        $self->cast_sitters_vote_header->SetFont    ( $self->app->get_font('header_7') ); 
+        $self->name_header->SetFont                 ( wxTheApp->get_font('header_7') );
+        $self->proposed_by_header->SetFont          ( wxTheApp->get_font('header_7') );
+        $self->votes_needed_header->SetFont         ( wxTheApp->get_font('header_7') );
+        $self->votes_yes_header->SetFont            ( wxTheApp->get_font('header_7') );
+        $self->votes_no_header->SetFont             ( wxTheApp->get_font('header_7') ); 
+        $self->my_vote_header->SetFont              ( wxTheApp->get_font('header_7') ); 
+        $self->cast_my_vote_header->SetFont         ( wxTheApp->get_font('header_7') ); 
+        $self->cast_sitters_vote_header->SetFont    ( wxTheApp->get_font('header_7') ); 
 
         $self->main_sizer->Add($self->name_header, 0, 0, 0);
         $self->main_sizer->Add($self->proposed_by_header, 0, 0, 0);
@@ -522,7 +497,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane::PropRow {
         my $prop                = shift;
         my $prop_has_passed     = 0;
 
-        $self->yield;
+        wxTheApp->Yield;
         if($self->stop_voting) { $self->stop_voting(0); $self->btn_sitters_yes->Enable(1); return; }
 
         my $player = $sitter_rec->player_name;
@@ -533,7 +508,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane::PropRow {
         ### Need a new client per sitter, logged in as that sitter, NOT as the 
         ### player currently using LacunaWaX.
         my $sitter_client = try {
-            $self->game_client->relog($sitter_rec->player_name, $sitter_rec->sitter);
+            wxTheApp->game_client->relog($sitter_rec->player_name, $sitter_rec->sitter);
         }
         catch {
             my $msg = (ref $_) ? $_->text : $_;
@@ -642,13 +617,13 @@ sitters.
 
 =cut
 
-        my $schema = $self->get_main_schema;
+        my $schema = wxTheApp->main_schema;
         my @recorded_sitter_recs    = $schema->resultset('SitterPasswords')->search(
-                                        { server_id => $self->get_connected_server->id, },
+                                        { server_id => wxTheApp->server->id, },
                                         { order_by  => { -asc => 'RANDOM()' } }
                                         );
         unless(@recorded_sitter_recs) {
-            $self->poperr("You don't have any sitters recorded yet, so you can't cast votes on their behalf.  See the Sitter Manager tool.", "Error");
+            wxTheApp->poperr("You don't have any sitters recorded yet, so you can't cast votes on their behalf.  See the Sitter Manager tool.", "Error");
             $self->btn_sitters_yes->Enable(1);
             $self->clear_dialog_status;
             return;
@@ -772,18 +747,18 @@ sitters.
         my $vote    = shift;    # 1 or 0
 
         unless($self->parl) {
-            $self->poperr("We seem not to have a parliament building; no voting is possible.", "Error");
+            wxTheApp->poperr("We seem not to have a parliament building; no voting is possible.", "Error");
             return;
         }
 
         my $conf_msg = q{You're about to vote 'Yes' for all props on this page for all of your sitters.  Are you sure?};
-        unless( wxYES == $self->popconf($conf_msg) ) {
-            $self->popmsg("OK; bailing.");
+        unless( wxYES == wxTheApp->popconf($conf_msg) ) {
+            wxTheApp->popmsg("OK; bailing.");
             return;
         }
 
         $self->dialog_status->show();
-        $self->yield;
+        wxTheApp->Yield;
         foreach my $row( @{$self->rows} ) {
             $self->dialog_status_say("Voting on prop '" . $row->prop->{'name'} . "'");
             $self->dialog_status_say_recsep();
@@ -794,7 +769,7 @@ sitters.
             $self->clear_dialog_status; # also closes it
         }
 
-        $self->endthrob;
+        wxTheApp->endthrob;
         $self->dialog_status_say("All props have been voted on.  You may close this window.");
         return 1;
     }#}}}
@@ -805,21 +780,21 @@ sitters.
         my $vote    = shift;    # 1 or 0
 
         unless($self->parl) {
-            $self->poperr("We seem not to have a parliament building; no voting is possible.", "Error");
+            wxTheApp->poperr("We seem not to have a parliament building; no voting is possible.", "Error");
             return;
         }
 
-        $self->throb;
+        wxTheApp->throb;
         my $rv = try {
             $self->parl->cast_vote($self->prop->{'id'}, $vote);
         }
         catch {
             my $msg = (ref $_) ? $_->text : $_;
-            $self->poperr("Attempt to vote failed with: $msg", "Error!");
-            $self->endthrob;
+            wxTheApp->poperr("Attempt to vote failed with: $msg", "Error!");
+            wxTheApp->endthrob;
             return;
         } or return;
-        $self->endthrob;
+        wxTheApp->endthrob;
 
 
         my $vote_text;
@@ -839,7 +814,7 @@ sitters.
         ### so further clicks on either button will just result in failure.
         $self->btn_me_yes->Enable(0);
         $self->btn_me_no->Enable(0);
-        $self->popmsg("Your vote of '$vote_text' has been recorded.", "Success!");
+        wxTheApp->popmsg("Your vote of '$vote_text' has been recorded.", "Success!");
         return 1;
     }#}}}
     sub OnSittersVote {#{{{
@@ -849,11 +824,11 @@ sitters.
         my $vote    = shift;    # 1 or 0
 
         unless($self->parl) {
-            $self->poperr("We seem not to have a parliament building; no voting is possible.", "Error");
+            wxTheApp->poperr("We seem not to have a parliament building; no voting is possible.", "Error");
             return;
         }
         unless($vote) {
-            $self->popmsg("I'm thinking that allowing anybody to vote 'no' for all of their sitters is a bad idea.", "Vote not recorded");
+            wxTheApp->popmsg("I'm thinking that allowing anybody to vote 'no' for all of their sitters is a bad idea.", "Vote not recorded");
             return;
         }
 
@@ -866,7 +841,7 @@ sitters.
         ### For now, just reset it at the beginning of voting for each prop.  
         ### This won't stop it from periodically showing up, but will clean it 
         ### up when it does.
-        $self->endthrob;
+        wxTheApp->endthrob;
 
         ### We _do_ want to directly call dialog_status->show here.  It's 
         ### possible the user:
@@ -877,7 +852,7 @@ sitters.
         ### the user closed its window, so it no longer exists.
         ### This direct call will, in that case, recreate it.
         $self->dialog_status->show();
-        $self->yield;
+        wxTheApp->Yield;
 
         $self->sitter_vote_on_prop($self);
 
@@ -886,7 +861,7 @@ sitters.
         }
 
         ### See comment at the other endthrob call top this method.
-        $self->endthrob;
+        wxTheApp->endthrob;
         return 1;
     }#}}}
     sub OnDialogStatusClose {#{{{
@@ -912,3 +887,41 @@ sitters.
 }
 
 1;
+
+__END__
+
+=head2 STATUS DIALOGS
+
+Each PropRow has its own dialog_status attribute with a lazy builder method.  If 
+the user closes that dialog with a mouseclick:
+    - Dialog::Status::OnClose gets called, completely destroying the wxwidgets 
+      dialog.
+    - That OnClose event then calls this class's OnDialogStatusClose() 
+      pseudo-event method, which clears the dialog_status from the PropRow 
+      object.
+    - This could happen at any time, without warning.
+    
+So any calls to dialog_status in here (eg dialog_status->say(...);) need to be 
+wrapped in checks that first ensure the thing still exists; dialog_status_say() 
+and dialog_status_say_recsep() methods exist to that end.
+
+
+When removing that dialog_status ourselves (progammatically, rather than when 
+the user closes it with a mouseclick), we need to destroy the actual wxwidgets 
+items as well as remove the Moose dialog_status attribute from the PropRow 
+object.
+
+Simply calling $self->clear_dialog_status _will_ take care of that, due to the 
+'before' method modifier.
+
+
+If you're testing something, search for "SITTERVOTE" in this file.  There's 
+commented-out code there that you can turn on that will pretend to vote but not 
+really vote (so you don't have to keep voting and then going back to the game 
+to create a new prop to test on).
+
+Also, if you need to force a 'No' vote for some specific reason, there's code 
+at that same SITTERVOTE tag to do that.
+
+=cut
+

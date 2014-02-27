@@ -4,10 +4,17 @@ package LacunaWaX::MainFrame::MenuBar::File::Connect {
     use Moose;
     use Wx qw(:everything);
     use Wx::Event qw(EVT_MENU);
-    with 'LacunaWaX::Roles::GuiElement';
 
     use MooseX::NonMoose::InsideOut;
     extends 'Wx::Menu';
+
+    has 'parent' => (
+        is          => 'rw',
+        isa         => 'LacunaWaX::MainFrame',
+        required    => 1,
+    );
+
+    #############################################
 
     has 'connections' => (is => 'rw', isa => 'HashRef[Wx::MenuItem]', lazy => 1, default => sub{ {} },
         documentation => q{
@@ -21,12 +28,12 @@ package LacunaWaX::MainFrame::MenuBar::File::Connect {
     }#}}}
     sub BUILD {
         my $self    = shift;
-        my $schema  = $self->get_main_schema;
+        my $schema = wxTheApp->main_schema;
 
         ### Build one submenu per server.  Immediately gray out servers for 
         ### which the user has not yet set username/password.
-        for my $srvr_id( sort{$a<=>$b}$self->server_ids ) {
-            my $srvr_rec = $self->server_record_by_id($srvr_id);
+        for my $srvr_id( sort{$a<=>$b}wxTheApp->server_ids ) {
+            my $srvr_rec = wxTheApp->server_record_by_id($srvr_id);
 
             ### OnConnect is relying on the MenuItem name being exactly 
             ### $srvr_rec->name - don't change that.
@@ -44,13 +51,14 @@ package LacunaWaX::MainFrame::MenuBar::File::Connect {
             else { $self->Enable($menu_item->GetId, 0); }
         }
 
+        $self->_set_events();
         return $self;
     }
     sub _set_events {#{{{
         my $self = shift;
         foreach my $server_id( keys %{ $self->connections } ) {
             my $menu_item = $self->connections->{$server_id};
-            EVT_MENU( $self->parent, $menu_item->GetId, sub{$self->get_main_frame->OnGameServerConnect($server_id)} );
+            EVT_MENU( $self->parent, $menu_item->GetId, sub{wxTheApp->main_frame->OnGameServerConnect($server_id)} );
         }
         return 1;
     }#}}}

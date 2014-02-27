@@ -15,7 +15,6 @@ package LacunaWaX::MainFrame {
     use LacunaWaX::MainFrame::IntroPanel;
     use LacunaWaX::MainFrame::MenuBar;
     use LacunaWaX::MainFrame::StatusBar;
-    use LacunaWaX::MainFrame::StatusBar::Timer;
     use LacunaWaX::MainSplitterWindow;
 
     has 'position'  => (is => 'rw', isa => 'Maybe[Wx::Point]',
@@ -76,7 +75,7 @@ package LacunaWaX::MainFrame {
             wxCAPTION|wxCLOSE_BOX|wxMINIMIZE_BOX|wxMAXIMIZE_BOX|wxSYSTEM_MENU|wxRESIZE_BORDER|wxCLIP_CHILDREN,
         );
     }#}}}
-    sub BUILD {#{{{
+    sub BUILD {
         my $self = shift;
 
         $self->Show(0);
@@ -93,7 +92,7 @@ package LacunaWaX::MainFrame {
         $self->_set_events;
         $self->Show(1);
         return $self;
-    };#}}}
+    };
 
     sub _build_icon {#{{{
         my $self = shift;
@@ -112,19 +111,11 @@ package LacunaWaX::MainFrame {
     }#}}}
     sub _build_intro_panel {#{{{
         my $self = shift;
-        return LacunaWaX::MainFrame::IntroPanel->new(
-            app         => wxTheApp,
-            ancestor    => $self,
-            parent      => $self,
-        );
+        return LacunaWaX::MainFrame::IntroPanel->new( parent => $self );
     }#}}}
     sub _build_menu_bar {#{{{
         my $self = shift;
-        my $mb = LacunaWaX::MainFrame::MenuBar->new(
-            app         => wxTheApp,
-            ancestor    => $self,
-            parent      => $self,
-        );
+        my $mb = LacunaWaX::MainFrame::MenuBar->new( parent => $self );
         return $mb;
     }#}}}
     sub _build_size {#{{{
@@ -170,11 +161,8 @@ package LacunaWaX::MainFrame {
     }#}}}
     sub _build_splitter {#{{{
         my $self = shift;
-        my $y = LacunaWaX::MainSplitterWindow->new(
-            app         => wxTheApp,
-            parent      => $self,
-            ancestor    => $self,
-        );
+
+        my $y = LacunaWaX::MainSplitterWindow->new( parent => $self );
         return $y;
     }#}}}
     sub _build_splitter_sizer {#{{{
@@ -184,11 +172,7 @@ package LacunaWaX::MainFrame {
     }#}}}
     sub _build_status_bar {#{{{
         my $self = shift;
-        my $sb = LacunaWaX::MainFrame::StatusBar->new(
-            app         => wxTheApp,
-            ancestor    => $self,
-            parent      => $self,
-        );
+        my $sb = LacunaWaX::MainFrame::StatusBar->new( parent => $self );
         return $sb;
     }#}}}
     sub _build_style {#{{{

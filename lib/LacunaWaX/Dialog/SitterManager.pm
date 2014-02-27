@@ -10,8 +10,6 @@ package LacunaWaX::Dialog::SitterManager {
 
     use LacunaWaX::Dialog::SitterManager::SitterRow;
 
-    has 'sizer_debug' => (is => 'rw', isa => 'Int',  lazy => 1, default => 0);
-
     has 'row_spacer_size'           => (is => 'rw', isa => 'Int',               lazy_build => 1                                 );
     has 'instructions_sizer'        => (is => 'rw', isa => 'Wx::Sizer',         lazy_build => 1                                 );
     has 'add_sitter_button_sizer'   => (is => 'rw', isa => 'Wx::Sizer',         lazy_build => 1, documentation => 'horizontal'  );
@@ -24,6 +22,7 @@ package LacunaWaX::Dialog::SitterManager {
     sub BUILD {
         my $self = shift;
     
+        wxTheApp->borders_off();    # Change to borders_on to see borders around sizers
         $self->SetTitle( $self->title );
         $self->SetSize( $self->size );
 
@@ -40,6 +39,7 @@ package LacunaWaX::Dialog::SitterManager {
         $self->main_sizer->Add($self->sitters_sizer, 0, 0, 0);
 
         $self->lbl_header->SetFocus();
+        $self->_set_events();
         $self->init_screen();
 
         return $self;
@@ -47,7 +47,7 @@ package LacunaWaX::Dialog::SitterManager {
     sub _build_add_sitter_button_sizer {#{{{
         my $self = shift;
 
-        my $v = $self->build_sizer($self->swindow, wxHORIZONTAL, 'Sitter Sizer');
+        my $v = wxTheApp->build_sizer($self->swindow, wxHORIZONTAL, 'Sitter Sizer');
         $v->AddSpacer(30);
         $v->Add($self->btn_add_sitter, 0, 0, 0);
 
@@ -65,7 +65,7 @@ package LacunaWaX::Dialog::SitterManager {
     }#}}}
     sub _build_header_sizer {#{{{
         my $self = shift;
-        my $v = $self->build_sizer($self->swindow, wxVERTICAL, 'Header Sizer');
+        my $v = wxTheApp->build_sizer($self->swindow, wxVERTICAL, 'Header Sizer');
         return $v;
     }#}}}
     sub _build_lbl_header {#{{{
@@ -76,7 +76,7 @@ package LacunaWaX::Dialog::SitterManager {
             wxDefaultPosition, 
             Wx::Size->new(400, 35)
         );
-        $y->SetFont( $self->app->get_font('header_1') );
+        $y->SetFont( wxTheApp->get_font('header_1') );
         return $y;
     }#}}}
     sub _build_lbl_instructions {#{{{
@@ -91,13 +91,13 @@ package LacunaWaX::Dialog::SitterManager {
             wxDefaultPosition, $size
         );
         $y->Wrap( $self->size->GetWidth - 100 ); # - 255 accounts for the vertical scrollbar
-        $y->SetFont( $self->app->get_font('para_text_1') );
+        $y->SetFont( wxTheApp->get_font('para_text_1') );
 
         return $y;
     }#}}}
     sub _build_instructions_sizer {#{{{
         my $self = shift;
-        my $v = $self->build_sizer($self->swindow, wxHORIZONTAL, 'Instructions');
+        my $v = wxTheApp->build_sizer($self->swindow, wxHORIZONTAL, 'Instructions');
         $v->Add($self->lbl_instructions, 0, 0, 0);
         return $v;
     }#}}}
@@ -133,19 +133,17 @@ package LacunaWaX::Dialog::SitterManager {
     sub fill_sitters_sizer {#{{{
         my $self = shift;
 
-        my $schema = $self->get_main_schema;
+        my $schema = wxTheApp->main_schema;
 
         my $header = LacunaWaX::Dialog::SitterManager::SitterRow->new(
-            app         => $self->app,
-            ancestor    => $self,
-            parent      => $self->swindow,
+            parent      => $self,
             is_header   => 1,
         );
         $self->sitters_sizer->Add($header->main_sizer, 0, 0, 0);
         $header->show;
 
         my $rs = $schema->resultset('SitterPasswords')->search(
-            { server_id => $self->get_connected_server->id },
+            { server_id => wxTheApp->server->id },
             ### LOWER(arg) works with SQLite.  May not work with another RDBMS.
             { order_by => { -asc => 'LOWER(player_name)' }, }
         );
@@ -153,14 +151,12 @@ package LacunaWaX::Dialog::SitterManager {
         my $prev_row = undef;
         while(my $rec = $rs->next) {
             my $row = LacunaWaX::Dialog::SitterManager::SitterRow->new(
-                app         => $self->app,
-                ancestor    => $self,
-                parent      => $self->swindow,
+                parent      => $self,
                 player_rec  => $rec,
             );
             $self->sitters_sizer->Add($row->main_sizer, 0, 0, 0);
             $self->sitters_sizer->AddSpacer( $self->row_spacer_size );
-            $self->yield;
+            wxTheApp->Yield;
             $row->show;
 
             if( $prev_row ) {
@@ -172,9 +168,7 @@ package LacunaWaX::Dialog::SitterManager {
 
         ### Blank row to add new player info
         my $row = LacunaWaX::Dialog::SitterManager::SitterRow->new(
-            app         => $self->app,
-            ancestor    => $self,
-            parent      => $self->swindow,
+            parent      => $self,
         );
         $self->sitters_sizer->Add($row->main_sizer, 0, 0, 0);
         $self->sitters_sizer->AddSpacer( $self->row_spacer_size );
@@ -191,9 +185,7 @@ package LacunaWaX::Dialog::SitterManager {
         my $event   = shift;    # Wx::CommandEvent
 
         my $row = LacunaWaX::Dialog::SitterManager::SitterRow->new(
-            app         => $self->app,
-            ancestor    => $self,
-            parent      => $self->swindow,
+            parent      => $self,
         );
         
         ### We're going to insert a new, blank row into our sitter_sizer, but 
@@ -234,7 +226,6 @@ package LacunaWaX::Dialog::SitterManager {
         my $self    = shift;
         my $dialog  = shift;    # Wx::Dialog (NOT Wx::ScrolledWindow here!)
         my $event   = shift;    # Wx::CommandEvent
-        #$dialog->Destroy;
         $self->Destroy;
         $event->Skip();
         return 1;

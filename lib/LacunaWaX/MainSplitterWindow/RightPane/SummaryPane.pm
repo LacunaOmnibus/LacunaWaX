@@ -15,7 +15,19 @@ package LacunaWaX::MainSplitterWindow::RightPane::SummaryPane {
     use Wx qw(:everything);
     with 'LacunaWaX::Roles::MainSplitterWindow::RightPane';
 
-    has 'sizer_debug' => (is => 'rw', isa => 'Int',  lazy => 1, default => 0 );
+    has 'ancestor' => (
+        is          => 'rw',
+        isa         => 'LacunaWaX::MainSplitterWindow::RightPane',
+        required    => 1,
+    );
+
+    has 'parent' => (
+        is          => 'rw',
+        isa         => 'Wx::ScrolledWindow',
+        required    => 1,
+    );
+
+    #########################################
 
     has 'planet_name'   => (is => 'rw', isa => 'Str',       required => 1     );
     has 'planet_id'     => (is => 'rw', isa => 'Str',       lazy_build => 1   );
@@ -33,6 +45,8 @@ package LacunaWaX::MainSplitterWindow::RightPane::SummaryPane {
     sub BUILD {
         my $self = shift;
 
+        wxTheApp->borders_off();    # Change to borders_on to see borders around sizers
+
         $self->szr_header->Add($self->lbl_header, 0, 0, 0);
         $self->content_sizer->Add($self->szr_header, 0, 0, 0);
         $self->content_sizer->AddSpacer(20);
@@ -40,11 +54,12 @@ package LacunaWaX::MainSplitterWindow::RightPane::SummaryPane {
 
         $self->fix_tree_for_stations();
 
+        $self->_set_events();
         return $self;
     }
     sub _build_szr_header {#{{{
         my $self = shift;
-        return $self->build_sizer($self->parent, wxVERTICAL, 'Header');
+        return wxTheApp->build_sizer($self->parent, wxVERTICAL, 'Header');
     }#}}}
     sub _build_lbl_header {#{{{
         my $self = shift;
@@ -54,7 +69,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::SummaryPane {
             wxDefaultPosition, 
             Wx::Size->new(-1, 30)
         );
-        $v->SetFont( $self->app->get_font('header_1') );
+        $v->SetFont( wxTheApp->get_font('header_1') );
         return $v;
     }#}}}
     sub _build_lbl_text {#{{{
@@ -65,7 +80,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::SummaryPane {
             wxDefaultPosition, 
             Wx::Size->new(400,600)
         );
-        $v->SetFont( $self->app->get_font('para_text_2') );
+        $v->SetFont( wxTheApp->get_font('para_text_2') );
         return $v;
     }#}}}
     sub _build_owner {#{{{
@@ -74,16 +89,16 @@ package LacunaWaX::MainSplitterWindow::RightPane::SummaryPane {
     }#}}}
     sub _build_planet_id {#{{{
         my $self = shift;
-        return $self->game_client->planet_id( $self->planet_name );
+        return wxTheApp->game_client->planet_id( $self->planet_name );
     }#}}}
     sub _build_status {#{{{
         my $self = shift;
 
         my $s = try {
-            $self->game_client->get_body_status( $self->planet_id );
+            wxTheApp->game_client->get_body_status( $self->planet_id );
         }
         catch {
-            $self->poperr("$_->{'text'} ($_)");
+            wxTheApp->poperr("$_->{'text'} ($_)");
             return;
         };
         return $s;
@@ -128,7 +143,7 @@ Orbit $s->{orbit} around $s->{star_name} (ID $s->{star_id}), in zone $s->{zone}\
             }
             $text .= "\n";
 
-            my $parl = try { $self->game_client->get_building($self->planet_id, 'Parliament') };
+            my $parl = try { wxTheApp->game_client->get_building($self->planet_id, 'Parliament') };
             my $laws = try { $parl->view_laws($self->planet_id) } if $parl;
 
             my @non_seizure_laws = ();
@@ -178,7 +193,7 @@ Orbit $s->{orbit} around $s->{star_name} (ID $s->{star_id}), in zone $s->{zone}\
 
         ### On Windows, the FirstVisibleItem is "Bodies", which is what we 
         ### want...
-        my $tree        = $self->get_left_pane->bodies_tree->treectrl;
+        my $tree        = wxTheApp->left_pane->bodies_tree->treectrl;
         my $bodies_leaf = $tree->GetFirstVisibleItem;
 
         ### ...but on Ubuntu, the FirstVisibleItem is the root item, which is 
@@ -237,11 +252,9 @@ Orbit $s->{orbit} around $s->{star_name} (ID $s->{star_id}), in zone $s->{zone}\
         ### Still here?  We have a station whose tree is currently showing the 
         ### default 'body' child leaves.  Fix that.
 
-        #$self->get_left_pane->bodies_tree->fill_tree();
-        #$self->get_left_pane->bodies_tree->add_fresh_tree();
-        $self->get_left_pane->add_fresh_tree(); 
-        $self->get_left_pane->bodies_tree->_set_events();
-        $self->get_left_pane->main_panel->Layout();
+        wxTheApp->left_pane->add_fresh_tree(); 
+        wxTheApp->left_pane->bodies_tree->_set_events();
+        wxTheApp->left_pane->main_panel->Layout();
     }#}}}
 
     no Moose;

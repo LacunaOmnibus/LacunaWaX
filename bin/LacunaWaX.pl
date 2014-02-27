@@ -3,15 +3,6 @@
 use v5.14;
 use strict;
 
-
-### Next step is to start pulling the requirement on GuiElement role from 
-### everything; it's silly.
-###
-### That'll mean that I'm going to need to move build_sizer somewhere else.  
-### LacunaWaX.pm makes sense.
-
-
-
 BEGIN {#{{{
 
     use FindBin;
@@ -92,7 +83,7 @@ BEGIN {#{{{
     use SQL::Translator::Schema::Object;
 
     ### Step 24
-    use LacunaWaX::Roles::GuiElement;
+    #use LacunaWaX::Roles::GuiElement;
 
 #use Moose::Exception::Role::Class;
 #use Moose::Exception::MethodNameNotFoundInInheritanceHierarchy;

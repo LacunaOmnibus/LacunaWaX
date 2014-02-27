@@ -62,6 +62,10 @@ package LacunaWaX {
             num_fonts  => 'num_fonts',
 
             get_cache  => 'cache',
+
+            borders_on      => 'borders_on',
+            borders_off     => 'borders_off',
+            borders_are_off => 'borders_are_off',
         }
     );
 
@@ -270,6 +274,27 @@ called.
         }#}}}
         return $img_list;
     }#}}}
+    sub build_sizer {#{{{
+        my $self        = shift;
+        my $parent      = shift;
+        my $direction   = shift;
+        my $name        = shift or die "iSizer name is required.";
+        my $force_box   = shift || 0;
+        my $pos         = shift || wxDefaultPosition;
+        my $size        = shift || wxDefaultSize;
+
+        my $hr = { };
+        if( $self->wxglobals->sizer_borders or $force_box ) {
+            $hr->{'box'} = Wx::StaticBox->new($parent, -1, $name, $pos, $size),
+            $hr->{'box'}->SetFont( wxTheApp->get_font('para_text_1') );
+            $hr->{'sizer'} = Wx::StaticBoxSizer->new($hr->{'box'}, $direction);
+        }
+        else {
+            $hr->{'sizer'} = Wx::BoxSizer->new($direction);
+        }
+
+        return $hr->{'sizer'};
+    }#}}}
     sub caption {#{{{
         my $self = shift;
         my $msg  = shift;
@@ -373,6 +398,10 @@ Returns true if the database passed in contains the correct tables and columns.
         $SIG{ALRM} = undef;     ##no critic qw(RequireLocalizedPunctuationVars) - PC thinks $SIG there is a scalar - whoops
         alarm 0;
         return;
+    }#}}}
+    sub get_top_left_corner {#{{{
+        my $self = shift;
+        return $self->GetTopWindow()->GetPosition;
     }#}}}
     sub game_connect {#{{{
         my $self = shift;

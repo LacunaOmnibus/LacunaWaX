@@ -1,11 +1,119 @@
 
+package LacunaWaX::Roles::MainSplitterWindow::RightPane {
+    use v5.14;
+    use Moose::Role;
+    use Try::Tiny;
+    use Wx qw(:everything);
+    use Wx::Event qw(EVT_ENTER_WINDOW EVT_LEAVE_WINDOW EVT_KILL_FOCUS EVT_CLOSE);
+
+    has 'main_sizer'        => (is => 'rw', isa => 'Wx::BoxSizer',  lazy_build => 1, documentation => 'vertical'   );
+    has 'main_horiz_sizer'  => (is => 'rw', isa => 'Wx::BoxSizer',  lazy_build => 1, documentation => 'horizontal' );
+    has 'content_sizer'     => (is => 'rw', isa => 'Wx::BoxSizer',  lazy_build => 1, documentation => 'vertical'   );
+
+    has 'left_margin_width' => (is => 'rw', isa => 'Int',  lazy => 1, default => 10   );
+    has 'top_margin_width'  => (is => 'rw', isa => 'Int',  lazy => 1, default => 10   );
+
+    has 'scroll_x'              => (is => 'rw', isa => 'Int', lazy => 1, default => 0                   );
+    has 'scroll_y'              => (is => 'rw', isa => 'Int', lazy => 1, default => 0                   );
+    has 'refocus_window_name'   => (is => 'rw', isa => 'Str', lazy_build => 1  );
+
+    after BUILD => sub {
+        my $self = shift;
+        $self->main_sizer->AddSpacer( $self->top_margin_width );
+        $self->main_sizer->Add($self->main_horiz_sizer, 0, 0, 0);
+
+        $self->main_horiz_sizer->AddSpacer( $self->left_margin_width );
+        $self->main_horiz_sizer->Add($self->content_sizer, 0, 0, 0);
+
+        $self->parent->SetSizer($self->main_sizer);
+        $self->_set_events();
+        return $self;
+    };
+    after _set_events => sub {#{{{
+        my $self = shift;
+        EVT_ENTER_WINDOW(   $self->parent,  sub{$self->OnMouseEnterScreen(@_)}      );
+        EVT_LEAVE_WINDOW(   $self->parent,  sub{$self->OnMouseLeaveScreen(@_)}      );
+        EVT_KILL_FOCUS(     $self->parent,  sub{$self->OnAppLoseFocus(@_)}          );
+        return 1;
+    };#}}}
+
+    sub _build_content_sizer {#{{{
+        my $self = shift;
+        return wxTheApp->build_sizer($self->parent, wxVERTICAL, 'Content Sizer');
+    }#}}}
+    sub _build_main_sizer {#{{{
+        my $self = shift;
+        return wxTheApp->build_sizer($self->parent, wxVERTICAL, 'Main Vert Sizer');
+    }#}}}
+    sub _build_main_horiz_sizer {#{{{
+        my $self = shift;
+        return wxTheApp->build_sizer($self->parent, wxHORIZONTAL, 'Main Horiz Sizer');
+    }#}}}
+    sub _build_refocus_window_name {#{{{
+        my $self = shift;
+        return 'lbl_planet_name';
+    }#}}}
+
+    sub OnAppLoseFocus {#{{{
+        my $self    = shift;
+        my $parent  = shift;
+        my $event   = shift;
+
+        ### This actually gets called when anything loses focus, not just the 
+        ### entire app.  It does trigger on an alt-tab away from LacunaWax.
+        wxTheApp->main_frame->splitter->defocus();
+
+        my($x,$y) = $parent->GetViewStart;
+        $self->scroll_x($x);
+        $self->scroll_y($y);
+
+        $event->Skip;
+        return 1;
+    }#}}}
+    sub OnMouseEnterScreen {#{{{
+        my $self    = shift;
+        my $parent  = shift;    # Wx::ScrolledWindow
+        my $event   = shift;    # Wx::MouseEvent
+        
+        return unless $self->can('has_refocus_window_name');
+        return unless $self->has_refocus_window_name;
+        my $ctrl_name = $self->refocus_window_name;
+
+        if( wxTheApp->main_frame->splitter->right_pane->has_focus ) {
+            $self->$ctrl_name->SetFocus;
+        }
+        else {
+            $self->parent->Show(0);
+            my $control = $self->refocus_window_name;
+            $self->$control->SetFocus;
+            wxTheApp->main_frame->splitter->focus_right();
+            $parent->Scroll( $self->scroll_x, $self->scroll_y );
+            $self->parent->Show(1);
+        }
+        return 1;
+    }#}}}
+    sub OnMouseLeaveScreen {#{{{
+        my $self    = shift;
+        my $parent  = shift;    # Wx::ScrolledWindow
+        my $event   = shift;    # Wx::MouseEvent
+
+        my($x,$y) = $parent->GetViewStart;
+        $self->scroll_x($x);
+        $self->scroll_y($y);
+        return 1;
+    }#}}}
+
+    no Moose::Role;
+}
+
+1;
+
+__END__
 
 =head1 DESCRIPTION
 
 Role defining a panel to be displayed on the right side of the app's main split 
 window.
-
-This role itself extends the GuiElement role.
 
 =head1 ATTRIBUTES
 
@@ -163,113 +271,3 @@ nice if we could detect that sort of regain of focus and add an event to
 rescroll to the last known pos like in OnMouseEnterScreen.
 
 =cut
-
-package LacunaWaX::Roles::MainSplitterWindow::RightPane {
-    use v5.14;
-    use Moose::Role;
-    use Try::Tiny;
-    use Wx qw(:everything);
-    use Wx::Event qw(EVT_ENTER_WINDOW EVT_LEAVE_WINDOW EVT_KILL_FOCUS EVT_CLOSE);
-    with 'LacunaWaX::Roles::GuiElement';
-
-    has 'main_sizer'        => (is => 'rw', isa => 'Wx::BoxSizer',  lazy_build => 1, documentation => 'vertical'   );
-    has 'main_horiz_sizer'  => (is => 'rw', isa => 'Wx::BoxSizer',  lazy_build => 1, documentation => 'horizontal' );
-    has 'content_sizer'     => (is => 'rw', isa => 'Wx::BoxSizer',  lazy_build => 1, documentation => 'vertical'   );
-
-    has 'left_margin_width' => (is => 'rw', isa => 'Int',  lazy => 1, default => 10   );
-    has 'top_margin_width'  => (is => 'rw', isa => 'Int',  lazy => 1, default => 10   );
-
-    has 'scroll_x'              => (is => 'rw', isa => 'Int', lazy => 1, default => 0                   );
-    has 'scroll_y'              => (is => 'rw', isa => 'Int', lazy => 1, default => 0                   );
-    has 'refocus_window_name'   => (is => 'rw', isa => 'Str', lazy_build => 1  );
-
-
-    after BUILD => sub {
-        my $self = shift;
-        $self->main_sizer->AddSpacer( $self->top_margin_width );
-        $self->main_sizer->Add($self->main_horiz_sizer, 0, 0, 0);
-
-        $self->main_horiz_sizer->AddSpacer( $self->left_margin_width );
-        $self->main_horiz_sizer->Add($self->content_sizer, 0, 0, 0);
-
-        $self->parent->SetSizer($self->main_sizer);
-        return $self;
-    };
-    after _set_events => sub {#{{{
-        my $self = shift;
-        EVT_ENTER_WINDOW(   $self->parent,  sub{$self->OnMouseEnterScreen(@_)}      );
-        EVT_LEAVE_WINDOW(   $self->parent,  sub{$self->OnMouseLeaveScreen(@_)}      );
-        EVT_KILL_FOCUS(     $self->parent,  sub{$self->OnAppLoseFocus(@_)}          );
-        return 1;
-    };#}}}
-
-    sub _build_content_sizer {#{{{
-        my $self = shift;
-        return $self->build_sizer($self->parent, wxVERTICAL, 'Content Sizer');
-    }#}}}
-    sub _build_main_sizer {#{{{
-        my $self = shift;
-        return $self->build_sizer($self->parent, wxVERTICAL, 'Main Vert Sizer');
-    }#}}}
-    sub _build_main_horiz_sizer {#{{{
-        my $self = shift;
-        return $self->build_sizer($self->parent, wxHORIZONTAL, 'Main Horiz Sizer');
-    }#}}}
-    sub _build_refocus_window_name {#{{{
-        my $self = shift;
-        return 'lbl_planet_name';
-    }#}}}
-
-    sub OnAppLoseFocus {#{{{
-        my $self    = shift;
-        my $parent  = shift;
-        my $event   = shift;
-
-        ### This actually gets called when anything loses focus, not just the 
-        ### entire app.  It does trigger on an alt-tab away from LacunaWax.
-        $self->ancestor->ancestor->defocus();
-
-        my($x,$y) = $parent->GetViewStart;
-        $self->scroll_x($x);
-        $self->scroll_y($y);
-
-        $event->Skip;
-        return 1;
-    }#}}}
-    sub OnMouseEnterScreen {#{{{
-        my $self    = shift;
-        my $parent  = shift;    # Wx::ScrolledWindow
-        my $event   = shift;    # Wx::MouseEvent
-        
-        return unless $self->can('has_refocus_window_name');
-        return unless $self->has_refocus_window_name;
-        my $ctrl_name = $self->refocus_window_name;
-
-        if( $self->ancestor->has_focus ) {
-            $self->$ctrl_name->SetFocus;
-        }
-        else {
-            $self->parent->Show(0);
-            my $control = $self->refocus_window_name;
-            $self->$control->SetFocus;
-            $self->ancestor->ancestor->focus_right();
-            $parent->Scroll( $self->scroll_x, $self->scroll_y );
-            $self->parent->Show(1);
-        }
-        return 1;
-    }#}}}
-    sub OnMouseLeaveScreen {#{{{
-        my $self    = shift;
-        my $parent  = shift;    # Wx::ScrolledWindow
-        my $event   = shift;    # Wx::MouseEvent
-
-        my($x,$y) = $parent->GetViewStart;
-        $self->scroll_x($x);
-        $self->scroll_y($y);
-        return 1;
-    }#}}}
-
-    no Moose::Role;
-}
-
-1;

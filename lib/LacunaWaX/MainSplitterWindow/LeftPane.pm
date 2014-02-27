@@ -13,9 +13,16 @@ package LacunaWaX::MainSplitterWindow::LeftPane {
     use Time::HiRes;
     use Try::Tiny;
     use Wx qw(:everything);
-    with 'LacunaWaX::Roles::GuiElement';
 
     use LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl;
+
+    has 'parent' => (
+        is          => 'rw',
+        isa         => 'Wx::SplitterWindow',
+        required    => 1,
+    );
+
+    #########################################
 
     has 'has_focus'     => (is => 'rw', isa => 'Int', lazy => 1, default => 0);
     has 'main_panel'    => (is => 'rw', isa => 'Wx::Panel', lazy_build => 1);
@@ -40,11 +47,7 @@ package LacunaWaX::MainSplitterWindow::LeftPane {
         my $self = shift;
 
         $self->bodies_tree( 
-            LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl->new(
-                app         => $self->app,
-                parent      => $self->main_panel, 
-                ancestor    => $self,
-            )
+            LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl->new( parent => $self->main_panel )
         );
     }#}}}
     sub _build_main_panel {#{{{

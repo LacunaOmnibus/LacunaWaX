@@ -7,10 +7,7 @@ package LacunaWaX::Dialog::Mail {
     use Try::Tiny;
     use Wx qw(:everything);
     use Wx::Event qw(EVT_BUTTON EVT_CHECKBOX EVT_CHOICE EVT_CLOSE EVT_SIZE);
-    use LacunaWaX::Dialog::NonScrolled;
     extends 'LacunaWaX::Dialog::NonScrolled';
-
-    has 'sizer_debug' => (is => 'rw', isa => 'Int',  lazy => 1, default => 0);
 
     has 'addy_height'   => (is => 'rw', isa => 'Int',                           lazy => 1,      default => 25   );
     has 'ally_members'  => (is => 'rw', isa => 'ArrayRef',                      lazy_build => 1                 );
@@ -27,7 +24,6 @@ package LacunaWaX::Dialog::Mail {
     has 'chk_parl'          => (is => 'rw', isa => 'Wx::CheckBox',      lazy_build => 1);
     has 'chk_probe'         => (is => 'rw', isa => 'Wx::CheckBox',      lazy_build => 1);
     has 'chk_targ_neut'     => (is => 'rw', isa => 'Wx::CheckBox',      lazy_build => 1);
-#    has 'chk_cust'			=> (is => 'rw', isa => 'Wx::CheckBox',      lazy_build => 1);
     has 'chk_read'          => (is => 'rw', isa => 'Wx::CheckBox',      lazy_build => 1);
     has 'lbl_ally'          => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1);
     has 'lbl_body'          => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1);
@@ -59,6 +55,7 @@ package LacunaWaX::Dialog::Mail {
     sub BUILD {
         my $self = shift;
 
+        wxTheApp->borders_off();    # Change to borders_on to see borders around sizers
         $self->SetTitle( $self->title );
         $self->SetSize( $self->size );
 
@@ -82,8 +79,6 @@ package LacunaWaX::Dialog::Mail {
         $self->szr_check_2->Add($self->chk_probe, 0, 0, 0);
         $self->szr_check_2->AddSpacer(2);
         $self->szr_check_2->Add($self->chk_targ_neut, 0, 0, 0);		
-        #$self->szr_check_2->AddSpacer(2);
-        #$self->szr_check_2->Add($self->chk_cust, 0, 0, 0);		
         $self->szr_check_2->AddSpacer(20);
         $self->szr_check_2->Add($self->chk_read, 0, 0, 0);		
 
@@ -140,6 +135,7 @@ package LacunaWaX::Dialog::Mail {
 
 		
         $self->btn_clear_inbox->SetFocus;
+        $self->_set_events();
         $self->init_screen();
 
         return $self;
@@ -147,7 +143,7 @@ package LacunaWaX::Dialog::Mail {
     sub _build_ally_members {#{{{
         my $self = shift;
 
-        my @members = sort{ uc $a->{name} cmp uc $b->{name} } @{$self->game_client->get_alliance_members('As an arrayref, please')};
+        my @members = sort{ uc $a->{name} cmp uc $b->{name} } @{wxTheApp->game_client->get_alliance_members('As an arrayref, please')};
         ### [
         ###     { id => 1, name => 'tmtowtdi'},
         ###     { id => 2, name => 'Infinate Ones'},
@@ -295,11 +291,11 @@ package LacunaWaX::Dialog::Mail {
     sub _build_inbox {#{{{
         my $self = shift;
         my $inbox = try {
-            $self->game_client->inbox;
+            wxTheApp->game_client->inbox;
         }
         catch {
             my $msg = (ref $_) ? $_->text : $_;
-            $self->poperr("GONNGG!  Unable to open your inbox: $msg");
+            wxTheApp->poperr("GONNGG!  Unable to open your inbox: $msg");
         };
         return $inbox;
     }#}}}
@@ -311,7 +307,7 @@ package LacunaWaX::Dialog::Mail {
             wxDefaultPosition, 
             Wx::Size->new(50, $self->addy_height)
         );
-        $y->SetFont( $self->app->get_font('bold_para_text_1') );
+        $y->SetFont( wxTheApp->get_font('bold_para_text_1') );
         return $y;
     }#}}}
     sub _build_lbl_body {#{{{
@@ -322,7 +318,7 @@ package LacunaWaX::Dialog::Mail {
             wxDefaultPosition, 
             Wx::Size->new(50, $self->addy_height)
         );
-        $y->SetFont( $self->app->get_font('bold_para_text_1') );
+        $y->SetFont( wxTheApp->get_font('bold_para_text_1') );
         return $y;
     }#}}}
     sub _build_lbl_btn_send {#{{{
@@ -336,7 +332,7 @@ package LacunaWaX::Dialog::Mail {
             wxDefaultPosition, 
             Wx::Size->new(50, $self->addy_height)
         );
-        $y->SetFont( $self->app->get_font('bold_para_text_1') );
+        $y->SetFont( wxTheApp->get_font('bold_para_text_1') );
         return $y;
     }#}}}
     sub _build_lbl_instructions {#{{{
@@ -351,7 +347,7 @@ package LacunaWaX::Dialog::Mail {
             wxDefaultPosition, $size
         );
         $y->Wrap( $self->size->GetWidth - 35 ); # - 35 accounts for the vertical scrollbar
-        $y->SetFont( $self->app->get_font('bold_para_text_1') );
+        $y->SetFont( wxTheApp->get_font('bold_para_text_1') );
 
         return $y;
     }#}}}
@@ -363,7 +359,7 @@ package LacunaWaX::Dialog::Mail {
             wxDefaultPosition, 
             Wx::Size->new(400, 30)
         );
-        $y->SetFont( $self->app->get_font('header_2') );
+        $y->SetFont( wxTheApp->get_font('header_2') );
         return $y;
     }#}}}
     sub _build_lbl_hdr_page {#{{{
@@ -374,7 +370,7 @@ package LacunaWaX::Dialog::Mail {
             wxDefaultPosition, 
             Wx::Size->new(400, 35)
         );
-        $y->SetFont( $self->app->get_font('header_1') );
+        $y->SetFont( wxTheApp->get_font('header_1') );
         return $y;
     }#}}}
     sub _build_lbl_hdr_send {#{{{
@@ -385,7 +381,7 @@ package LacunaWaX::Dialog::Mail {
             wxDefaultPosition, 
             Wx::Size->new(400, 30)
         );
-        $v->SetFont( $self->app->get_font('header_2') );
+        $v->SetFont( wxTheApp->get_font('header_2') );
         $v->SetToolTip(
 "Messages sent by this form are doing an end-run around the profanity filter.  Use your head."
         );
@@ -399,7 +395,7 @@ package LacunaWaX::Dialog::Mail {
             wxDefaultPosition, 
             Wx::Size->new(50, $self->addy_height)
         );
-        $y->SetFont( $self->app->get_font('bold_para_text_1') );
+        $y->SetFont( wxTheApp->get_font('bold_para_text_1') );
         return $y;
     }#}}}
     sub _build_lbl_to {#{{{
@@ -410,65 +406,65 @@ package LacunaWaX::Dialog::Mail {
             wxDefaultPosition, 
             Wx::Size->new(50, $self->addy_height)
         );
-        $y->SetFont( $self->app->get_font('bold_para_text_1') );
+        $y->SetFont( wxTheApp->get_font('bold_para_text_1') );
         return $y;
     }#}}}
     sub _build_size {#{{{
         my $self = shift;
-        my $s = Wx::Size->new(600, 700);
+        my $s = Wx::Size->new(600, 710);    # 600, 710 for windows
         return $s;
     }#}}}
     sub _build_szr_ally {#{{{
         my $self = shift;
-        return $self->build_sizer($self, wxHORIZONTAL, 'Allies:');
+        return wxTheApp->build_sizer($self, wxHORIZONTAL, 'Allies:');
     }#}}}
     sub _build_szr_body {#{{{
         my $self = shift;
-        return $self->build_sizer($self, wxHORIZONTAL, 'Body:');
+        return wxTheApp->build_sizer($self, wxHORIZONTAL, 'Body:');
     }#}}}
     sub _build_szr_btn_send {#{{{
         my $self = shift;
-        return $self->build_sizer($self, wxHORIZONTAL, 'Send Button');
+        return wxTheApp->build_sizer($self, wxHORIZONTAL, 'Send Button');
     }#}}}
     sub _build_szr_clear {#{{{
         my $self = shift;
-        return $self->build_sizer($self, wxVERTICAL, 'Clear Sizer');
+        return wxTheApp->build_sizer($self, wxVERTICAL, 'Clear Sizer');
     }#}}}
     sub _build_szr_cust {#{{{
         my $self = shift;
-        return $self->build_sizer($self, wxHORIZONTAL, 'Custom Text Sizer');
+        return wxTheApp->build_sizer($self, wxHORIZONTAL, 'Custom Text Sizer');
     }#}}}	
     sub _build_szr_check_outer {#{{{
         my $self = shift;
-        return $self->build_sizer($self, wxVERTICAL, 'Checkbox Sizer');
+        return wxTheApp->build_sizer($self, wxVERTICAL, 'Checkbox Sizer');
     }#}}}
     sub _build_szr_check_1 {#{{{
         my $self = shift;
-        return $self->build_sizer($self, wxHORIZONTAL, 'Checkbox Sizer');
+        return wxTheApp->build_sizer($self, wxHORIZONTAL, 'Checkbox Sizer');
     }#}}}
     sub _build_szr_check_2 {#{{{
         my $self = shift;
-        return $self->build_sizer($self, wxHORIZONTAL, 'Checkbox Sizer');
+        return wxTheApp->build_sizer($self, wxHORIZONTAL, 'Checkbox Sizer');
     }#}}}
     sub _build_szr_header {#{{{
         my $self = shift;
-        return $self->build_sizer($self, wxVERTICAL, 'Header Sizer');
+        return wxTheApp->build_sizer($self, wxVERTICAL, 'Header Sizer');
     }#}}}
     sub _build_szr_instructions {#{{{
         my $self = shift;
-        return $self->build_sizer($self, wxVERTICAL, 'Instructions Sizer');
+        return wxTheApp->build_sizer($self, wxVERTICAL, 'Instructions Sizer');
     }#}}}
     sub _build_szr_send {#{{{
         my $self = shift;
-        return $self->build_sizer($self, wxVERTICAL, 'Send Message Sizer');
+        return wxTheApp->build_sizer($self, wxVERTICAL, 'Send Message Sizer');
     }#}}}
     sub _build_szr_subject {#{{{
         my $self = shift;
-        return $self->build_sizer($self, wxHORIZONTAL, 'Subject:');
+        return wxTheApp->build_sizer($self, wxHORIZONTAL, 'Subject:');
     }#}}}
     sub _build_szr_to {#{{{
         my $self = shift;
-        return $self->build_sizer($self, wxHORIZONTAL, 'To:');
+        return wxTheApp->build_sizer($self, wxHORIZONTAL, 'To:');
     }#}}}
     sub _build_title {#{{{
         my $self = shift;
@@ -520,9 +516,8 @@ package LacunaWaX::Dialog::Mail {
         unless( $status ) {
             $created_own_status = 1;
             $status = LacunaWaX::Dialog::Status->new(
-                app      => $self->app,
-                ancestor => $self,
-                title    => 'Clear Mail',
+                parent => $self,
+                title  => 'Clear Mail',
             );
             $status->show;
         }
@@ -552,7 +547,7 @@ package LacunaWaX::Dialog::Mail {
         }
         catch {
             my $msg = (ref $_) ? $_->text : $_;
-            $self->poperr("Unable to get page 1: $msg");
+            wxTheApp->poperr("Unable to get page 1: $msg");
             return;
         } or return;
 
@@ -581,7 +576,7 @@ package LacunaWaX::Dialog::Mail {
             }
             catch {
                 my $msg = (ref $_) ? $_->text : $_;
-                $self->poperr("Unable to get page $page: $msg");
+                wxTheApp->poperr("Unable to get page $page: $msg");
                 return;
             } or return;
             my $msgs = $contents->{'messages'};
@@ -606,132 +601,6 @@ package LacunaWaX::Dialog::Mail {
             }
         }
 
-        if( $created_own_status ) {
-            $status->close();
-        }
-
-        return $trash_these;
-    }#}}}
-    sub _get_trash_messages_old {#{{{
-        my $self            = shift;
-		my $del_string      = shift;
-        my $tags_to_trash   = shift;
-        my $status          = shift;
-        my $trash_these     = [];
-
-        ### If $del_string is non-empty, we'll delete all mails whose subject 
-        ### exactly matches that string.  Otherwise, we'll delete mails whose 
-        ### tag is in the arrayref $tags_to_trash.
-
-        my $created_own_status = 0;
-        unless( $status ) {
-            $created_own_status = 1;
-            $status = LacunaWaX::Dialog::Status->new(
-                app      => $self->app,
-                ancestor => $self,
-                title    => 'Clear Mail',
-            );
-            $status->show;
-        }
-
-        ### We always have to get the first page of messages, which will tell 
-        ### us how many messages (and therefore pages) there are in total.
-        $status->say("Reading page 1");
-		
-		if( $del_string ) {
-			my $contents = try {
-				$self->inbox->view_inbox({page_number => 1});
-			}
-			catch {
-				my $msg = (ref $_) ? $_->text : $_;
-				$self->poperr("Unable to get page 1: $msg");
-				return;
-			} or return;
-			my $msg_count   = $contents->{'message_count'};
-			my $msgs        = $contents->{'messages'};
-			
-			foreach my $m(@{$msgs}) {
-$status->say(Dumper $m);
-				next if $self->chk_read->GetValue and not $m->{'has_read'};
-				
-				if ($del_string eq $m->{'subject'}) {
-					push @{$trash_these}, $m->{'id'};
-				}
-			}
-
-			### Get subsequent pages if necessary.
-			my $max_page = int($msg_count / 25);
-			$max_page++ if $msg_count % 25;
-			for my $page(2..$max_page) {    # already got page 1
-				$status->say("Reading page $page");
-				my $contents = try {
-					$self->inbox->view_inbox({page_number => $page});
-				}
-				catch {
-					my $msg = (ref $_) ? $_->text : $_;
-					$self->poperr("Unable to get page $page: $msg");
-					return;
-				} or return;
-				my $msgs = $contents->{'messages'};
-				my $found_count = 0;
-				foreach my $m(@{$msgs}) {
-					next if $self->chk_read->GetValue and not $m->{'has_read'};
-					if ($del_string eq $m->{'subject'}) {
-						push @{$trash_these}, $m->{'id'};
-					}
-				}
-                if( $max_page >= 60 ) {
-                    ### Or we'll hit the RPC limit when there are more than 60 
-                    ### pages, which does happen periodically.  Only bother 
-                    ### with the sleep if there are that many pages.
-                    ###
-                    ### TBD
-                    ### What should happen is that I should just clear all 
-                    ### messages every 55 pages or so.
-                    sleep 1;
-                }
-			}
-		}
-        else {
-			my $contents = try {
-				$self->inbox->view_inbox({page_number => 1, tags => $tags_to_trash});
-			}
-			catch {
-				my $msg = (ref $_) ? $_->text : $_;
-				$self->poperr("Unable to get page 1: $msg");
-				return;
-			} or return;
-			my $msg_count   = $contents->{'message_count'};
-			my $msgs        = $contents->{'messages'};
-			
-			foreach my $m(@{$msgs}) {
-				next if $self->chk_read->GetValue and not $m->{'has_read'};
-				
-				push @{$trash_these}, $m->{'id'};
-			}
-
-			### Get subsequent pages if necessary.
-			my $max_page = int($msg_count / 25);
-			$max_page++ if $msg_count % 25;
-			for my $page(2..$max_page) {    # already got page 1
-				$status->say("Reading page $page");
-				my $contents = try {
-					$self->inbox->view_inbox({page_number => $page, tags => $tags_to_trash});
-				}
-				catch {
-					my $msg = (ref $_) ? $_->text : $_;
-					$self->poperr("Unable to get page $page: $msg");
-					return;
-				} or return;
-				my $msgs = $contents->{'messages'};
-				my $found_count = 0;
-				foreach my $m(@{$msgs}) {
-					next if $self->chk_read->GetValue and not $m->{'has_read'};
-					push @{$trash_these}, $m->{'id'};
-				}
-			}
-		}
-		
         if( $created_own_status ) {
             $status->close();
         }
@@ -866,7 +735,7 @@ already used 'bless'.
         }
 		
         unless( @{$tags_to_trash} or $del_string ) {
-            $self->poperr(
+            wxTheApp->poperr(
                 "I should remove nothing?  You got it.",
                 "No checkboxes checked",
             );
@@ -875,9 +744,8 @@ already used 'bless'.
         }
 
         my $status = LacunaWaX::Dialog::Status->new(
-            app      => $self->app,
-            ancestor => $self,
-            title    => 'Clear Mail',
+            parent => $self,
+            title  => 'Clear Mail',
         );
         $status->show;
 
@@ -889,7 +757,7 @@ already used 'bless'.
         }
         catch {
             my $msg = (ref $_) ? $_->text : $_;
-            $self->poperr("Unable to delete messages: $msg");
+            wxTheApp->poperr("Unable to delete messages: $msg");
             return;
         } or return;
         my $trashed     = scalar @{$rv->{'success'}} || 0;
@@ -918,7 +786,7 @@ already used 'bless'.
     sub OnCorrespondenceCheckbox {#{{{
         my $self = shift;
         if( $self->chk_corr->IsChecked ) {
-            unless( wxYES == $self->popconf("You're about to delete mail sent by other players!  Are you sure?") ) {
+            unless( wxYES == wxTheApp->popconf("You're about to delete mail sent by other players!  Are you sure?") ) {
                 $self->chk_corr->SetValue(0);
             }
         }
@@ -933,17 +801,17 @@ already used 'bless'.
         $body = $self->fix_profanity($body);
 
         unless( $to and $subj and $body ) {
-            $self->poperr("The To and Body fields must not be blank.  Try again.");
+            wxTheApp->poperr("The To and Body fields must not be blank.  Try again.");
             return;
         }
 
         my $rv = try { $self->inbox->send_message( $to, $subj, $body ) };
         if( ref $rv eq 'HASH' ) {
-            $self->popmsg("Your message has been sent.");
+            wxTheApp->popmsg("Your message has been sent.");
             $self->clear_mail_form;
         }
         else {
-            $self->poperr("Unknown error sending message.");
+            wxTheApp->poperr("Unknown error sending message.");
         }
         return 1;
     }#}}}

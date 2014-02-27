@@ -6,10 +6,8 @@ package LacunaWaX::Dialog::Calculator {
     use Try::Tiny;
     use Wx qw(:everything);
     use Wx::Event qw(EVT_BUTTON EVT_CHECKBOX EVT_CHOICE EVT_CLOSE EVT_SIZE);
-    use LacunaWaX::Dialog::NonScrolled;
     extends 'LacunaWaX::Dialog::NonScrolled';
 
-    has 'sizer_debug'   => (is => 'rw', isa => 'Int',   lazy => 1, default => 0     );
     has 'width'         => (is => 'rw', isa => 'Int',   lazy => 1, default => 460   );
     has 'height'        => (is => 'rw', isa => 'Int',   lazy => 1, default => 630   );
     has 'line_height'   => (is => 'rw', isa => 'Int',   lazy => 1, default => 25    );
@@ -66,18 +64,10 @@ package LacunaWaX::Dialog::Calculator {
     has 'szr_tri_p1'        => (is => 'rw', isa => 'Wx::Sizer',         lazy_build => 1, documentation => 'horizontal'    );
     has 'szr_tri_p2'        => (is => 'rw', isa => 'Wx::Sizer',         lazy_build => 1, documentation => 'horizontal'    );
     has 'lbl_tri_inst'      => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1);
-    #has 'lbl_p1_x'          => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1);
-    #has 'txt_p1_x'          => (is => 'rw', isa => 'Wx::TextCtrl',      lazy_build => 1);
-    #has 'lbl_p1_y'          => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1);
-    #has 'txt_p1_y'          => (is => 'rw', isa => 'Wx::TextCtrl',      lazy_build => 1);
     has 'lbl_p1_rate'       => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1);
     has 'txt_p1_rate'       => (is => 'rw', isa => 'Wx::TextCtrl',      lazy_build => 1);
     has 'lbl_p1_time'       => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1);
     has 'txt_p1_time'       => (is => 'rw', isa => 'Wx::TextCtrl',      lazy_build => 1);
-    #has 'lbl_p2_x'          => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1);
-    #has 'txt_p2_x'          => (is => 'rw', isa => 'Wx::TextCtrl',      lazy_build => 1);
-    #has 'lbl_p2_y'          => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1);
-    #has 'txt_p2_y'          => (is => 'rw', isa => 'Wx::TextCtrl',      lazy_build => 1);
     has 'lbl_p2_rate'       => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1);
     has 'txt_p2_rate'       => (is => 'rw', isa => 'Wx::TextCtrl',      lazy_build => 1);
     has 'lbl_p2_time'       => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1);
@@ -86,6 +76,8 @@ package LacunaWaX::Dialog::Calculator {
 
     sub BUILD {#{{{
         my $self = shift;
+
+        wxTheApp->borders_off();    # Change to borders_on to see borders around sizers
 
         $self->SetTitle( $self->title );
         $self->SetSize( $self->size );
@@ -177,6 +169,7 @@ package LacunaWaX::Dialog::Calculator {
         $self->main_sizer->AddSpacer(20);
         $self->main_sizer->Add($self->szr_tri, 0, 0, 0);
 
+        $self->_set_events();
         $self->init_screen();
 
         return $self;
@@ -201,7 +194,7 @@ package LacunaWaX::Dialog::Calculator {
             wxDefaultPosition, 
             Wx::Size->new(100, $self->line_height)
         );
-        $y->SetFont( $self->app->get_font('bold_para_text_1') );
+        $y->SetFont( wxTheApp->get_font('bold_para_text_1') );
         return $y;
     }#}}}
     sub _build_lbl_halls_lvl_to {#{{{
@@ -212,12 +205,12 @@ package LacunaWaX::Dialog::Calculator {
             wxDefaultPosition, 
             Wx::Size->new(120, $self->line_height)
         );
-        $y->SetFont( $self->app->get_font('bold_para_text_1') );
+        $y->SetFont( wxTheApp->get_font('bold_para_text_1') );
         return $y;
     }#}}}
     sub _build_szr_halls {#{{{
         my $self = shift;
-        return $self->build_sizer($self, wxHORIZONTAL, 'Halls', 1);
+        return wxTheApp->build_sizer($self, wxHORIZONTAL, 'Halls', 1);
     }#}}}
     sub _build_txt_halls_lvl_from {#{{{
         my $self = shift;
@@ -265,7 +258,7 @@ package LacunaWaX::Dialog::Calculator {
             wxDefaultPosition, 
             Wx::Size->new(13, $self->line_height)
         );
-        $y->SetFont( $self->app->get_font('bold_para_text_1') );
+        $y->SetFont( wxTheApp->get_font('bold_para_text_1') );
         return $y;
     }#}}}
     sub _build_lbl_from_y {#{{{
@@ -276,7 +269,7 @@ package LacunaWaX::Dialog::Calculator {
             wxDefaultPosition, 
             Wx::Size->new(13, $self->line_height)
         );
-        $y->SetFont( $self->app->get_font('bold_para_text_1') );
+        $y->SetFont( wxTheApp->get_font('bold_para_text_1') );
         return $y;
     }#}}}
     sub _build_lbl_to_x {#{{{
@@ -287,7 +280,7 @@ package LacunaWaX::Dialog::Calculator {
             wxDefaultPosition, 
             Wx::Size->new(13, $self->line_height)
         );
-        $y->SetFont( $self->app->get_font('bold_para_text_1') );
+        $y->SetFont( wxTheApp->get_font('bold_para_text_1') );
         return $y;
     }#}}}
     sub _build_lbl_to_y {#{{{
@@ -298,28 +291,28 @@ package LacunaWaX::Dialog::Calculator {
             wxDefaultPosition, 
             Wx::Size->new(13, $self->line_height)
         );
-        $y->SetFont( $self->app->get_font('bold_para_text_1') );
+        $y->SetFont( wxTheApp->get_font('bold_para_text_1') );
         return $y;
     }#}}}
     sub _build_szr_distance {#{{{
         my $self = shift;
-        return $self->build_sizer($self, wxHORIZONTAL, 'Distance from coords', 1);
+        return wxTheApp->build_sizer($self, wxHORIZONTAL, 'Distance from coords', 1);
     }#}}}
     sub _build_szr_coords {#{{{
         my $self = shift;
-        return $self->build_sizer($self, wxVERTICAL, 'Coords');
+        return wxTheApp->build_sizer($self, wxVERTICAL, 'Coords');
     }#}}}
     sub _build_szr_distance_from {#{{{
         my $self = shift;
-        return $self->build_sizer($self, wxHORIZONTAL, 'From', 1);
+        return wxTheApp->build_sizer($self, wxHORIZONTAL, 'From', 1);
     }#}}}
     sub _build_szr_distance_to {#{{{
         my $self = shift;
-        return $self->build_sizer($self, wxHORIZONTAL, 'To', 1);
+        return wxTheApp->build_sizer($self, wxHORIZONTAL, 'To', 1);
     }#}}}
     sub _build_szr_distance_btn {#{{{
         my $self = shift;
-        return $self->build_sizer($self, wxVERTICAL, 'Button');
+        return wxTheApp->build_sizer($self, wxVERTICAL, 'Button');
     }#}}}
     sub _build_txt_from_x {#{{{
         my $self = shift;
@@ -367,7 +360,7 @@ package LacunaWaX::Dialog::Calculator {
     }#}}}
     sub _build_szr_time {#{{{
         my $self = shift;
-        return $self->build_sizer($self, wxHORIZONTAL, 'Time', 1);
+        return wxTheApp->build_sizer($self, wxHORIZONTAL, 'Time', 1);
     }#}}}
     sub _build_lbl_distance {#{{{
         my $self = shift;
@@ -377,7 +370,7 @@ package LacunaWaX::Dialog::Calculator {
             wxDefaultPosition, 
             Wx::Size->new(55, $self->line_height)
         );
-        $y->SetFont( $self->app->get_font('bold_para_text_1') );
+        $y->SetFont( wxTheApp->get_font('bold_para_text_1') );
         return $y;
     }#}}}
     sub _build_txt_distance {#{{{
@@ -396,7 +389,7 @@ package LacunaWaX::Dialog::Calculator {
             wxDefaultPosition, 
             Wx::Size->new(40, $self->line_height)
         );
-        $y->SetFont( $self->app->get_font('bold_para_text_1') );
+        $y->SetFont( wxTheApp->get_font('bold_para_text_1') );
         return $y;
     }#}}}
     sub _build_txt_speed {#{{{
@@ -421,8 +414,8 @@ package LacunaWaX::Dialog::Calculator {
         my $self = shift;
 
         unless( scalar @{$self->sorted_planets} ) {
-            my %planets_by_id = reverse %{$self->game_client->planets};
-            my $schema = $self->get_main_schema;
+            my %planets_by_id = reverse %{wxTheApp->game_client->planets};
+            my $schema = wxTheApp->main_schema;
             foreach my $id( keys %planets_by_id ) {
                 ### Get SSs out of the dropdown
                 if( my $rec = $schema->resultset('BodyTypes')->find({body_id => $id, type_general => 'space station'}) ) {
@@ -438,7 +431,7 @@ package LacunaWaX::Dialog::Calculator {
             Wx::Size->new(110, 25), 
             ['', @{$self->sorted_planets}],
         );
-        $v->SetFont( $self->app->get_font('para_text_1') );
+        $v->SetFont( wxTheApp->get_font('para_text_1') );
         return $v;
     }#}}}
 
@@ -454,15 +447,15 @@ package LacunaWaX::Dialog::Calculator {
     }#}}}
     sub _build_szr_tri {#{{{
         my $self = shift;
-        return $self->build_sizer($self, wxVERTICAL, 'Trilaterate', 1);
+        return wxTheApp->build_sizer($self, wxVERTICAL, 'Trilaterate', 1);
     }#}}}
     sub _build_szr_tri_p1 {#{{{
         my $self = shift;
-        return $self->build_sizer($self, wxHORIZONTAL, 'Planet 1', 1);
+        return wxTheApp->build_sizer($self, wxHORIZONTAL, 'Planet 1', 1);
     }#}}}
     sub _build_szr_tri_p2 {#{{{
         my $self = shift;
-        return $self->build_sizer($self, wxHORIZONTAL, 'Planet 2', 1);
+        return wxTheApp->build_sizer($self, wxHORIZONTAL, 'Planet 2', 1);
     }#}}}
     sub _build_lbl_tri_inst {#{{{
         my $self = shift;
@@ -473,7 +466,7 @@ package LacunaWaX::Dialog::Calculator {
             wxDefaultPosition, 
             Wx::Size->new(350, 30)
         );
-        $y->SetFont( $self->app->get_font('para_text_1') );
+        $y->SetFont( wxTheApp->get_font('para_text_1') );
         return $y;
     }#}}}
     sub _build_lbl_p1_rate {#{{{
@@ -484,7 +477,7 @@ package LacunaWaX::Dialog::Calculator {
             wxDefaultPosition, 
             Wx::Size->new(45, $self->line_height)
         );
-        $y->SetFont( $self->app->get_font('bold_para_text_1') );
+        $y->SetFont( wxTheApp->get_font('bold_para_text_1') );
         $y->SetToolTip("Enter the speed as an integer, as it appears in-game.");
         return $y;
     }#}}}
@@ -496,7 +489,7 @@ package LacunaWaX::Dialog::Calculator {
             wxDefaultPosition, 
             Wx::Size->new(40, $self->line_height)
         );
-        $y->SetFont( $self->app->get_font('bold_para_text_1') );
+        $y->SetFont( wxTheApp->get_font('bold_para_text_1') );
         $y->SetToolTip( "Enter the time as given in-game, eg hh:mm:ss" );
         return $y;
     }#}}}
@@ -528,7 +521,7 @@ package LacunaWaX::Dialog::Calculator {
             wxDefaultPosition, 
             Wx::Size->new(45, $self->line_height)
         );
-        $y->SetFont( $self->app->get_font('bold_para_text_1') );
+        $y->SetFont( wxTheApp->get_font('bold_para_text_1') );
         $y->SetToolTip("Enter the speed as an integer, as it appears in-game.");
         return $y;
     }#}}}
@@ -540,7 +533,7 @@ package LacunaWaX::Dialog::Calculator {
             wxDefaultPosition, 
             Wx::Size->new(40, $self->line_height)
         );
-        $y->SetFont( $self->app->get_font('bold_para_text_1') );
+        $y->SetFont( wxTheApp->get_font('bold_para_text_1') );
         $y->SetToolTip( "Enter the time as given in-game, eg hh:mm:ss" );
         return $y;
     }#}}}
@@ -574,7 +567,7 @@ package LacunaWaX::Dialog::Calculator {
             wxDefaultPosition, 
             Wx::Size->new(400, 35)
         );
-        $y->SetFont( $self->app->get_font('header_1') );
+        $y->SetFont( wxTheApp->get_font('header_1') );
         return $y;
     }#}}}
     sub _build_lbl_instructions {#{{{
@@ -586,12 +579,12 @@ package LacunaWaX::Dialog::Calculator {
             wxDefaultPosition, 
             Wx::Size->new( $self->width - 20, 35 )
         );
-        $y->SetFont( $self->app->get_font('para_text_2') );
+        $y->SetFont( wxTheApp->get_font('para_text_2') );
         return $y;
     }#}}}
     sub _build_szr_header {#{{{
         my $self = shift;
-        return $self->build_sizer($self, wxVERTICAL, 'Header');
+        return wxTheApp->build_sizer($self, wxVERTICAL, 'Header');
     }#}}}
     sub _build_size {#{{{
         my $self = shift;
@@ -705,9 +698,9 @@ sub distance_from_coords {#{{{
         my $tx = (int $self->txt_to_x->GetValue) || 0;
         my $ty = (int $self->txt_to_y->GetValue) || 0;
 
-        my $dist = $self->cartesian_distance($fx, $fy, $tx, $ty);
+        my $dist = wxTheApp->cartesian_distance($fx, $fy, $tx, $ty);
         $self->txt_distance->SetValue($dist);
-        $self->popmsg("The distance between those two points is $dist.");
+        wxTheApp->popmsg("The distance between those two points is $dist.");
 
         return 1;
     }#}}}
@@ -720,12 +713,12 @@ sub distance_from_coords {#{{{
         my $to   = (int $self->txt_halls_lvl_to->GetValue) || 0;
 
         unless($to > $from) {
-            $self->poperr("The level you're going to has to be higher than the level you're at now.");
+            wxTheApp->poperr("The level you're going to has to be higher than the level you're at now.");
             return;
         }
 
-        my $needed = $self->halls_to_level($from, $to);
-        $self->popmsg("You need $needed halls to go from level $from to level $to.");
+        my $needed = wxTheApp->halls_to_level($from, $to);
+        wxTheApp->popmsg("You need $needed halls to go from level $from to level $to.");
 
         return 1;
     }#}}}
@@ -737,9 +730,9 @@ sub distance_from_coords {#{{{
         my $distance = $self->txt_distance->GetValue || 0;
         my $speed    = (int $self->txt_speed->GetValue) || 0;
 
-        my $seconds = $self->travel_time($speed, $distance);
-        my $time = $self->secs_to_human($seconds, 1);   # 1 == 'exact'
-        $self->popmsg("Traveling $distance units at $speed speed will take $time ($seconds seconds).");
+        my $seconds = wxTheApp->travel_time($speed, $distance);
+        my $time = wxTheApp->secs_to_human($seconds, 1);   # 1 == 'exact'
+        wxTheApp->popmsg("Traveling $distance units at $speed speed will take $time ($seconds seconds).");
 
         return 1;
     }#}}}
@@ -748,28 +741,28 @@ sub distance_from_coords {#{{{
         my $dialog  = shift;    # self
         my $event   = shift;    # CommandEvent
 
-        my %planets     = %{$self->game_client->planets};   # keyed by name
+        my %planets     = %{wxTheApp->game_client->planets};   # keyed by name
 
         my $b1_idx      = $self->chc_body_1->GetSelection;
         unless($b1_idx) {
-            $self->poperr("Planet 1 must be selected");
+            wxTheApp->poperr("Planet 1 must be selected");
             return 0;
         }
         my $b1_name     = $self->chc_body_1->GetString( $b1_idx );
-        my $b1_status   = $self->game_client->get_body_status( $planets{$b1_name} );
+        my $b1_status   = wxTheApp->game_client->get_body_status( $planets{$b1_name} );
         my( $ax, $ay )  = ($b1_status->{'x'}, $b1_status->{'y'} );
 
         my $b2_idx      = $self->chc_body_2->GetSelection;
         unless($b2_idx) {
-            $self->poperr("Planet 2 must be selected");
+            wxTheApp->poperr("Planet 2 must be selected");
             return 0;
         }
         if( $b2_idx == $b1_idx ) {
-            $self->poperr("Don't chose the same planet for both choices; that won't tell you anything.");
+            wxTheApp->poperr("Don't chose the same planet for both choices; that won't tell you anything.");
             return 0;
         }
         my $b2_name     = $self->chc_body_2->GetString( $b2_idx );
-        my $b2_status   = $self->game_client->get_body_status( $planets{$b2_name} );
+        my $b2_status   = wxTheApp->game_client->get_body_status( $planets{$b2_name} );
         my( $bx, $by )  = ($b2_status->{'x'}, $b2_status->{'y'} );
 
         my $ac_rate = $self->txt_p1_rate->GetValue;
@@ -779,7 +772,7 @@ sub distance_from_coords {#{{{
 
         for($ac_rate, $bc_rate, $ac_time, $bc_time) {
             unless( defined ) {
-                $self->poperr("All rates and times must be set.");
+                wxTheApp->poperr("All rates and times must be set.");
                 return 0;
             }
         }
@@ -798,7 +791,7 @@ sub distance_from_coords {#{{{
             );
         }
         catch {
-            $self->poperr(
+            wxTheApp->poperr(
                 "The numbers you entered do not intersect; check your speeds and rates.",
                 "Likely Typo"
             );
@@ -812,15 +805,15 @@ sub distance_from_coords {#{{{
         ### one of the given coordinates is outside the boundaries of the 
         ### game.
         if( abs $cx1 > 1500 or abs $cy1 > 1500 ) {
-            $self->popmsg("Your target planet is at ($cx2, $cy2).");
+            wxTheApp->popmsg("Your target planet is at ($cx2, $cy2).");
             return 1;
         }
         elsif( abs $cx2 > 1500 or abs $cy2 > 1500 ) {
-            $self->popmsg("Your target planet is at ($cx1, $cy1).");
+            wxTheApp->popmsg("Your target planet is at ($cx1, $cy1).");
             return 1;
         }
 
-        $self->popmsg("Your target planet is either at ($cx1, $cy1) or ($cx2, $cy2).");
+        wxTheApp->popmsg("Your target planet is either at ($cx1, $cy1) or ($cx2, $cy2).");
         return 1;
     }#}}}
 

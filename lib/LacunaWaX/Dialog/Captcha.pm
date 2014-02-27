@@ -1,4 +1,9 @@
 
+### CHECK
+### If this pops up, and the user dismisses it rather than solving it, any 
+### subsequent server calls that require a captcha will error out.  I haven't 
+### found a good solution to that yet.
+
 package LacunaWaX::Dialog::Captcha {
     use v5.14;
     use Data::Dumper; $Data::Dumper::Indent = 1;
@@ -9,8 +14,6 @@ package LacunaWaX::Dialog::Captcha {
     use Wx qw(:everything);
     use Wx::Event qw(EVT_BUTTON EVT_CLOSE EVT_TEXT_ENTER);
     extends 'LacunaWaX::Dialog::NonScrolled';
-
-    has 'sizer_debug'   => ( is => 'rw', isa => 'Int', lazy => 1, default => 0 );
 
     has 'captcha' => (
         is          => 'rw',
@@ -25,7 +28,7 @@ package LacunaWaX::Dialog::Captcha {
     has 'size' => (
         is          => 'rw',
         isa         => 'Wx::Size',
-        default     => sub{ Wx::Size->new(310, 80 + $_[0]->line_height) },
+        default     => sub{ Wx::Size->new(317, 115 + $_[0]->line_height) }, # CHECK - 317, 115 for windows.  Recheck on ubuntu.
     );
     has 'ua' => (
         is          => 'rw',
@@ -56,6 +59,8 @@ package LacunaWaX::Dialog::Captcha {
     sub BUILD {
         my $self = shift;
 
+        wxTheApp->borders_off();    # Change to borders_on to see borders around sizers
+
         $self->SetTitle( 'Captcha' );
         $self->SetSize( $self->size );
         $self->Centre();
@@ -75,6 +80,7 @@ package LacunaWaX::Dialog::Captcha {
         $self->main_sizer->Add($self->szr_image, 0, 0, 0);
         $self->main_sizer->Add($self->szr_solution, 0, 0, 0);
 
+        $self->_set_events();
         $self->init_screen();
         $self->txt_solution->SetFocus();
         $self->ShowModal();
@@ -103,11 +109,11 @@ package LacunaWaX::Dialog::Captcha {
     }#}}}
     sub _build_szr_image {#{{{
         my $self = shift;
-        return $self->build_sizer($self, wxVERTICAL, 'Image', 0);
+        return wxTheApp->build_sizer($self, wxVERTICAL, 'Image', 0);
     }#}}}
     sub _build_szr_solution {#{{{
         my $self = shift;
-        return $self->build_sizer($self, wxHORIZONTAL, 'Solution', 0);
+        return wxTheApp->build_sizer($self, wxHORIZONTAL, 'Solution', 0);
     }#}}}
     sub _build_txt_solution {#{{{
         my $self = shift;
@@ -121,11 +127,11 @@ package LacunaWaX::Dialog::Captcha {
     sub _build_captcha {#{{{
         my $self = shift;
         my $c = try {
-            $self->game_client->captcha;
+            wxTheApp->game_client->captcha;
         }
         catch {
             my $msg = (ref $_) ? $_->text : $_;
-            $self->poperr($msg);
+            wxTheApp->poperr($msg);
             return;
         };
         return $c;
@@ -153,7 +159,7 @@ package LacunaWaX::Dialog::Captcha {
             ### rest of the game continues to work.  If we're accessing the 
             ### game over http, but https is down (bad cert or whatever), we 
             ### will not be able to get captcha images.
-            $self->poperr("Unable to retrieve captcha image!");
+            wxTheApp->poperr("Unable to retrieve captcha image!");
             return;
         }
 
@@ -179,7 +185,7 @@ package LacunaWaX::Dialog::Captcha {
         my $event = shift;
         $self->EndModal(1);
         $self->Destroy;
-        return 1;
+        return 0;
     }#}}}
     sub OnReload {#{{{
         my $self = shift;
@@ -206,16 +212,14 @@ package LacunaWaX::Dialog::Captcha {
             return 1;
         }
         catch {
-            $self->poperr("Sorry, '$resp' was incorrect.", "Whoops");
+            wxTheApp->poperr("Sorry, '$resp' was incorrect.", "Whoops");
             $self->txt_solution->SetValue(q{});
             $self->OnReload();
             return 0;
-            ### CHECK
-            ### this should force a reload of the image (?)
         };
 
         if($rv) {
-            $self->popmsg("Success", "Correct!") if $rv;
+            wxTheApp->popmsg("Success", "Correct!") if $rv;
             $self->Close;
         }
         return 1;

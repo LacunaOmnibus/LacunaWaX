@@ -4,14 +4,9 @@ package LacunaWaX::MainSplitterWindow::RightPane::RearrangerPane::BitmapButton {
     use Moose;
     use Try::Tiny;
     use Wx qw(:everything);
-    with 'LacunaWaX::Roles::GuiElement';
 
-    ### Wx::Menu is a non-hash object.  Extending such requires 
-    ### MooseX::NonMoose::InsideOut instead of plain MooseX::NonMoose.
     use MooseX::NonMoose::InsideOut;
     extends 'Wx::BitmapButton';
-
-    has 'sizer_debug' => (is => 'rw', isa => 'Int',  lazy => 1, default => 0);
 
     has 'bitmap'        => (is => 'rw', isa => 'Wx::Bitmap' );
     has 'bldg_id'       => (is => 'rw', isa => 'Maybe[Int]' );
@@ -30,7 +25,10 @@ package LacunaWaX::MainSplitterWindow::RightPane::RearrangerPane::BitmapButton {
     }#}}}
     sub BUILD {
         my($self, @params) = @_;
+
+        wxTheApp->borders_off();    # Change to borders_on to see borders around sizers
         $self->update_button_tooltip();
+
         return $self;
     };
     sub _set_events { }

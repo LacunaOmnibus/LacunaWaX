@@ -5,10 +5,7 @@ package LacunaWaX::Dialog::LogViewer {
     use Try::Tiny;
     use Wx qw(:everything);
     use Wx::Event qw(EVT_BUTTON EVT_CLOSE EVT_RADIOBOX EVT_SIZE);
-    use LacunaWaX::Dialog::NonScrolled;
     extends 'LacunaWaX::Dialog::NonScrolled';
-
-    has 'sizer_debug' => (is => 'rw', isa => 'Int',  lazy => 1, default => 0);
 
     has 'count' => (
         is      => 'ro',
@@ -67,6 +64,8 @@ package LacunaWaX::Dialog::LogViewer {
     sub BUILD {
         my $self = shift;
 
+        wxTheApp->borders_off();    # Change to borders_on to see borders around sizers
+
         $self->SetTitle( $self->title );
         $self->SetSize( $self->size );
 
@@ -77,6 +76,7 @@ package LacunaWaX::Dialog::LogViewer {
         $self->main_sizer->Add($self->rdo_component, 0, 0, 0);
         $self->main_sizer->Add($self->szr_log, 0, 0, 0);
 
+        $self->_set_events();
         $self->init_screen();
         return $self;
     }
@@ -87,7 +87,7 @@ package LacunaWaX::Dialog::LogViewer {
             wxDefaultPosition, 
             Wx::Size->new(50, 30)
         );
-        $v->SetFont( $self->app->get_font('para_text_1') );
+        $v->SetFont( wxTheApp->get_font('para_text_1') );
         my $enabled = ($self->count > $self->recs_per_page) ? 1 : 0;
         $v->Enable($enabled);
         return $v;
@@ -99,14 +99,14 @@ package LacunaWaX::Dialog::LogViewer {
             wxDefaultPosition, 
             Wx::Size->new(50, 30)
         );
-        $v->SetFont( $self->app->get_font('para_text_1') );
+        $v->SetFont( wxTheApp->get_font('para_text_1') );
         $v->Enable(0); # Always start the Prev button disabled.
         return $v;
     }#}}}
     sub _build_component_labels {#{{{
         my $self = shift;
         ### If you update a label, also update the values below.
-        my $v = [ 'Clear', 'Archmin', 'Autovote', 'Lottery', 'Spies', 'SS Health' ];
+        my $v = [ 'Clear', 'Main', 'Archmin', 'Autovote', 'Lottery', 'Spies', 'SS Health' ];
         return $v;
     }#}}}
     sub _build_component_values {#{{{
@@ -115,6 +115,7 @@ package LacunaWaX::Dialog::LogViewer {
         my $v = {
             # Label         => Value
             Clear           => 'This does not appear in the table so this will clear the list',
+            Main            => 'main',
             Archmin         => 'Archmin',
             Autovote        => 'Autovote',
             Lottery         => 'Lottery',
@@ -132,7 +133,7 @@ package LacunaWaX::Dialog::LogViewer {
             wxDefaultPosition, 
             Wx::Size->new(-1, 20)
         );
-        $v->SetFont( $self->app->get_font('para_text_2') );
+        $v->SetFont( wxTheApp->get_font('para_text_2') );
         return $v;
     }#}}}
     sub _build_list_log {#{{{
@@ -164,7 +165,7 @@ package LacunaWaX::Dialog::LogViewer {
         $v->SetColumnWidth(2,wxLIST_AUTOSIZE_USEHEADER);
         $v->SetColumnWidth(3,wxLIST_AUTOSIZE_USEHEADER);
         $v->Arrange(wxLIST_ALIGN_TOP);
-        $self->yield;
+        wxTheApp->Yield;
         return $v;
 
     }#}}}
@@ -174,7 +175,7 @@ package LacunaWaX::Dialog::LogViewer {
             $self, -1, 
             "Component", 
             wxDefaultPosition, 
-            Wx::Size->new(430,50), 
+            Wx::Size->new(500,50), 
             $self->component_labels,
             1, 
             wxRA_SPECIFY_ROWS
@@ -206,11 +207,11 @@ package LacunaWaX::Dialog::LogViewer {
         ### necessary, so I'm currently just skipping it.  But it would be 
         ### nice to figure out why things aren't working the way I want.
 
-        return $self->build_sizer($self, wxVERTICAL, 'Log List');
+        return wxTheApp->build_sizer($self, wxVERTICAL, 'Log List');
     }#}}}
     sub _build_szr_pagination {#{{{
         my $self = shift;
-        return $self->build_sizer($self, wxHORIZONTAL, 'Pagination');
+        return wxTheApp->build_sizer($self, wxHORIZONTAL, 'Pagination');
     }#}}}
     sub _build_title {#{{{
         my $self = shift;
@@ -272,7 +273,7 @@ package LacunaWaX::Dialog::LogViewer {
             $self->list_log->SetItem($row, 2, $r->component);
             $self->list_log->SetItem($row, 3, $r->message);
             $row++;
-            $self->yield;
+            wxTheApp->Yield;
         }
         $self->list_log->SetColumnWidth(0, wxLIST_AUTOSIZE);
         $self->list_log->SetColumnWidth(1, wxLIST_AUTOSIZE_USEHEADER);
@@ -319,12 +320,20 @@ package LacunaWaX::Dialog::LogViewer {
         my $cmp_label  = $self->rdo_component->GetString( $self->rdo_component->GetSelection );
         my $cmp_search = $self->component_values->{$cmp_label} || q{};
 
-        my $schema = $self->app->globals->db_log->schema;
+        ### Choosing "Main" means that the user wants to see all log entries, 
+        ### not just the main component (which has very few actual entries).
+        ###
+        ### Otherwise, show both the component chosen and the 'Schedule' 
+        ### component.
+        my $where = [
+            {component => $cmp_search},
+            {component => 'Schedule'},
+        ];
+        $where = [] if $cmp_search eq 'main';
+
+        my $schema = wxTheApp->log_schema;
         my $rs = $schema->resultset('Logs')->search(
-            [
-                {component => $cmp_search},
-                {component => 'Schedule'},
-            ],
+            $where,
             {
                 order_by => [
                     { -desc => ['run'] },
@@ -332,14 +341,6 @@ package LacunaWaX::Dialog::LogViewer {
                     ### the same timestamp will show up in the correct order.
                     { -asc  => ['id'] },
                 ],
-                ### Max (MorL) of 24 planets, 90 spies per planet, == max 2160 
-                ### spies trained during Schedule_train_spies, so that many 
-                ### useful log entries are possible.
-                ### CHECK
-                ### However, displaying that many records is slow and ugly.  I 
-                ### should have some pagination in here instead of trying to 
-                ### show everything on one screen.
-#                rows => $self->recs_per_page,
             }
         );
 
@@ -355,9 +356,6 @@ package LacunaWaX::Dialog::LogViewer {
         my $dialog  = shift;
         my $event   = shift;    # Wx::SizeEvent
 
-        #$self->list_log->SetSize( $self->list_width, -1 );
-        #$self->resize_pagination();
-        ##$self->Layout;
         return 1;
     }#}}}
     sub OnPrev {#{{{

@@ -3,7 +3,6 @@ package LacunaWaX::MainFrame::MenuBar {
     use v5.14;
     use Moose;
     use Wx qw(:everything);
-    with 'LacunaWaX::Roles::GuiElement';
 
     use MooseX::NonMoose::InsideOut;
     extends 'Wx::MenuBar';
@@ -12,6 +11,14 @@ package LacunaWaX::MainFrame::MenuBar {
     use LacunaWaX::MainFrame::MenuBar::File;
     use LacunaWaX::MainFrame::MenuBar::Help;
     use LacunaWaX::MainFrame::MenuBar::Tools;
+
+    has 'parent' => (
+        is          => 'rw',
+        isa         => 'Wx::Window',
+        required    => 1,
+    );
+
+    ##############################################
 
     has 'show_test'   => (is => 'rw', isa => 'Int',  lazy => 1, default => 0,
         documentation => q{
@@ -57,46 +64,31 @@ package LacunaWaX::MainFrame::MenuBar {
     sub _build_menu_file {#{{{
         my $self = shift;
         return LacunaWaX::MainFrame::MenuBar::File->new(
-            ancestor    => $self,
-            app         => wxTheApp,
-            parent      => $self->parent,   # MainFrame, not this Menu, is the parent.
-            #parent      => wxTheApp->main_frame,   # MainFrame, not this Menu, is the parent.
+            parent => $self->parent,   # MainFrame, not this Menu, is the parent.
         );
     }#}}}
     sub _build_menu_file_connect {#{{{
         my $self = shift;
         return LacunaWaX::MainFrame::MenuBar::File::Connect->new(
-            ancestor    => $self,
-            app         => wxTheApp,
-            parent      => $self->parent,   # MainFrame, not this Menu, is the parent.
-            #parent      => wxTheApp->main_frame,   # MainFrame, not this Menu, is the parent.
+            parent => $self->parent,   # MainFrame, not this Menu, is the parent.
         );
     }#}}}
     sub _build_menu_edit {#{{{
         my $self = shift;
         return LacunaWaX::MainFrame::MenuBar::Edit->new(
-            ancestor    => $self,
-            app         => wxTheApp,
-            parent      => $self->parent,   # MainFrame, not this Menu, is the parent.
-            #parent      => wxTheApp->main_frame,   # MainFrame, not this Menu, is the parent.
+            parent => $self->parent,   # MainFrame, not this Menu, is the parent.
         );
     }#}}}
     sub _build_menu_help {#{{{
         my $self = shift;
         return LacunaWaX::MainFrame::MenuBar::Help->new(
-            ancestor    => $self,
-            app         => wxTheApp,
-            parent      => $self->parent,   # MainFrame, not this Menu, is the parent.
-            #parent      => wxTheApp->main_frame,   # MainFrame, not this Menu, is the parent.
+            parent => $self->parent,   # MainFrame, not this Menu, is the parent.
         );
     }#}}}
     sub _build_menu_tools {#{{{
         my $self = shift;
         return LacunaWaX::MainFrame::MenuBar::Tools->new(
-            ancestor    => $self,
-            app         => wxTheApp,
             parent      => $self->parent,   # MainFrame, not this Menu, is the parent.
-            #parent      => wxTheApp->main_frame,   # MainFrame, not this Menu, is the parent.
             show_test   => $self->show_test,
         );
     }#}}}

@@ -5,7 +5,6 @@ package LacunaWaX::Dialog::Scrolled {
     use Try::Tiny;
     use Wx qw(:everything);
     use Wx::Event qw();
-    with 'LacunaWaX::Roles::GuiElement';
 
     use MooseX::NonMoose::InsideOut;
     extends 'Wx::Dialog';
@@ -41,12 +40,12 @@ package LacunaWaX::Dialog::Scrolled {
     };
     sub _build_main_sizer {#{{{
         my $self = shift;
-        my $v = $self->build_sizer($self, wxVERTICAL, 'Main Sizer');
+        my $v = wxTheApp->build_sizer($self, wxVERTICAL, 'Main Sizer');
         return $v;
     }#}}}
     sub _build_page_sizer {#{{{
         my $self = shift;
-        my $v = $self->build_sizer($self->swindow, wxHORIZONTAL, 'Page Sizer');
+        my $v = wxTheApp->build_sizer($self->swindow, wxHORIZONTAL, 'Page Sizer');
         return $v;
     }#}}}
     sub _build_size {#{{{
@@ -118,10 +117,6 @@ NonScrolled before, pay attention.
 The main difference is the addition of the swindow (Wx::ScrolledWindow) attribute,
 which is what your extending class's Wx components should be added to.
 
-LacunaWaX::Dialog::Scrolled implements the LacunaWaX::Roles::GuiElement role, 
-so extending classes will require app, ancestor, and parent arguments passed to 
-their constructors.
-
 =head1 SYNOPSIS
 
  package ExtendingClass;
@@ -180,10 +175,6 @@ likely never make a difference, but it's possible it could, so plan for it.
  # class does not need to touch page_sizer.
 
 =head1 ARGUMENTS
-
-=head2 app, ancestor, parent (required)
-
-The standard arguments required by LacunaWaX::Roles::GuiElement
 
 =head2 position (optional)
 

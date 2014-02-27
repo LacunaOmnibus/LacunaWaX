@@ -19,19 +19,9 @@ package LacunaWaX::Dialog::Help {
     use Try::Tiny;
     use Wx qw(:everything);
     use Wx::Event qw(EVT_BUTTON EVT_CLOSE EVT_HTML_LINK_CLICKED EVT_SIZE EVT_TEXT_ENTER);
-    with 'LacunaWaX::Roles::GuiElement';
 
     use MooseX::NonMoose::InsideOut;
     extends 'Wx::Dialog', 'LacunaWaX::Dialog::NonScrolled';
-
-    has 'sizer_debug' => (is => 'rw', isa => 'Int',  lazy => 1, default => 0,
-        documentation => q{
-            Turning this on adds extra space usage because of the boxes drawn 
-            around the sizers.  This will mess up the sizing on the navbar.
-            That's OK, just be aware of it and don't try to fix the navbar sizing 
-            while this is on.
-        }
-    );
 
     has 'index_file'    => (is => 'rw', isa => 'Str',       lazy_build => 1);
     has 'history'       => (is => 'rw', isa => 'ArrayRef',  lazy_build => 1);
@@ -82,6 +72,8 @@ package LacunaWaX::Dialog::Help {
         my($self, @params) = @_;
         $self->Show(0);
 
+        wxTheApp->borders_off();    # Change to borders_on to see borders around sizers
+
         $self->make_search_index;
 
         $self->SetTitle( $self->title );
@@ -95,18 +87,19 @@ package LacunaWaX::Dialog::Help {
         $self->main_sizer->Add($self->szr_html, 0, 0, 0);
 
         unless( $self->load_html_file($self->index_file) ) {
-            $self->poperr("GONG!  Unable to load help files!", "GONG!");
+            wxTheApp->poperr("GONG!  Unable to load help files!", "GONG!");
             $self->Destroy;
             return;
         }
 
+        $self->_set_events;
         $self->init_screen();
         $self->Show(1);
         return $self;
     };
     sub _build_bmp_home {#{{{
         my $self = shift;
-        my $img = $self->app->get_image('app/home.png');
+        my $img = wxTheApp->get_image('app/home.png');
         $img->Rescale($self->nav_img_w - 10, $self->nav_img_h - 10);    # see build_bmp_left
         my $bmp = Wx::Bitmap->new($img);
         my $v = Wx::BitmapButton->new(
@@ -120,7 +113,7 @@ package LacunaWaX::Dialog::Help {
     }#}}}
     sub _build_bmp_left {#{{{
         my $self = shift;
-        my $img = $self->app->get_image('app/arrow-left.png');
+        my $img = wxTheApp->get_image('app/arrow-left.png');
         ### On Ubuntu, there's a margin inside the button.  If the image is 
         ### the same size as the button, that margin obscures part of the 
         ### image.  So the image must be a bit smaller than the button.
@@ -137,7 +130,7 @@ package LacunaWaX::Dialog::Help {
     }#}}}
     sub _build_bmp_right {#{{{
         my $self = shift;
-        my $img = $self->app->get_image('app/arrow-right.png');
+        my $img = wxTheApp->get_image('app/arrow-right.png');
         $img->Rescale($self->nav_img_w - 10, $self->nav_img_h - 10);    # see build_bmp_left
         my $bmp = Wx::Bitmap->new($img);
         return Wx::BitmapButton->new(
@@ -150,7 +143,7 @@ package LacunaWaX::Dialog::Help {
     }#}}}
     sub _build_bmp_search {#{{{
         my $self = shift;
-        my $img = $self->app->get_image('app/search.png');
+        my $img = wxTheApp->get_image('app/search.png');
         $img->Rescale($self->nav_img_w - 10, $self->nav_img_h - 10);    # see build_bmp_left
         my $bmp = Wx::Bitmap->new($img);
         my $v = Wx::BitmapButton->new(
@@ -190,17 +183,18 @@ package LacunaWaX::Dialog::Help {
     }#}}}
     sub _build_szr_main {#{{{
         my $self = shift;
-        my $v = $self->build_sizer($self, wxVERTICAL, 'Main Sizer');
+        #my $v = $self->build_sizer($self, wxVERTICAL, 'Main Sizer');
+        my $v = wxTheApp->build_sizer($self, wxVERTICAL, 'Main Sizer');
         return $v;
     }#}}}
     sub _build_szr_html {#{{{
         my $self = shift;
-        my $v = $self->build_sizer($self, wxVERTICAL, 'LacunaWaX Help');
+        my $v = wxTheApp->build_sizer($self, wxVERTICAL, 'LacunaWaX Help');
         return $v;
     }#}}}
     sub _build_szr_navbar {#{{{
         my $self = shift;
-        my $v = $self->build_sizer($self, wxHORIZONTAL, 'Nav bar');
+        my $v = wxTheApp->build_sizer($self, wxHORIZONTAL, 'Nav bar');
         return $v;
     }#}}}
     sub _build_title {#{{{
@@ -316,7 +310,7 @@ package LacunaWaX::Dialog::Help {
 
         my $fqfn = join q{/}, (wxTheApp->globals->dir_html, $file);
         unless(-e $fqfn) {
-            $self->poperr("$fqfn: No such file or directory");
+            wxTheApp->poperr("$fqfn: No such file or directory");
             return;
         }
 
@@ -447,13 +441,13 @@ package LacunaWaX::Dialog::Help {
             my $ok = Browser::Open::open_browser($info->GetHref);
 
             if( $ok ) {
-                $self->poperr(
+                wxTheApp->poperr(
                     "LacunaWaX encountered an error while attempting to open the URL in your web browser.  The URL you were attempting to reach was '" . $info->GetHref . q{'.},
                     "Error opening web browser"
                 );
             }
             elsif(not defined $ok) {
-                $self->poperr(
+                wxTheApp->poperr(
                     "LacunaWaX was unable to open the URL in your web browser.  The URL you were attempting to reach was '" . $info->GetHref . q{'.},
                     "Unable to open web browser"
                 );
@@ -513,7 +507,7 @@ package LacunaWaX::Dialog::Help {
 
         my $term = $self->txt_search->GetValue;
         unless($term) {
-            $self->popmsg("Searching for nothing isn't going to return many results.");
+            wxTheApp->popmsg("Searching for nothing isn't going to return many results.");
             return;
         }
 

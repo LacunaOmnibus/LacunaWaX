@@ -6,7 +6,19 @@ package LacunaWaX::MainSplitterWindow::RightPane::DefaultPane {
     use Wx qw(:everything);
     with 'LacunaWaX::Roles::MainSplitterWindow::RightPane';
 
-    has 'sizer_debug'           => (is => 'rw', isa => 'Int', lazy => 1, default => 0);
+    has 'ancestor' => (
+        is          => 'rw',
+        isa         => 'LacunaWaX::MainSplitterWindow::RightPane',
+        required    => 1,
+    );
+
+    has 'parent' => (
+        is          => 'rw',
+        isa         => 'Wx::ScrolledWindow',
+        required    => 1,
+    );
+
+    #########################################
 
     has 'text' => (is => 'rw', isa => 'Str', lazy_build => 1 );
 
@@ -17,6 +29,8 @@ package LacunaWaX::MainSplitterWindow::RightPane::DefaultPane {
     sub BUILD {
         my $self = shift;
 
+        wxTheApp->borders_off();    # Change to borders_on to see borders around sizers
+
         $self->header_sizer->Add($self->lbl_header, 0, 0, 0);
         $self->content_sizer->Add($self->header_sizer, 0, 0, 0);
         $self->content_sizer->AddSpacer(20);
@@ -26,7 +40,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::DefaultPane {
     }
     sub _build_header_sizer {#{{{
         my $self = shift;
-        return $self->build_sizer($self->parent, wxVERTICAL, 'Header');
+        return wxTheApp->build_sizer($self->parent, wxVERTICAL, 'Header');
     }#}}}
     sub _build_lbl_header {#{{{
         my $self = shift;
@@ -36,7 +50,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::DefaultPane {
             wxDefaultPosition, 
             Wx::Size->new(-1, 30)
         );
-        $v->SetFont( $self->app->get_font('header_1') );
+        $v->SetFont( wxTheApp->get_font('header_1') );
         return $v;
     }#}}}
     sub _build_lbl_text {#{{{
@@ -47,7 +61,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::DefaultPane {
             wxDefaultPosition, 
             Wx::Size->new(500,400)
         );
-        $v->SetFont( $self->app->get_font('para_text_2') );
+        $v->SetFont( wxTheApp->get_font('para_text_2') );
         return $v;
     }#}}}
     sub _build_text {#{{{
