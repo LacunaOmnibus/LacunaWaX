@@ -9,12 +9,7 @@ package LacunaWaX::Dialog::About {
     has 'developers' => (
         is          => 'ro',
         isa         => 'ArrayRef[Str]',
-        traits      => ['Array'],
         lazy_build  => 1,
-        handles     => {
-            devs        => 'elements',
-            count_devs  => 'count',
-        },
     );
 
     sub BUILD {
@@ -46,7 +41,7 @@ package LacunaWaX::Dialog::About {
             'This is free software; you can redistribute it and/or modify it under
             the same terms as the Perl 5 programming language system itself.'
         );
-        for my $d( $self->devs ) {
+        for my $d( @{ $self->developers } ) {
             $self->info->AddDeveloper($d);
         }
 

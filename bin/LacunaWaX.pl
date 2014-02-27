@@ -3,95 +3,12 @@
 use v5.14;
 use strict;
 
-BEGIN {#{{{
-
-    use FindBin;
-    use lib "$FindBin::Bin/../lib";
-
-    ### Step 2
-    use Class::Load::XS;
-
-    ### Step 3
-    use Package::Stash::XS;
-
-    ### Step 5
-    use Variable::Magic;
-
-    ### Step 4
-    use B::Hooks::EndOfScope::XS;
-
-    ### Step 1
-    use Moose;
-
-    ### Step 6
-    use JSON::RPC::Common::Marshal::Text;
-
-### I stopped here and went to play with WaxWorks' test.pl.
-
-    ### Step 3
-#    use Class::MOP::Mixin;
-
-    ### Step 4
-#    use Class::MOP::Method::Generated;
-
-    ### Step 5
-#    use Class::MOP::Method::Inlined;
-
-    ### Step 6
-#    use Class::MOP::Module;
-
-    ### Step 7
-#    use Class::MOP::Package;
-
-    ### Step 9
-#    use Moose::Meta::Method;
-
-    ### Step 10
-#    use Class::MOP::Class::Immutable::Trait;
-
-    ### Step 11
-#    use Moose::Meta::Mixin::AttributeCore;
-
-    ### Step 15
-#    use Params::Validate::XS;
-
-    ### Step 18
-#    use MooseX::Clone::Meta::Attribute::Trait::Clone::Base;
-
-    ### Step 19
-#    use MooseX::Clone::Meta::Attribute::Trait::Clone::Std;
-
-    ### Step 17
-#    use MooseX::Clone;
-
-    ### Step 19
-#    use SQL::Translator::Role::Error;
-
-    ### Step 20
-#    use SQL::Translator::Role::BuildArgs;
-
-    ### Step 21
-#    use SQL::Translator::Schema::Role::Extra;
-
-    ### Step 22
-#    use SQL::Translator::Schema::Role::Compare;
-
-    ### Step 23
-#    use SQL::Translator::Role::Debug;
-
-    ### Step 18
-#    use SQL::Translator::Schema::Object;
-
-#use Moose::Exception::Role::Class;
-#use Moose::Exception::MethodNameNotFoundInInheritanceHierarchy;
-#use Moose::Exception::IncompatibleMetaclassOfSuperclass;
-
-}#}}}
-
 use File::Copy;
 use IO::All;
 use Wx qw(:allclasses);
 
+use FindBin;
+use lib "$FindBin::Bin/../lib";
 use LacunaWaX;
 use LacunaWaX::Util;
 use LacunaWaX::Model::DefaultData;
