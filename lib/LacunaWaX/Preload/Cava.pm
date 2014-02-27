@@ -18,11 +18,11 @@ package LacunaWaX::Preload::Cava {
     use if $^O eq 'linux',   'LacunaWaX::Preload::Unix';
     use if $^O eq 'MSWin32', 'LacunaWaX::Preload::Win32';
 
-    use B::Hooks::EndOfScope::XS;
-    use LacunaWaX::Roles::ScheduledTask;
-    use SQL::Translator;
-    use SQL::Translator::Role::Error;
-    use Variable::Magic;
+    #use B::Hooks::EndOfScope::XS;
+    #use LacunaWaX::Roles::ScheduledTask;
+    #use SQL::Translator;
+    #use SQL::Translator::Role::Error;
+    #use Variable::Magic;
 
     ### Ugh.
     ###
