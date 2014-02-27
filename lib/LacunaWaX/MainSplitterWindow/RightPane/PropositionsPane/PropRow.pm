@@ -63,10 +63,15 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane::PropRow {
         }
     );
 
+    has 'foo' => (
+        is              => 'rw',
+        isa             => 'Str',
+        default         => 'bar',
+        lazy            => 1,
+    );
     has 'is_footer' => (
         is              => 'rw',
         isa             => 'Int',
-        lazy            => 1,
         default         => 0,
         documentation   => q{
             If true, the produced Row contain a "Vote for all props" button
@@ -129,7 +134,8 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane::PropRow {
     has 'waiting_for_enter' => (is => 'rw', isa => 'Int',                       lazy => 1,      default => 0);
 
     sub BUILD {
-        my $self = shift;
+        my $self    = shift;
+        my $params  = shift;
 
         wxTheApp->borders_off();    # Change to borders_on to see borders around sizers
         return $self->_make_header if $self->is_header;
@@ -148,6 +154,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane::PropRow {
 
         wxTheApp->Yield;
         $self->_set_events();
+
         return $self;
     }
     sub _build_ally_members {#{{{
@@ -390,14 +397,11 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane::PropRow {
         ### The header has no controls so setting events on it is pointless.
         ### Furthermore, setting these events will call lazy builders on some of 
         ### those non-existent controls which will explode.
-        return 1 if $self->is_header;
-
-        ### The footer only has a "Vote for all" button, and it's the only row 
-        ### that has that button.
-        if( $self->is_footer ) {
-            EVT_BUTTON( $self->parent, $self->btn_all_yes->GetId,   sub{$self->OnAllVote(@_, 1)}        );
-            return 1;
-        }
+        ###
+        ### We should never get here on the header and footer rows; they're 
+        ### returning before _set_events gets called.  Still, safety is nice 
+        ### and this isn't hurting anything.
+        return 1 if $self->is_header or $self->is_footer;
 
         EVT_BUTTON( $self->parent, $self->btn_me_yes->GetId,        sub{$self->OnMyVote(@_, 1)}         );
         EVT_BUTTON( $self->parent, $self->btn_me_no->GetId,         sub{$self->OnMyVote(@_, 0)}         );
@@ -487,6 +491,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane::PropRow {
     sub _make_footer {#{{{
         my $self = shift;
 
+        EVT_BUTTON( $self->parent, $self->btn_all_yes->GetId,   sub{$self->OnAllVote(@_, 1)}        );
         $self->main_sizer->AddSpacer(420);
         $self->main_sizer->Add($self->btn_all_yes, 0, 0, 0);
         return;
