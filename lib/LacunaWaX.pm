@@ -15,7 +15,7 @@ package LacunaWaX {
     use Wx qw(:everything);
     use Wx::Event qw(EVT_MOVE EVT_CLOSE);
 
-    use LacunaWaX::Preload::Cava;
+    use LacunaWaX::Preload::Perlapp;
     use LacunaWaX::MainFrame;
     use LacunaWaX::MainSplitterWindow;
     use LacunaWaX::Model::Client;   

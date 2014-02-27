@@ -1,5 +1,6 @@
 .svn/
 Thumbs.db
+*.exe
 *.msi
 *.sqlite
 *.sqlite-journal
