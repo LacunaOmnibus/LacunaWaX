@@ -6,6 +6,7 @@ use LacunaWaX::Dialog::About;
 #use LacunaWaX::Dialog::LogViewer;   # still producing incompatible metaclass problems, because of NonScrolled.  Come back to this.
 use LacunaWaX::MainSplitterWindow::RightPane::GlyphsPane;
 use LacunaWaX::MainSplitterWindow::RightPane::RepairPane;
+use LacunaWaX::MainSplitterWindow::RightPane::SSIncoming;
 
 say "blarg";
 

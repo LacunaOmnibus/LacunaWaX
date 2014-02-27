@@ -24,28 +24,18 @@ package LacunaWaX::MainSplitterWindow::RightPane::SSIncoming {
     #########################################
 
     has 'count' => (
-        is      => 'ro',
+        is      => 'rw',
         isa     => 'Int',
         default => 0,
-        traits  => ['Number'],
-        handles => {
-            set_count => 'set',
-        },
         documentation => q{
             The total number of ships (not just the number on the current page).
             Set by get_incoming().
         }
     );
     has 'page' => (
-        is      => 'ro',
+        is      => 'rw',
         isa     => 'Int',
         default => 1,
-        traits  => ['Number'],
-        handles => {
-            set_page  => 'set',
-            prev_page => 'sub',
-            next_page => 'add',
-        },
         documentation => q{
             The page we're currently on.  Will only change if more than 25 ships 
             are inbound and the user is playing with the pagination buttons.
@@ -53,15 +43,9 @@ package LacunaWaX::MainSplitterWindow::RightPane::SSIncoming {
     );
 
     has 'incoming' => (
-        is      => 'ro',
+        is      => 'rw',
         isa     => 'ArrayRef',
-        traits  => ['Array'],
         default => sub{ [] },
-        handles => {
-            clear_incoming => 'clear',
-            incoming_ships => 'elements',
-            push_incoming  => 'push',
-        },
         documentation => q{
             AoH of inbound ships.
             Set by get_incoming().
@@ -350,10 +334,10 @@ The list of ships is an AoH, each H representing a ship:
         };
         $rv and ref $rv eq 'HASH' or return undef;
 
-        $self->set_count( $rv->{'number_of_ships'} );
-        $self->clear_incoming;
+        $self->count( $rv->{'number_of_ships'} );
+        $self->incoming( [] );
         foreach my $ship( sort{$a->{'date_arrives'} cmp $b->{'date_arrives'} }@{$rv->{'ships'}} ) {
-            $self->push_incoming($ship);
+            push( @{$self->incoming}, $ship );
         }
 
         return 1;
@@ -366,7 +350,7 @@ The list of ships is an AoH, each H representing a ship:
         $self->lst_incoming->DeleteAllItems;
 
         my $row = 0;
-        foreach my $ship( $self->incoming_ships ) {
+        foreach my $ship( @{$self->incoming} ) {
             $self->lst_incoming->InsertStringItem($row, $ship->{'type_human'});
             $self->lst_incoming->SetItem($row, 1, $ship->{'date_arrives'});
             $self->lst_incoming->SetItem($row, 2, $ship->{'from'}{'name'});
@@ -424,7 +408,7 @@ The list of ships is an AoH, each H representing a ship:
         my $panel   = shift;
         my $event   = shift;
 
-        $self->next_page(1);
+        $self->page( $self->page + 1 );
         $self->get_incoming;
         $self->show_list_page;
 
@@ -435,7 +419,7 @@ The list of ships is an AoH, each H representing a ship:
         my $panel   = shift;
         my $event   = shift;
 
-        $self->prev_page(1);
+        $self->page( $self->page - 1);
         $self->get_incoming;
         $self->show_list_page;
 
