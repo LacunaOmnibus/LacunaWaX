@@ -15,9 +15,7 @@ package LacunaWaX::Model::Globals {
     use Log::Dispatch;
     use Lucy::Search::IndexSearcher;
     use Moose;
-    use MooseX::NonMoose;
     use Path::Tiny;
-    no if $] >= 5.017011, warnings => 'experimental::smartmatch';
 
     use LacunaWaX::Model::DBILogger;
     use LacunaWaX::Model::Globals::Database;
