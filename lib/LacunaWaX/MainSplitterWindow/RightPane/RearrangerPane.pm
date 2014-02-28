@@ -311,9 +311,9 @@ building, then makes the one the user just clicked out currently-saved.
                 }
 
                 my $bmp_butt = LacunaWaX::MainSplitterWindow::RightPane::RearrangerPane::BitmapButton->new( 
-                        app         => wxTheApp, 
+                        #app         => wxTheApp, 
                         parent      => $self->parent,
-                        ancestor    => $self,
+                        #ancestor    => $self,
                         bitmap      => $bitmap,
                         bldg_id     => $bldg_hr->{'bldg_id'}     || 0,
                         name        => $bldg_hr->{'name'}        || 'Empty',
@@ -328,7 +328,7 @@ building, then makes the one the user just clicked out currently-saved.
                 EVT_BUTTON( $self->parent, $bmp_butt->GetId, sub{$self->OnPlotButtonClick($bmp_butt->GetId, @_)} );
 
                 $self->gridszr_buttons->Add(
-                    $bmp_butt, 0, wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 0
+                    $bmp_butt->bitmap_button, 0, wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 0
                 );
             }
         }

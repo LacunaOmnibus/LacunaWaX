@@ -5,8 +5,27 @@ package LacunaWaX::MainSplitterWindow::RightPane::RearrangerPane::BitmapButton {
     use Try::Tiny;
     use Wx qw(:everything);
 
-    use MooseX::NonMoose::InsideOut;
-    extends 'Wx::BitmapButton';
+    has 'parent' => (
+        is          => 'rw',
+        isa         => 'Wx::ScrolledWindow',
+        required    => 1,
+    );
+
+    ##########################################
+
+    has 'bitmap_button' => (
+        is          => 'rw',
+        isa         => 'Wx::BitmapButton',
+        lazy_build  => 1,
+        handles     => {
+            Enable          => "Enable",
+            GetId           => "GetId",
+            GetBitmapLabel  => "GetBitmapLabel",
+            GetLabel        => "GetLabel",
+            SetBitmapLabel  => "SetBitmapLabel",
+            SetToolTip      => "SetToolTip",
+        }
+    );
 
     has 'bitmap'        => (is => 'rw', isa => 'Wx::Bitmap' );
     has 'bldg_id'       => (is => 'rw', isa => 'Maybe[Int]' );
@@ -18,11 +37,6 @@ package LacunaWaX::MainSplitterWindow::RightPane::RearrangerPane::BitmapButton {
     has 'x'             => (is => 'rw', isa => 'Maybe[Int]' );
     has 'y'             => (is => 'rw', isa => 'Maybe[Int]' );
 
-    sub FOREIGNBUILDARGS {## no critic qw(RequireArgUnpacking) {{{
-        my $self = shift;
-        my %args = @_;
-        return ( $args{'parent'}, -1, $args{'bitmap'} );
-    }#}}}
     sub BUILD {
         my($self, @params) = @_;
 
@@ -31,6 +45,13 @@ package LacunaWaX::MainSplitterWindow::RightPane::RearrangerPane::BitmapButton {
 
         return $self;
     };
+    sub _build_bitmap_button {#{{{
+        my $self = shift;
+        return Wx::BitmapButton->new(
+            $self->parent, -1,
+            $self->bitmap,
+        );
+    }#}}}
     sub _set_events { }
 
     sub id_for_tooltip {#{{{
