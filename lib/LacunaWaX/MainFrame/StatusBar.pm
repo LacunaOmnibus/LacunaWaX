@@ -23,6 +23,7 @@ package LacunaWaX::MainFrame::StatusBar {
     sub BUILD {
         my $self = shift;
         $self->bar_reset; # Resets the whole bar, including the gauge.
+        $self->_set_events();
         return $self;
     }
     sub _build_status_bar {#{{{
@@ -44,9 +45,8 @@ package LacunaWaX::MainFrame::StatusBar {
         my $self = shift;
         my $rect = $self->status_bar->GetFieldRect(1);
         my $g = Wx::Gauge->new(
-            $self->status_bar,  # parent
-            -1,                 # id
-            100,                # value range
+            $self->status_bar, -1,
+            100,
             Wx::Point->new($rect->x, $rect->y), 
             Wx::Size->new($rect->width, $rect->height), 
             wxGA_HORIZONTAL
@@ -85,16 +85,14 @@ package LacunaWaX::MainFrame::StatusBar {
     sub OnResize {#{{{
         my($self, $status_bar, $event) = @_;
 
-        if( $self->has_main_frame ) {
-            my $mf = $self->get_main_frame;
-            #my $current_size = $mf->frame->GetSize;
-            my $current_size = $mf->GetSize;
-            if( $current_size->width != $self->old_w or $current_size->height != $self->old_h ) {
-                $self->bar_reset;    # otherwise the throbber gauge gets all screwy
-                $self->old_w( $current_size->width );
-                $self->old_h( $current_size->height );
-            } 
-        }
+        my $mf = $self->parent->frame;
+        my $current_size = $mf->GetSize;
+        if( $current_size->width != $self->old_w or $current_size->height != $self->old_h ) {
+            $self->bar_reset;    # otherwise the throbber gauge gets all screwy
+            $self->old_w( $current_size->width );
+            $self->old_h( $current_size->height );
+        } 
+
         return 1;
     }#}}}
 

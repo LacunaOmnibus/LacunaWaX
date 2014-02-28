@@ -11,7 +11,7 @@ package LacunaWaX::MainFrame::MenuBar {
 
     has 'parent' => (
         is          => 'rw',
-        isa         => 'Wx::Window',
+        isa         => 'LacunaWaX::MainFrame',
         required    => 1,
     );
 

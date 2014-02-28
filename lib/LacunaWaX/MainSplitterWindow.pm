@@ -79,7 +79,7 @@ package LacunaWaX::MainSplitterWindow {
     sub _build_splitter_window {#{{{
         my $self = shift;
         my $y = Wx::SplitterWindow->new(
-            $self->parent, -1, 
+            $self->parent->frame, -1, 
             wxDefaultPosition, 
             $self->size,
             wxSP_3D|wxSP_BORDER

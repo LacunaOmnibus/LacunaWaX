@@ -132,7 +132,7 @@ package LacunaWaX {
 
         $self->SetAppName('LacunaWaX');
 
-        $self->SetTopWindow($self->main_frame);
+        $self->SetTopWindow( $self->main_frame->frame );
         $self->main_frame->SetIcons( $self->icon_bundle );
         $self->main_frame->Show(1);
 
@@ -191,8 +191,7 @@ package LacunaWaX {
         my $self = shift;
 
         my $args = {
-            #app     => $self,
-            title   => wxTheApp->GetAppName,
+            title => wxTheApp->GetAppName,
         };
 
         ### Coords to place frame if we saved them from a previous run.

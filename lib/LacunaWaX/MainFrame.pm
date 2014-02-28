@@ -8,14 +8,31 @@ package LacunaWaX::MainFrame {
     use Wx qw(:everything);
     use Wx::Event qw(EVT_CLOSE EVT_SET_FOCUS EVT_KILL_FOCUS EVT_SIZE);
 
-    use MooseX::NonMoose::InsideOut;
-    extends 'Wx::Frame';
-
     use LacunaWaX::Dialog::Status;
     use LacunaWaX::MainFrame::IntroPanel;
     use LacunaWaX::MainFrame::MenuBar;
     use LacunaWaX::MainFrame::StatusBar;
     use LacunaWaX::MainSplitterWindow;
+
+    has 'frame' => (
+        is          => 'rw',
+        isa         => 'Wx::Frame',
+        lazy_build  => 1,
+        handles => {
+            Connect             => "Connect",
+            CreateStatusBar     => "CreateStatusBar",
+            Destroy             => "Destroy",
+            GetSize             => "GetSize",
+            GetStatusBar        => "GetStatusBar",
+            Layout              => "Layout",
+            SetMenuBar          => "SetMenuBar",
+            SetIcons            => "SetIcons",
+            SetSize             => "SetSize",
+            SetSizer            => "SetSizer",
+            SetTitle            => "SetTitle",
+            Show                => "Show",
+        },
+    );
 
     has 'position'  => (is => 'rw', isa => 'Maybe[Wx::Point]',
         documentation => q{
@@ -60,21 +77,6 @@ package LacunaWaX::MainFrame {
     has 'intro_panel_sizer' => (is => 'rw', isa => 'Wx::Sizer', lazy_build => 1 );
     has 'splitter_sizer'    => (is => 'rw', isa => 'Wx::Sizer', lazy_build => 1 );
 
-    sub FOREIGNBUILDARGS {## no critic qw(RequireArgUnpacking) {{{
-        my $self = shift;
-        my $args = $_[0]; # hashref
-
-        my $pos = $args->{'position'} // wxDefaultPosition;
-        my $size = get_size_from_prefs();
-
-        return (
-            undef, -1, 
-            $args->{'title'},           # the title
-            $pos,
-            $size,
-            wxCAPTION|wxCLOSE_BOX|wxMINIMIZE_BOX|wxMAXIMIZE_BOX|wxSYSTEM_MENU|wxRESIZE_BORDER|wxCLIP_CHILDREN,
-        );
-    }#}}}
     sub BUILD {
         my $self = shift;
 
@@ -94,6 +96,19 @@ package LacunaWaX::MainFrame {
         return $self;
     };
 
+    sub _build_frame {#{{{
+        my $self = shift;
+
+        my $frame = Wx::Frame->new(
+            undef, -1, 
+            $self->title,
+            $self->position,
+            $self->size,
+            wxCAPTION|wxCLOSE_BOX|wxMINIMIZE_BOX|wxMAXIMIZE_BOX|wxSYSTEM_MENU|wxRESIZE_BORDER|wxCLIP_CHILDREN,
+        );
+
+        return $frame;
+    }#}}}
     sub _build_icon {#{{{
         my $self = shift;
 
@@ -132,7 +147,7 @@ package LacunaWaX::MainFrame {
 
         ### Maintain the h/w most recently set by the user
         my($w,$h) = (900,800);  # defaults
-        my $schema = $self->get_main_schema;
+        my $schema = wxTheApp->main_schema;
         if( my $db_w = $schema->resultset('AppPrefsKeystore')->find({ name => 'MainWindowW' }) ) {
             $w = $db_w->value;
         }
@@ -185,7 +200,7 @@ package LacunaWaX::MainFrame {
     }#}}}
     sub _set_events {#{{{
         my $self = shift;
-        EVT_CLOSE($self, sub{$self->OnClose(@_)});
+        EVT_CLOSE($self->frame, sub{$self->OnClose(@_)});
         return;
     }#}}}
 

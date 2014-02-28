@@ -116,7 +116,7 @@ package LacunaWaX::MainFrame::IntroPanel {
     sub _build_main_panel {#{{{
         my $self = shift;
         return Wx::Panel->new(
-            $self->parent, -1, 
+            $self->parent->frame, -1, 
             wxDefaultPosition, wxDefaultSize,
             0,
             'mainPanel'
