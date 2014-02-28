@@ -5,7 +5,6 @@ package LacunaWaX::Dialog::SitterManager {
     use Try::Tiny;
     use Wx qw(:everything);
     use Wx::Event qw(EVT_BUTTON EVT_CLOSE);
-    use LacunaWaX::Dialog::Scrolled;
     extends 'LacunaWaX::Dialog::Scrolled';
 
     use LacunaWaX::Dialog::SitterManager::SitterRow;
@@ -210,7 +209,8 @@ package LacunaWaX::Dialog::SitterManager {
         $row->show;
         $self->swindow->FitInside();
         $self->Fit();
-        $self->parent->Layout;
+        #$self->parent->Layout;
+        $self->Layout;
 
         ### On Windows XP (at least), adding a new row is leaving a very slight 
         ### artifact on the bottom border of the Player Name text control.  Just 

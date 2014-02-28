@@ -10,6 +10,7 @@ use LacunaWaX::Dialog::Help;
 use LacunaWaX::Dialog::LogViewer;
 use LacunaWaX::Dialog::Mail;
 use LacunaWaX::Dialog::Prefs;
+use LacunaWaX::Dialog::SitterManager;
 use LacunaWaX::MainSplitterWindow::RightPane::GlyphsPane;
 use LacunaWaX::MainSplitterWindow::RightPane::RepairPane;
 use LacunaWaX::MainSplitterWindow::RightPane::SSIncoming;
@@ -19,8 +20,6 @@ use LacunaWaX::Model::SStation::Police;
 use LacunaWaX::Schedule::Spies;
 use LacunaWaX::Schedule::SS_Health;
 use LacunaWaX::Servers;
-
-### Must continue to remove all references to MooseX::NonMoose.
 
 ### Need to get to here.
 #use LacunaWaX;

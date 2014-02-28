@@ -7,7 +7,7 @@ package LacunaWaX::Dialog::NonScrolled {
 
     use Moose;
 
-    ### Perlapp does not like MooseX::NonMoose::InsideOut one little bit.  
+    ### Perlapp does not like MooseX-NonMoose::InsideOut one little bit.  
     ### Outside of perlapp it works just fine.
     ###
     ### We'll attempt to at least partially imitate it, by allowing the dialog 

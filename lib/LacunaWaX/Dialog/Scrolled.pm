@@ -6,8 +6,30 @@ package LacunaWaX::Dialog::Scrolled {
     use Wx qw(:everything);
     use Wx::Event qw();
 
-    use MooseX::NonMoose::InsideOut;
-    extends 'Wx::Dialog';
+    ### See comment in ./NonScrolled re: MooseX-NonMoose
+    has 'dialog' => (
+        is          => 'rw',
+        isa         => 'Wx::Dialog',
+        lazy_build  => 1,
+        handles => {
+            Centre              => "Centre",
+            Close               => "Close",
+            Connect             => "Connect",
+            Destroy             => "Destroy",
+            EndModal            => "EndModal",
+            Fit                 => "Fit",
+            GetClientSize       => "GetClientSize",
+            GetSize             => "GetSize",
+            GetWindowStyleFlag  => "GetWindowStyleFlag",
+            Layout              => "Layout",
+            SetSize             => "SetSize",
+            SetSizer            => "SetSizer",
+            SetTitle            => "SetTitle",
+            SetWindowStyle      => "SetWindowStyle",
+            Show                => "Show",
+            ShowModal           => "ShowModal",
+        },
+    );
 
     has 'page_sizer'    => (is => 'rw', isa => 'Wx::BoxSizer',          lazy_build => 1, documentation => 'horizontal'  );
     has 'main_sizer'    => (is => 'rw', isa => 'Wx::Sizer',             lazy_build => 1, documentation => 'vertical'    );
@@ -38,6 +60,20 @@ package LacunaWaX::Dialog::Scrolled {
         $self->swindow->SetSizer($self->page_sizer);
         return $self;
     };
+
+    sub _build_dialog {#{{{
+        my $self = shift;
+
+        my $d = Wx::Dialog->new(
+            undef, -1, 
+            q{},
+            $self->position || Wx::Point->new(10,10),
+            $self->size || wxDefaultSize,
+            wxRESIZE_BORDER|wxDEFAULT_DIALOG_STYLE
+        );
+
+        return $d;
+    }#}}}
     sub _build_main_sizer {#{{{
         my $self = shift;
         my $v = wxTheApp->build_sizer($self, wxVERTICAL, 'Main Sizer');
@@ -56,7 +92,7 @@ package LacunaWaX::Dialog::Scrolled {
         my $self = shift;
 
         my $v = Wx::ScrolledWindow->new(
-            $self, -1, 
+            $self->dialog, -1, 
             wxDefaultPosition, 
             wxDefaultSize, 
             wxTAB_TRAVERSAL
