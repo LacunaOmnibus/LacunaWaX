@@ -12,6 +12,7 @@ This has no caching at all.
 
 package LacunaWaX::Model::Globals {
     use v5.14;
+    use Log::Dispatch;
     use Lucy::Search::IndexSearcher;
     use Moose;
     use MooseX::NonMoose;
@@ -122,12 +123,6 @@ package LacunaWaX::Model::Globals {
     );
 
     has 'logger' => (
-        is          => 'rw', 
-        isa         => 'Log::Dispatch',
-        lazy_build  => 1,
-    );
-
-    has 'logger_output' => (
         is          => 'rw', 
         isa         => 'LacunaWaX::Model::DBILogger',
         lazy_build  => 1,
@@ -243,8 +238,7 @@ package LacunaWaX::Model::Globals {
         my $p = path( join q{/}, $self->dir_root, 'user' );
         return $p;
     }#}}}
-
-    sub _build_logger_output {#{{{
+    sub _build_logger {#{{{
         my $self = shift;
 
         my %args = (
@@ -254,23 +248,14 @@ package LacunaWaX::Model::Globals {
             time_zone   => $self->log_time_zone,
             dbh         => $self->db_log->connection,
             table       => 'Logs',
-            callbacks   => sub{ my %h = @_; return sprintf "%s", $h{'message'}; }
         );
-
         if( $self->run ) { $args{'run'} = $self->run; }
-        my $o = LacunaWaX::Model::DBILogger->new(%args);
-        unless( $self->run ) { $self->run( $o->run ); }
 
-        return $o;
-    };#}}}
-    sub _build_logger {#{{{
-        my $self = shift;
+        my $l = LacunaWaX::Model::DBILogger->new(%args);
+        unless( $self->run ) { $self->run( $l->run ); }
 
-        my $l = Log::Dispatch->new();
-        $l->add( $self->logger_output );
         return $l;
-    }#}}}
-
+    };#}}}
     sub _build_lucy_searcher {#{{{
         my $self = shift;
 
