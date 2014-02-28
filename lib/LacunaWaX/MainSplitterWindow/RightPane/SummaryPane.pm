@@ -98,7 +98,8 @@ package LacunaWaX::MainSplitterWindow::RightPane::SummaryPane {
             wxTheApp->game_client->get_body_status( $self->planet_id );
         }
         catch {
-            wxTheApp->poperr("$_->{'text'} ($_)");
+            my $msg = (ref $_) ? $_->text : $_;
+            wxTheApp->poperr("$msg");
             return;
         };
         return $s;

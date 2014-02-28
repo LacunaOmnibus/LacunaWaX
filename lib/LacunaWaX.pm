@@ -1,137 +1,34 @@
 
+use v5.14;
+
 package LacunaWaX {
-    use v5.14;
-    use strict;
-    use warnings;
-    use Data::Dumper;  $Data::Dumper::INDENT = 1;
-    use English qw( -no_match_vars );
-    use Games::Lacuna::Client::TMTRPC;
-    use Getopt::Long;
-    use Math::BigFloat;
-    use Moose;
-    use Time::Duration;
-    use Time::HiRes;
-    use Try::Tiny;
+    use Carp;
+    use Data::Dumper;
     use Wx qw(:everything);
     use Wx::Event qw(EVT_MOVE EVT_CLOSE);
 
-    use LacunaWaX::Preload::Perlapp;
+    use base 'Wx::App';
+    $Wx::App::VERSION   = "2.0";
+    our $VERSION        = '2.0';
+
     use LacunaWaX::MainFrame;
-    use LacunaWaX::MainSplitterWindow;
-    use LacunaWaX::Model::Client;   
     use LacunaWaX::Model::Globals;
     use LacunaWaX::Model::Globals::Wx;
-    use LacunaWaX::Schedule;
     use LacunaWaX::Servers;
 
-    use MooseX::NonMoose;
-    $Wx::App::VERSION = "1.0";
-    extends 'Wx::App';
+    sub new {
+        my $class = shift;
+        my %args  = @_;
+        my $self  = $class->SUPER::new();
 
-    our $VERSION = '2.0';
+        croak "root dir is required" unless defined $args{'root_dir'};
+        $self->{'root_dir'} = $args{'root_dir'};
 
-    has 'root_dir'          => (is => 'rw', isa => 'Str',                               required   => 1);
-    has 'db_file'           => (is => 'rw', isa => 'Str',                               lazy_build => 1);
-    has 'db_log_file'       => (is => 'rw', isa => 'Str',                               lazy_build => 1);
-    has 'icon_bundle'       => (is => 'rw', isa => 'Wx::IconBundle',                    lazy_build => 1);
-
-    has 'globals' => (
-        is          => 'rw', 
-        isa         => 'LacunaWaX::Model::Globals',
-        lazy_build  => 1,
-        handles     => {
-            logger          => 'logger',
-            log_schema      => 'log_schema',
-            main_schema     => 'main_schema',
-        }
-    );
-
-    has 'wxglobals' => (
-        is          => 'rw', 
-        isa         => 'LacunaWaX::Model::Globals::Wx',
-        lazy_build  => 1,
-        handles     => {
-            get_image   => 'get_image',
-            set_image   => 'set_image',
-            get_font    => 'get_font',
-            set_font    => 'set_font',
-
-            get_cache   => 'cache',
-
-            borders_on      => 'borders_on',
-            borders_off     => 'borders_off',
-            borders_are_on  => 'sizer_borders',
-            borders_are_off => 'borders_are_off',
-        }
-    );
-
-    ### X and Y of the current screen resolution
-    has 'display_x'     => (is => 'rw', isa => 'Int', lazy_build => 1);
-    has 'display_y'     => (is => 'rw', isa => 'Int', lazy_build => 1);
-
-    has 'main_frame' => (
-        is      => 'rw', 
-        isa     => 'LacunaWaX::MainFrame', 
-        lazy_build => 1,
-        handles => {
-            menu_bar            => 'menu_bar',
-            intro_panel         => 'intro_panel',
-            has_intro_panel     => 'has_intro_panel',
-            left_pane           => 'left_pane',
-            right_pane          => 'right_pane',
-            splitter            => 'splitter',
-        }
-    );
-    has 'servers' => (
-        is      => 'ro',
-        isa     => 'LacunaWaX::Servers',
-        handles => {
-            server_ids              => 'ids',
-            server_records          => 'records',
-            server_record_by_id     => 'get',
-        },
-        lazy_build => 1,
-    );
-    has 'server' => (
-        is              => 'rw',
-        isa             => 'Maybe[LacunaWaX::Model::Schema::Servers]',
-        clearer         => 'clear_server',
-        documentation   => q{
-            DBIC Servers record of the server to which we're connected.
-            Populated by call to ->game_connect().
-        },
-    );
-    has 'account' => (
-        is              => 'rw', 
-        isa             => 'Maybe[LacunaWaX::Model::Schema::ServerAccounts]',
-        clearer         => 'clear_server_prefs',
-        documentation   => q{
-            DBIC ServerAccounts record of the account we're connected as.
-            Populated by call to ->game_connect().
-        },
-    );
-    has 'game_client' => (
-        is              => 'rw', 
-        isa             => 'LacunaWaX::Model::Client', 
-        clearer         => 'clear_game_client',
-        predicate       => 'has_game_client',
-        documentation   => q{
-            Chicken-and-egg.
-            This makes sense as an attribute of LacunaWaX, but it cannot connect 
-            until the user has updated their username/password in the 
-            Preferences window during their first run.  Populated by call to 
-            ->game_connect().
-        }
-    );
-
-    sub FOREIGNBUILDARGS {#{{{
-        return (); # Wx::App->new() gets no arguments.
-    }#}}}
-    sub BUILD {
-        my $self = shift;
+        ### Initialize all attributes that can be.  These used to be our lazy 
+        ### attributes.
+        $self->_init_attrs;
 
         $self->SetAppName('LacunaWaX');
-
         $self->SetTopWindow( $self->main_frame->frame );
         $self->main_frame->SetIcons( $self->icon_bundle );
         $self->main_frame->Show(1);
@@ -147,12 +44,132 @@ package LacunaWaX {
             );
         }
 
-        $self->_set_events;
+        $self->_set_events();
         return $self;
     }
+    sub _init_attrs {#{{{
+        my $self = shift;
+
+        ### Do not change the order of the attributes list without testing.
+        ### db_file might depend on the existence of globals, etc.
+        my @build_attrs = (
+            'globals', 'wxglobals',
+            'db_file', 'db_log_file',
+            'icon_bundle',
+            'display_x', 'display_y',
+            'servers' ,
+            'main_frame',
+        );
+        foreach my $attr(@build_attrs) {
+            my $meth = "_build_$attr";
+            unless( $self->can( $meth) ) {
+                die "Builder expected but not found for attribute '$attr'.";
+            }
+            $self->$attr( $self->$meth );
+        }
+    }#}}}
+    sub _set_events {#{{{
+        my $self = shift;
+        EVT_CLOSE( $self->main_frame, sub{$self->OnClose(@_)} );
+        return;
+    }#}}}
+    sub OnInit {#{{{
+        my $self = shift;
+        ### This gets called by the Wx::App (our parent) constructor.  This 
+        ### means that $self is not yet a LacunaWaX object; new() has not run 
+        ### yet.
+        ###
+        ### The point being that any code in here should relate only to the 
+        ### Wx::App, not to the LacunaWaX.
+        Wx::InitAllImageHandlers();
+        return 1;
+    }#}}}
+
+### Accessors
+    sub root_dir {#{{{
+        my $self = shift;
+        my $arg  = shift;
+        $self->{'root_dir'} = $arg if $arg;
+        return $self->{'root_dir'};
+    }#}}}
+    sub db_file {#{{{
+        my $self = shift;
+        my $arg  = shift;
+        $self->{'db_file'} = $arg if $arg;
+        return $self->{'db_file'};
+    }#}}}
+    sub db_log_file {#{{{
+        my $self = shift;
+        my $arg  = shift;
+        $self->{'db_log_file'} = $arg if $arg;
+        return $self->{'db_log_file'};
+    }#}}}
+    sub icon_bundle {#{{{
+        my $self = shift;
+        my $arg  = shift;
+        $self->{'icon_bundle'} = $arg if $arg;
+        return $self->{'icon_bundle'};
+    }#}}}
+    sub globals {#{{{
+        my $self = shift;
+        my $arg  = shift;
+        $self->{'globals'} = $arg if $arg;
+        return $self->{'globals'};
+    }#}}}
+    sub wxglobals {#{{{
+        my $self = shift;
+        my $arg  = shift;
+        $self->{'wxglobals'} = $arg if $arg;
+        return $self->{'wxglobals'};
+    }#}}}
+    sub display_x {#{{{
+        my $self = shift;
+        my $arg  = shift;
+        $self->{'display_x'} = $arg if $arg;
+        return $self->{'display_x'};
+    }#}}}
+    sub display_y {#{{{
+        my $self = shift;
+        my $arg  = shift;
+        $self->{'display_y'} = $arg if $arg;
+        return $self->{'display_y'};
+    }#}}}
+    sub main_frame {#{{{
+        my $self = shift;
+        my $arg  = shift;
+        $self->{'main_frame'} = $arg if $arg;
+        return $self->{'main_frame'};
+    }#}}}
+    sub servers {#{{{
+        my $self = shift;
+        my $arg  = shift;
+        $self->{'servers'} = $arg if $arg;
+        return $self->{'servers'};
+    }#}}}
+    sub server {#{{{
+        my $self = shift;
+        my $arg  = shift;
+        $self->{'server'} = $arg if $arg;
+        return $self->{'server'};
+    }#}}}
+    sub account {#{{{
+        my $self = shift;
+        my $arg  = shift;
+        $self->{'account'} = $arg if $arg;
+        return $self->{'account'};
+    }#}}}
+    sub game_client {#{{{
+        my $self = shift;
+        my $arg  = shift;
+        $self->{'game_client'} = $arg if $arg;
+        return $self->{'game_client'};
+    }#}}}
+
+### Builders
     sub _build_globals {#{{{
         my $self = shift;
-        return LacunaWaX::Model::Globals->new( root_dir => $self->root_dir );
+        my $g = LacunaWaX::Model::Globals->new( root_dir => $self->root_dir );
+        return $g;
     }#}}}
     sub _build_wxglobals {#{{{
         my $self = shift;
@@ -168,14 +185,6 @@ package LacunaWaX {
         my $file = $self->root_dir . '/user/lacuna_log.sqlite';
         return $file;
     }#}}}
-    sub _build_display_x {#{{{
-        my $self = shift;
-        return Wx::SystemSettings::GetMetric(wxSYS_SCREEN_X);
-    }#}}}
-    sub _build_display_y {#{{{
-        my $self = shift;
-        return Wx::SystemSettings::GetMetric(wxSYS_SCREEN_Y);
-    }#}}}
     sub _build_icon_bundle {#{{{
         my $self = shift;
 
@@ -187,16 +196,28 @@ package LacunaWaX {
 
         return $bundle;
     }#}}}
+    sub _build_display_x {#{{{
+        my $self = shift;
+        return Wx::SystemSettings::GetMetric(wxSYS_SCREEN_X);
+    }#}}}
+    sub _build_display_y {#{{{
+        my $self = shift;
+        return Wx::SystemSettings::GetMetric(wxSYS_SCREEN_Y);
+    }#}}}
+    sub _build_servers {#{{{
+        my $self        = shift;
+        return LacunaWaX::Servers->new( schema => $self->main_schema );
+    }#}}}
     sub _build_main_frame {#{{{
         my $self = shift;
 
         my $args = {
-            title => wxTheApp->GetAppName,
+            title => $self->GetAppName,
         };
 
         ### Coords to place frame if we saved them from a previous run.
         ### If not, we'll start the main_frame in the center of the display.
-        my $schema = wxTheApp->main_schema;
+        my $schema = $self->main_schema;
         if( my $db_x = $schema->resultset('AppPrefsKeystore')->find({ name => 'MainWindowX' }) ) {
             if( my $db_y = $schema->resultset('AppPrefsKeystore')->find({ name => 'MainWindowY' }) ) {
                 my( $x, $y ) = ($db_x->value, $db_y->value );
@@ -218,16 +239,143 @@ package LacunaWaX {
         my $mf = LacunaWaX::MainFrame->new( $args );
         return $mf;
     }#}}}
-    sub _build_servers {#{{{
-        my $self        = shift;
-        return LacunaWaX::Servers->new( schema => wxTheApp->main_schema );
-    }#}}}
-    sub _set_events {#{{{
+
+### Handlers
+    ### Globals
+    sub logger {#{{{
         my $self = shift;
-        EVT_CLOSE( $self->main_frame, sub{$self->OnClose(@_)} );
+        $self->globals->logger(@_);
+    }#}}}
+    sub log_schema {#{{{
+        my $self = shift;
+        $self->globals->log_schema(@_);
+    }#}}}
+    sub main_schema {#{{{
+        my $self = shift;
+        $self->globals->main_schema(@_);
+    }#}}}
+    ### WxGlobals
+    sub get_image {#{{{
+        my $self = shift;
+        $self->wxglobals->get_image(@_);
+    }#}}}
+    sub set_image {#{{{
+        my $self = shift;
+        $self->wxglobals->set_image(@_);
+    }#}}}
+    sub get_font {#{{{
+        my $self = shift;
+        $self->wxglobals->get_font(@_);
+    }#}}}
+    sub set_font {#{{{
+        my $self = shift;
+        $self->wxglobals->set_font(@_);
+    }#}}}
+    sub get_cache {#{{{
+        my $self = shift;
+        $self->wxglobals->cache(@_);
+    }#}}}
+    sub borders_on {#{{{
+        my $self = shift;
+        $self->wxglobals->borders_on(@_);
+    }#}}}
+    sub borders_off {#{{{
+        my $self = shift;
+        $self->wxglobals->borders_off(@_);
+    }#}}}
+    sub borders_are_on {#{{{
+        my $self = shift;
+        $self->wxglobals->borders_are_on(@_);
+    }#}}}
+    sub borders_are_off {#{{{
+        my $self = shift;
+        $self->wxglobals->borders_are_off(@_);
+    }#}}}
+    ### Servers
+    sub server_ids {#{{{
+        my $self = shift;
+        $self->servers->ids(@_);
+    }#}}}
+    sub server_records {#{{{
+        my $self = shift;
+        $self->servers->records(@_);
+    }#}}}
+    sub server_record_by_id {#{{{
+        my $self = shift;
+        $self->servers->get(@_);
+    }#}}}
+    ### MainFrame
+    sub menu_bar {#{{{
+        my $self = shift;
+        $self->main_frame->menu_bar(@_);
+    }#}}}
+    sub intro_panel {#{{{
+        my $self = shift;
+        $self->main_frame->intro_panel(@_);
+    }#}}}
+    sub has_intro_panel {#{{{
+        my $self = shift;
+        $self->main_frame->has_intro_panel(@_);
+    }#}}}
+    sub left_pane {#{{{
+        my $self = shift;
+        $self->main_frame->left_pane(@_);
+    }#}}}
+    sub right_pane {#{{{
+        my $self = shift;
+        $self->main_frame->right_pane(@_);
+    }#}}}
+    sub splitter {#{{{
+        my $self = shift;
+        $self->main_frame->splitter(@_);
+    }#}}}
+
+### Events
+    sub OnClose {#{{{
+        my($self, $frame, $event) = @_;
+
+        my $schema = wxTheApp->main_schema;
+        $self->logger->component('LacunaWaX');
+
+        ### Save main window position
+        my $db_x = $schema->resultset('AppPrefsKeystore')->find_or_create({ name => 'MainWindowX' });
+        my $db_y = $schema->resultset('AppPrefsKeystore')->find_or_create({ name => 'MainWindowY' });
+        my $point = $self->GetTopWindow()->GetPosition;
+        $db_x->value( $point->x ); $db_x->update;
+        $db_y->value( $point->y ); $db_y->update;
+
+        ### Save main window size
+        my $db_w = $schema->resultset('AppPrefsKeystore')->find_or_create({ name => 'MainWindowW' });
+        my $db_h = $schema->resultset('AppPrefsKeystore')->find_or_create({ name => 'MainWindowH' });
+        my $size = $self->GetTopWindow()->GetSize;
+        $db_w->value( $size->width ); $db_w->update;
+        $db_h->value( $size->height ); $db_h->update;
+
+        ### Prune old log entries
+        my $now   = DateTime->now();
+        my $dur   = DateTime::Duration->new(days => 7);     # TBD this duration should perhaps be configurable
+        my $limit = $now->subtract_duration( $dur );
+        $self->logger->debug('Pruning old log entries');
+        $self->logger->prune_bydate( $limit );
+        $self->logger->debug('Closing application');
+
+        ### Set the current app version
+        ### TBD doing this here is somewhat questionable; see UPGRADING in the 
+        ### dev notes file.
+        if( my $app_version = $schema->resultset('AppPrefsKeystore')->find_or_create({ name => 'AppVersion' }) ) {
+            $app_version->value( $LacunaWaX::VERSION );
+            $app_version->update;
+        }
+        if( my $db_version = $schema->resultset('AppPrefsKeystore')->find_or_create({ name => 'DbVersion' }) ) {
+            $db_version->value( $LacunaWaX::Model::Schema::VERSION );
+            $db_version->update;
+        }
+
+        $event->Skip();
         return;
     }#}}}
 
+### Utilities
     sub api_ship_name {#{{{
         my $self = shift;
         my $ship = shift;
@@ -562,7 +710,7 @@ Returns the number of halls needed to get from one level to another.
         my $self    = shift;
         my $message = shift || 'Unknown error occurred';
         my $title   = shift || 'Error!';
-        Wx::MessageBox($message, $title, wxICON_EXCLAMATION, $self->main_frame );
+        Wx::MessageBox($message, $title, wxICON_EXCLAMATION, $self->main_frame->frame );
         return;
     }#}}}
     sub popmsg {#{{{
@@ -572,7 +720,7 @@ Returns the number of halls needed to get from one level to another.
         Wx::MessageBox($message,
                         $title,
                         wxOK | wxICON_INFORMATION,
-                        $self->main_frame );
+                        $self->main_frame->frame );
         return;
     }#}}}
     sub popconf {#{{{
@@ -619,7 +767,7 @@ Instead, you need something like this...
         my $resp = Wx::MessageBox($message,
                                     $title,
                                     wxYES_NO|wxYES_DEFAULT|wxICON_QUESTION|wxSTAY_ON_TOP,
-                                    $self->main_frame );
+                                    $self->main_frame->frame );
         $self->Yield;
         return $resp;
     }#}}}
@@ -715,70 +863,7 @@ Returns the triangle sum of a given int.
         return( $int * ($int+1) / 2 ); 
     }#}}}
 
-    sub OnClose {#{{{
-        my($self, $frame, $event) = @_;
-
-        my $schema = wxTheApp->main_schema;
-        $self->logger->component('LacunaWaX');
-
-        ### Save main window position
-        my $db_x = $schema->resultset('AppPrefsKeystore')->find_or_create({ name => 'MainWindowX' });
-        my $db_y = $schema->resultset('AppPrefsKeystore')->find_or_create({ name => 'MainWindowY' });
-        my $point = $self->GetTopWindow()->GetPosition;
-        $db_x->value( $point->x ); $db_x->update;
-        $db_y->value( $point->y ); $db_y->update;
-
-        ### Save main window size
-        my $db_w = $schema->resultset('AppPrefsKeystore')->find_or_create({ name => 'MainWindowW' });
-        my $db_h = $schema->resultset('AppPrefsKeystore')->find_or_create({ name => 'MainWindowH' });
-        my $size = $self->GetTopWindow()->GetSize;
-        $db_w->value( $size->width ); $db_w->update;
-        $db_h->value( $size->height ); $db_h->update;
-
-        ### Prune old log entries
-        my $now   = DateTime->now();
-        my $dur   = DateTime::Duration->new(days => 7);     # TBD this duration should perhaps be configurable
-        my $limit = $now->subtract_duration( $dur );
-        $self->logger->debug('Pruning old log entries');
-        $self->logger->prune_bydate( $limit );
-        $self->logger->debug('Closing application');
-
-        ### Set the current app version
-        ### TBD doing this here is somewhat questionable; see UPGRADING in the 
-        ### dev notes file.
-        if( my $app_version = $schema->resultset('AppPrefsKeystore')->find_or_create({ name => 'AppVersion' }) ) {
-            $app_version->value( $LacunaWaX::VERSION );
-            $app_version->update;
-        }
-        if( my $db_version = $schema->resultset('AppPrefsKeystore')->find_or_create({ name => 'DbVersion' }) ) {
-            $db_version->value( $LacunaWaX::Model::Schema::VERSION );
-            $db_version->update;
-        }
-
-        $event->Skip();
-        return;
-    }#}}}
-    sub OnInit {#{{{
-        my $self = shift;
-        ### This gets called by the Wx::App (our parent) constructor.  This 
-        ### means that $self is not yet a LacunaWaX object, so Moose hasn't 
-        ### gotten involved fully yet.
-        ### eg $self->root_dir is going to be undef, even though it's required 
-        ### and was passed in by the user.
-        ###
-        ### The point being that any code in here should relate only to the 
-        ### Wx::App, not to the LacunaWaX.
-        Wx::InitAllImageHandlers();
-
-        return 1;
-    }#}}}
-
-    no Moose;
-    __PACKAGE__->meta->make_immutable;
 }
 
 1;
 
-__END__
-
- vim: syntax=perl

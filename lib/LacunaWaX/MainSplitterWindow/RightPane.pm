@@ -196,13 +196,13 @@ Displays one of the RightPane/*.pm panels in the splitter window's right pane.
         my $class = shift || q{};
 
         if( $pname and $class ne 'LacunaWaX::MainSplitterWindow::RightPane::SummaryPane' ) {
-            $self->get_right_pane->show_right_pane(
+            $self->right_pane->show_right_pane(
                 'LacunaWaX::MainSplitterWindow::RightPane::SummaryPane',
                 $pname
             );
         }
         elsif( $class ne 'LacunaWaX::MainSplitterWindow::RightPane::DefaultPane' ) {
-            $self->get_right_pane->show_right_pane(
+            $self->right_pane->show_right_pane(
                 'LacunaWaX::MainSplitterWindow::RightPane::DefaultPane'
             );
         }

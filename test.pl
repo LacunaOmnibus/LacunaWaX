@@ -22,7 +22,7 @@ use LacunaWaX::Schedule::SS_Health;
 use LacunaWaX::Servers;
 
 ### Need to get to here.
-#use LacunaWaX;
+use LacunaWaX;
 
 say "blarg";
 
