@@ -5,26 +5,13 @@ package LacunaWaX::MainFrame::MenuBar::Help {
     use Wx qw(:everything);
     use Wx::Event qw(EVT_MENU);
 
+    with 'LacunaWaX::Roles::MainFrame::MenuBar::Menu';
     use LacunaWaX::Dialog::About;
     use LacunaWaX::Dialog::Help;
-
-    use MooseX::NonMoose::InsideOut;
-    extends 'Wx::Menu';
-
-    has 'parent' => (
-        is          => 'rw',
-        isa         => 'LacunaWaX::MainFrame',
-        required    => 1,
-    );
-
-    #############################################
 
     has 'itm_about' => (is => 'rw', isa => 'Wx::MenuItem',  lazy_build => 1);
     has 'itm_help'  => (is => 'rw', isa => 'Wx::MenuItem',  lazy_build => 1);
 
-    sub FOREIGNBUILDARGS {#{{{
-        return; # Wx::Menu->new() takes no arguments
-    }#}}}
     sub BUILD {
         my $self = shift;
         $self->Append( $self->itm_about );
@@ -36,7 +23,7 @@ package LacunaWaX::MainFrame::MenuBar::Help {
     sub _build_itm_about {#{{{
         my $self = shift;
         return Wx::MenuItem->new(
-            $self, -1,
+            $self->menu, -1,
             '&About',
             'Show about dialog',
             wxITEM_NORMAL,
@@ -46,7 +33,7 @@ package LacunaWaX::MainFrame::MenuBar::Help {
     sub _build_itm_help {#{{{
         my $self = shift;
         return Wx::MenuItem->new(
-            $self, -1,
+            $self->menu, -1,
             '&Help',
             'Show HTML help',
             wxITEM_NORMAL,

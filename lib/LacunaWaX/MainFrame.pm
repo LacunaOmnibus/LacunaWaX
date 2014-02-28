@@ -79,7 +79,7 @@ package LacunaWaX::MainFrame {
         my $self = shift;
 
         $self->Show(0);
-        $self->SetMenuBar($self->menu_bar);
+        $self->SetMenuBar($self->menu_bar->menu_bar);
         $self->intro_panel_sizer->Add( $self->intro_panel->main_panel, 1, wxEXPAND );
         $self->SetSizer($self->intro_panel_sizer);
 

@@ -5,16 +5,7 @@ package LacunaWaX::MainFrame::MenuBar::File::Connect {
     use Wx qw(:everything);
     use Wx::Event qw(EVT_MENU);
 
-    use MooseX::NonMoose::InsideOut;
-    extends 'Wx::Menu';
-
-    has 'parent' => (
-        is          => 'rw',
-        isa         => 'LacunaWaX::MainFrame',
-        required    => 1,
-    );
-
-    #############################################
+    with 'LacunaWaX::Roles::MainFrame::MenuBar::Menu';
 
     has 'connections' => (is => 'rw', isa => 'HashRef[Wx::MenuItem]', lazy => 1, default => sub{ {} },
         documentation => q{
@@ -23,9 +14,6 @@ package LacunaWaX::MainFrame::MenuBar::File::Connect {
         }
     );
 
-    sub FOREIGNBUILDARGS {#{{{
-        return; # Wx::Menu->new() takes no arguments
-    }#}}}
     sub BUILD {
         my $self    = shift;
         my $schema = wxTheApp->main_schema;

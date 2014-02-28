@@ -6,23 +6,10 @@ package LacunaWaX::MainFrame::MenuBar::Edit {
     use Wx::Event qw(EVT_MENU);
 
     use LacunaWaX::Dialog::Prefs;
-
-    use MooseX::NonMoose::InsideOut;
-    extends 'Wx::Menu';
-
-    has 'parent' => (
-        is          => 'rw',
-        isa         => 'LacunaWaX::MainFrame',
-        required    => 1,
-    );
-
-    #############################################
+    with 'LacunaWaX::Roles::MainFrame::MenuBar::Menu';
 
     has 'itm_prefs'   => (is => 'rw', isa => 'Wx::MenuItem',  lazy_build => 1);
 
-    sub FOREIGNBUILDARGS {#{{{
-        return; # Wx::Menu->new() takes no arguments
-    }#}}}
     sub BUILD {
         my $self = shift;
         $self->Append( $self->itm_prefs );
@@ -33,7 +20,7 @@ package LacunaWaX::MainFrame::MenuBar::Edit {
     sub _build_itm_prefs {#{{{
         my $self = shift;
         return Wx::MenuItem->new(
-            $self, -1,
+            $self->menu, -1,
             '&Preferences',
             'Preferences',
             wxITEM_NORMAL,

@@ -10,33 +10,20 @@ package LacunaWaX::MainFrame::MenuBar::File {
     use Wx qw(:everything);
     use Wx::Event qw(EVT_MENU);
 
-    use MooseX::NonMoose::InsideOut;
-    extends 'Wx::Menu';
-
+    with 'LacunaWaX::Roles::MainFrame::MenuBar::Menu';
     use LacunaWaX::MainFrame::MenuBar::File::Connect;
-
-    has 'parent' => (
-        is          => 'rw',
-        isa         => 'LacunaWaX::MainFrame',
-        required    => 1,
-    );
-
-    #############################################
 
     has 'itm_exit'      => (is => 'rw', isa => 'Wx::MenuItem',                                  lazy_build => 1);
     has 'itm_connect'   => (is => 'rw', isa => 'LacunaWaX::MainFrame::MenuBar::File::Connect',  lazy_build => 1);
     has 'itm_import'    => (is => 'rw', isa => 'Wx::MenuItem',                                  lazy_build => 1);
     has 'itm_export'    => (is => 'rw', isa => 'Wx::MenuItem',                                  lazy_build => 1);
 
-    sub FOREIGNBUILDARGS {#{{{
-        return; # Wx::Menu->new() takes no arguments
-    }#}}}
     sub BUILD {
         my $self = shift;
-        $self->AppendSubMenu    ( $self->itm_connect,   "&Connect...",  "Connect to a server"   );
-        $self->Append           ( $self->itm_import                                             );
-        $self->Append           ( $self->itm_export                                             );
-        $self->Append           ( $self->itm_exit                                               );
+        $self->AppendSubMenu    ( $self->itm_connect->menu, "&Connect...",  "Connect to a server"   );
+        $self->Append           ( $self->itm_import                                                 );
+        $self->Append           ( $self->itm_export                                                 );
+        $self->Append           ( $self->itm_exit                                                   );
         $self->_set_events();
         return $self;
     }
@@ -44,7 +31,7 @@ package LacunaWaX::MainFrame::MenuBar::File {
     sub _build_itm_exit {#{{{
         my $self = shift;
         return Wx::MenuItem->new(
-            $self, -1,
+            $self->menu, -1,
             '&Exit',
             'Exit',
             wxITEM_NORMAL,
@@ -60,7 +47,7 @@ package LacunaWaX::MainFrame::MenuBar::File {
     sub _build_itm_export {#{{{
         my $self = shift;
         return Wx::MenuItem->new(
-            $self, -1,
+            $self->menu, -1,
             '&Export Database',
             'Export your preferences database for backup or to prep for upgrade.',
             wxITEM_NORMAL,
@@ -70,7 +57,7 @@ package LacunaWaX::MainFrame::MenuBar::File {
     sub _build_itm_import {#{{{
         my $self = shift;
         return Wx::MenuItem->new(
-            $self, -1,
+            $self->menu, -1,
             '&Import Preferences',
             'Import preferences and settings from a previous LacunaWaX install.',
             wxITEM_NORMAL,

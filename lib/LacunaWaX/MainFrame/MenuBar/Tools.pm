@@ -5,22 +5,12 @@ package LacunaWaX::MainFrame::MenuBar::Tools {
     use Wx qw(:everything);
     use Wx::Event qw(EVT_MENU);
 
+    with 'LacunaWaX::Roles::MainFrame::MenuBar::Menu';
     use LacunaWaX::Dialog::Calculator;
     use LacunaWaX::Dialog::LogViewer;
     use LacunaWaX::Dialog::Mail;
     use LacunaWaX::Dialog::SitterManager;
     use LacunaWaX::Dialog::Captcha;
-
-    use MooseX::NonMoose::InsideOut;
-    extends 'Wx::Menu';
-
-    has 'parent' => (
-        is          => 'rw',
-        isa         => 'LacunaWaX::MainFrame',
-        required    => 1,
-    );
-
-    #############################################
 
     has 'itm_calc'      => (is => 'rw', isa => 'Wx::MenuItem',  lazy_build => 1);
     has 'itm_logview'   => (is => 'rw', isa => 'Wx::MenuItem',  lazy_build => 1);
@@ -46,7 +36,7 @@ package LacunaWaX::MainFrame::MenuBar::Tools {
     sub _build_itm_calc {#{{{
         my $self = shift;
         return Wx::MenuItem->new(
-            $self, -1,
+            $self->menu, -1,
             '&Calculator',
             'Calculator',
             wxITEM_NORMAL,
@@ -56,7 +46,7 @@ package LacunaWaX::MainFrame::MenuBar::Tools {
     sub _build_itm_logview {#{{{
         my $self = shift;
         return Wx::MenuItem->new(
-            $self, -1,
+            $self->menu, -1,
             '&Log Viewer',
             'Log Viewer',
             wxITEM_NORMAL,
@@ -66,7 +56,7 @@ package LacunaWaX::MainFrame::MenuBar::Tools {
     sub _build_itm_mail {#{{{
         my $self = shift;
         return Wx::MenuItem->new(
-            $self, -1,
+            $self->menu, -1,
             '&Mail',
             'Mail',
             wxITEM_NORMAL,
@@ -76,7 +66,7 @@ package LacunaWaX::MainFrame::MenuBar::Tools {
     sub _build_itm_sitter {#{{{
         my $self = shift;
         return Wx::MenuItem->new(
-            $self, -1,
+            $self->menu, -1,
             '&Sitter Manager',
             'Sitter Manager',
             wxITEM_NORMAL,

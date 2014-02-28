@@ -4,9 +4,6 @@ package LacunaWaX::MainFrame::MenuBar {
     use Moose;
     use Wx qw(:everything);
 
-    use MooseX::NonMoose::InsideOut;
-    extends 'Wx::MenuBar';
-
     use LacunaWaX::MainFrame::MenuBar::Edit;
     use LacunaWaX::MainFrame::MenuBar::File;
     use LacunaWaX::MainFrame::MenuBar::Help;
@@ -19,6 +16,31 @@ package LacunaWaX::MainFrame::MenuBar {
     );
 
     ##############################################
+
+    has 'menu_bar' => (
+        is          => 'rw',
+        isa         => 'Wx::MenuBar',
+        lazy_build  => 1,
+        handles     => {
+            Append              => "Append",
+            AppendSubMenu       => "AppendSubMenu",
+            Centre              => "Centre",
+            Close               => "Close",
+            Connect             => "Connect",
+            Destroy             => "Destroy",
+            Enable              => "Enable",
+            Fit                 => "Fit",
+            GetClientSize       => "GetClientSize",
+            GetSize             => "GetSize",
+            GetWindowStyleFlag  => "GetWindowStyleFlag",
+            Layout              => "Layout",
+            SetSize             => "SetSize",
+            SetSizer            => "SetSizer",
+            SetTitle            => "SetTitle",
+            SetWindowStyle      => "SetWindowStyle",
+            Show                => "Show",
+        }
+    );
 
     has 'show_test'   => (is => 'rw', isa => 'Int',  lazy => 1, default => 0,
         documentation => q{
@@ -48,19 +70,20 @@ package LacunaWaX::MainFrame::MenuBar {
         }
     );
 
-    sub FOREIGNBUILDARGS {#{{{
-        return; # Wx::Menu->new() takes no arguments
-    }#}}}
     sub BUILD {
         my $self = shift;
 
-        $self->Append( $self->menu_file,   "&File");
-        $self->Append( $self->menu_edit,   "&Edit");
-        $self->Append( $self->menu_tools,  "&Tools");
-        $self->Append( $self->menu_help,   "&Help");
+        $self->Append( $self->menu_file->menu,   "&File");
+        $self->Append( $self->menu_edit->menu,   "&Edit");
+        $self->Append( $self->menu_tools->menu,  "&Tools");
+        $self->Append( $self->menu_help->menu,   "&Help");
 
         return $self;
     }
+    sub _build_menu_bar {#{{{
+        my $self = shift;
+        return Wx::MenuBar->new();
+    }#}}}
     sub _build_menu_file {#{{{
         my $self = shift;
         return LacunaWaX::MainFrame::MenuBar::File->new(
