@@ -4,8 +4,9 @@ Packer: c:\Program Files (x86)\ActiveState Perl Dev Kit 9.2.1\bin\perlapp.exe
 Script: test.pl
 Cwd: C:\Users\Jon\Documents\work\LacunaWaX
 Add: Moose::Meta::Attribute::Native::Trait::
+Add: Wx::
 Clean: 0
-Date: 2014-02-27 18:17:19
+Date: 2014-02-28 18:50:40
 Debug: 
 Dependent: 0
 Dyndll: 0

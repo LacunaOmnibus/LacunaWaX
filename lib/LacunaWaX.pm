@@ -30,7 +30,7 @@ package LacunaWaX {
 
         $self->SetAppName('LacunaWaX');
         $self->SetTopWindow( $self->main_frame->frame );
-        $self->main_frame->SetIcons( $self->icon_bundle );
+        $self->main_frame->SetIcon( $self->icon_image );
         $self->main_frame->Show(1);
 
         $self->logger->debug('Starting application');
@@ -55,7 +55,7 @@ package LacunaWaX {
         my @build_attrs = (
             'globals', 'wxglobals',
             'db_file', 'db_log_file',
-            'icon_bundle',
+            'icon_image',
             'display_x', 'display_y',
             'servers' ,
             'main_frame',
@@ -104,11 +104,11 @@ package LacunaWaX {
         $self->{'db_log_file'} = $arg if $arg;
         return $self->{'db_log_file'};
     }#}}}
-    sub icon_bundle {#{{{
+    sub icon_image {#{{{
         my $self = shift;
         my $arg  = shift;
-        $self->{'icon_bundle'} = $arg if $arg;
-        return $self->{'icon_bundle'};
+        $self->{'icon_image'} = $arg if $arg;
+        return $self->{'icon_image'};
     }#}}}
     sub globals {#{{{
         my $self = shift;
@@ -185,16 +185,18 @@ package LacunaWaX {
         my $file = $self->root_dir . '/user/lacuna_log.sqlite';
         return $file;
     }#}}}
-    sub _build_icon_bundle {#{{{
+    sub _build_icon_image {#{{{
         my $self = shift;
 
-        my $bundle = Wx::IconBundle->new();
-        my @images = map{ join q{/}, ($self->globals->dir_ico, qq{frai_$_.png}) }qw(16 24 32 48 64 72 128 256);
-        foreach my $i(@images) {
-            $bundle->AddIcon( Wx::Icon->new($i, wxBITMAP_TYPE_ANY) );
-        }
+        my $png = join q{/}, ($self->globals->dir_ico, qq{frai_256.png});
+        my $img = Wx::Image->new($png, wxBITMAP_TYPE_PNG);
+        $img->Rescale(32,32);
+        my $bmp = Wx::Bitmap->new($img);
 
-        return $bundle;
+        my $icon = Wx::Icon->new();
+        $icon->CopyFromBitmap($bmp);
+
+        return $icon;
     }#}}}
     sub _build_display_x {#{{{
         my $self = shift;

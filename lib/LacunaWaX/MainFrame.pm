@@ -26,7 +26,7 @@ package LacunaWaX::MainFrame {
             GetStatusBar        => "GetStatusBar",
             Layout              => "Layout",
             SetMenuBar          => "SetMenuBar",
-            SetIcons            => "SetIcons",
+            SetIcon             => "SetIcon",
             SetSize             => "SetSize",
             SetSizer            => "SetSizer",
             SetTitle            => "SetTitle",
