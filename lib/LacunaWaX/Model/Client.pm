@@ -14,8 +14,8 @@ package LacunaWaX::Model::Client {
 
     our $AUTOLOAD;
 
-    has 'app'           => (is => 'rw', isa => 'LacunaWaX',                     weak_ref => 1   ); 
-    has 'server_id'     => (is => 'rw', isa => 'Int',                           required => 1   );
+    has 'app'           => (is => 'rw', isa => 'LacunaWaX', weak_ref => 1   ); 
+    has 'server_id'     => (is => 'rw', isa => 'Int',       required => 1   );
 
     has 'globals' => (
         is          => 'rw', 
@@ -173,7 +173,7 @@ package LacunaWaX::Model::Client {
     sub _build_glyph_recipes {#{{{
         my $self = shift;
         return {
-            'Halls of Vrbansk (all)'        => [qw(various)],                           # Not a real recipe!
+            'Halls of Vrbansk (all)'        => [qw(various)], # Obviously not a real recipe
             'Halls of Vrbansk (1)'          => [qw(goethite halite gypsum trona)],
             'Halls of Vrbansk (2)'          => [qw(gold anthracite uraninite bauxite)],
             'Halls of Vrbansk (3)'          => [qw(kerogen methane sulfur zircon)],
@@ -190,7 +190,7 @@ package LacunaWaX::Model::Client {
             'Oracle of Anid'                => [qw(gold uraninite bauxite goethite)],
             'Pantheon of Hagness'           => [qw(gypsum trona beryl anthracite)],
             'Temple of the Drajilites'      => [qw(kerogen rutile chromite chalcopyrite)],
-            'Terraforming Platform'         => [qw(gypsum sulfur monazite)],
+            'Terraforming Platform'         => [qw(methane zircon magnetite beryl)],
         };
     }#}}}
     sub _build_ore_types {#{{{
@@ -323,7 +323,6 @@ false and never die.
         }
 
         $self->app->Yield if $self->app;
-
 
         my $rv = try {
             $self->get_empire_status
@@ -938,7 +937,12 @@ necessary, call ping() instead.
         $self->app->Yield if $self->app;
         my $empire = $self->client->empire;
         $self->app->Yield if $self->app;
-        my $status = $empire->get_status;
+        my $status = try {
+            $empire->get_status;
+        }
+        catch {
+            return;
+        };
         ref $status eq 'HASH' or return;
         $self->empire_status($status);
 

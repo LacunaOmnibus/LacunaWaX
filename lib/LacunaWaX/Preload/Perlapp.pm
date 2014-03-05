@@ -31,7 +31,21 @@ package LacunaWaX::Preload::Perlapp {
     use SQL::Translator::Schema::Object;
     use SQL::Translator;
 
+    ### Needed for JSON::RPC
+    use JSON::RPC::Common::Marshal::Text;
+    use JSON::RPC::Common::Marshal::HTTP;
+    use JSON::RPC::Common::Message;
+    use JSON::RPC::Common::Procedure::Call::Version_2_0;
+
+    ### Needed for CHI
+    use CHI::Driver;
+    use CHI::Driver::Memory;
+    use CHI::Driver::RawMemory;
+
+
+    ### 
     ### Needed for LacunaWaX
+    ### 
 
     ### DateTime::Locale    (step 13)
     {#{{{
@@ -505,7 +519,6 @@ package LacunaWaX::Preload::Perlapp {
 
     }#}}}
 
-    use JSON::RPC::Common::Marshal::Text;           # 16
 
     use LacunaWaX::Dialog::NonScrolled;
     use LacunaWaX::Dialog::Scrolled;

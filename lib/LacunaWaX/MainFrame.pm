@@ -110,6 +110,13 @@ package LacunaWaX::MainFrame {
             wxCAPTION|wxCLOSE_BOX|wxMINIMIZE_BOX|wxMAXIMIZE_BOX|wxSYSTEM_MENU|wxRESIZE_BORDER|wxCLIP_CHILDREN,
         );
 
+        ### If $self->position is at (0,0), that means this is a first run; 
+        ### there's no saved position from last time and we're using the 
+        ### defaults.  In that case, center the frame.
+        unless( $self->position->x or $self->position->y ) {
+            $frame->Centre(wxBOTH);
+        }
+
         return $frame;
     }#}}}
     sub _build_icon {#{{{
@@ -138,7 +145,7 @@ package LacunaWaX::MainFrame {
     }#}}}
     sub _build_position {#{{{
         my $self = shift;
-        my $mb = Wx::Point->new( 10, 10 );
+        my $mb = Wx::Point->new( 0, 0 );    # Don't change this default position from 0,0
         return $mb;
     }#}}}
     sub _build_size {#{{{
@@ -279,7 +286,6 @@ package LacunaWaX::MainFrame {
         if( my $server = $schema->resultset('Servers')->find({id => $server_id}) ) {
             wxTheApp->server( $server );
 
-            #$self->set_caption("Connecting...");
             wxTheApp->caption("Connecting...");
             wxTheApp->throb();
 
@@ -289,7 +295,7 @@ package LacunaWaX::MainFrame {
                 ### our next attempt.
                 wxTheApp->server(undef);
                 wxTheApp->endthrob();
-                $self->set_caption("Connection Failed!  Correct your login credentials in Edit... Preferences.");
+                wxTheApp->caption("Connection Failed!  Correct your login credentials in Edit... Preferences.");
                 return;
             }
             if( $self->has_intro_panel ) {
