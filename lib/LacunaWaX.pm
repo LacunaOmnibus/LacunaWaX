@@ -4,6 +4,7 @@ use v5.14;
 package LacunaWaX {
     use Carp;
     use Data::Dumper;
+    use Try::Tiny;
     use Wx qw(:everything);
     use Wx::Event qw(EVT_MOVE EVT_CLOSE);
 
@@ -11,6 +12,7 @@ package LacunaWaX {
     $Wx::App::VERSION   = "2.0";
     our $VERSION        = '2.0';
 
+    use LacunaWaX::Preload::Perlapp;
     use LacunaWaX::MainFrame;
     use LacunaWaX::Model::Globals;
     use LacunaWaX::Model::Globals::Wx;
@@ -514,11 +516,20 @@ Returns true if the database passed in contains the correct tables and columns.
             $dbh->table_info(undef, undef, undef, 'TABLE');
         }
         catch { return };
+#say "1";
         return 0 unless $tbl_sth;
+#say "2";
         while( my $r = $tbl_sth->fetchrow_hashref ) {
+#say "--$r->{'TABLE_NAME'}--";
             delete $checked_tables{$r->{'TABLE_NAME'}};
         }
-        return 0 if keys %checked_tables;
+#say "3";
+        if( keys %checked_tables ) {
+            $tbl_sth->finish();
+#say "4";
+            return 0;
+        }
+#say "4.5";
 
         ### Ensure each of those tables contains the correct columns
         foreach my $tbl( keys %{$tables} ) {
@@ -528,8 +539,14 @@ Returns true if the database passed in contains the correct tables and columns.
             while( my $r = $sth->fetchrow_hashref ) {
                 delete $checked_cols{$r->{'COLUMN_NAME'}};
             }
-            return 0 if keys %checked_cols;
+#say "5";
+            if( keys %checked_cols ) {
+                $sth->finish();
+#say "6";
+                return 0;
+            }
         }
+#say "7";
 
         return 1;
     }#}}}

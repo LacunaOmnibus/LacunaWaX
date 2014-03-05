@@ -34,7 +34,10 @@ package LacunaWaX::MainFrame {
         },
     );
 
-    has 'position'  => (is => 'rw', isa => 'Maybe[Wx::Point]',
+    has 'position'  => (
+        is          => 'rw', 
+        isa         => 'Maybe[Wx::Point]',
+        lazy_build  => 1,
         documentation => q{
             Optional - if sent, it will be the point of the upper-left corner of the ap.
             If no position is passed in, the ap will be displayed centered on the screen.
@@ -131,6 +134,11 @@ package LacunaWaX::MainFrame {
     sub _build_menu_bar {#{{{
         my $self = shift;
         my $mb = LacunaWaX::MainFrame::MenuBar->new( parent => $self );
+        return $mb;
+    }#}}}
+    sub _build_position {#{{{
+        my $self = shift;
+        my $mb = Wx::Point->new( 10, 10 );
         return $mb;
     }#}}}
     sub _build_size {#{{{

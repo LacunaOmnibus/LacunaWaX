@@ -3,6 +3,7 @@ use warnings;
 
 package LacunaWaX::Preload::Perlapp {
 
+    ### Needed for Moose
     use Variable::Magic;                            # 15    (RepairPane, at least)
     use B::Hooks::EndOfScope::XS;                   # 14    (RepairPane, at least)
     use Class::Load::XS;                            # 1
@@ -17,6 +18,20 @@ package LacunaWaX::Preload::Perlapp {
     use Moose::Meta::Method;                        # 9
     use Class::MOP::Class::Immutable::Trait;        # 10
     use Moose::Meta::Mixin::AttributeCore;          # 11
+
+    ### Needed for DBIC
+    use SQL::Translator::Role::BuildArgs;
+    use SQL::Translator::Role::Debug;
+    use SQL::Translator::Role::Error;
+    use SQL::Translator::Role::ListAttr;
+    use SQL::Translator::Schema::Role::Compare;
+    use SQL::Translator::Schema::Role::Extra;
+    use SQL::Translator::Generator::Role::DDL;
+    use SQL::Translator::Generator::Role::Quote;
+    use SQL::Translator::Schema::Object;
+    use SQL::Translator;
+
+    ### Needed for LacunaWaX
 
     ### DateTime::Locale    (step 13)
     {#{{{
@@ -491,6 +506,12 @@ package LacunaWaX::Preload::Perlapp {
     }#}}}
 
     use JSON::RPC::Common::Marshal::Text;           # 16
+
+    use LacunaWaX::Dialog::NonScrolled;
+    use LacunaWaX::Dialog::Scrolled;
+    use LacunaWaX::Roles::MainFrame::MenuBar::Menu;
+    use LacunaWaX::Roles::MainSplitterWindow::RightPane;
+
 
 }
 

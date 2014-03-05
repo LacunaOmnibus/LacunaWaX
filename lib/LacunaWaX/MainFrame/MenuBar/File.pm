@@ -82,7 +82,7 @@ package LacunaWaX::MainFrame::MenuBar::File {
 
         ### Open modal file browser
         my $file_browser = Wx::FileDialog->new(
-            $self->parent,
+            $self->parent->frame,
             'Select a database file',
             $ENV{'HOME'},           # default dir
             'lacuna_app.sqlite',    # default file
@@ -107,13 +107,9 @@ package LacunaWaX::MainFrame::MenuBar::File {
     sub OnImport {#{{{
         my $self  = shift;
 
-        unless( wxYES == wxTheApp->popconf("This will import preferences from a previous install of LacunaWaX - is that what you want to do?", "Import") ) {
-            return;
-        }
-
         ### Open modal file browser
         my $file_browser = Wx::FileDialog->new(
-            $self->parent,
+            $self->parent->frame,
             'Select a database file',
             '', # default dir
             'lacuna_app.sqlite', # default file
