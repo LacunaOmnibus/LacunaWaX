@@ -63,7 +63,6 @@ package LacunaWaX::Dialog::Mail {
         ### header
         $self->szr_header->AddSpacer(5);
         $self->szr_header->Add($self->lbl_hdr_page, 0, 0, 0);
-        $self->szr_header->AddSpacer(10);
 
         ### clear mail checkboxes
         $self->szr_check_1->Add($self->chk_alert, 0, 0, 0);
@@ -89,7 +88,6 @@ package LacunaWaX::Dialog::Mail {
         ### clear mail block
         $self->szr_clear->Add($self->lbl_hdr_clear, 0, 0, 0);
         $self->szr_clear->AddSpacer(5);
-        #$self->szr_clear->Add($self->szr_check_1, 0, 0, 0);
         $self->szr_clear->Add($self->szr_check_outer, 0, 0, 0);
 		
 		### custom text entry	
@@ -129,9 +127,9 @@ package LacunaWaX::Dialog::Mail {
     
         ### combine the above
         $self->main_sizer->Add($self->szr_header, 0, 0, 0);
-        $self->main_sizer->AddSpacer(20);
+        $self->main_sizer->AddSpacer(15);
         $self->main_sizer->Add($self->szr_clear, 0, 0, 0);	
-        $self->main_sizer->AddSpacer(40);
+        $self->main_sizer->AddSpacer(20);
         $self->main_sizer->Add($self->szr_send, 0, 0, 0);
 
 		
@@ -360,7 +358,7 @@ package LacunaWaX::Dialog::Mail {
             wxDefaultPosition, 
             Wx::Size->new(400, 30)
         );
-        $y->SetFont( wxTheApp->get_font('header_2') );
+        $y->SetFont( wxTheApp->get_font('header_3') );
         return $y;
     }#}}}
     sub _build_lbl_hdr_page {#{{{
@@ -382,7 +380,7 @@ package LacunaWaX::Dialog::Mail {
             wxDefaultPosition, 
             Wx::Size->new(400, 30)
         );
-        $v->SetFont( wxTheApp->get_font('header_2') );
+        $v->SetFont( wxTheApp->get_font('header_3') );
         $v->SetToolTip(
 "Messages sent by this form are doing an end-run around the profanity filter.  Use your head."
         );
@@ -412,7 +410,8 @@ package LacunaWaX::Dialog::Mail {
     }#}}}
     sub _build_size {#{{{
         my $self = shift;
-        my $s = Wx::Size->new(600, 710);    # 600, 710 for windows
+        # 600, 710 for windows
+        my $s = Wx::Size->new(600, 710);
         return $s;
     }#}}}
     sub _build_szr_ally {#{{{

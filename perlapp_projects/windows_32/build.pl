@@ -10,8 +10,8 @@ use Term::Prompt;
 
 use FindBin;
 use lib $FindBin::Bin . '/../../lib';
-use LacunaWaX::Model::Container;
 use LacunaWaX::Model::DefaultData;
+use LacunaWaX::Model::Globals;
 use LacunaWaX::Model::LogsSchema;
 use LacunaWaX::Model::Schema;
 
@@ -74,19 +74,12 @@ mirror "../../user/ico", "./build/user/ico/";
 ### Used by multiple Capture::Tiny::capture() calls below
 my($out,$err,$exit);
 
-### Deploy empty datbases
+### Deploy empty datbases {#{{{
 say "Deploying default (empty) databases...";
-($out,$err,$exit) = capture {#{{{
-    my $app_db_file = 'build/user/lacuna_app.sqlite';
-    my $log_db_file = 'build/user/lacuna_log.sqlite';
-    my $c = LacunaWaX::Model::Container->new(
-        name        => 'my container',
-        root_dir    => $FindBin::Bin . "/../..",
-        db_file     => $app_db_file,
-        db_log_file => $log_db_file,
-    );
-    my $app_schema = $c->resolve( service => '/Database/schema' );
-    my $log_schema = $c->resolve( service => '/DatabaseLog/schema' );
+($out,$err,$exit) = capture {
+    my $g           = LacunaWaX::Model::Globals->new( root_dir => "$FindBin::Bin/build/" );
+    my $app_schema  = $g->main_schema;
+    my $log_schema  = $g->logs_schema;
 
     $log_schema->deploy;
     $app_schema->deploy;
@@ -98,29 +91,25 @@ say "Deploying default (empty) databases...";
     ### to be false on success.  So if we're here, everything's good - return 
     ### false.
     0;
-};#}}}
+};
 die "Database deploy failed! ($exit)" if $exit;
-
-
-### LacunaWaX (main GUI)
+### }#}}}
+### LacunaWaX (main GUI) {#{{{
 say "Building LacunaWaX executable...";
-($out,$err,$exit) = capture {#{{{
+($out,$err,$exit) = capture {
 
     ### Don't hide the console
-    system('perlapp --add Wx::;JSON::RPC::Common::;Params::Validate::*;DateTime::Locale::*;Bread::Board::;Moose::;MooseX::;SQL::Translator::;SQL::Abstract;Log::Dispatch::*;DateTime::Format::*;CHI::Driver::;LacunaWaX::;Games::Lacuna::Client::;Games::Lacuna::Cache;Games::Lacuna::Client::;Games::Lacuna::Client::;Games::Lacuna::Client;Games::Lacuna::Client::Buildings::**;Class::MOP::;HTML::TreeBuilder::XPath;Variable::Magic --icon "..\..\unpackaged assets\frai.ico" --scan ..\extra_scan.pl --lib ..\..\lib --shared private --norunlib --force --exe build\bin\LacunaWaX.exe --perl C:\Perl\bin\perl.exe ..\..\bin\LacunaWaX.pl') and return 1;
+    #system('perlapp --add Wx::;JSON::RPC::Common::;Params::Validate::*;DateTime::Locale::*;Bread::Board::;Moose::;MooseX::;SQL::Translator::;SQL::Abstract;Log::Dispatch::*;DateTime::Format::*;CHI::Driver::;LacunaWaX::;Games::Lacuna::Client::;Games::Lacuna::Cache;Games::Lacuna::Client::;Games::Lacuna::Client::;Games::Lacuna::Client;Games::Lacuna::Client::Buildings::**;Class::MOP::;HTML::TreeBuilder::XPath;Variable::Magic --icon "..\..\unpackaged assets\frai.ico" --scan ..\extra_scan.pl --lib ..\..\lib --shared private --norunlib --force --exe build\bin\LacunaWaX.exe --perl C:\Perl\bin\perl.exe ..\..\bin\LacunaWaX.pl') and return 1;
 
-=pod
     ### Hide the console ("--gui")
     system('perlapp --add Wx::;JSON::RPC::Common::;Params::Validate::*;DateTime::Locale::*;Bread::Board::;Moose::;MooseX::;SQL::Translator::;SQL::Abstract;Log::Dispatch::*;DateTime::Format::*;CHI::Driver::;LacunaWaX::;Games::Lacuna::Client::;Games::Lacuna::Cache;Games::Lacuna::Client::;Games::Lacuna::Client::;Games::Lacuna::Client;Games::Lacuna::Client::Buildings::**;Class::MOP::;HTML::TreeBuilder::XPath;Variable::Magic --icon "..\..\unpackaged assets\frai.ico" --scan ..\extra_scan.pl --lib ..\..\lib --shared private --norunlib --gui --force --exe build\bin\LacunaWaX.exe --perl C:\Perl\bin\perl.exe ..\..\bin\LacunaWaX.pl') and return 1;
-=cut
 
-};#}}}
+};
 die "Building LacunaWaX.exe failed!" if $exit;
-
-### Archmin
-=pod
+### }#}}}
+### Archmin {#{{{
 say "Building Archmin executable...";
-($out,$err,$exit) = capture {#{{{
+($out,$err,$exit) = capture {
 
     ### Hide the console
     system('perlapp --add Wx::;JSON::RPC::Common::;Params::Validate::*;DateTime::Locale::*;Bread::Board::;Moose::;MooseX::;SQL::Translator::;SQL::Abstract;Log::Dispatch::*;DateTime::Format::*;CHI::Driver::;Moose;Class::MOP:: --icon "../../unpackaged assets/leela.ico" --scan ../extra_scan.pl --lib ..\..\lib --shared private --norunlib --gui --force --exe build\bin\Schedule_archmin.exe --perl C:\Perl\bin\perl.exe ..\..\bin\Schedule_archmin.pl');
@@ -128,14 +117,14 @@ say "Building Archmin executable...";
     ### Don't hide the console
     #system('perlapp --add Wx::;JSON::RPC::Common::;Params::Validate::*;DateTime::Locale::*;Bread::Board::;Moose::;MooseX::;SQL::Translator::;SQL::Abstract;Log::Dispatch::*;DateTime::Format::*;CHI::Driver::;Moose;Class::MOP:: --icon "../../unpackaged assets/leela.ico" --scan ../extra_scan.pl --lib ..\..\lib --shared private --norunlib --force --exe build\bin\Schedule_archmin.exe --perl C:\Perl\bin\perl.exe ..\..\bin\Schedule_archmin.pl');
 
-};#}}}
+};
 die "Building Schedule_archmin.exe failed!" if $exit;
-=cut
-
-### Autovote
 =pod
+=cut
+### }#}}}
+### Autovote {#{{{
 say "Building Autovote executable...";
-($out,$err,$exit) = capture {#{{{
+($out,$err,$exit) = capture {
 
     ### Hide the console
     system('perlapp --add Wx::;JSON::RPC::Common::;Params::Validate::*;DateTime::Locale::*;Bread::Board::;Moose::;MooseX::;SQL::Translator::;SQL::Abstract;Log::Dispatch::*;DateTime::Format::*;CHI::Driver::;Moose;Class::MOP:: --icon "../../unpackaged assets/leela.ico" --scan ../extra_scan.pl --lib ../../lib --shared private --norunlib --gui --force --exe build\bin\Schedule_autovote.exe --perl C:\Perl\bin\perl.exe ..\..\bin\Schedule_autovote.pl');
@@ -143,14 +132,14 @@ say "Building Autovote executable...";
     ### Don't hide the console
     #system('perlapp --add Wx::;JSON::RPC::Common::;Params::Validate::*;DateTime::Locale::*;Bread::Board::;Moose::;MooseX::;SQL::Translator::;SQL::Abstract;Log::Dispatch::*;DateTime::Format::*;CHI::Driver::;Moose;Class::MOP:: --icon "../../unpackaged assets/leela.ico" --scan ../extra_scan.pl --lib ../../lib --shared private --norunlib --force --exe build\bin\Schedule_autovote.exe --perl C:\Perl\bin\perl.exe ..\..\bin\Schedule_autovote.pl');
 
-};#}}}
+};
 die "Building Schedule_autovote failed!" if $exit;
-=cut
-
-### SS Health
 =pod
+=cut
+### }#}}}
+### SS Health {#{{{
 say "Building SS Health executable...";
-($out,$err,$exit) = capture {#{{{
+($out,$err,$exit) = capture {
 
     ### Hide the console
     system('perlapp --add Wx::;JSON::RPC::Common::;Params::Validate::*;DateTime::Locale::*;Bread::Board::;Moose::;MooseX::;SQL::Translator::;SQL::Abstract;Log::Dispatch::*;DateTime::Format::*;CHI::Driver::;Moose;Class::MOP:: --icon "../../unpackaged assets/leela.ico" --scan ../extra_scan.pl --lib ../../lib --shared private --norunlib --gui --force --exe build\bin\Schedule_sshealth.exe --perl C:\Perl\bin\perl.exe ..\..\bin\Schedule_sshealth.pl');
@@ -158,9 +147,11 @@ say "Building SS Health executable...";
     ### Don't hide the console
     #system('perlapp --add Wx::;JSON::RPC::Common::;Params::Validate::*;DateTime::Locale::*;Bread::Board::;Moose::;MooseX::;SQL::Translator::;SQL::Abstract;Log::Dispatch::*;DateTime::Format::*;CHI::Driver::;Moose;Class::MOP:: --icon "../../unpackaged assets/leela.ico" --scan ../extra_scan.pl --lib ../../lib --shared private --norunlib --force --exe build\bin\Schedule_sshealth.exe --perl C:\Perl\bin\perl.exe ..\..\bin\Schedule_sshealth.pl');
 
-};#}}}
+};
 die "Building Schedule_sshealth failed!" if $exit;
+=pod
 =cut
+### }#}}}
     
 my $zip = Archive::Zip->new();
 $zip->addDirectory( $build_dir );
@@ -171,6 +162,9 @@ die "Unable to write to archive $ARCHIVE_FILENAME_FULL.";
 say "";
 say "Done!  $ARCHIVE_FILENAME_FULL has been created.  build/ has been left for testing.";
 say "";
-
-
+say "If you attempt to test build/, remember that it's going to try to use databases in APPDIR,";
+say "not the ones in ./build/user/.  Those get placed by the installer, so may not be there now,";
+say "and ->deploy will not work from the executable.  So if the version in build\ doesn't function,";
+say "go make sure that empty copies of the database are in users/USER/AppData/Roaming/.";
+say "";
 

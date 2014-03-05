@@ -24,10 +24,15 @@ Running for the first time, so databases must be deployed first.
 
 This takes a few seconds; please be patient...  ";
 
+    ### ->deploy does not function properly for the installed version, and it 
+    ### would take too long anyway.  So the installer needs to include empty 
+    ### versions of both databases.
+    ###
+    ### This deploy bit is here for the benefit of people running from source.
     my $g = LacunaWaX::Model::Globals->new( root_dir => "$FindBin::Bin/.." );
-
     unless(-e $app_db ) {
         my $app_schema = $g->main_schema;
+say "deploying app";
         $app_schema->deploy;
         my $d = LacunaWaX::Model::DefaultData->new();
         $d->add_servers($app_schema);
@@ -35,6 +40,7 @@ This takes a few seconds; please be patient...  ";
     }
     unless(-e $log_db ) {
         my $log_schema = $g->logs_schema;
+say "deploying log";
         $log_schema->deploy;
     }
 
