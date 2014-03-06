@@ -59,13 +59,17 @@ package LacunaWaX::Roles::MainSplitterWindow::RightPane {
         my $parent  = shift;
         my $event   = shift;
 
+        wxTheApp->Yield;
         ### This actually gets called when anything loses focus, not just the 
         ### entire app.  It does trigger on an alt-tab away from LacunaWax.
         wxTheApp->main_frame->splitter->defocus();
 
         my($x,$y) = $parent->GetViewStart;
+        wxTheApp->Yield;
         $self->scroll_x($x);
+        wxTheApp->Yield;
         $self->scroll_y($y);
+        wxTheApp->Yield;
 
         $event->Skip;
         return 1;
@@ -88,6 +92,7 @@ package LacunaWaX::Roles::MainSplitterWindow::RightPane {
             $self->$control->SetFocus;
             wxTheApp->main_frame->splitter->focus_right();
             $parent->Scroll( $self->scroll_x, $self->scroll_y );
+            wxTheApp->Yield;
             $self->parent->Show(1);
         }
         return 1;
@@ -97,9 +102,13 @@ package LacunaWaX::Roles::MainSplitterWindow::RightPane {
         my $parent  = shift;    # Wx::ScrolledWindow
         my $event   = shift;    # Wx::MouseEvent
 
+        wxTheApp->Yield;
         my($x,$y) = $parent->GetViewStart;
+        wxTheApp->Yield;
         $self->scroll_x($x);
+        wxTheApp->Yield;
         $self->scroll_y($y);
+        wxTheApp->Yield;
         return 1;
     }#}}}
 

@@ -31,6 +31,11 @@ package LacunaWaX::Dialog::Captcha {
         isa         => 'Wx::Size',
         default     => sub{ Wx::Size->new(317, 115 + $_[0]->line_height) }, # CHECK - 317, 115 for windows.  Recheck on ubuntu.
     );
+    has 'solved' => (
+        is          => 'rw',
+        isa         => 'Bool',
+        default     => 0,
+    );
     has 'ua' => (
         is          => 'rw',
         isa         => 'LWP::UserAgent',
@@ -39,14 +44,10 @@ package LacunaWaX::Dialog::Captcha {
 
     has 'error' => (
         is          => 'rw',
-        isa         => 'Maybe[Str]',
+        isa         => 'Str',
+        default     => 'Captcha not solved',
         documentation => q{
-            Will be set if we're unable to access the captcha image.  If they forget to renew the cert again, the
-            game will be up at http, but captchas require https; in that case, LW will work, but captcha images 
-            will not be available.
-
-            So any code trying to implement a LacunaWaX::Dialog::Captcha should check this error attribute.  If 
-            it's non-false, then something went haywire and nothing that requires a captcha should be attempted.
+            Gets set to the empty string only when the captcha is solved successfully.
         },
     );
 
@@ -198,6 +199,7 @@ package LacunaWaX::Dialog::Captcha {
         $self->bmp_captcha( $new_bmp );
 
         $self->szr_image->Replace( $old_bmp, $new_bmp );
+        $old_bmp->Destroy();    # otherwise it's still existing in the dialog and obscuring the new one.
         $self->szr_image->Layout;
 
         return 1;
@@ -221,6 +223,7 @@ package LacunaWaX::Dialog::Captcha {
 
         if($rv) {
             wxTheApp->popmsg("Success", "Correct!") if $rv;
+            $self->error(q{});
             $self->Close;
         }
         return 1;

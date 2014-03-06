@@ -83,6 +83,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::SpiesPane {
         my $self = shift;
 
         return unless $self->int_min_exists_here;
+        $self->parent->Show(0);
 
         wxTheApp->borders_off();    # Change to borders_on to see borders around sizers
 
@@ -92,6 +93,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::SpiesPane {
         $self->szr_header->Add($self->lbl_instructions_box, 0, 0, 0);
         $self->content_sizer->Add($self->szr_header, 0, 0, 0);
         $self->content_sizer->AddSpacer(20);
+        wxTheApp->Yield;
 
         $self->szr_train->Add($self->lbl_train_1, 0, 0, 0);
         $self->szr_train->Add($self->chc_train_1, 0, 0, 0);
@@ -108,6 +110,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::SpiesPane {
         $self->szr_train->Add($self->btn_clear, 0, 0, 0);
         $self->content_sizer->Add($self->szr_train, 0, 0, 0);
         $self->content_sizer->AddSpacer(10);
+        wxTheApp->Yield;
 
         my $spies = try {
             wxTheApp->game_client->get_spies($self->planet_id);
@@ -154,10 +157,12 @@ package LacunaWaX::MainSplitterWindow::RightPane::SpiesPane {
                 $self->content_sizer->AddSpacer(5);
             }
         }
+        wxTheApp->Yield;
 
         $self->szr_buttons->Add($self->btn_save, 0, 0, 0);
         $self->szr_buttons->AddSpacer(10);
         $self->szr_buttons->Add($self->btn_rename, 0, 0, 0);
+        wxTheApp->Yield;
 
 =head2 BOTTOM SIZERS {#{{{
 
@@ -210,15 +215,19 @@ see what you're doing.
         $self->szr_bottom_right->AddSpacer(40);
         $self->szr_bottom_right->Add($self->szr_batch_center, 0, 0, 0);
         $self->szr_bottom_right->AddSpacer(40);
+        wxTheApp->Yield;
 
         $self->szr_bottom_center->AddSpacer(160);
         $self->szr_bottom_center->Add($self->szr_bottom_right, 0, 0, 0);
 
         $self->content_sizer->AddSpacer(10);
         $self->content_sizer->Add($self->szr_bottom_center, 0, 0, 0);
+        wxTheApp->Yield;
 
-        $self->lbl_header->SetFocus();  # make sure we're scrolled to the top
+        #$self->lbl_header->SetFocus();  # make sure we're scrolled to the top
 
+        $self->parent->Show(1);
+        wxTheApp->Yield;
         return $self;
     }
     sub _build_batch_form {#{{{
@@ -464,9 +473,9 @@ see what you're doing.
         EVT_CHOICE( $self->parent, $self->chc_train_2->GetId,   sub{$self->OnAllTrainChoice($self->chc_train_2,@_)} );
         EVT_CHOICE( $self->parent, $self->chc_train_3->GetId,   sub{$self->OnAllTrainChoice($self->chc_train_3,@_)} );
         EVT_CHOICE( $self->parent, $self->chc_train_4->GetId,   sub{$self->OnAllTrainChoice($self->chc_train_4,@_)} );
-        EVT_BUTTON( $self->parent, $self->btn_clear->GetId,     sub{$self->OnClearButton(@_)}   );
-        EVT_BUTTON( $self->parent, $self->btn_rename->GetId,    sub{$self->OnRenameButton(@_)}    );
-        EVT_BUTTON( $self->parent, $self->btn_save->GetId,      sub{$self->OnSaveButton(@_)}    );
+        EVT_BUTTON( $self->parent, $self->btn_clear->GetId,     sub{$self->OnClearButton(@_)}                       );
+        EVT_BUTTON( $self->parent, $self->btn_rename->GetId,    sub{$self->OnRenameButton(@_)}                      );
+        EVT_BUTTON( $self->parent, $self->btn_save->GetId,      sub{$self->OnSaveButton(@_)}                        );
 
         ### When the user clicks on the instructions text at the top of the 
         ### screen, this will cause that text to gain focus, thereby enabling 

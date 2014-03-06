@@ -117,7 +117,6 @@ say "Deploying default (empty) databases...";
 die "Database deploy failed! ($exit)" if $exit;
 ### }#}}}
 ### LacunaWaX (main GUI) {#{{{
-=pod
 say "Building LacunaWaX executable...";
 ($out,$err,$exit) = capture {
 
@@ -130,10 +129,10 @@ say "Building LacunaWaX executable...";
 
 };
 die "Building LacunaWaX.exe failed!" if $exit;
+=pod
 =cut
 ### }#}}}
 ### Archmin {#{{{
-=pod
 say "Building Archmin executable...";
 ($out,$err,$exit) = capture {
 
@@ -146,10 +145,10 @@ say "Building Archmin executable...";
 
 };
 die "Building Schedule_archmin.exe failed!" if $exit;
+=pod
 =cut
 ### }#}}}
 ### Autovote {#{{{
-=pod
 say "Building Autovote executable...";
 ($out,$err,$exit) = capture {
 
@@ -162,6 +161,7 @@ say "Building Autovote executable...";
 
 };
 die "Building Schedule_autovote failed!" if $exit;
+=pod
 =cut
 ### }#}}}
 ### SS Health {#{{{

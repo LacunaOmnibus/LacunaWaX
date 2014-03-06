@@ -481,7 +481,6 @@ package LacunaWaX::MainSplitterWindow::RightPane::SpiesPane::SpyRow {
         ### sizers and positions.
         ### So Layout() has to be called on the ScrolledWindow, which 
         ### understands how to deal with its own scrolling.
-        #my $grandparent = $self->ancestor->ancestor;
         my $grandparent = wxTheApp->main_frame->splitter->right_pane;
         $grandparent->main_panel->Layout();
 

@@ -229,7 +229,6 @@ package LacunaWaX::MainFrame {
         return;
     };#}}}
 
-
     ### Subroutine, not a method!
     sub get_size_from_prefs {#{{{
 
@@ -251,7 +250,6 @@ package LacunaWaX::MainFrame {
         $size->SetHeight($h);
         return $size;
     }#}}}
-
 
     sub OnClose {#{{{
         my $self    = shift;
