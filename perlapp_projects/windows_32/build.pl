@@ -149,6 +149,7 @@ die "Building Schedule_archmin.exe failed!" if $exit;
 =cut
 ### }#}}}
 ### Autovote {#{{{
+=pod
 say "Building Autovote executable...";
 ($out,$err,$exit) = capture {
 
@@ -161,11 +162,9 @@ say "Building Autovote executable...";
 
 };
 die "Building Schedule_autovote failed!" if $exit;
-=pod
 =cut
 ### }#}}}
 ### SS Health {#{{{
-=pod
 say "Building SS Health executable...";
 ($out,$err,$exit) = capture {
 
@@ -178,6 +177,7 @@ say "Building SS Health executable...";
 
 };
 die "Building Schedule_sshealth failed!" if $exit;
+=pod
 =cut
 ### }#}}}
     
