@@ -261,6 +261,16 @@ package LacunaWaX::Model::Globals {
         return $lucy;
     }#}}}
 
+    sub get_new_logger {#{{{
+        my $self = shift;
+
+        ### $self->logger is a singleton; various modules often want their own 
+        ### loggers so they can change components and have them stick.
+
+        my $l = $self->_build_logger;
+        return $l;
+    }#}}}
+
 
     no Moose;
     __PACKAGE__->meta->make_immutable; 

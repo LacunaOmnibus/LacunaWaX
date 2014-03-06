@@ -133,6 +133,7 @@ die "Building LacunaWaX.exe failed!" if $exit;
 =cut
 ### }#}}}
 ### Archmin {#{{{
+=pod
 say "Building Archmin executable...";
 ($out,$err,$exit) = capture {
 
@@ -145,11 +146,9 @@ say "Building Archmin executable...";
 
 };
 die "Building Schedule_archmin.exe failed!" if $exit;
-=pod
 =cut
 ### }#}}}
 ### Autovote {#{{{
-=pod
 say "Building Autovote executable...";
 ($out,$err,$exit) = capture {
 
@@ -162,6 +161,7 @@ say "Building Autovote executable...";
 
 };
 die "Building Schedule_autovote failed!" if $exit;
+=pod
 =cut
 ### }#}}}
 ### SS Health {#{{{

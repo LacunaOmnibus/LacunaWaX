@@ -32,7 +32,8 @@ package LacunaWaX::Roles::ScheduledTask {
 
     sub _build_logger {#{{{
         my $self = shift;
-        return $self->globals->logger;
+        #return $self->globals->logger;
+        return $self->globals->get_new_logger;
     }#}}}
     sub _build_schema {#{{{
         my $self = shift;
