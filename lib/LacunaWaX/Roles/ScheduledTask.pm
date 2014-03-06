@@ -21,7 +21,7 @@ package LacunaWaX::Roles::ScheduledTask {
     );
     has 'logger' => (
         is          => 'rw',
-        isa         => 'Log::Dispatch',
+        isa         => 'LacunaWaX::Model::DBILogger',
         lazy_build  => 1,
     );
     has 'schema' => (

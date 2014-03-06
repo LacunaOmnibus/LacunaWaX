@@ -29,6 +29,5 @@ my $scheduler = LacunaWaX::Schedule->new(
     schedule    => 'autovote',
 );
 $scheduler->autovote();
-
 exit 0;
 

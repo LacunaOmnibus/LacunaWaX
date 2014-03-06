@@ -524,6 +524,7 @@ package LacunaWaX::Preload::Perlapp {
     use LacunaWaX::Dialog::Scrolled;
     use LacunaWaX::Roles::MainFrame::MenuBar::Menu;
     use LacunaWaX::Roles::MainSplitterWindow::RightPane;
+    use LacunaWaX::Roles::ScheduledTask;
 
 
 }

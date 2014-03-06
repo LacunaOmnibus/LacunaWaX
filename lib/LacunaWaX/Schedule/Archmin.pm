@@ -8,12 +8,7 @@ package LacunaWaX::Schedule::Archmin {
     with 'LacunaWaX::Roles::ScheduledTask';
     no if $] >= 5.017011, warnings => 'experimental::smartmatch';
 
-    has GLYPH_CARGO_SIZE => (
-        is      => 'ro',
-        isa     => 'Str',
-        lazy    => 1,
-        default => 100,
-    );
+    my $GLYPH_CARGO_SIZE = 100;
 
     sub BUILD {
         my $self = shift;
@@ -101,7 +96,7 @@ they'll simply be picked up on the next run.
             ### missions, we may have subtracted the quantity down to 0.
             next ADD_GLYPHS if $g->{'quantity'} == 0;
             $count += $g->{'quantity'};
-            if( $count * $self->GLYPH_CARGO_SIZE > $hold_size ) { # Whoops
+            if( $count * $GLYPH_CARGO_SIZE > $hold_size ) { # Whoops
                 $count -= $g->{'quantity'};
                 last ADD_GLYPHS;
             }

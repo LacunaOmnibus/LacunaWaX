@@ -1,16 +1,21 @@
 use v5.14;
 use warnings;
-use DateTime::TimeZone;
+
 use FindBin;
+use lib $FindBin::Bin . '/../lib';
+use LacunaWaX::Preload::Perlapp;
+
+use DateTime::TimeZone;
 use Try::Tiny;
 
-### This must exist here for perlApp to understand it needs Moose in time.
+### This must exist here for perlApp to understand it needs Moose in time
 use Moose;
 
-use lib $FindBin::Bin . '/../lib';
+use LacunaWaX;
 use LacunaWaX::Model::Globals;
 use LacunaWaX::Schedule;
 use LacunaWaX::Util;
+
 
 my $root_dir    = LacunaWaX::Util::find_root();
 my $db_file     = join '/', ($root_dir, 'user', 'lacuna_app.sqlite');
@@ -27,7 +32,5 @@ my $scheduler = LacunaWaX::Schedule->new(
     schedule    => 'archmin',
 );
 $scheduler->archmin();
-warn "done";
-
 exit 0;
 
