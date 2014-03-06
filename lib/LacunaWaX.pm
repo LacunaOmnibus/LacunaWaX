@@ -4,6 +4,7 @@ use v5.14;
 package LacunaWaX {
     use Carp;
     use Data::Dumper;
+    use Time::Duration qw(duration duration_exact);
     use Try::Tiny;
     use Wx qw(:everything);
     use Wx::Event qw(EVT_MOVE EVT_CLOSE);
