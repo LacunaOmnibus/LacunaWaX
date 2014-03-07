@@ -52,10 +52,7 @@ package LacunaWaX::MainSplitterWindow {
     };
     sub _build_left_pane {#{{{
         my $self = shift;
-        my $y = LacunaWaX::MainSplitterWindow::LeftPane->new(
-            ancestor => $self,
-            parent   => $self->splitter_window,
-        );
+        my $y = LacunaWaX::MainSplitterWindow::LeftPane->new( parent => $self );
         return $y;
     }#}}}
     sub _build_main_sizer {#{{{
@@ -65,10 +62,7 @@ package LacunaWaX::MainSplitterWindow {
     }#}}}
     sub _build_right_pane {#{{{
         my $self = shift;
-        my $y = LacunaWaX::MainSplitterWindow::RightPane->new(
-            ancestor => $self,
-            parent   => $self->splitter_window,
-        );
+        my $y = LacunaWaX::MainSplitterWindow::RightPane->new( parent => $self );
         return $y;
     }#}}}
     sub _build_size {#{{{

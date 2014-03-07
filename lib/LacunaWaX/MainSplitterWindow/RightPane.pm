@@ -21,7 +21,7 @@ package LacunaWaX::MainSplitterWindow::RightPane {
 
     has 'parent' => (
         is          => 'rw',
-        isa         => 'Wx::SplitterWindow',
+        isa         => 'LacunaWaX::MainSplitterWindow',
         required    => 1,
     );
 
@@ -77,7 +77,7 @@ With no children.
         else {
             $self->main_panel(
                 Wx::ScrolledWindow->new(
-                    $self->parent, -1, 
+                    $self->parent->splitter_window, -1, 
                     wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL
                 )
             );
@@ -196,13 +196,13 @@ Displays one of the RightPane/*.pm panels in the splitter window's right pane.
         my $class = shift || q{};
 
         if( $pname and $class ne 'LacunaWaX::MainSplitterWindow::RightPane::SummaryPane' ) {
-            $self->right_pane->show_right_pane(
+            $self->parent->right_pane->show_right_pane(
                 'LacunaWaX::MainSplitterWindow::RightPane::SummaryPane',
                 $pname
             );
         }
         elsif( $class ne 'LacunaWaX::MainSplitterWindow::RightPane::DefaultPane' ) {
-            $self->right_pane->show_right_pane(
+            $self->parent->right_pane->show_right_pane(
                 'LacunaWaX::MainSplitterWindow::RightPane::DefaultPane'
             );
         }
