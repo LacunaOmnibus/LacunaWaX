@@ -606,7 +606,6 @@ package LacunaWaX::Dialog::Calculator {
         return 1;
     }#}}}
 
-
 sub trilaterate {#{{{
     my $self = shift;
     my $a_x = shift;
@@ -682,7 +681,6 @@ sub distance_from_coords {#{{{
     return sqrt( ($tx - $ox)**2 + ($ty - $oy)**2 );
 }#}}}
 
-
     sub OnClose {#{{{
         my($self, $dialog, $event) = @_;
         $self->Destroy;
@@ -701,7 +699,14 @@ sub distance_from_coords {#{{{
 
         my $dist = wxTheApp->cartesian_distance($fx, $fy, $tx, $ty);
         $self->txt_distance->SetValue($dist);
-        wxTheApp->popmsg("The distance between those two points is $dist.");
+        my $status = LacunaWaX::Dialog::Status->new(
+            parent => $self->dialog,
+            title  => 'Distance',
+        );
+        $status->show; # Don't forget this!
+        $status->say(
+            "The distance between those two points is $dist."
+        );
 
         return 1;
     }#}}}
@@ -719,7 +724,14 @@ sub distance_from_coords {#{{{
         }
 
         my $needed = wxTheApp->halls_to_level($from, $to);
-        wxTheApp->popmsg("You need $needed halls to go from level $from to level $to.");
+        my $status = LacunaWaX::Dialog::Status->new(
+            parent => $self->dialog,
+            title  => 'Halls to Upgrade',
+        );
+        $status->show; # Don't forget this!
+        $status->say(
+            "You need $needed halls to go from level $from to level $to."
+        );
 
         return 1;
     }#}}}
@@ -733,7 +745,15 @@ sub distance_from_coords {#{{{
 
         my $seconds = wxTheApp->travel_time($speed, $distance);
         my $time = wxTheApp->secs_to_human($seconds, 1);   # 1 == 'exact'
-        wxTheApp->popmsg("Traveling $distance units at $speed speed will take $time ($seconds seconds).");
+
+        my $status = LacunaWaX::Dialog::Status->new(
+            parent => $self->dialog,
+            title  => 'Travel Time',
+        );
+        $status->show; # Don't forget this!
+        $status->say(
+            "Traveling $distance units at $speed speed will take $time ($seconds seconds)."
+        );
 
         return 1;
     }#}}}
@@ -805,16 +825,26 @@ sub distance_from_coords {#{{{
         ### We can only be sure of the actual location of the target planet if 
         ### one of the given coordinates is outside the boundaries of the 
         ### game.
+        my $msg = my $title = q{};
         if( abs $cx1 > 1500 or abs $cy1 > 1500 ) {
-            wxTheApp->popmsg("Your target planet is at ($cx2, $cy2).");
-            return 1;
+            $msg    = "Your target planet is at ($cx2, $cy2).";
+            $title  = 'Target Location';
         }
         elsif( abs $cx2 > 1500 or abs $cy2 > 1500 ) {
-            wxTheApp->popmsg("Your target planet is at ($cx1, $cy1).");
-            return 1;
+            $msg    = "Your target planet is at ($cx1, $cy1).";
+            $title  = 'Target Location';
+        }
+        else {
+            $msg    = "Your target planet is either at ($cx1, $cy1) or ($cx2, $cy2).";
+            $title  = 'Possible Target Locations';
         }
 
-        wxTheApp->popmsg("Your target planet is either at ($cx1, $cy1) or ($cx2, $cy2).");
+        my $status = LacunaWaX::Dialog::Status->new(
+            parent => $self->dialog,
+            title  => $title,
+        );
+        $status->show;
+        $status->say( $msg );
         return 1;
     }#}}}
 

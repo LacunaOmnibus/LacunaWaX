@@ -728,10 +728,12 @@ Returns the number of halls needed to get from one level to another.
         my $self    = shift;
         my $message = shift || 'Everything is fine';
         my $title   = shift || 'LacunaWaX';
+
         Wx::MessageBox($message,
                         $title,
                         wxOK | wxICON_INFORMATION,
                         $self->main_frame->frame );
+
         return;
     }#}}}
     sub popconf {#{{{
