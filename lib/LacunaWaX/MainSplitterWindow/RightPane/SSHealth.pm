@@ -48,25 +48,18 @@ package LacunaWaX::MainSplitterWindow::RightPane::SSHealth {
     has 'lbl_header'        => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1);
     has 'lbl_instructions'  => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1);
 
-    has 'chk_enable_alert'  => (is => 'rw', isa => 'Wx::CheckBox',      lazy_build => 1);
-    has 'lbl_enable_alert'  => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1);
-    has 'szr_enable_alert'  => (is => 'rw', isa => 'Wx::Sizer',         lazy_build => 1, documentation => 'horizontal' );
-
-    has 'chk_hostile_ships' => (is => 'rw', isa => 'Wx::CheckBox',      lazy_build => 1);
-    has 'lbl_hostile_ships' => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1);
-    has 'szr_hostile_ships' => (is => 'rw', isa => 'Wx::Sizer',         lazy_build => 1, documentation => 'horizontal' );
-
-    has 'chk_hostile_spies' => (is => 'rw', isa => 'Wx::CheckBox',      lazy_build => 1);
-    has 'lbl_hostile_spies' => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1);
-    has 'szr_hostile_spies' => (is => 'rw', isa => 'Wx::Sizer',         lazy_build => 1, documentation => 'horizontal' );
-
-    has 'chk_own_star_seized' => (is => 'rw', isa => 'Wx::CheckBox',      lazy_build => 1);
-    has 'lbl_own_star_seized' => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1);
-    has 'szr_own_star_seized' => (is => 'rw', isa => 'Wx::Sizer',         lazy_build => 1, documentation => 'horizontal' );
+    has 'szr_grid_opts'         => (is => 'rw', isa => 'Wx::FlexGridSizer', lazy_build => 1 );
+    has 'chk_enable_alert'      => (is => 'rw', isa => 'Wx::CheckBox',      lazy_build => 1);
+    has 'lbl_enable_alert'      => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1);
+    has 'chk_hostile_ships'     => (is => 'rw', isa => 'Wx::CheckBox',      lazy_build => 1);
+    has 'lbl_hostile_ships'     => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1);
+    has 'chk_hostile_spies'     => (is => 'rw', isa => 'Wx::CheckBox',      lazy_build => 1);
+    has 'lbl_hostile_spies'     => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1);
+    has 'chk_own_star_seized'   => (is => 'rw', isa => 'Wx::CheckBox',      lazy_build => 1);
+    has 'lbl_own_star_seized'   => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1);
 
     has 'lbl_min_res_pre'   => (is => 'rw', isa => 'Wx::StaticText', lazy_build => 1);
     has 'lbl_min_res_suf'   => (is => 'rw', isa => 'Wx::StaticText', lazy_build => 1);
-    has 'szr_min_res'       => (is => 'rw', isa => 'Wx::Sizer',      lazy_build => 1, documentation => 'horizontal' );
     has 'txt_min_res'       => (is => 'rw', isa => 'Wx::TextCtrl',   lazy_build => 1);
 
     has 'szr_save' => (is => 'rw', isa => 'Wx::Sizer',  lazy_build => 1, documentation => 'vertical' );
@@ -81,41 +74,22 @@ package LacunaWaX::MainSplitterWindow::RightPane::SSHealth {
         $self->szr_header->Add(5, 3, 0);
         $self->szr_header->Add($self->lbl_instructions, 0, 0, 0);
 
-        $self->szr_enable_alert->Add($self->lbl_enable_alert, 0, 0, 0);
-        $self->szr_enable_alert->Add(118, 2, 0);
-        $self->szr_enable_alert->Add($self->chk_enable_alert, 0, 0, 0);
-
-        $self->szr_hostile_ships->Add($self->lbl_hostile_ships, 0, 0, 0);
-        $self->szr_hostile_ships->Add(42, 2, 0);
-        $self->szr_hostile_ships->Add($self->chk_hostile_ships, 0, 0, 0);
-
-        $self->szr_hostile_spies->Add($self->lbl_hostile_spies, 0, 0, 0);
-        $self->szr_hostile_spies->Add(46, 2, 0);
-        $self->szr_hostile_spies->Add($self->chk_hostile_spies, 0, 0, 0);
-
-        $self->szr_own_star_seized->Add($self->lbl_own_star_seized, 0, 0, 0);
-        $self->szr_own_star_seized->Add(10, 2, 0);
-        $self->szr_own_star_seized->Add($self->chk_own_star_seized, 0, 0, 0);
-
-        $self->szr_min_res->Add($self->lbl_min_res_pre, 0, 0, 0);
-        $self->szr_min_res->Add(30, 0, 0);
-        $self->szr_min_res->Add($self->txt_min_res, 0, 0, 0);
-        $self->szr_min_res->Add(5, 0, 0);
-        $self->szr_min_res->Add($self->lbl_min_res_suf, 0, 0, 0);
+        $self->szr_grid_opts->Add( $self->lbl_enable_alert, 0, 0, 0 );
+        $self->szr_grid_opts->Add( $self->chk_enable_alert, 0, 0, 0 );
+        $self->szr_grid_opts->Add( $self->lbl_hostile_ships, 0, 0, 0 );
+        $self->szr_grid_opts->Add( $self->chk_hostile_ships, 0, 0, 0 );
+        $self->szr_grid_opts->Add( $self->lbl_hostile_spies, 0, 0, 0 );
+        $self->szr_grid_opts->Add( $self->chk_hostile_spies, 0, 0, 0 );
+        $self->szr_grid_opts->Add( $self->lbl_own_star_seized, 0, 0, 0 );
+        $self->szr_grid_opts->Add( $self->chk_own_star_seized, 0, 0, 0 );
+        $self->szr_grid_opts->Add( $self->lbl_min_res_pre, 0, 0, 0 );
+        $self->szr_grid_opts->Add( $self->txt_min_res, 0, 0, 0 );
 
         $self->szr_save->Add($self->btn_save, 0, 0, 0);
 
         $self->content_sizer->Add($self->szr_header, 0, 0, 0);
         $self->content_sizer->AddSpacer(20);
-        $self->content_sizer->Add($self->szr_enable_alert, 0, 0, 0);
-        $self->content_sizer->AddSpacer(0);
-        $self->content_sizer->Add($self->szr_hostile_ships, 0, 0, 0);
-        $self->content_sizer->AddSpacer(0);
-        $self->content_sizer->Add($self->szr_hostile_spies, 0, 0, 0);
-        $self->content_sizer->AddSpacer(0);
-        $self->content_sizer->Add($self->szr_own_star_seized, 0, 0, 0);
-        $self->content_sizer->AddSpacer(0);
-        $self->content_sizer->Add($self->szr_min_res, 0, 0, 0);
+        $self->content_sizer->Add($self->szr_grid_opts, 0, 0, 0);
         $self->content_sizer->AddSpacer(20);
         $self->content_sizer->Add($self->szr_save, 0, 0, 0);
 
@@ -143,7 +117,6 @@ package LacunaWaX::MainSplitterWindow::RightPane::SSHealth {
         $v->SetFont( wxTheApp->get_font('para_text_1') );
         return $v;
     }#}}}
-
     sub _build_chk_enable_alert {#{{{
         my $self = shift;
         my $v = Wx::CheckBox->new(
@@ -171,11 +144,6 @@ package LacunaWaX::MainSplitterWindow::RightPane::SSHealth {
         $v->SetToolTip($tt);
         return $v;
     }#}}}
-    sub _build_szr_enable_alert {#{{{
-        my $self = shift;
-        return wxTheApp->build_sizer($self->parent, wxHORIZONTAL, 'Enable Alert');
-    }#}}}
-
     sub _build_chk_hostile_ships {#{{{
         my $self = shift;
         my $v = Wx::CheckBox->new(
@@ -203,11 +171,6 @@ package LacunaWaX::MainSplitterWindow::RightPane::SSHealth {
         $v->SetToolTip($tt);
         return $v;
     }#}}}
-    sub _build_szr_hostile_ships {#{{{
-        my $self = shift;
-        return wxTheApp->build_sizer($self->parent, wxHORIZONTAL, 'Hostile Ships');
-    }#}}}
-
     sub _build_chk_hostile_spies {#{{{
         my $self = shift;
         my $v = Wx::CheckBox->new(
@@ -235,11 +198,6 @@ package LacunaWaX::MainSplitterWindow::RightPane::SSHealth {
         $v->SetToolTip($tt);
         return $v;
     }#}}}
-    sub _build_szr_hostile_spies {#{{{
-        my $self = shift;
-        return wxTheApp->build_sizer($self->parent, wxHORIZONTAL, 'Hostile Spies');
-    }#}}}
-
     sub _build_chk_own_star_seized {#{{{
         my $self = shift;
         my $v = Wx::CheckBox->new(
@@ -267,11 +225,6 @@ package LacunaWaX::MainSplitterWindow::RightPane::SSHealth {
         $v->SetToolTip($tt);
         return $v;
     }#}}}
-    sub _build_szr_own_star_seized {#{{{
-        my $self = shift;
-        return wxTheApp->build_sizer($self->parent, wxHORIZONTAL, 'Own Star');
-    }#}}}
-
     sub _build_lbl_header {#{{{
         my $self = shift;
         my $v = Wx::StaticText->new(
@@ -287,21 +240,13 @@ package LacunaWaX::MainSplitterWindow::RightPane::SSHealth {
     sub _build_lbl_instructions {#{{{
         my $self = shift;
 
-        my $text = "Sends mail to you in-game to alert you to possible problems with a Space Station.
-
-Alerts will have the 'Correspondence' tag attached, so be sure to filter by that before doing a mass email delete.
-        
-Hostile spy and ship alerts both require that a Police Station module be on the planet.  A higher level Police Station will be more effective.
-
-There's actually no way to truly tell if a foreign spy is 'hostile' or not.  So the hostile spy alert is actually looking for any spies onsite who are not currently set to the Counter Espionage mission; it's assumed that's what any friendly spies will be doing.
-
-";
+        my $text = "Sends mail to alert you to possible problems with a Space Station.  See Help for details.";
 
         my $v = Wx::StaticText->new(
             $self->parent, -1, 
             $text,
             wxDefaultPosition, 
-            Wx::Size->new(-1, 270)
+            Wx::Size->new(-1, 20)
         );
         $v->Wrap( $self->parent->GetSize->GetWidth - 130 ); # accounts for the vertical scrollbar
         $v->SetFont( wxTheApp->get_font('para_text_2') );
@@ -347,13 +292,14 @@ There's actually no way to truly tell if a foreign spy is 'hostile' or not.  So 
 
         return( $police and ref $police eq 'Games::Lacuna::Client::Buildings::PoliceStation' ) ? $police : undef;
     }#}}}
+    sub _build_szr_grid_opts {#{{{
+        my $self = shift;
+        return Wx::FlexGridSizer->new(5, 2, 5, 15);
+    }#}}}
     sub _build_szr_header {#{{{
         my $self = shift;
-        return wxTheApp->build_sizer($self->parent, wxVERTICAL, 'Header');
-    }#}}}
-    sub _build_szr_min_res {#{{{
-        my $self = shift;
-        return wxTheApp->build_sizer($self->parent, wxHORIZONTAL, 'Min Res');
+        my $v = wxTheApp->build_sizer($self->parent, wxVERTICAL, 'Header');
+        return $v;
     }#}}}
     sub _build_szr_save {#{{{
         my $self = shift;
