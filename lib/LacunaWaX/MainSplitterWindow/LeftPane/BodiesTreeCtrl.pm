@@ -226,6 +226,20 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
         return 1;
     }#}}}
 
+    sub bold_planet_names {#{{{
+        my $self = shift;
+
+        my( $planet_id, $cookie ) = $self->treeview->treectrl->GetFirstChild( $self->bodies_item_id );
+        my $cnt = 1;
+        $self->treectrl->SetItemFont( $planet_id, wxTheApp->get_font('bold_para_text_1') );
+
+        while( $planet_id = $self->treeview->treectrl->GetNextSibling($planet_id) ) {
+            last unless $planet_id->IsOk;
+            $cnt++;
+            $self->treectrl->SetItemFont( $planet_id, wxTheApp->get_font('bold_para_text_1') );
+        }
+        return $cnt;
+    }#}}}
     sub fill_tree {#{{{
         my $self = shift;
 
@@ -288,6 +302,16 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
             push @{$bodies}, $planet_node;
         }#}}}
 
+        for(1..2) {
+            ### Add some empty nodes at the bottom, or the last item will be 
+            ### obscured by the bottom of the frame.
+            my $empty_node = {
+                node    => q{},
+                childs  => [],
+            };
+            push @{$bodies}, $empty_node;
+        }
+
         my $model_data = $self->treeview->model->data;
         $model_data->{'childs'}[0]{'childs'} = $bodies; # {'childs'}[0] is the leaf labeled 'Bodies'
         $self->treeview->model->data( $model_data );
@@ -309,20 +333,6 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
         #$self->treectrl->Expand($self->bodies_item_id);
 
         return 1;
-    }#}}}
-    sub bold_planet_names {#{{{
-        my $self = shift;
-
-        my( $planet_id, $cookie ) = $self->treeview->treectrl->GetFirstChild( $self->bodies_item_id );
-        my $cnt = 1;
-        $self->treectrl->SetItemFont( $planet_id, wxTheApp->get_font('bold_para_text_1') );
-
-        while( $planet_id = $self->treeview->treectrl->GetNextSibling($planet_id) ) {
-            last unless $planet_id->IsOk;
-            $cnt++;
-            $self->treectrl->SetItemFont( $planet_id, wxTheApp->get_font('bold_para_text_1') );
-        }
-        return $cnt;
     }#}}}
     sub toggle_expansion_state {#{{{
         my $self = shift;
