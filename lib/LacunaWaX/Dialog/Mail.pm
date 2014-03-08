@@ -24,7 +24,6 @@ package LacunaWaX::Dialog::Mail {
     has 'chk_excav'         => (is => 'rw', isa => 'Wx::CheckBox',      lazy_build => 1);
     has 'chk_parl'          => (is => 'rw', isa => 'Wx::CheckBox',      lazy_build => 1);
     has 'chk_probe'         => (is => 'rw', isa => 'Wx::CheckBox',      lazy_build => 1);
-    has 'chk_targ_neut'     => (is => 'rw', isa => 'Wx::CheckBox',      lazy_build => 1);
     has 'chk_read'          => (is => 'rw', isa => 'Wx::CheckBox',      lazy_build => 1);
     has 'lbl_ally'          => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1);
     has 'lbl_body'          => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1);
@@ -72,13 +71,10 @@ package LacunaWaX::Dialog::Mail {
         $self->szr_check_1->Add($self->chk_corr, 0, 0, 0);
         $self->szr_check_1->AddSpacer(2);
         $self->szr_check_1->Add($self->chk_excav, 0, 0, 0);
-        $self->szr_check_1->AddSpacer(2);
-        $self->szr_check_1->Add($self->chk_parl, 0, 0, 0);
 
+        $self->szr_check_2->Add($self->chk_parl, 0, 0, 0);
         $self->szr_check_2->AddSpacer(2);
         $self->szr_check_2->Add($self->chk_probe, 0, 0, 0);
-        $self->szr_check_2->AddSpacer(2);
-        $self->szr_check_2->Add($self->chk_targ_neut, 0, 0, 0);		
         $self->szr_check_2->AddSpacer(20);
         $self->szr_check_2->Add($self->chk_read, 0, 0, 0);		
 
@@ -206,7 +202,7 @@ package LacunaWaX::Dialog::Mail {
         my $self = shift;
         return Wx::CheckBox->new(
             $self->dialog, -1, 
-            'Attacks',
+            'Attack',
             wxDefaultPosition, 
             Wx::Size->new(-1,-1), 
         );
@@ -243,15 +239,6 @@ package LacunaWaX::Dialog::Mail {
         return Wx::CheckBox->new(
             $self->dialog, -1, 
             'Probe',
-            wxDefaultPosition, 
-            Wx::Size->new(-1,-1), 
-        );
-    }#}}}
-    sub _build_chk_targ_neut {#{{{
-        my $self = shift;
-        return Wx::CheckBox->new(
-            $self->dialog, -1, 
-            'Target Neutralized',
             wxDefaultPosition, 
             Wx::Size->new(-1,-1), 
         );
@@ -522,14 +509,6 @@ package LacunaWaX::Dialog::Mail {
             $status->show;
         }
 
-### wx-common
-###     includes libwxbase2.8-0
-### libwxgtk2.8-dev
-###     includes
-###         libwxbase2.8-dev
-###         libwxgtk2.8-0
-###         wx2.8-headers
-
         ### We always have to get the first page of messages, which will tell 
         ### us how many messages (and therefore pages) there are in total.
         $status->say("Reading page 1");
@@ -613,7 +592,6 @@ package LacunaWaX::Dialog::Mail {
         EVT_BUTTON(     $self, $self->btn_clear_to->GetId,      sub{$self->OnClearTo(@_)} );
         EVT_BUTTON(     $self, $self->btn_send->GetId,          sub{$self->OnSendMail(@_)} );
         EVT_CHECKBOX(   $self, $self->chk_corr->GetId,          sub{$self->OnCorrespondenceCheckbox(@_)} );
-        EVT_CHECKBOX(   $self, $self->chk_targ_neut->GetId,     sub{$self->OnTargNeutChecked(@_)} );
         EVT_CHOICE(     $self, $self->chc_ally->GetId,          sub{$self->OnAllyChoice(@_)} );
         EVT_CLOSE(      $self,                                  sub{$self->OnClose(@_)});
         return 1;
@@ -813,14 +791,6 @@ already used 'bless'.
         else {
             wxTheApp->poperr("Unknown error sending message.");
         }
-        return 1;
-    }#}}}
-    sub OnTargNeutChecked {#{{{
-        my $self   = shift;
-
-        $self->txt_cust->SetValue('Target Neutralized');
-        $self->chk_targ_neut->SetValue(0);
-
         return 1;
     }#}}}
 
