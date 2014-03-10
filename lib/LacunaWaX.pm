@@ -473,7 +473,7 @@ Really just a convenience method to keep you from having to call
 Returns the distance between two points.
 
  my $dist = $client->cartesian_distance(
-    $origin_x, $origin_y,
+    $source_x, $source_y,
     $target_x, $target_y,
  );
 
@@ -832,7 +832,7 @@ Returns the time (in seconds) to cover a given distance given a rate of speed,
 where rate is a ship's listed speed.
 
  my $dist = $client->cartesian_distance(
-    $origin_x, $origin_y,
+    $source_x, $source_y,
     $target_x, $target_y,
  );
  my $seconds_travelling = $client->travel_time($rate, $dist);

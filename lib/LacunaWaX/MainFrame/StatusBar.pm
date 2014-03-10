@@ -148,8 +148,7 @@ package LacunaWaX::MainFrame::StatusBar {
         return $old_text;
     }#}}}
     sub endthrob {#{{{
-        my $self    = shift;
-        my $pause   = shift || 50;    # milliseconds
+        my $self = shift;
         $self->gauge->stop();
         $self->bar_reset();
         $self->status_bar->GetParent->SendSizeEvent();
