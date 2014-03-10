@@ -31,23 +31,23 @@
       </div><!-- end header -->
 
     <div class="wrapper">
-
       <section>
         <div id="title">
           <h1>Lacunawax</h1>
-          <p>A GUI for The Lacuna Expanse</p>
-          <hr>
-          <span class="credits left">Project maintained by <a href="https://github.com/tmtowtdi">tmtowtdi</a></span>
-          <span class="credits right">Hosted on GitHub Pages &mdash; Theme by <a href="http://twitter.com/#!/michigangraham">mattgraham</a></span>
-        </div>
+          <p>
+            A GUI for The Lacuna Expanse<br>
+            © 2012-2014 Jonathan D. Barton (<a 
+            href="mailto:tmtowtdi@gmail.com">tmtowtdi@gmail.com</a>)
+        </p>
 
-        <h1>LacunaWaX</h1>
+        <hr>
+        <span class="credits left">Project maintained by <a 
+        href="https://github.com/tmtowtdi">tmtowtdi</a></span>
+        <span class="credits right">Hosted on GitHub Pages &mdash; Theme by <a 
+        href="http://twitter.com/#!/michigangraham">mattgraham</a></span>
+    </div>
 
-<p>A GUI for The Lacuna Expanse</p>
-
-<p>Copyright 2012-2013 Jonathan D. Barton (<a href="mailto:tmtowtdi@gmail.com">tmtowtdi@gmail.com</a>)</p>
-
-<h2>INSTALLING</h2>
+<h2>INSTALLING FOR THE FIRST TIME</h2>
 <ul>
     <li>
         To install on Windows, download the EXE installer and run it.
@@ -60,40 +60,56 @@
 </ul>
 
 <h2>UPGRADING FROM PREVIOUS VERSIONS</h2>
-Usually, when you want to upgrade from an old version to a new version, all you need to do 
-is run the new version's installer.  You should not need to uninstall the old version 
-first; the new version will just lay itself over top of the old version and preserve all 
-of your preferences.
-<p>
+The upgrade process has changed for version 2.0; please read!
 <p>
 
-However, a few people have occasionally had problems when installing a new version over 
-top of a much older version (not just the previously-released version).
-<p>
-
-When this happens, the install will look like it worked fine, but when you start the 
-program and try to access a panel, often one that previously worked, the entire program 
-will crash instead.
-<p>
-
-If that happens, the solution is to:
 <ul>
     <li>
-        If you need to record any data from your old version (like lists of sitter 
-        passwords), re-install the old version, run the program, and make notes of what 
-        you need to preserve.  When you're finished, shut down LacunaWaX.
+        Before upgrading, you'll want to back up your current preferences database so that 
+        the new version you're about to install doesn't have to be completely 
+        reconfigured.
+        <p>
     </li>
     <li>
-        Uninstall LacunaWaX.
+        To back up version 1.x
+        <ul>
+            <li>
+                Shut down LacunaWaX if it's running.
+            </li>
+            <li>
+                Find your current LacunaWaX database file.  This is simply a single file 
+                called <code>lacuna_app.sqlite.</code>  You'll find it under your 
+                installation folder, something like <code>C:\Program Files\TMT 
+                Tools\LacunaWaX\user\lacunawax_app.sqlite</code> - copy that file onto 
+                your desktop.
+            </li>
+        </ul>
     </li>
     <li>
-        Fully delete the install directory, which will be in your Program Files directory.  
-        The directory (folder) you want to remove is "TMT Tools\LacunaWaX" - just delete 
-        the whole thing.
+        To back up version 2.x
+        <ul>
+            <li>
+                Start LacunaWax.  Under the File menu, choose "Export Database".  Browse 
+                to your desktop, and save the database there.
+            </li>
+        </ul>
+        <p>
     </li>
     <li>
-        Now install the new version.  It should work fine now, you'll just need to re-set 
-        your preferences.
+        Uninstall LacunaWaX as you'd uninstall any other program (Control Panel...  
+        Add/Remove Programs).
+    </li>
+    <li>
+        Install the new version of LacunaWaX.  When the installation completes, run it.  
+        </li>
+    <li>
+        Choose the File... Import Preferences menu item, and browse to the 
+        <code>lacunawax_app.sqlite</code> file you created in the "back up" step above.  
+        This will import your old preferences to your new installation.
+    </li>
+    <li>
+        You can now run LacunaWaX normally, and you're free to delete the 
+        <code>lacunawax_app.sqlite</code> file from your desktop.
     </li>
 </ul>
 
@@ -101,9 +117,10 @@ If that happens, the solution is to:
 
 <h2>CAUTION</h2>
 
-<p>LacunaWaX stores game account passwords in plain text.  Guard your lacuna_app.sqlite file 
-- handing it to someone else for any reason is the same as handing that person not only 
-  your own account password, but also all of your recorded sitter passwords.</p>
+<p>LacunaWaX stores game account passwords in plain text.  Guard your 
+<code>lacuna_app.sqlite</code> file - handing it to someone else for any reason is the 
+same as handing that person not only your own account password, but also all of your 
+recorded sitter passwords.</p>
 
 <p>It is safe to send your lacuna_log.sqlite file to someone else for debugging help if 
 needed, as it contains no passwords.</p>
@@ -120,24 +137,33 @@ pre-requisite modules will need to be installed manually.</p>
         <ul>
         <li>Perl &gt;= v5.14</li>
         <li>Archive::Zip</li>
-        <li>Bread::Board</li>
         <li>CHI</li>
         <li>DateTime</li>
-        <li>File::Which</li>
+        <li>
+            JSON::RPC::LWP
+            <ul>
+                <li>
+                    You may need to force install this.
+                    <code>cpan -f JSON::RPC::LWP</code>
+                </li>
+            </ul>
+        </li>
         <li>LWP::UserAgent</li>
         <li>Moose</li>
         <li>MooseX::NonMoose</li>
         <li>Try::Tiny</li>
         <li>URI</li>
         <li>Wx</li>
-        </ul><h3>Run</h3>
+        </ul>
+        
+        <h3>Run</h3>
+        <pre> $ perl bin/LacunaWaX.pl </pre>
 
-        <pre><code>$ perl bin/LacunaWaX.pl
-        </code></pre>
-
-        <p>Install any modules it complains about missing, and add them to the list above.</p>
-
-        <p>Once all pre-reqs have been installed, that command will start the GUI.</p>
+        <p>
+            Install any modules it complains about missing, and add them to the list 
+            above.<br>
+            Once all pre-reqs have been installed, that command will start the GUI.
+        </p>
 
       </section>
     </div>

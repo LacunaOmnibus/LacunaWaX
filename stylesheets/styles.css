@@ -311,8 +311,14 @@ sub {
 dl,
 menu,
 ol,
+/*
+ * JDB - removing top margin from ul
 ul {
   margin: 1em 0;
+}
+*/
+ul {
+  margin: 0em 0;
 }
 
 dd {
@@ -551,7 +557,21 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: normal;
 }
 
+/*
+ * JDB - non-h1 headers, likely to be used inline, get some extra top margin.
+ */
+h2, h3, h4, h5, h6 {
+  margin: 1em 0 10px;
+}
+
+/*
+ * JDB - removing bottom margin from ul.  Might want to do the same for ol if 
+ * that ever gets used.
 p, ul, ol, table, pre, dl {
+  margin: 0 0 20px;
+}
+*/
+p, ol, table, pre, dl {
   margin: 0 0 20px;
 }
 
@@ -627,8 +647,13 @@ code {
   font-family: "Lucida Sans", Monaco, Bitstream Vera Sans Mono, Lucida Console, Terminal;
   color: #efefef;
   font-size: 13px;
-  margin: 0 4px;
-  padding: 4px 6px;
+  /*
+   * JDB reduced right margin and padding
+    margin: 0 4px;
+    padding: 4px 6px;
+   */
+  margin: 0 2px;
+  padding: 4px 2px;
   -moz-border-radius: 2px;
   -webkit-border-radius: 2px;
   -o-border-radius: 2px;
