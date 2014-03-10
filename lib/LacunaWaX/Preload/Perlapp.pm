@@ -47,7 +47,7 @@ package LacunaWaX::Preload::Perlapp {
     ### Needed for LacunaWaX
     ### 
 
-    ### DateTime::Locale    (step 13)
+    ### DateTime::Locale
     {#{{{
 
         use DateTime::Locale::aa;
@@ -519,14 +519,11 @@ package LacunaWaX::Preload::Perlapp {
 
     }#}}}
 
-
     use LacunaWaX::Dialog::NonScrolled;
     use LacunaWaX::Dialog::Scrolled;
     use LacunaWaX::Roles::MainFrame::MenuBar::Menu;
     use LacunaWaX::Roles::MainSplitterWindow::RightPane;
     use LacunaWaX::Roles::ScheduledTask;
-
-
 }
 
 1;

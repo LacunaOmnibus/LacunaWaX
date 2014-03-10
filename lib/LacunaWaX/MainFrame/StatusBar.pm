@@ -1,6 +1,8 @@
 
 package LacunaWaX::MainFrame::StatusBar {
     use v5.14;
+    use DateTime;
+    use DateTime::TimeZone;
     use Moose;
     use Try::Tiny;
     use Wx qw(:everything);
@@ -14,16 +16,53 @@ package LacunaWaX::MainFrame::StatusBar {
 
     #########################################
 
+    has 'timer' => (
+        is          => 'rw', 
+        isa         => 'Wx::Timer',
+        lazy_build  => 1,
+        handles => {
+            start => 'Start',
+            stop  => 'Stop',
+        }
+    );
+
     has 'status_bar'        => (is => 'rw', isa => 'Wx::StatusBar', lazy_build => 1                 );
     has 'gauge'             => (is => 'rw', isa => 'Wx::Gauge',     lazy_build => 1                 );
     has 'caption'           => (is => 'rw', isa => 'Str',           lazy_build => 1                 );
     has 'old_w'             => (is => 'rw', isa => 'Int',           lazy => 1,          default => 0);
     has 'old_h'             => (is => 'rw', isa => 'Int',           lazy => 1,          default => 0);
 
+    has 'rect_caption' => (
+        is      => 'ro',
+        isa     => 'Int',
+        default => 0,
+    );
+    has 'rect_clock' => (
+        is      => 'ro',
+        isa     => 'Int',
+        default => 1,
+    );
+    has 'rect_gauge' => (
+        is      => 'ro',
+        isa     => 'Int',
+        default => 2,
+    );
+
     sub BUILD {
         my $self = shift;
-        $self->bar_reset; # Resets the whole bar, including the gauge.
+
+        ### Force the clock to show up immediately rather than waiting for the 
+        ### first timer event to kick off, which will take a second.
+        $self->SetClock('bogus bar', 'bogus event');
+
+        ### Send 1-second timer events to ourself to update the clock.
+        $self->start( 1000, wxTIMER_CONTINUOUS );
+
+        ### Resets the whole bar, including the gauge.
+        $self->bar_reset;
+
         $self->_set_events();
+
         return $self;
     }
     sub _build_status_bar {#{{{
@@ -33,7 +72,8 @@ package LacunaWaX::MainFrame::StatusBar {
         unless( $y = $self->parent->GetStatusBar ) {
             ### Don't recreate the statusbar if it already exists, as in the 
             ### transition from the intro panel to the main splitter window.
-            $y = $self->parent->CreateStatusBar(2);
+            #$y = $self->parent->CreateStatusBar(2);
+            $y = $self->parent->CreateStatusBar(3);
         }
         return $y;
     }#}}}
@@ -43,7 +83,7 @@ package LacunaWaX::MainFrame::StatusBar {
     }#}}}
     sub _build_gauge {#{{{
         my $self = shift;
-        my $rect = $self->status_bar->GetFieldRect(1);
+        my $rect = $self->status_bar->GetFieldRect( $self->rect_gauge );
         my $g = Wx::Gauge->new(
             $self->status_bar, -1,
             100,
@@ -54,19 +94,26 @@ package LacunaWaX::MainFrame::StatusBar {
         $g->SetValue(0);
         return $g;
     }#}}}
+    sub _build_timer {#{{{
+        my $self = shift;
+        my $t = Wx::Timer->new();
+        $t->SetOwner( $self->status_bar );
+        return $t;
+    }#}}}
     sub _set_events {#{{{
         my $self = shift;
-        EVT_SIZE( $self->status_bar, sub{$self->OnResize(@_)} );
+        EVT_SIZE(   $self->status_bar,                      sub{$self->OnResize(@_)} );
+        EVT_TIMER(  $self->status_bar, $self->timer->GetId, sub{$self->SetClock(@_)} );
         return 1;
     }#}}}
 
     sub bar_reset {#{{{
         my $self = shift;
         $self->status_bar->DestroyChildren();
-        $self->status_bar->SetStatusWidths(-5, -1);
-        $self->status_bar->SetStatusText( $self->caption, 0 );
+        $self->status_bar->SetStatusWidths(-3, -4, -2);
+        $self->status_bar->SetStatusText( $self->caption, $self->rect_caption );
 
-        my $rect = $self->status_bar->GetFieldRect(1);
+        my $rect = $self->status_bar->GetFieldRect( $self->rect_gauge );
         $self->gauge( $self->_build_gauge );
         wxTheApp->Yield;
 
@@ -76,10 +123,21 @@ package LacunaWaX::MainFrame::StatusBar {
     sub change_caption {#{{{
         my $self = shift;
         my $new_text = shift;
-        my $old_text = $self->status_bar->GetStatusText(0);
+        my $old_text = $self->status_bar->GetStatusText( $self->rect_caption );
         $self->caption($new_text);
-        $self->status_bar->SetStatusText($new_text, 0);
+        $self->status_bar->SetStatusText( $new_text, $self->rect_caption );
         return $old_text;
+    }#}}}
+    sub hms_12 {#{{{
+        my $self = shift;
+        my $dt   = shift;
+        my $str = sprintf "%02d:%02d:%02d %s", $dt->hour_12, $dt->minute, $dt->second, $dt->am_or_pm;
+        return $str;
+    }#}}}
+    sub hms_24 {#{{{
+        my $self = shift;
+        my $dt   = shift;
+        return $dt->hms;
     }#}}}
 
     sub OnResize {#{{{
@@ -92,6 +150,25 @@ package LacunaWaX::MainFrame::StatusBar {
             $self->old_w( $current_size->width );
             $self->old_h( $current_size->height );
         } 
+
+        return 1;
+    }#}}}
+    sub SetClock {#{{{
+        my $self = shift;
+        my $bar  = shift;   # Wx::StatusBar
+        my $evt  = shift;   # Wx::TimerEvent
+
+        my $tz_loc  = DateTime::TimeZone->new( name => 'local' );
+        my $gmt     = shift || DateTime->now( time_zone => 'GMT' );
+        my $loc     = shift || DateTime->now( time_zone => $tz_loc );
+
+        ### CHECK I should add an editable preference where the user can chose 
+        ### between 12 and 24 hour time.  For now, I'm forcing 12.
+        my $status = "Local: " . $self->hms_12($loc). " | Server: " . $self->hms_12($gmt);
+        #my $status = "Local: " . $self->hms_24($loc). " | Server: " . $self->hms_24($gmt);
+
+        $self->status_bar->SetStatusText( $status, $self->rect_clock );
+        wxTheApp->Yield;
 
         return 1;
     }#}}}
