@@ -16,6 +16,7 @@ use LacunaWaX::Model::DefaultData;
 my $root_dir = LacunaWaX::Util::find_root();
 my $app_db   = "$root_dir/user/lacuna_app.sqlite";
 my $log_db   = "$root_dir/user/lacuna_log.sqlite";
+my $globals  = LacunaWaX::Model::Globals->new( root_dir => $root_dir );
 
 unless(-e $app_db and -e $log_db ) {#{{{
     autoflush STDOUT 1;
@@ -29,9 +30,8 @@ This takes a few seconds; please be patient...  ";
     ### versions of both databases.
     ###
     ### This deploy bit is here for the benefit of people running from source.
-    my $g = LacunaWaX::Model::Globals->new( root_dir => "$FindBin::Bin/.." );
     unless(-e $app_db ) {
-        my $app_schema = $g->main_schema;
+        my $app_schema = $globals->main_schema;
 say "deploying app";
         $app_schema->deploy;
         my $d = LacunaWaX::Model::DefaultData->new();
@@ -39,7 +39,7 @@ say "deploying app";
         $d->add_stations($app_schema);
     }
     unless(-e $log_db ) {
-        my $log_schema = $g->logs_schema;
+        my $log_schema = $globals->logs_schema;
 say "deploying log";
         $log_schema->deploy;
     }

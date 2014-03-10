@@ -50,6 +50,13 @@ package LacunaWaX::Preload::Perlapp {
     ### DateTime::Locale
     {#{{{
 
+        ### Yeah, both mods on both OSs.  The perlapp executable complains 
+        ### about being unable to find the ::Unix on Windows if it's not 
+        ### included here (and, I assume vice-versa).  The correct mod ends up 
+        ### getting used in the correct OS.
+        use DateTime::TimeZone::Local::Win32;
+        use DateTime::TimeZone::Local::Unix;
+
         use DateTime::Locale::aa;
         use DateTime::Locale::aa_DJ;
         use DateTime::Locale::aa_ER;
