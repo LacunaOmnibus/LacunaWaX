@@ -44,6 +44,16 @@ package LacunaWaX::MainFrame {
         }
     );
 
+    has 'status_bar' => (
+        is          => 'rw',
+        isa         => 'LacunaWaX::MainFrame::StatusBar',
+        lazy_build  => 1,
+        handles     => {
+            endthrob    => 'endthrob',
+            throb       => 'throb',
+        }
+    );
+
     has 'style'     => (is => 'rw', isa => 'Int',       lazy_build => 1);
     has 'title'     => (is => 'rw', isa => 'Str',       lazy_build => 1);
     has 'size'      => (is => 'rw', isa => 'Wx::Size',  lazy_build => 1);
@@ -54,7 +64,6 @@ package LacunaWaX::MainFrame {
     has 'default_width'     => (is => 'ro', isa => 'Int', default => 800);
     has 'default_height'    => (is => 'ro', isa => 'Int', default => 900);
 
-    has 'status_bar'    => (is => 'rw', isa => 'LacunaWaX::MainFrame::StatusBar',   lazy_build => 1 );
     has 'menu_bar'      => (is => 'rw', isa => 'LacunaWaX::MainFrame::MenuBar',     lazy_build => 1 );
 
     has 'intro_panel' => (

@@ -544,13 +544,7 @@ Returns true if the database passed in contains the correct tables and columns.
     }#}}}
     sub endthrob {#{{{
         my $self = shift;
-
-        $self->main_frame->status_bar->bar_reset;
-        $self->Yield; 
-        local %SIG = ();
-        $SIG{ALRM} = undef;     ##no critic qw(RequireLocalizedPunctuationVars) - PC thinks $SIG there is a scalar - whoops
-        alarm 0;
-        return;
+        $self->main_frame->status_bar->endthrob;
     }#}}}
     sub get_top_left_corner {#{{{
         my $self = shift;
@@ -825,17 +819,7 @@ string.
     }#}}}
     sub throb {#{{{
         my $self = shift;
-
-        $self->main_frame->status_bar->gauge->Pulse;        ## no critic qw(ProhibitLongChainsOfMethodCalls)
-        $self->Yield; 
-        local %SIG = ();
-        $SIG{ALRM} = sub {  ##no critic qw(RequireLocalizedPunctuationVars) - PC thinks $SIG there is a scalar - whoops
-            $self->main_frame->status_bar->gauge->Pulse;    ## no critic qw(ProhibitLongChainsOfMethodCalls)
-            $self->Yield; 
-            alarm 1;
-        };
-        alarm 1;
-        return;
+        $self->main_frame->status_bar->throb;
     }#}}}
     sub travel_time {#{{{
         my $self = shift;

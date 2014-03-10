@@ -8,6 +8,8 @@ package LacunaWaX::MainFrame::StatusBar {
     use Wx qw(:everything);
     use Wx::Event qw(EVT_SIZE EVT_TIMER);
 
+    use LacunaWaX::MainFrame::StatusBar::Gauge;
+
     has 'parent' => (
         is          => 'rw',
         isa         => 'LacunaWaX::MainFrame',
@@ -16,47 +18,63 @@ package LacunaWaX::MainFrame::StatusBar {
 
     #########################################
 
+    has 'caption' => (
+        is          => 'rw',
+        isa         => 'Str',
+        lazy_build  => 1,
+    );
+
+    has 'gauge' => (
+        is          => 'rw',
+        isa         => 'LacunaWaX::MainFrame::StatusBar::Gauge',
+        lazy_build  => 1,
+    );
+
+    has [ 'old_h', 'old_w' ] => (
+        is      => 'rw',
+        isa     => 'Int',
+        lazy    => 1,
+        default => 0,
+    );
+
+    has [ 'rect_caption', 'rect_clock', 'rect_gauge' ] => (
+        is      => 'rw',
+        isa     => 'Int',
+        lazy    => 1,
+        default => 0,
+    );
+
+    has 'status_bar' => (
+        is          => 'rw',
+        isa         => 'Wx::StatusBar',
+        lazy_build => 1,
+    );
+
     has 'timer' => (
         is          => 'rw', 
         isa         => 'Wx::Timer',
         lazy_build  => 1,
         handles => {
-            start => 'Start',
-            stop  => 'Stop',
+            start_ticking => 'Start',
+            stop_ticking  => 'Stop',
         }
     );
 
-    has 'status_bar'        => (is => 'rw', isa => 'Wx::StatusBar', lazy_build => 1                 );
-    has 'gauge'             => (is => 'rw', isa => 'Wx::Gauge',     lazy_build => 1                 );
-    has 'caption'           => (is => 'rw', isa => 'Str',           lazy_build => 1                 );
-    has 'old_w'             => (is => 'rw', isa => 'Int',           lazy => 1,          default => 0);
-    has 'old_h'             => (is => 'rw', isa => 'Int',           lazy => 1,          default => 0);
-
-    has 'rect_caption' => (
-        is      => 'ro',
-        isa     => 'Int',
-        default => 0,
-    );
-    has 'rect_clock' => (
-        is      => 'ro',
-        isa     => 'Int',
-        default => 1,
-    );
-    has 'rect_gauge' => (
-        is      => 'ro',
-        isa     => 'Int',
-        default => 2,
-    );
 
     sub BUILD {
         my $self = shift;
 
+        ### Set rectangle order
+        $self->rect_caption(0);
+        $self->rect_clock(1);
+        $self->rect_gauge(2);
+
         ### Force the clock to show up immediately rather than waiting for the 
         ### first timer event to kick off, which will take a second.
-        $self->SetClock('bogus bar', 'bogus event');
+        $self->update_time();
 
         ### Send 1-second timer events to ourself to update the clock.
-        $self->start( 1000, wxTIMER_CONTINUOUS );
+        $self->start_ticking( 1000, wxTIMER_CONTINUOUS );
 
         ### Resets the whole bar, including the gauge.
         $self->bar_reset;
@@ -83,15 +101,16 @@ package LacunaWaX::MainFrame::StatusBar {
     }#}}}
     sub _build_gauge {#{{{
         my $self = shift;
+
         my $rect = $self->status_bar->GetFieldRect( $self->rect_gauge );
-        my $g = Wx::Gauge->new(
-            $self->status_bar, -1,
-            100,
-            Wx::Point->new($rect->x, $rect->y), 
-            Wx::Size->new($rect->width, $rect->height), 
-            wxGA_HORIZONTAL
+        my $pos  = Wx::Point->new( $rect->x, $rect->y ); 
+        my $size = Wx::Size->new( $rect->width, $rect->height );
+
+        my $g = LacunaWaX::MainFrame::StatusBar::Gauge->new(
+            parent      => $self,
+            position    => $pos,
+            size        => $size,
         );
-        $g->SetValue(0);
         return $g;
     }#}}}
     sub _build_timer {#{{{
@@ -102,8 +121,8 @@ package LacunaWaX::MainFrame::StatusBar {
     }#}}}
     sub _set_events {#{{{
         my $self = shift;
-        EVT_SIZE(   $self->status_bar,                      sub{$self->OnResize(@_)} );
-        EVT_TIMER(  $self->status_bar, $self->timer->GetId, sub{$self->SetClock(@_)} );
+        EVT_SIZE(   $self->status_bar,                      sub{$self->OnResize(@_)}    );
+        EVT_TIMER(  $self->status_bar, $self->timer->GetId, sub{$self->OnClockTick(@_)} );
         return 1;
     }#}}}
 
@@ -128,6 +147,13 @@ package LacunaWaX::MainFrame::StatusBar {
         $self->status_bar->SetStatusText( $new_text, $self->rect_caption );
         return $old_text;
     }#}}}
+    sub endthrob {#{{{
+        my $self    = shift;
+        my $pause   = shift || 50;    # milliseconds
+        $self->gauge->stop();
+        $self->bar_reset();
+        $self->status_bar->GetParent->SendSizeEvent();
+    }#}}}
     sub hms_12 {#{{{
         my $self = shift;
         my $dt   = shift;
@@ -138,6 +164,28 @@ package LacunaWaX::MainFrame::StatusBar {
         my $self = shift;
         my $dt   = shift;
         return $dt->hms;
+    }#}}}
+    sub throb {#{{{
+        my $self    = shift;
+        my $pause   = shift || 50;    # milliseconds
+        $self->gauge->start( $pause, wxTIMER_CONTINUOUS );
+    }#}}}
+    sub update_time {#{{{
+        my $self = shift;
+
+        my $tz_loc  = DateTime::TimeZone->new( name => 'local' );
+        my $gmt     = shift || DateTime->now( time_zone => 'GMT' );
+        my $loc     = shift || DateTime->now( time_zone => $tz_loc );
+
+        ### CHECK I should add an editable preference where the user can chose 
+        ### between 12 and 24 hour time.  For now, I'm forcing 12.
+        my $status = "Local: " . $self->hms_12($loc). " | Server: " . $self->hms_12($gmt);
+        #my $status = "Local: " . $self->hms_24($loc). " | Server: " . $self->hms_24($gmt);
+
+        $self->status_bar->SetStatusText( $status, $self->rect_clock );
+        wxTheApp->Yield;
+
+        return 1;
     }#}}}
 
     sub OnResize {#{{{
@@ -153,22 +201,12 @@ package LacunaWaX::MainFrame::StatusBar {
 
         return 1;
     }#}}}
-    sub SetClock {#{{{
+    sub OnClockTick {#{{{
         my $self = shift;
         my $bar  = shift;   # Wx::StatusBar
         my $evt  = shift;   # Wx::TimerEvent
 
-        my $tz_loc  = DateTime::TimeZone->new( name => 'local' );
-        my $gmt     = shift || DateTime->now( time_zone => 'GMT' );
-        my $loc     = shift || DateTime->now( time_zone => $tz_loc );
-
-        ### CHECK I should add an editable preference where the user can chose 
-        ### between 12 and 24 hour time.  For now, I'm forcing 12.
-        my $status = "Local: " . $self->hms_12($loc). " | Server: " . $self->hms_12($gmt);
-        #my $status = "Local: " . $self->hms_24($loc). " | Server: " . $self->hms_24($gmt);
-
-        $self->status_bar->SetStatusText( $status, $self->rect_clock );
-        wxTheApp->Yield;
+        $self->update_time;
 
         return 1;
     }#}}}
