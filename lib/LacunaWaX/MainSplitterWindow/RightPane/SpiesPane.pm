@@ -398,23 +398,10 @@ see what you're doing.
     sub _build_lbl_instructions {#{{{
         my $self = shift;
 
-        my $orig_text = "    The four dropdown boxes ('1st' - '4th') are just a convenience feature to help you with assigning tasks to your spies.  Without them, you'd have to individually assign up to 90 spies per planet.  When you chose a skill from one of those four dropdown boxes, that skill will be assigned to every spy who:
+        my $text = "03/10/2014
+    The spy training bit below was originally done to work with the old way of training spies.  It's been tweaked so it sort-of works, but is still a bit clunky.  I'm aware of it, and plan to do something about it at some point.
 
-            1) Currently has no assignment ('None')
-                                   AND
-            2) Is below the max score (2600) for the skill you just chose.
-
-    So assume you want this planet's spies to specialize first in Intel.  If any of them already have max Intel, you want them to instead train in Poli.  Chose Intel in the 1st box.  The spies who already have max Intel will remain unassigned, but everybody else will get assigned to Intel.  Next, choose Poli from the 2nd box, and the spies who had max Intel, and are therefore still assigned to None, will get assigned to Poli (unless they also already have max Poli).  etc.
-    The switch from Intel training to Poli training will _not_ be automatic.  So you'll need to come back here periodically to re-assign any spies who were set to train in Intel, but who have maxed that out, to now train in Poli.  
-
-    You can rename spies individually by clicking their name and then typing the desired new name, then clicking the Rename Spies button under the list of spies.  Or, you can use the Batch Rename form at the very bottom of the screen to rename all of your spies at once.
-    ";
-
-
-        my $text = "12/12/2013
-    Spy assignments are meant to help with training, so 'regular' assignments are not listed.  To set all of your spies to Idle, click the 'Clear Spy Assignments' button to the right first.
-
-    You can rename spies individually by clicking their name and then typing the desired new name.  Or, you can use the Batch Rename form at the very bottom of the screen to rename all of your spies at once.  Either way, don't forget to click the Rename Spies button at the bottom.
+    Spy renaming still works.  You can rename individually by clicking a name.  Or, you can use the Batch Rename form at the bottom to rename all of your spies at once.  Either way, don't forget to click the Rename Spies button.
     ";
 
         my $y = Wx::StaticText->new(
