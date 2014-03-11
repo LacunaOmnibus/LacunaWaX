@@ -9,6 +9,7 @@ use Wx qw(:allclasses);
 
 use FindBin;
 use lib "$FindBin::Bin/../lib";
+use LacunaWaX::Preload::Perlapp;
 use LacunaWaX;
 use LacunaWaX::Util;
 use LacunaWaX::Model::DefaultData;

@@ -3,12 +3,6 @@ use warnings;
 
 package LacunaWaX::Preload::Perlapp {
 
-    ### The perlapp executable, when run on windows, complains about not being 
-    ### able to find the Unix-specific module.  But attempting to load the 
-    ### Windows-specific module on Linux doesn't work at all.
-    use if $^O eq 'MSWin32', 'LacunaWaX::Preload::Win32';
-    use LacunaWaX::Preload::Unix;
-
     ### Needed for Moose
     use Variable::Magic;                            # 15    (RepairPane, at least)
     use B::Hooks::EndOfScope::XS;                   # 14    (RepairPane, at least)
@@ -24,6 +18,12 @@ package LacunaWaX::Preload::Perlapp {
     use Moose::Meta::Method;                        # 9
     use Class::MOP::Class::Immutable::Trait;        # 10
     use Moose::Meta::Mixin::AttributeCore;          # 11
+
+    ### The perlapp executable, when run on windows, complains about not being 
+    ### able to find the Unix-specific module.  But attempting to load the 
+    ### Windows-specific module on Linux doesn't work at all.
+    use if $^O eq 'MSWin32', 'LacunaWaX::Preload::Win32';
+    use LacunaWaX::Preload::Unix;
 
     ### Needed for DBIC
     use SQL::Translator::Role::BuildArgs;
