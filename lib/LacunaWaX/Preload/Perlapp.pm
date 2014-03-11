@@ -3,6 +3,12 @@ use warnings;
 
 package LacunaWaX::Preload::Perlapp {
 
+    ### The perlapp executable, when run on windows, complains about not being 
+    ### able to find the Unix-specific module.  But attempting to load the 
+    ### Windows-specific module on Linux doesn't work at all.
+    use if $^O eq 'MSWin32', 'LacunaWaX::Preload::Win32';
+    use LacunaWaX::Preload::Unix;
+
     ### Needed for Moose
     use Variable::Magic;                            # 15    (RepairPane, at least)
     use B::Hooks::EndOfScope::XS;                   # 14    (RepairPane, at least)
@@ -50,12 +56,6 @@ package LacunaWaX::Preload::Perlapp {
     ### DateTime::Locale
     {#{{{
 
-        ### Yeah, both mods on both OSs.  The perlapp executable complains 
-        ### about being unable to find the ::Unix on Windows if it's not 
-        ### included here (and, I assume vice-versa).  The correct mod ends up 
-        ### getting used in the correct OS.
-        use DateTime::TimeZone::Local::Win32;
-        use DateTime::TimeZone::Local::Unix;
 
         use DateTime::Locale::aa;
         use DateTime::Locale::aa_DJ;
