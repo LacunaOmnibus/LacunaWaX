@@ -9,22 +9,29 @@ package LacunaWaX::Dialog::Prefs {
     extends 'LacunaWaX::Dialog::NonScrolled';
 
     use LacunaWaX::Dialog::Prefs::TabAutovote;
+    use LacunaWaX::Dialog::Prefs::TabGeneral;
     use LacunaWaX::Dialog::Prefs::TabServer;
 
     has 'notebook_size' => (is => 'rw', isa => 'Wx::Size',      lazy_build => 1                 );
     has 'notebook'      => (is => 'rw', isa => 'Wx::Notebook',  lazy_build => 1                 );
-
-    has 'tab_server' => (
-        is => 'rw', 
-        isa => 'LacunaWax::Dialog::Prefs::TabServer',         
-        lazy_build => 1
-    );
 
     has 'tab_autovote' => (
         is              => 'rw', 
         isa             => 'Maybe[LacunaWax::Dialog::Prefs::TabAutovote]', 
         lazy_build      => 1,
         documentation   => q{Will be undef unless we're connected to a server.}
+    );
+
+    has 'tab_general' => (
+        is          => 'rw', 
+        isa         => 'LacunaWax::Dialog::Prefs::TabGeneral',         
+        lazy_build  => 1,
+    );
+
+    has 'tab_server' => (
+        is          => 'rw', 
+        isa         => 'LacunaWax::Dialog::Prefs::TabServer',         
+        lazy_build  => 1,
     );
 
     sub BUILD {
@@ -37,6 +44,7 @@ package LacunaWaX::Dialog::Prefs {
 
         $self->notebook->AddPage($self->tab_server->pnl_main, "Server");
         $self->notebook->AddPage($self->tab_autovote->pnl_main, "AutoVote") if $self->tab_autovote;
+        $self->notebook->AddPage($self->tab_general->pnl_main, "General");
 
         $self->main_sizer->AddSpacer(5);
         $self->main_sizer->Add($self->notebook, 1, wxEXPAND, 0);
@@ -70,6 +78,12 @@ package LacunaWaX::Dialog::Prefs {
         my $self = shift;
 
         my $tab = LacunaWax::Dialog::Prefs::TabServer->new( parent => $self );
+        return $tab;
+    }#}}}
+    sub _build_tab_general {#{{{
+        my $self = shift;
+
+        my $tab = LacunaWax::Dialog::Prefs::TabGeneral->new( parent => $self );
         return $tab;
     }#}}}
     sub _build_size {#{{{

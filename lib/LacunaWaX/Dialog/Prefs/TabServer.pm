@@ -84,7 +84,6 @@ package LacunaWax::Dialog::Prefs::TabServer {
         ### Row 3, password
         $grid_sizer->Add($self->lbl_pass, 0, 0, 0);
         $grid_sizer->Add($self->txtbox_pass, 0, 0, 0);
-        $grid_sizer->Add(Wx::StaticText->new($self->pnl_main, -1, q{}, wxDefaultPosition, Wx::Size->new(-1,-1)));   # empty placeholder
 
         return $grid_sizer;
     }#}}}

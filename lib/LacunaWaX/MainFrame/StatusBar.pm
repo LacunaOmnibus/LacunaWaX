@@ -172,14 +172,18 @@ package LacunaWaX::MainFrame::StatusBar {
     sub update_time {#{{{
         my $self = shift;
 
-        my $tz_loc  = DateTime::TimeZone->new( name => 'local' );
+        ### wxTheApp->time_zone is not set yet on the very first tick, so pick
+        ### a default.
+        my $tz_loc  = wxTheApp->time_zone || DateTime::TimeZone->new( name => 'local' );
         my $gmt     = shift || DateTime->now( time_zone => 'GMT' );
         my $loc     = shift || DateTime->now( time_zone => $tz_loc );
 
         ### CHECK I should add an editable preference where the user can chose 
         ### between 12 and 24 hour time.  For now, I'm forcing 12.
-        my $status = "Local: " . $self->hms_12($loc). " | Server: " . $self->hms_12($gmt);
-        #my $status = "Local: " . $self->hms_24($loc). " | Server: " . $self->hms_24($gmt);
+        my $type = wxTheApp->clock_type || 12;
+        my $status = ($type == 12)
+            ? "Local: " . $self->hms_12($loc). " | Server: " . $self->hms_12($gmt)
+            : "Local: " . $self->hms_24($loc). " | Server: " . $self->hms_24($gmt);
 
         $self->status_bar->SetStatusText( $status, $self->rect_clock );
         wxTheApp->Yield;

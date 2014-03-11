@@ -4,6 +4,7 @@ use v5.14;
 package LacunaWaX {
     use Carp;
     use Data::Dumper;
+    use DateTime::TimeZone;
     use Time::Duration qw(duration duration_exact);
     use Try::Tiny;
     use Wx qw(:everything);
@@ -53,7 +54,8 @@ package LacunaWaX {
     sub _init_attrs {#{{{
         my $self = shift;
 
-        ### Do not change the order of the attributes list without testing.
+        ### Do not change the order of the attributes above the blank line  
+        ### without testing.
         ### db_file might depend on the existence of globals, etc.
         my @build_attrs = (
             'globals', 'wxglobals',
@@ -62,6 +64,9 @@ package LacunaWaX {
             'display_x', 'display_y',
             'servers' ,
             'main_frame',
+
+            'clock_type',
+            'time_zone',
         );
         foreach my $attr(@build_attrs) {
             my $meth = "_build_$attr";
@@ -89,11 +94,22 @@ package LacunaWaX {
     }#}}}
 
 ### Accessors
-    sub root_dir {#{{{
+    sub account {#{{{
         my $self = shift;
         my $arg  = shift;
-        $self->{'root_dir'} = $arg if $arg;
-        return $self->{'root_dir'};
+        $self->{'account'} = $arg if $arg;
+        return $self->{'account'};
+    }#}}}
+    sub clock_type {#{{{
+        my $self = shift;
+        my $arg  = shift;
+
+        my $type;
+        if( $arg and grep{ /^$arg$/ }(12, 24) ) {
+            $type = $arg;
+        }
+        $self->{'clock_type'} = $type if $type;
+        return $self->{'clock_type'};
     }#}}}
     sub db_file {#{{{
         my $self = shift;
@@ -112,6 +128,12 @@ package LacunaWaX {
         my $arg  = shift;
         $self->{'icon_image'} = $arg if $arg;
         return $self->{'icon_image'};
+    }#}}}
+    sub game_client {#{{{
+        my $self = shift;
+        my $arg  = shift;
+        $self->{'game_client'} = $arg if $arg;
+        return $self->{'game_client'};
     }#}}}
     sub globals {#{{{
         my $self = shift;
@@ -143,6 +165,12 @@ package LacunaWaX {
         $self->{'main_frame'} = $arg if $arg;
         return $self->{'main_frame'};
     }#}}}
+    sub root_dir {#{{{
+        my $self = shift;
+        my $arg  = shift;
+        $self->{'root_dir'} = $arg if $arg;
+        return $self->{'root_dir'};
+    }#}}}
     sub servers {#{{{
         my $self = shift;
         my $arg  = shift;
@@ -155,28 +183,37 @@ package LacunaWaX {
         $self->{'server'} = $arg if $arg;
         return $self->{'server'};
     }#}}}
-    sub account {#{{{
+    sub time_zone {#{{{
         my $self = shift;
         my $arg  = shift;
-        $self->{'account'} = $arg if $arg;
-        return $self->{'account'};
-    }#}}}
-    sub game_client {#{{{
-        my $self = shift;
-        my $arg  = shift;
-        $self->{'game_client'} = $arg if $arg;
-        return $self->{'game_client'};
+
+        my $tz;
+        if( $arg ) {
+            $tz = try {
+                DateTime::TimeZone->new( name => $arg );
+            }
+            catch {
+                return;
+            }
+        }
+
+        $self->{'time_zone'} = $tz if $tz;
+        return $self->{'time_zone'};
     }#}}}
 
 ### Builders
-    sub _build_globals {#{{{
+    sub _build_clock_type {#{{{
         my $self = shift;
-        my $g = LacunaWaX::Model::Globals->new( root_dir => $self->root_dir );
-        return $g;
-    }#}}}
-    sub _build_wxglobals {#{{{
-        my $self = shift;
-        return LacunaWaX::Model::Globals::Wx->new( globals => $self->globals );
+
+        my $schema  = $self->main_schema;
+        my $rs      = $schema->resultset('AppPrefsKeystore')->search({ name => 'ClockType' });
+
+        my $clock_type = 12;
+        if( my $rec = $rs->next ) {
+            $clock_type = $rec->value;
+        }
+
+        return $clock_type;
     }#}}}
     sub _build_db_file {#{{{
         my $self = shift;
@@ -187,6 +224,19 @@ package LacunaWaX {
         my $self = shift;
         my $file = $self->root_dir . '/user/lacuna_log.sqlite';
         return $file;
+    }#}}}
+    sub _build_display_x {#{{{
+        my $self = shift;
+        return Wx::SystemSettings::GetMetric(wxSYS_SCREEN_X);
+    }#}}}
+    sub _build_display_y {#{{{
+        my $self = shift;
+        return Wx::SystemSettings::GetMetric(wxSYS_SCREEN_Y);
+    }#}}}
+    sub _build_globals {#{{{
+        my $self = shift;
+        my $g = LacunaWaX::Model::Globals->new( root_dir => $self->root_dir );
+        return $g;
     }#}}}
     sub _build_icon_image {#{{{
         my $self = shift;
@@ -200,18 +250,6 @@ package LacunaWaX {
         $icon->CopyFromBitmap($bmp);
 
         return $icon;
-    }#}}}
-    sub _build_display_x {#{{{
-        my $self = shift;
-        return Wx::SystemSettings::GetMetric(wxSYS_SCREEN_X);
-    }#}}}
-    sub _build_display_y {#{{{
-        my $self = shift;
-        return Wx::SystemSettings::GetMetric(wxSYS_SCREEN_Y);
-    }#}}}
-    sub _build_servers {#{{{
-        my $self        = shift;
-        return LacunaWaX::Servers->new( schema => $self->main_schema );
     }#}}}
     sub _build_main_frame {#{{{
         my $self = shift;
@@ -243,6 +281,27 @@ package LacunaWaX {
         ### position is not sent.
         my $mf = LacunaWaX::MainFrame->new( $args );
         return $mf;
+    }#}}}
+    sub _build_servers {#{{{
+        my $self = shift;
+        return LacunaWaX::Servers->new( schema => $self->main_schema );
+    }#}}}
+    sub _build_time_zone {#{{{
+        my $self = shift;
+
+        my $schema  = $self->main_schema;
+        my $rs      = $schema->resultset('AppPrefsKeystore')->search({ name => 'TimeZone' });
+
+        my $zone_name = 'local';
+        if( my $rec = $rs->next ) {
+            $zone_name = $rec->value;
+        }
+        my $tz = DateTime::TimeZone->new( name => $zone_name );
+        return $tz;
+    }#}}}
+    sub _build_wxglobals {#{{{
+        my $self = shift;
+        return LacunaWaX::Model::Globals::Wx->new( globals => $self->globals );
     }#}}}
 
 ### Handlers
