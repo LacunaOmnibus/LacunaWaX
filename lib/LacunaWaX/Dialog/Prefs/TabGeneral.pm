@@ -48,16 +48,30 @@ package LacunaWax::Dialog::Prefs::TabGeneral {
         lazy_build  => 1,
     );
 
-    has 'tz_categories' => (
-        is          => 'rw',
-        isa         => 'ArrayRef',
-        lazy_build  => 1,
-    );
-
     has 'rdo_2412' => (
         is          => 'rw',
         isa         => 'Wx::RadioBox',
         lazy_build  => 1
+    );
+
+
+
+    has 'current_category' => (
+        is          => 'rw',
+        isa         => 'Maybe[Str]',
+        lazy_build  => 1,
+    );
+
+    has 'current_tz_name' => (
+        is          => 'rw',
+        isa         => 'Maybe[Str]',
+        lazy_build  => 1,
+    );
+
+    has 'tz_categories' => (
+        is          => 'rw',
+        isa         => 'ArrayRef',
+        lazy_build  => 1,
     );
 
     sub BUILD {
@@ -79,6 +93,7 @@ package LacunaWax::Dialog::Prefs::TabGeneral {
         $self->szr_grid->AddSpacer(10); # left margin column
         $self->szr_grid->Add($self->lbl_tz, 0, 0, 0);
         $self->szr_grid->Add($self->chc_tz_category, 0, 0, 0);
+        $self->set_tzs_from_category;
         $self->szr_grid->Add($self->chc_tz, 0, 0, 0);
 
         ### Spacer row before save button
@@ -120,18 +135,24 @@ package LacunaWax::Dialog::Prefs::TabGeneral {
             Wx::Size->new(75,40), 
             $self->tz_categories,
         );
-        $v->SetSelection(0);
+
+        if( my $cat = $self->current_category ) {
+            $v->SetStringSelection($cat);
+        }
+
         return $v;
     }#}}}
     sub _build_chc_tz {#{{{
         my $self = shift;
+
         my $v = Wx::Choice->new(
             $self->pnl_main, -1, 
             wxDefaultPosition, 
             Wx::Size->new(150,40), 
-            [ ],    # start empty; choosing a category will fill this.
+            [ ],    # start empty
         );
         $v->SetSelection(0);
+
         return $v;
     }#}}}
     sub _build_lbl_2412 {#{{{
@@ -173,6 +194,11 @@ package LacunaWax::Dialog::Prefs::TabGeneral {
             wxRA_SPECIFY_ROWS
         );
         $v->SetSize( $v->GetBestSize );
+
+        if( my $current_clock = wxTheApp->clock_type ) {
+            $v->SetStringSelection($current_clock);
+        }
+
         return $v;
     }#}}}
     sub _build_szr_grid {#{{{
@@ -192,6 +218,45 @@ package LacunaWax::Dialog::Prefs::TabGeneral {
         return [ "Select One", DateTime::TimeZone->categories ],
     }#}}}
 
+    sub _parse_current_tz {#{{{
+        my $self = shift;
+
+        if( my $current_tz = wxTheApp->time_zone ) {
+            my $current_tz_name = $current_tz->name;
+            my( $cat, $tz ) = split '/', $current_tz_name, 2;
+            $self->current_category( $cat );
+            $self->current_tz_name( $tz );
+        };
+    }#}}}
+    sub _build_current_category {#{{{
+        my $self = shift;
+        $self->_parse_current_tz();
+        $self->current_category;
+    }#}}}
+    sub _build_current_tz_name {#{{{
+        my $self = shift;
+        $self->_parse_current_tz();
+        $self->current_tz_name;
+    }#}}}
+
+    sub set_tzs_from_category {#{{{
+        my $self    = shift;
+
+        my $tz_cat = $self->chc_tz_category->GetStringSelection;
+        my @names  = DateTime::TimeZone->names_in_category($tz_cat);
+
+        $self->chc_tz->Clear();
+        foreach my $n(@names) {
+            $self->chc_tz->Append($n);
+        }
+
+        if( my $tz_name = $self->current_tz_name ) {
+            $self->chc_tz->SetStringSelection($tz_name);
+        }
+
+        return 1;
+    }#}}}
+
     sub OnChooseTZ {#{{{
         my $self    = shift;
         my $dialog  = shift;
@@ -203,15 +268,7 @@ package LacunaWax::Dialog::Prefs::TabGeneral {
     }#}}}
     sub OnChooseTZCategory {#{{{
         my $self    = shift;
-
-        my $tz_cat = $self->tz_categories->[$self->chc_tz_category->GetCurrentSelection];
-        my @names  = DateTime::TimeZone->names_in_category($tz_cat);
-
-        $self->chc_tz->Clear();
-        foreach my $n(@names) {
-            $self->chc_tz->Append($n);
-        }
-
+        $self->set_tzs_from_category;
         return 1;
     }#}}}
     sub OnRadio2412 {#{{{
@@ -230,14 +287,44 @@ package LacunaWax::Dialog::Prefs::TabGeneral {
 
         my $schema = wxTheApp->main_schema;
 
-        if( my $tz_offset = $self->chc_tz->GetCurrentSelection ) {
-            my $tz_cat  = $self->tz_categories->[$self->chc_tz_category->GetCurrentSelection];
-            my $tz      = (DateTime::TimeZone->names_in_category($tz_cat))[$tz_offset];
+        if( my $tz = $self->chc_tz->GetStringSelection ) {
+            my $tz_cat  = $self->chc_tz_category->GetStringSelection;
             my $fqtz    = join '/', ($tz_cat, $tz);
             my $rec     = $schema->resultset('AppPrefsKeystore')->find_or_create({ name => 'TimeZone' });
             $rec->value( $fqtz );
             $rec->update;
             wxTheApp->time_zone( $fqtz );
+        }
+
+        if( my $type = $self->rdo_2412->GetString($self->rdo_2412->GetSelection) ) {
+            my $rec = $schema->resultset('AppPrefsKeystore')->find_or_create({ name => 'ClockType' });
+            $rec->value( $type );
+            $rec->update;
+            wxTheApp->clock_type( $type );
+        }
+
+        wxTheApp->popmsg("Your preferences have been saved.", 'Success!' );
+        return 1;
+    }#}}}
+    sub OnSavePrefs_orig {#{{{
+        my $self    = shift;
+        my $dialog  = shift;
+        my $event   = shift;
+
+        my $schema = wxTheApp->main_schema;
+
+        if( my $tz_offset = $self->chc_tz->GetCurrentSelection ) {
+            my $tz_cat  = $self->chc_tz_category->GetStringSelection;
+            #my $tz      = (DateTime::TimeZone->names_in_category($tz_cat))[$tz_offset];
+            my $tz      = (DateTime::TimeZone->names_in_category($tz_cat))[$tz_offset];
+
+            if( $tz_cat ne 'Select One' and $tz ) {
+                my $fqtz    = join '/', ($tz_cat, $tz);
+                my $rec     = $schema->resultset('AppPrefsKeystore')->find_or_create({ name => 'TimeZone' });
+                $rec->value( $fqtz );
+                $rec->update;
+                wxTheApp->time_zone( $fqtz );
+            }
         }
 
         if( my $type = $self->rdo_2412->GetString($self->rdo_2412->GetSelection) ) {

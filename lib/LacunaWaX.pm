@@ -54,19 +54,16 @@ package LacunaWaX {
     sub _init_attrs {#{{{
         my $self = shift;
 
-        ### Do not change the order of the attributes above the blank line  
-        ### without testing.
+        ### Do not change the order of the attributes without testing.
         ### db_file might depend on the existence of globals, etc.
         my @build_attrs = (
             'globals', 'wxglobals',
+            'clock_type', 'time_zone',
             'db_file', 'db_log_file',
             'icon_image',
             'display_x', 'display_y',
             'servers' ,
             'main_frame',
-
-            'clock_type',
-            'time_zone',
         );
         foreach my $attr(@build_attrs) {
             my $meth = "_build_$attr";
@@ -187,13 +184,24 @@ package LacunaWaX {
         my $self = shift;
         my $arg  = shift;
 
+        ### Accepts a DateTime::TimeZone:: object, or just a time_zone name 
+        ### ('local', 'America/New_York', etc), or no arg for a simple 
+        ### accessor.
+
         my $tz;
         if( $arg ) {
-            $tz = try {
-                DateTime::TimeZone->new( name => $arg );
+            if( (ref $arg) =~ /^DateTime::TimeZone::/ ) {
+                $tz = $arg;
             }
-            catch {
-                return;
+            else {
+                $tz = try {
+                    my $t = DateTime::TimeZone->new( name => $arg );
+                    return $t;
+                }
+                catch {
+                    say "===$_===";
+                    return;
+                };
             }
         }
 
@@ -296,7 +304,12 @@ package LacunaWaX {
         if( my $rec = $rs->next ) {
             $zone_name = $rec->value;
         }
-        my $tz = DateTime::TimeZone->new( name => $zone_name );
+        my $tz = try {
+            DateTime::TimeZone->new( name => $zone_name );
+        }
+        catch {
+            DateTime::TimeZone->new( name => 'local' ); # in case a bogus string somehow gets into the database.
+        };
         return $tz;
     }#}}}
     sub _build_wxglobals {#{{{
