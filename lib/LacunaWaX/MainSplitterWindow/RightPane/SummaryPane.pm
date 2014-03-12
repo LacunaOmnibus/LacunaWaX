@@ -37,6 +37,11 @@ package LacunaWaX::MainSplitterWindow::RightPane::SummaryPane {
     has 'owner'         => (is => 'rw', isa => 'Str',       lazy_build => 1   );
 
     has 'szr_header'    => (is => 'rw', isa => 'Wx::Sizer',         lazy_build => 1   );
+    has 'szr_res_grid' => (
+        is          => 'rw', 
+        isa         => 'Wx::FlexGridSizer',     
+        lazy_build  => 1,
+    );
     has 'lbl_header'    => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1   );
     has 'lbl_text'      => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1   );
 
@@ -47,16 +52,28 @@ package LacunaWaX::MainSplitterWindow::RightPane::SummaryPane {
 
         wxTheApp->borders_off();    # Change to borders_on to see borders around sizers
 
+        $self->fill_res_grid();
+
         $self->szr_header->Add($self->lbl_header, 0, 0, 0);
         $self->content_sizer->Add($self->szr_header, 0, 0, 0);
         $self->content_sizer->AddSpacer(20);
         $self->content_sizer->Add($self->lbl_text, 0, 0, 0);
+        $self->content_sizer->AddSpacer(20);
+        $self->content_sizer->Add($self->szr_res_grid, 0, 0, 0);
 
         $self->fix_tree_for_stations();
 
         $self->_set_events();
         return $self;
     }
+    sub _build_szr_res_grid {#{{{
+        my $self = shift;
+
+        ### 7 rows (5 data, 1 header, 1 spacer), 4 cols, 2px vgap, 50px hgap.
+        my $szr_res_grid = Wx::FlexGridSizer->new(7, 4, 2, 50);
+
+        return $szr_res_grid;
+    }#}}}
     sub _build_szr_header {#{{{
         my $self = shift;
         return wxTheApp->build_sizer($self->parent, wxVERTICAL, 'Header');
@@ -78,7 +95,11 @@ package LacunaWaX::MainSplitterWindow::RightPane::SummaryPane {
             $self->parent, -1, 
             $self->text, 
             wxDefaultPosition, 
-            Wx::Size->new(400,600)
+            ### If you start changing the height on this, check the result on 
+            ### both a station and on a planet.  Station text is bigger.  
+            ### Also, stations with warning text ("OMG we haven't seize our 
+            ### own star!") will need even more height here.
+            Wx::Size->new(400,220)
         );
         $v->SetFont( wxTheApp->get_font('para_text_2') );
         return $v;
@@ -133,6 +154,7 @@ Orbit $s->{orbit} around $s->{star_name} (ID $s->{star_id}), in zone $s->{zone}\
         $text .= "Size $s->{size}\n";
         $text .= "$s->{plots_available} plots available\n";
         $text .= "$s->{building_count} buildings\n";
+        $text .= "\n";
 
         if( $self->type eq 'Station' ) {
             my($spent, $total) = @{$s->{'influence'}}{qw(spent total)};
@@ -170,6 +192,53 @@ Orbit $s->{orbit} around $s->{star_name} (ID $s->{star_id}), in zone $s->{zone}\
         return ($self->status->{'type'} eq 'space station') ? 'Station' : 'Planet';
     }#}}}
     sub _set_events {}
+
+    sub fill_res_grid {#{{{
+        my $self = shift;
+
+        foreach my $number_name(qw(
+            food_stored food_capacity food_hour
+            ore_stored ore_capacity ore_hour
+            water_stored water_capacity water_hour
+            energy_stored energy_capacity energy_hour
+            happiness happiness_hour
+        )) {
+            my $commaized_field_name = "c_" . $number_name;
+            my $val = wxTheApp->commaize_number($self->status->{$number_name});
+            $self->status->{$commaized_field_name} = $val;
+        }
+
+        my @grid = (
+            'Type',     'Stored',               'Capacity',             'Production/hour',
+            '----',     '------',               '--------',             '---------------',
+            'Food:',    'c_food_stored',        'c_food_capacity',      'c_food_hour',
+            'Ore:',     'c_ore_stored',         'c_ore_capacity',       'c_ore_hour',
+            'Water:',   'c_water_stored',       'c_water_capacity',     'c_water_hour',
+            'Energy:',  'c_energy_stored',      'c_energy_capacity',    'c_energy_hour',
+            'Happy:',   'c_happiness',          q{},                    'c_happiness_hour',
+        );
+
+        foreach my $add_this_to_grid( @grid ) {
+            ### The alignments will only work when wxEXPAND is _not_ included.
+            my( $text, $font, $style );
+            if( defined $self->status->{$add_this_to_grid} ) { ### Data
+                $text   = sprintf "%s", $self->status->{$add_this_to_grid};
+                $font   = wxTheApp->get_font('modern_text_2');
+                $style  = wxALIGN_RIGHT;
+            }
+            else { ### Header
+                $text   = $add_this_to_grid;
+                $font   = wxTheApp->get_font('bold_modern_text_2');
+                $style  = ($add_this_to_grid =~ /:/) 
+                    ? wxALIGN_LEFT            # left column header
+                    : wxALIGN_CENTRE;         # top row header
+            }
+
+            my $v = Wx::StaticText->new( $self->parent, -1, $text, wxDefaultPosition, Wx::Size->new(-1, -1) );
+            $v->SetFont( $font );
+            $self->szr_res_grid->Add($v, 0, $style);
+        }
+    }#}}}
 
     sub fix_tree_for_stations {#{{{
         my $self = shift;

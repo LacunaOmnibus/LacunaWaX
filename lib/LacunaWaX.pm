@@ -556,6 +556,29 @@ perform arithmetic on it without Math::BigFloat.
 
         return sqrt( ($tx - $ox)**2 + ($ty - $oy)**2 );
     }#}}}
+    sub commaize_number {
+        my $self    = shift;
+        my $num     = shift;
+        return $num unless( $num =~ /^[\d]{4,}$/ );
+
+        my @pieces;
+        if( $num =~ /^[\d]{4,}$/ ) {
+            while($num) {
+                my $p;
+
+                if( length $num >= 3 ) {
+                    $p = substr($num, ((length $num) - 3), 3, q{});
+                }
+                else {
+                    $p = $num;
+                    $num = q{};
+                }
+                unshift @pieces, $p;
+            }
+        }
+
+        return join ',', @pieces;
+    }
     sub database_checks_out  {#{{{
         my $self    = shift;
         my $dbh     = shift;
