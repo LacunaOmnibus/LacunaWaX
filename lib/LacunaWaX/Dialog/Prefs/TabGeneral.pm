@@ -54,25 +54,52 @@ package LacunaWax::Dialog::Prefs::TabGeneral {
         lazy_build  => 1
     );
 
-
-
     has 'current_category' => (
         is          => 'rw',
         isa         => 'Maybe[Str]',
         lazy_build  => 1,
+        documentation => q{
+            The category ("America" in "America/New_York") of the TZ currently in use by the application.
+        }
     );
-
     has 'current_tz_name' => (
         is          => 'rw',
         isa         => 'Maybe[Str]',
         lazy_build  => 1,
+        documentation => q{
+            The zone ("New_York" in "America/New_York") of the TZ currently in use by the application.
+        }
     );
-
     has 'tz_categories' => (
         is          => 'rw',
         isa         => 'ArrayRef',
         lazy_build  => 1,
+        documentation => q{
+            The contents of the time zone Categories select box - retval of 
+            DateTime::TimeZone->categories() with "Select One" jammed in there first.
+        }
     );
+
+### Grid Layout {#{{{
+=pod
+
+The FlexGridSizer that lays out our elements has extra unseen columns and 
+rows.
+
+ROWS
+    - The first row is a spacer.
+    - There's another spacer row just before the save button
+    - The save button is itself in a row; it's not outside the grid.
+
+COLUMNS
+    - The first column is a spacer
+        - *** HEY READ THAT AGAIN ***
+        - If you add a new row, make sure that the first item you add is a 
+          spacer cell.
+                $self->szr_grid->AddSpacer(10); # first cell - left margin column
+
+=cut
+### }#}}}
 
     sub BUILD {
         my $self = shift;

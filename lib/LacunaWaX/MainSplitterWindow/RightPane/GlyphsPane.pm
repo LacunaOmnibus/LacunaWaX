@@ -1,8 +1,4 @@
 
-### Lineage:
-###     ancestor: RightPane.pm
-###     ancestor->ancestor: MainSplitterWindow.pm
-
 package LacunaWaX::MainSplitterWindow::RightPane::GlyphsPane {
     use v5.14;
     use Moose;
@@ -89,7 +85,8 @@ package LacunaWaX::MainSplitterWindow::RightPane::GlyphsPane {
     sub BUILD {
         my $self = shift;
 
-        wxTheApp->borders_off();    # Change to borders_on to see borders around sizers
+        wxTheApp->throb();
+        wxTheApp->borders_off();    # Turn on to see borders around sizers
 
         ### See comments in the method as to why it's '_make', not '_build'.
         $self->dialog_status( $self->_make_dialog_status );
@@ -111,6 +108,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::GlyphsPane {
         $self->recipe_box->AddSpacer(10);
         $self->recipe_box->Add($self->halls_btn_sizer, 0, 0, 0);
         $self->recipe_box->AddSpacer(20);
+        wxTheApp->Yield;
 
         foreach my $rname( sort keys %{wxTheApp->game_client->glyph_recipes} ) {
             my $form = LacunaWaX::MainSplitterWindow::RightPane::GlyphsPane::RecipeForm->new(
@@ -120,9 +118,12 @@ package LacunaWaX::MainSplitterWindow::RightPane::GlyphsPane {
                 recipe_ingredients  => wxTheApp->game_client->glyph_recipes->{$rname},
             );
             $self->recipe_box->Add($form->main_sizer, 0, 0, 0);
+            wxTheApp->Yield;
         }
         $self->content_sizer->Add($self->recipe_box, 0, 0, 0);
         $self->refocus_window_name( 'lbl_planet_name' );
+
+        wxTheApp->endthrob();
         return $self;
     }
     sub _build_auto_search_box {#{{{
@@ -307,7 +308,6 @@ package LacunaWaX::MainSplitterWindow::RightPane::GlyphsPane {
     }#}}}
     sub _build_list_glyphs {#{{{
         my $self = shift;
-        wxTheApp->throb();
         wxTheApp->Yield;
 
         my $sorted_glyphs = try {
@@ -358,7 +358,6 @@ package LacunaWaX::MainSplitterWindow::RightPane::GlyphsPane {
 
         $list_ctrl->SetFont( wxTheApp->get_font('para_text_1') );
 
-        wxTheApp->endthrob();
         return $list_ctrl;
     }#}}}
     sub _build_lbl_planet_name {#{{{

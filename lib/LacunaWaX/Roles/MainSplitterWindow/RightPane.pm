@@ -19,6 +19,7 @@ package LacunaWaX::Roles::MainSplitterWindow::RightPane {
 
     after BUILD => sub {
         my $self = shift;
+
         $self->main_sizer->AddSpacer( $self->top_margin_width );
         $self->main_sizer->Add($self->main_horiz_sizer, 0, 0, 0);
 
@@ -26,6 +27,7 @@ package LacunaWaX::Roles::MainSplitterWindow::RightPane {
         $self->main_horiz_sizer->Add($self->content_sizer, 0, 0, 0);
 
         $self->parent->SetSizer($self->main_sizer);
+
         $self->_set_events();
         return $self;
     };

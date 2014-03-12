@@ -22,19 +22,29 @@ package LacunaWaX::MainSplitterWindow::RightPane::SpiesPane::SpyRow {
 
     #########################################
 
-    has 'spy' => (is => 'rw', isa => 'LacunaWaX::Model::Client::Spy',
+    has 'spy' => (
+        is          => 'rw',
+        isa         => 'LacunaWaX::Model::Client::Spy',
         documentation => q{
             Not required so we can generate a header, but othewise it's needed.
         }
     );
 
-    has 'text_none'     => (is => 'rw', isa => 'Str', lazy => 1, default => 'None',
+    has 'text_none' => (
+        is          => 'rw',
+        isa         => 'Str',
+        lazy        => 1,
+        default     => 'None',
         documentation => q{
             Simply the string value used to indicate 'no training' in the training select box.
         }
     );
 
-    has 'is_header'     => (is => 'rw', isa => 'Int', lazy => 1, default => 0,
+    has 'is_header' => (
+        is          => 'rw',
+        isa         => 'Int',
+        lazy        => 1,
+        default     => 0,
         documentation => q{
             If true, the produced Row will be a simple header with no input
             controls and no events.  The advantage is that the header's size will 
@@ -42,7 +52,9 @@ package LacunaWaX::MainSplitterWindow::RightPane::SpiesPane::SpyRow {
         }
     );
 
-    has 'new_name' => ( is => 'rw', isa => 'Str',
+    has 'new_name' => (
+        is          => 'rw',
+        isa         => 'Str',
         documentation => q{
             If the user wants to change the name of the spy, that new name goes in here.  Upon 
             clicking the "rename" button, any spy rows that have a new_name that's not equal to 
@@ -101,6 +113,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::SpiesPane::SpyRow {
         my $self = shift;
 
         wxTheApp->borders_off();    # Change to borders_on to see borders around sizers
+        wxTheApp->Yield;
 
         if( $self->is_header ) {#{{{
             ### Don't forget to return from set_events when is_header is true 
@@ -155,7 +168,6 @@ package LacunaWaX::MainSplitterWindow::RightPane::SpiesPane::SpyRow {
         $self->szr_main->Add($self->szr_theft, 0, 0, 0);
         $self->szr_main->Add($self->szr_train, 0, 0, 0);
 
-        wxTheApp->Yield;
         $self->_set_events;
         return $self;
     }
@@ -165,7 +177,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::SpiesPane::SpyRow {
             $self->parent, -1, 
             wxDefaultPosition, 
             Wx::Size->new($self->train_width, $self->row_height), 
-            [$self->text_none, @{wxTheApp->game_client->spy_training_choices} ]
+            [$self->text_none, @{$self->ancestor->spy_training_choices} ]
         );
 
         my $selection = 0;

@@ -448,9 +448,6 @@ is given, now() is assumed.
         my $seconds_dur = $later->subtract_datetime_absolute($origin_time);
         return $seconds_dur->seconds;
     }#}}}
-    sub spy_training_choices {#{{{
-        return ['Idle', 'Intel Training', 'Mayhem Training', 'Politics Training', 'Theft Training'];
-    }#}}}
     sub travel_speed {#{{{
         my $self = shift;
         my $time = shift;

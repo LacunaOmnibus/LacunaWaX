@@ -24,60 +24,98 @@ package LacunaWaX::MainSplitterWindow::RightPane::SpiesPane {
         required    => 1,
     );
 
+    has 'planet_name' => (
+        is          => 'rw',
+        isa         => 'Str',
+        required    => 1
+    );
+
     #########################################
 
-    has 'planet_name'   => (is => 'rw', isa => 'Str',                   required => 1   );
-    has 'planet_id'     => (is => 'rw', isa => 'Int', lazy_build => 1                   );
+    has 'batch_form' => (
+        is          => 'rw',
+        isa         => 'LacunaWaX::MainSplitterWindow::RightPane::SpiesPane::BatchRenameForm',
+        lazy_build  => 1,
+    );
 
-    has 'int_min' => (is => 'rw', isa => 'Maybe[Games::Lacuna::Client::Buildings::Intelligence]', lazy_build => 1);
+    has 'dialog_status' => (
+        is          => 'rw',
+        isa         => 'LacunaWaX::Dialog::Status',
+        lazy_build  => 1,
+    );
 
-    has 'stop_renaming' => (is => 'rw', isa => 'Int', lazy => 1, default => 0,
+    has 'int_min' => (
+        is          => 'rw',
+        isa         => 'Maybe[Games::Lacuna::Client::Buildings::Intelligence]', 
+        lazy_build  => 1,
+    );
+
+    has 'planet_id' => (
+        is          => 'rw',
+        isa         => 'Int',
+        lazy_build  => 1,
+        documentation => q{
+            Does not need to be passed in; derived from the required planet_name.
+        }
+    );
+
+    has 'spy_table' => (
+        is          => 'rw',
+        isa         => 'ArrayRef',
+        lazy        => 1,
+        default     => sub{[]},
+        documentation => q{
+            Contains all of the SpyRow objects.
+        }
+    );
+
+    has 'spy_training_choices' => (
+        is          => 'rw', 
+        isa         => 'ArrayRef',
+        lazy_build  => 1,
+        documentation => q{
+            Contents of the Training select boxes.
+        }
+    );
+
+    has 'stop_renaming' => (
+        is          => 'rw', 
+        isa         => 'Int',
+        lazy        => 1,
+        default     => 0,
         documentation => q{
             If the user closes the status window, this will be set to True, in which 
             case the renaming loop will quit.
         }
     );
 
-    has 'screen_width'  => (is => 'rw', isa => 'Int', lazy => 1, default => 640 );
+    has 'width_screen'  => (is => 'rw', isa => 'Int', lazy => 1, default => 640     );
+    has 'width_chc'     => (is => 'rw', isa => 'Int', lazy => 1, default => 80      );
+    has 'height_chc'    => (is => 'rw', isa => 'Int', lazy => 1, default => 25      );
+    has 'text_none'     => (is => 'rw', isa => 'Str', lazy => 1, default => 'None'  );
 
-    has 'dialog_status' => (is => 'rw', isa => 'LacunaWaX::Dialog::Status', lazy_build => 1);
+    has 'szr_buttons'           => (is => 'rw', isa => 'Wx::BoxSizer',  lazy_build => 1, documentation => 'horizontal'  );
+    has 'szr_header'            => (is => 'rw', isa => 'Wx::BoxSizer',  lazy_build => 1, documentation => 'vertical'    );
+    has 'szr_train'             => (is => 'rw', isa => 'Wx::BoxSizer',  lazy_build => 1, documentation => 'horizontal'  );
+    has 'szr_batch'             => (is => 'rw', isa => 'Wx::BoxSizer',  lazy_build => 1, documentation => 'horizontal'  );
+    has 'szr_bottom_center'     => (is => 'rw', isa => 'Wx::BoxSizer',  lazy_build => 1, documentation => 'horizontal'  );
+    has 'szr_bottom_right'      => (is => 'rw', isa => 'Wx::BoxSizer',  lazy_build => 1, documentation => 'vertical'    );
+    has 'szr_batch_center'      => (is => 'rw', isa => 'Wx::BoxSizer',  lazy_build => 1, documentation => 'horizontal'  );
 
-    has 'width_chc'  => (is => 'rw', isa => 'Int', lazy => 1, default => 80     );
-    has 'height_chc' => (is => 'rw', isa => 'Int', lazy => 1, default => 25     );
-    has 'text_none'  => (is => 'rw', isa => 'Str', lazy => 1, default => 'None' );
-
-    has 'szr_buttons'  => (is => 'rw', isa => 'Wx::BoxSizer',  lazy_build => 1, documentation => 'horizontal');
-    has 'szr_header'   => (is => 'rw', isa => 'Wx::BoxSizer',  lazy_build => 1, documentation => 'vertical');
-    has 'szr_train'    => (is => 'rw', isa => 'Wx::BoxSizer',  lazy_build => 1, documentation => 'horizontal');
-    has 'szr_batch'    => (is => 'rw', isa => 'Wx::BoxSizer',  lazy_build => 1, documentation => 'horizontal');
-
-    has 'szr_bottom_center'   => (is => 'rw', isa => 'Wx::BoxSizer',  lazy_build => 1, documentation => 'horizontal');
-    has 'szr_bottom_right'    => (is => 'rw', isa => 'Wx::BoxSizer',  lazy_build => 1, documentation => 'vertical'  );
-    has 'szr_batch_center'    => (is => 'rw', isa => 'Wx::BoxSizer',  lazy_build => 1, documentation => 'horizontal');
-
-    has 'lbl_header'                => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1);
-    has 'lbl_instructions_box'      => (is => 'rw', isa => 'Wx::BoxSizer',      lazy_build => 1);
-    has 'lbl_instructions'          => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1);
-    has 'lbl_save_button_reminder'  => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1);
-
-    has 'lbl_train_1'       => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1);
-    has 'lbl_train_2'       => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1);
-    has 'lbl_train_3'       => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1);
-    has 'lbl_train_4'       => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1);
-    has 'chc_train_1'       => (is => 'rw', isa => 'Wx::Choice',        lazy_build => 1);
-    has 'chc_train_2'       => (is => 'rw', isa => 'Wx::Choice',        lazy_build => 1);
-    has 'chc_train_3'       => (is => 'rw', isa => 'Wx::Choice',        lazy_build => 1);
-    has 'chc_train_4'       => (is => 'rw', isa => 'Wx::Choice',        lazy_build => 1);
-    has 'btn_clear'         => (is => 'rw', isa => 'Wx::Button',        lazy_build => 1);
-    has 'btn_rename'        => (is => 'rw', isa => 'Wx::Button',        lazy_build => 1);
-    has 'btn_save'          => (is => 'rw', isa => 'Wx::Button',        lazy_build => 1);
-
-    has 'spy_table' => (is => 'rw', isa => 'ArrayRef', lazy => 1, default => sub{[]});
-    has 'batch_form' => (
-        is          => 'rw',
-        isa         => 'LacunaWaX::MainSplitterWindow::RightPane::SpiesPane::BatchRenameForm',
-        lazy_build  => 1,
-    );
+    has 'lbl_header'            => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1);
+    has 'lbl_instructions_box'  => (is => 'rw', isa => 'Wx::BoxSizer',      lazy_build => 1);
+    has 'lbl_instructions'      => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1);
+    has 'lbl_train_1'           => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1);
+    has 'lbl_train_2'           => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1);
+    has 'lbl_train_3'           => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1);
+    has 'lbl_train_4'           => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1);
+    has 'chc_train_1'           => (is => 'rw', isa => 'Wx::Choice',        lazy_build => 1);
+    has 'chc_train_2'           => (is => 'rw', isa => 'Wx::Choice',        lazy_build => 1);
+    has 'chc_train_3'           => (is => 'rw', isa => 'Wx::Choice',        lazy_build => 1);
+    has 'chc_train_4'           => (is => 'rw', isa => 'Wx::Choice',        lazy_build => 1);
+    has 'btn_clear'             => (is => 'rw', isa => 'Wx::Button',        lazy_build => 1);
+    has 'btn_rename'            => (is => 'rw', isa => 'Wx::Button',        lazy_build => 1);
+    has 'btn_save'              => (is => 'rw', isa => 'Wx::Button',        lazy_build => 1);
 
     sub BUILD {
         my $self = shift;
@@ -89,7 +127,6 @@ package LacunaWaX::MainSplitterWindow::RightPane::SpiesPane {
 
         $self->szr_header->Add($self->lbl_header, 0, 0, 0);
         $self->szr_header->AddSpacer(5);
-        $self->szr_header->Add($self->lbl_save_button_reminder, 0, 0, 0);
         $self->szr_header->Add($self->lbl_instructions_box, 0, 0, 0);
         $self->content_sizer->Add($self->szr_header, 0, 0, 0);
         $self->content_sizer->AddSpacer(20);
@@ -112,16 +149,6 @@ package LacunaWaX::MainSplitterWindow::RightPane::SpiesPane {
         $self->content_sizer->AddSpacer(10);
         wxTheApp->Yield;
 
-        my $spies = try {
-            wxTheApp->game_client->get_spies($self->planet_id);
-        }
-        catch {
-            my $msg = (ref $_) ? $_->text : $_;
-            wxTheApp->poperr($msg);
-            return;
-        };
-        $spies or return;
-
         ### Spy list header
         my $header = LacunaWaX::MainSplitterWindow::RightPane::SpiesPane::SpyRow->new(
             ancestor    => $self,
@@ -131,82 +158,13 @@ package LacunaWaX::MainSplitterWindow::RightPane::SpiesPane {
         $self->content_sizer->Add($header->szr_main, 0, 0, 0);
         $self->content_sizer->AddSpacer(5);
 
-        ### Actual spy list
-        foreach my $hr( @{$spies} ) {
-            wxTheApp->Yield;
-            my $spy = LacunaWaX::Model::Client::Spy->new(hr => $hr);
-            my $row = LacunaWaX::MainSplitterWindow::RightPane::SpiesPane::SpyRow->new(
-                app         => wxTheApp,
-                ancestor    => $self,
-                parent      => $self->parent,
-                spy         => $spy,
-            );
-            push @{ $self->spy_table }, $row;
-            $self->content_sizer->Add($row->szr_main, 0, 0, 0);
-            $self->content_sizer->AddSpacer(5);
-
-            unless( scalar @{$self->spy_table} % 20 ) {
-                ### Add another header every 20 rows
-                my $header = LacunaWaX::MainSplitterWindow::RightPane::SpiesPane::SpyRow->new(
-                    app         => wxTheApp,
-                    ancestor    => $self,
-                    parent      => $self->parent,
-                    is_header   => 1,
-                );
-                $self->content_sizer->Add($header->szr_main, 0, 0, 0);
-                $self->content_sizer->AddSpacer(5);
-            }
-        }
+        $self->make_spies_list();
         wxTheApp->Yield;
 
         $self->szr_buttons->Add($self->btn_save, 0, 0, 0);
         $self->szr_buttons->AddSpacer(10);
         $self->szr_buttons->Add($self->btn_rename, 0, 0, 0);
         wxTheApp->Yield;
-
-=head2 BOTTOM SIZERS {#{{{
-
-The buttons and batch rename form at the bottom of the screen have a somewhat 
-complicated sizer setup in an effort to keep those sets of items MorL centered.
-
-The setup described below appears inside the Content Sizer after the list of 
-spies.
-
-If you need to fiddle these sizers at all, please turn on sizer_debug so you can 
-see what you're doing.
-
-=begin rawtext
-
-                                                                                                  
- ___ Bottom Centering ______________________________________________________                                                                                               
-|                                                                           |                     
-|                 __ Bottom Right _________________________________________ |                     
-|                | __ Bottom Buttons _____________________________________ ||                     
-|                ||                                                       |||                     
-|                ||   SAVE SPY ASSIGNMENTS      RENAME SPIES              |||                     
-|                ||                                                       |||                     
-|                ||                                                       |||                     
-|                ||_______________________________________________________|||                     
-|      S         |                                                         ||                     
-|      P         |            SPACER                                       ||                     
-|      A         |                                                         ||                     
-|      C         | __ Batch Centering ______________________________       ||                     
-|      E         ||            __ Batch Rename ____________________ |      ||                     
-|      R         ||           |                                    ||      ||                     
-|                ||     S     |   NEW NAME TEXT BOX                ||      ||                     
-|                ||     P     |                                    ||      ||                     
-|                ||     A     |                                    ||      ||                     
-|                ||     C     |   PRE- SUF- FIX RADIO BOX          ||      ||                     
-|                ||     E     |                                    ||      ||                     
-|                ||     R     |                                    ||      ||                     
-|                ||           |____________________________________||      ||                     
-|                ||_________________________________________________|      ||                     
-|                |_________________________________________________________||                     
-|___________________________________________________________________________|                                                                                            
-
-=end rawtext
-
-=cut # }#}}}
 
         $self->szr_batch_center->AddSpacer(50);
         $self->szr_batch_center->Add($self->batch_form->szr_main, 0, 0, 0); # probably needs to be in another horiz sizer with a spacer first
@@ -224,12 +182,34 @@ see what you're doing.
         $self->content_sizer->Add($self->szr_bottom_center, 0, 0, 0);
         wxTheApp->Yield;
 
-        #$self->lbl_header->SetFocus();  # make sure we're scrolled to the top
-
         $self->parent->Show(1);
         wxTheApp->Yield;
         return $self;
     }
+    sub _set_events {#{{{
+        my $self = shift;
+        EVT_CHOICE( $self->parent, $self->chc_train_1->GetId,   sub{$self->OnAllTrainChoice($self->chc_train_1,@_)} );
+        EVT_CHOICE( $self->parent, $self->chc_train_2->GetId,   sub{$self->OnAllTrainChoice($self->chc_train_2,@_)} );
+        EVT_CHOICE( $self->parent, $self->chc_train_3->GetId,   sub{$self->OnAllTrainChoice($self->chc_train_3,@_)} );
+        EVT_CHOICE( $self->parent, $self->chc_train_4->GetId,   sub{$self->OnAllTrainChoice($self->chc_train_4,@_)} );
+        EVT_BUTTON( $self->parent, $self->btn_clear->GetId,     sub{$self->OnClearButton(@_)}                       );
+        EVT_BUTTON( $self->parent, $self->btn_rename->GetId,    sub{$self->OnRenameButton(@_)}                      );
+        EVT_BUTTON( $self->parent, $self->btn_save->GetId,      sub{$self->OnSaveButton(@_)}                        );
+
+        ### When the user clicks on the instructions text at the top of the 
+        ### screen, this will cause that text to gain focus, thereby enabling 
+        ### the user's mousewheel to scroll the long spies list as they'd 
+        ### expect.
+        $self->lbl_instructions->Connect(
+            $self->lbl_instructions->GetId,
+            wxID_ANY,
+            wxEVT_LEFT_DOWN,
+            sub{$self->OnStaticTextClick(@_)},
+        );
+
+        return 1;
+    }#}}}
+
     sub _build_batch_form {#{{{
         my $self = shift;
         return LacunaWaX::MainSplitterWindow::RightPane::SpiesPane::BatchRenameForm->new(
@@ -262,7 +242,7 @@ see what you're doing.
             $self->parent, -1, 
             wxDefaultPosition, 
             Wx::Size->new($self->width_chc, $self->height_chc), 
-            [$self->text_none, @{wxTheApp->game_client->spy_training_choices}],
+            [$self->text_none, @{$self->spy_training_choices}],
         );
         $v->SetSelection(0);
         $v->SetFont( wxTheApp->get_font('para_text_2') );
@@ -274,7 +254,7 @@ see what you're doing.
             $self->parent, -1, 
             wxDefaultPosition, 
             Wx::Size->new($self->width_chc, $self->height_chc), 
-            [$self->text_none, @{wxTheApp->game_client->spy_training_choices}],
+            [$self->text_none, @{$self->spy_training_choices}],
         );
         $v->SetSelection(0);
         $v->SetFont( wxTheApp->get_font('para_text_2') );
@@ -286,7 +266,7 @@ see what you're doing.
             $self->parent, -1, 
             wxDefaultPosition, 
             Wx::Size->new($self->width_chc, $self->height_chc), 
-            [$self->text_none, @{wxTheApp->game_client->spy_training_choices}],
+            [$self->text_none, @{$self->spy_training_choices}],
         );
         $v->SetSelection(0);
         $v->SetFont( wxTheApp->get_font('para_text_2') );
@@ -298,7 +278,7 @@ see what you're doing.
             $self->parent, -1, 
             wxDefaultPosition, 
             Wx::Size->new($self->width_chc, $self->height_chc), 
-            [$self->text_none, @{wxTheApp->game_client->spy_training_choices}],
+            [$self->text_none, @{$self->spy_training_choices}],
         );
         $v->SetSelection(0);
         $v->SetFont( wxTheApp->get_font('para_text_2') );
@@ -378,21 +358,9 @@ see what you're doing.
             $self->parent, -1, 
             "Spies on " . $self->planet_name, 
             wxDefaultPosition, 
-            Wx::Size->new($self->screen_width, 40)
+            Wx::Size->new($self->width_screen, 40)
         );
         $y->SetFont( wxTheApp->get_font('header_1') );
-        return $y;
-    }#}}}
-    sub _build_lbl_save_button_reminder {#{{{
-        my $self = shift;
-        my $y = Wx::StaticText->new(
-            $self->parent, -1, 
-            "Don't forget to click the Save button at the bottom when you're finished.",
-            wxDefaultPosition, 
-            Wx::Size->new($self->screen_width, 28)
-        );
-        $y->SetFont( wxTheApp->get_font('para_text_2') );
-        $y->SetForegroundColour( Wx::Colour->new(255,0,0) );    # Not 'color'.  Silly brits.
         return $y;
     }#}}}
     sub _build_lbl_instructions {#{{{
@@ -411,7 +379,7 @@ see what you're doing.
             Wx::Size->new(-1, 130)
         );
         $y->SetFont( wxTheApp->get_font('para_text_2') );
-        $y->Wrap($self->screen_width);
+        $y->Wrap($self->width_screen);
 
         return $y;
     }#}}}
@@ -424,6 +392,9 @@ see what you're doing.
     sub _build_planet_id {#{{{
         my $self = shift;
         return wxTheApp->game_client->planet_id( $self->planet_name );
+    }#}}}
+    sub _build_spy_training_choices {#{{{
+        return ['Idle', 'Intel Training', 'Mayhem Training', 'Politics Training', 'Theft Training'];
     }#}}}
     sub _build_szr_batch {#{{{
         my $self = shift;
@@ -454,30 +425,6 @@ see what you're doing.
         return wxTheApp->build_sizer($self->parent, wxHORIZONTAL, 'Training');
     }#}}}
 
-    sub _set_events {#{{{
-        my $self = shift;
-        EVT_CHOICE( $self->parent, $self->chc_train_1->GetId,   sub{$self->OnAllTrainChoice($self->chc_train_1,@_)} );
-        EVT_CHOICE( $self->parent, $self->chc_train_2->GetId,   sub{$self->OnAllTrainChoice($self->chc_train_2,@_)} );
-        EVT_CHOICE( $self->parent, $self->chc_train_3->GetId,   sub{$self->OnAllTrainChoice($self->chc_train_3,@_)} );
-        EVT_CHOICE( $self->parent, $self->chc_train_4->GetId,   sub{$self->OnAllTrainChoice($self->chc_train_4,@_)} );
-        EVT_BUTTON( $self->parent, $self->btn_clear->GetId,     sub{$self->OnClearButton(@_)}                       );
-        EVT_BUTTON( $self->parent, $self->btn_rename->GetId,    sub{$self->OnRenameButton(@_)}                      );
-        EVT_BUTTON( $self->parent, $self->btn_save->GetId,      sub{$self->OnSaveButton(@_)}                        );
-
-        ### When the user clicks on the instructions text at the top of the 
-        ### screen, this will cause that text to gain focus, thereby enabling 
-        ### the user's mousewheel to scroll the long spies list as they'd 
-        ### expect.
-        $self->lbl_instructions->Connect(
-            $self->lbl_instructions->GetId,
-            wxID_ANY,
-            wxEVT_LEFT_DOWN,
-            sub{$self->OnStaticTextClick(@_)},
-        );
-
-        return 1;
-    }#}}}
-
     ### Wrappers around dialog_status's methods to first check for existence of 
     ### dialog_status.
     sub dialog_status_say {#{{{
@@ -494,6 +441,52 @@ see what you're doing.
             try{ $self->dialog_status->say_recsep };
         }
         return 1;
+    }#}}}
+
+    sub make_spies_list {#{{{
+        my $self = shift;
+
+        my $spies = try {
+            wxTheApp->game_client->get_spies($self->planet_id);
+        }
+        catch {
+            my $msg = (ref $_) ? $_->text : $_;
+            wxTheApp->poperr($msg);
+            return;
+        };
+        $spies or return;
+
+        ### Actual spy list
+        my $spy_cnt = 0;
+        foreach my $hr( @{$spies} ) {
+            wxTheApp->Yield;
+            $spy_cnt++;
+            my $spy = LacunaWaX::Model::Client::Spy->new(hr => $hr);
+            my $row = LacunaWaX::MainSplitterWindow::RightPane::SpiesPane::SpyRow->new(
+                app         => wxTheApp,
+                ancestor    => $self,
+                parent      => $self->parent,
+                spy         => $spy,
+            );
+            push @{ $self->spy_table }, $row;
+            $self->content_sizer->Add($row->szr_main, 0, 0, 0);
+            $self->content_sizer->AddSpacer(5);
+
+            unless( scalar @{$self->spy_table} % 20 ) {
+                ### Add another header every 20 rows, but don't add those 
+                ### headers themselves to the spy_table.
+                my $header = LacunaWaX::MainSplitterWindow::RightPane::SpiesPane::SpyRow->new(
+                    app         => wxTheApp,
+                    ancestor    => $self,
+                    parent      => $self->parent,
+                    is_header   => 1,
+                );
+                $self->content_sizer->Add($header->szr_main, 0, 0, 0);
+                $self->content_sizer->AddSpacer(5);
+            }
+        }
+
+        return $spy_cnt;
     }#}}}
 
     sub OnAllTrainChoice {#{{{
@@ -702,3 +695,50 @@ see what you're doing.
 }
 
 1;
+
+__END__
+
+=head2 BOTTOM SIZERS {#{{{
+
+The buttons and batch rename form at the bottom of the screen have a somewhat 
+complicated sizer setup in an effort to keep those sets of items MorL centered.
+
+The setup described below appears inside the Content Sizer after the list of 
+spies.
+
+If you need to fiddle these sizers at all, please turn on sizer_debug so you can 
+see what you're doing.
+
+=begin rawtext
+
+                                                                                                  
+ ___ Bottom Centering ______________________________________________________                                                                                               
+|                                                                           |                     
+|                 __ Bottom Right _________________________________________ |                     
+|                | __ Bottom Buttons _____________________________________ ||                     
+|                ||                                                       |||                     
+|                ||   SAVE SPY ASSIGNMENTS      RENAME SPIES              |||                     
+|                ||                                                       |||                     
+|                ||                                                       |||                     
+|                ||_______________________________________________________|||                     
+|      S         |                                                         ||                     
+|      P         |            SPACER                                       ||                     
+|      A         |                                                         ||                     
+|      C         | __ Batch Centering ______________________________       ||                     
+|      E         ||            __ Batch Rename ____________________ |      ||                     
+|      R         ||           |                                    ||      ||                     
+|                ||     S     |   NEW NAME TEXT BOX                ||      ||                     
+|                ||     P     |                                    ||      ||                     
+|                ||     A     |                                    ||      ||                     
+|                ||     C     |   PRE- SUF- FIX RADIO BOX          ||      ||                     
+|                ||     E     |                                    ||      ||                     
+|                ||     R     |                                    ||      ||                     
+|                ||           |____________________________________||      ||                     
+|                ||_________________________________________________|      ||                     
+|                |_________________________________________________________||                     
+|___________________________________________________________________________|                                                                                            
+
+=end rawtext
+
+=cut # }#}}}
+
