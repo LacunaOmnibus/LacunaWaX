@@ -875,3 +875,8 @@ section #title .credits.right {
     display: none;
   }
 }
+
+/* JDB */
+.achtung {
+  color: #f00;
+}
