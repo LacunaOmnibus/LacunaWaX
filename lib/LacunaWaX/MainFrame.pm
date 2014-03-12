@@ -275,11 +275,13 @@ package LacunaWaX::MainFrame {
         my $self        = shift;
         my $server_id   = shift;
 
+        wxTheApp->throb();
         if( $self->has_intro_panel ) {
             ### Keep the user from double clicking the connect button and thus 
             ### producing a "You're already connected" poperr.
             foreach my $srvr_id( keys %{$self->intro_panel->buttons} ) {
                 $self->intro_panel->buttons->{$srvr_id}->Disable();
+                wxTheApp->Yield();
             }
         }
 
@@ -287,6 +289,7 @@ package LacunaWaX::MainFrame {
             ### We're already connected so a splitter is displayed.  Clear 
             ### it.
             $self->clear_splitter;
+            wxTheApp->Yield();
         }
 
         my $schema = wxTheApp->main_schema;
@@ -294,30 +297,33 @@ package LacunaWaX::MainFrame {
             wxTheApp->server( $server );
 
             wxTheApp->caption("Connecting...");
-            wxTheApp->throb();
 
             unless( wxTheApp->game_connect ) {
                 ### Probably bad creds filled out in Prefs frame.  Undef 
                 ### server so we don't get told we're "Already Connected" on 
                 ### our next attempt.
                 wxTheApp->server(undef);
+                wxTheApp->Yield();
                 wxTheApp->endthrob();
                 wxTheApp->caption("Connection Failed!  Correct your login credentials in Edit... Preferences.");
                 return;
             }
             if( $self->has_intro_panel ) {
                 $self->clear_intro_panel;
+                wxTheApp->Yield();
             }
 
             ### Enable any menu items that were disabled on creation because we 
             ### weren't connected yet.
             $self->menu_bar->show_connected();
+            wxTheApp->Yield();
 
             $self->splitter_sizer->Add( $self->splitter->splitter_window, 1, wxEXPAND );
             $self->Layout();
+            wxTheApp->Yield();
 
-            wxTheApp->endthrob();
             wxTheApp->caption("Connected to " . $server->name . " as " . wxTheApp->account->username);
+            wxTheApp->endthrob();
         }
         else {
             Wx::MessageBox("Invalid Server!", "Whoops", wxICON_EXCLAMATION, $self);

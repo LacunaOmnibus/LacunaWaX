@@ -149,6 +149,8 @@ package LacunaWaX::MainFrame::MenuBar::File {
                     wxTheApp->intro_panel->buttons->{ $sa->server->id }->Enable(1);
                 }
             }
+            wxTheApp->intro_panel->lbl_firsttime->SetLabel('Thanks!  Click the button to login.');
+            wxTheApp->intro_panel->bottom_panel_sizer->Layout();
         }
 
         return 1;

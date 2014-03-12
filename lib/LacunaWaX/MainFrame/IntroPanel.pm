@@ -34,6 +34,12 @@ package LacunaWaX::MainFrame::IntroPanel {
         default => 0,
     );
 
+    has 'lbl_firsttime' => (
+        is          => 'rw',
+        isa         => 'Wx::StaticText',
+        lazy_build  => 1,
+    );
+
     has 'buttons' => (
         is => 'rw', isa => 'HashRef[Wx::Button]', lazy_build => 1,
         documentation => q{ server_id => Wx::Button },
@@ -64,6 +70,13 @@ package LacunaWaX::MainFrame::IntroPanel {
         foreach my $srvr_id(keys %{$self->buttons}) {
             $self->bottom_panel_sizer->Add( $self->buttons->{$srvr_id}, 0, wxALIGN_CENTER_VERTICAL|wxALIGN_CENTER_HORIZONTAL, 0);
         }
+
+        unless( $self->has_enabled_button ) {
+            $self->bottom_panel_sizer->AddSpacer(20);
+            $self->lbl_firsttime->Show(1);
+            $self->bottom_panel_sizer->Add( $self->lbl_firsttime, 0, wxALIGN_CENTER_VERTICAL|wxALIGN_CENTER_HORIZONTAL, 0 );
+        }
+
         $self->bottom_panel_sizer->AddStretchSpacer(2);
         $self->bottom_panel->SetSizer($self->bottom_panel_sizer);
 
@@ -94,6 +107,21 @@ package LacunaWaX::MainFrame::IntroPanel {
     }#}}}
     sub _build_buttons {#{{{
         return {};
+    }#}}}
+    sub _build_lbl_firsttime {#{{{
+        my $self = shift;
+        my $text = "Before you can do anything, you have to go to Edit... Preferences and enter your login info, or import preferences from a previously-installed version of LacunaWaX.";
+        my $v = Wx::StaticText->new(
+            $self->bottom_panel, -1, 
+            $text, 
+            wxDefaultPosition, 
+            Wx::Size->new(800,150),
+            wxALIGN_CENTRE,
+        );
+        $v->Show(0);
+        $v->SetForegroundColour(Wx::Colour->new(200,200,200));
+        $v->SetFont( wxTheApp->get_font('header_3') );
+        return $v;
     }#}}}
     sub _build_logo {#{{{
         my $self = shift;

@@ -162,6 +162,8 @@ package LacunaWaX::Dialog::Prefs {
         if( $username_str and $password_str ) {
             if( wxTheApp->has_intro_panel ) {
                 wxTheApp->intro_panel->buttons->{ $server_account->server->id }->Enable(1);
+                wxTheApp->intro_panel->lbl_firsttime->SetLabel('Thanks!  Click the button to login.');
+                wxTheApp->intro_panel->bottom_panel_sizer->Layout();
             }
             $menu_file->itm_connect->Enable($srvr_menu_id, 1);
         }

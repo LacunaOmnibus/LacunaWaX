@@ -7,9 +7,12 @@ use File::Copy;
 use IO::All;
 use Wx qw(:allclasses);
 
-use FindBin;
-use lib "$FindBin::Bin/../lib";
-use LacunaWaX::Preload::Perlapp;
+BEGIN {
+    use FindBin;
+    use lib "$FindBin::Bin/../lib";
+    use LacunaWaX::Preload::Perlapp;
+    use Wx::Perl::SplashFast( "$FindBin::Bin/../splash.jpg", 2000 );
+}
 use LacunaWaX;
 use LacunaWaX::Util;
 use LacunaWaX::Model::DefaultData;
