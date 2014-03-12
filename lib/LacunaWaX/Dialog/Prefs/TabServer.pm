@@ -4,8 +4,14 @@ package LacunaWax::Dialog::Prefs::TabServer {
     use Try::Tiny;
     use Wx qw(:everything);
     use Wx::Event qw(EVT_BUTTON EVT_CHOICE EVT_COMBOBOX);
-    with 'LacunaWaX::Roles::GuiElement';
 
+    has 'parent' => (
+        is          => 'rw',
+        isa         => 'LacunaWaX::Dialog::Prefs',
+        required    => 1,
+    );
+
+    #################################
     has 'main_sizer'        => (is => 'rw', isa => 'Wx::Sizer',                 lazy_build => 1);
     has 'pnl_main'          => (is => 'rw', isa => 'Wx::Panel',                 lazy_build => 1);
 
@@ -26,7 +32,7 @@ package LacunaWax::Dialog::Prefs::TabServer {
     has 'btn_save'      => (is => 'rw', isa => 'Wx::Button',            lazy_build => 1);
 
     sub BUILD {
-        my($self, @params) = @_;
+        my $self = shift;
 
         my $szr_vert = Wx::BoxSizer->new(wxVERTICAL);
         $szr_vert->AddSpacer(10);
@@ -45,8 +51,8 @@ package LacunaWax::Dialog::Prefs::TabServer {
         return $self;
     }
     sub _build_server_list {#{{{
-        my $self = shift;
-        my $schema = $self->get_main_schema;
+        my $self    = shift;
+        my $schema  = wxTheApp->main_schema;
         my $rs_servers = $schema->resultset('Servers')->search();
 
         my $list = [];
@@ -78,26 +84,25 @@ package LacunaWax::Dialog::Prefs::TabServer {
         ### Row 3, password
         $grid_sizer->Add($self->lbl_pass, 0, 0, 0);
         $grid_sizer->Add($self->txtbox_pass, 0, 0, 0);
-        $grid_sizer->Add(Wx::StaticText->new($self->pnl_main, -1, q{}, wxDefaultPosition, Wx::Size->new(-1,-1)));   # empty placeholder
 
         return $grid_sizer;
     }#}}}
     sub _build_lbl_server {#{{{
         my $self = shift;
         my $v = Wx::StaticText->new($self->pnl_main, -1, "Server", wxDefaultPosition, Wx::Size->new(80,25));
-        $v->SetFont( $self->get_font('/bold_para_text_1') );
+        $v->SetFont( wxTheApp->get_font('bold_para_text_1') );
         return $v;
     }#}}}
     sub _build_lbl_user {#{{{
         my $self = shift;
         my $v =  Wx::StaticText->new($self->pnl_main, -1, "Username", wxDefaultPosition, Wx::Size->new(80,25));
-        $v->SetFont( $self->get_font('/bold_para_text_1') );
+        $v->SetFont( wxTheApp->get_font('bold_para_text_1') );
         return $v;
     }#}}}
     sub _build_lbl_pass {#{{{
         my $self = shift;
         my $v = Wx::StaticText->new($self->pnl_main, -1, "Password", wxDefaultPosition, Wx::Size->new(80,25));
-        $v->SetFont( $self->get_font('/bold_para_text_1') );
+        $v->SetFont( wxTheApp->get_font('bold_para_text_1') );
         return $v;
     }#}}}
     sub _build_btn_save {#{{{
@@ -165,11 +170,11 @@ package LacunaWax::Dialog::Prefs::TabServer {
     }#}}}
     sub _build_pnl_main {#{{{
         my $self = shift;
-        return Wx::Panel->new($self->parent, -1, wxDefaultPosition, wxDefaultSize);
+        return Wx::Panel->new($self->parent->notebook, -1, wxDefaultPosition, wxDefaultSize);
     }#}}}
     sub _set_events {#{{{
         my $self = shift;
-        EVT_BUTTON(     $self->pnl_main,  $self->btn_save->GetId,     sub{$self->ancestor->OnSavePrefs(@_)} );
+        EVT_BUTTON(     $self->pnl_main,  $self->btn_save->GetId,     sub{$self->parent->OnSavePrefs(@_)} );
         EVT_CHOICE(     $self->pnl_main,  $self->chc_server->GetId,   sub{$self->OnChooseServer()} );
         return 1;
     }#}}}
@@ -177,13 +182,13 @@ package LacunaWax::Dialog::Prefs::TabServer {
     sub get_server_protocol {#{{{
         my $self = shift;
         my $server_name = $self->server_list->[ $self->chc_server->GetCurrentSelection ];
-        my $schema      = $self->get_main_schema;
+        my $schema      = wxTheApp->main_schema;
         my $server_rec  = $schema->resultset('Servers')->find({ name => $server_name });
         return $server_rec->protocol;
     }#}}}
     sub set_proto {#{{{
         my $self = shift;
-        my $schema      = $self->get_main_schema;
+        my $schema      = wxTheApp->main_schema;
         my $server_name = $self->server_list->[ $self->chc_server->GetCurrentSelection ];
 
         my $server_rec = $schema->resultset('Servers')->find({ name => $server_name });
@@ -197,7 +202,7 @@ package LacunaWax::Dialog::Prefs::TabServer {
     }#}}}
     sub set_txtbox_user {#{{{
         my $self        = shift;
-        my $schema      = $self->get_main_schema;
+        my $schema      = wxTheApp->main_schema;
         my $server_name = $self->server_list->[ $self->chc_server->GetCurrentSelection ];
 
         my $rs = $schema->resultset('ServerAccounts')->search(
@@ -210,11 +215,12 @@ package LacunaWax::Dialog::Prefs::TabServer {
         if( my $r = $rs->next ) {
             $self->txtbox_user->SetValue($r->username);
         }
+        $self->txtbox_user->SetFocus();
         return 1;
     }#}}}
     sub set_pass {#{{{
         my $self = shift;
-        my $schema      = $self->get_main_schema;
+        my $schema      = wxTheApp->main_schema;
         my $server_name = $self->server_list->[ $self->chc_server->GetCurrentSelection ];
         my $username    = $self->txtbox_user->GetLineText(0);
 
@@ -233,7 +239,7 @@ package LacunaWax::Dialog::Prefs::TabServer {
     }#}}}
     sub set_default_account {#{{{
         my $self = shift;
-        my $schema      = $self->get_main_schema;
+        my $schema      = wxTheApp->main_schema;
         my $server_name = $self->server_list->[ $self->chc_server->GetCurrentSelection ];
         my $username    = $self->txtbox_user->GetLineText(0);
 

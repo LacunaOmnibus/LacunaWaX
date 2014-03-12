@@ -15,7 +15,19 @@ package LacunaWaX::MainSplitterWindow::RightPane::SummaryPane {
     use Wx qw(:everything);
     with 'LacunaWaX::Roles::MainSplitterWindow::RightPane';
 
-    has 'sizer_debug' => (is => 'rw', isa => 'Int',  lazy => 1, default => 0 );
+    has 'ancestor' => (
+        is          => 'rw',
+        isa         => 'LacunaWaX::MainSplitterWindow::RightPane',
+        required    => 1,
+    );
+
+    has 'parent' => (
+        is          => 'rw',
+        isa         => 'Wx::ScrolledWindow',
+        required    => 1,
+    );
+
+    #########################################
 
     has 'planet_name'   => (is => 'rw', isa => 'Str',       required => 1     );
     has 'planet_id'     => (is => 'rw', isa => 'Str',       lazy_build => 1   );
@@ -25,6 +37,11 @@ package LacunaWaX::MainSplitterWindow::RightPane::SummaryPane {
     has 'owner'         => (is => 'rw', isa => 'Str',       lazy_build => 1   );
 
     has 'szr_header'    => (is => 'rw', isa => 'Wx::Sizer',         lazy_build => 1   );
+    has 'szr_res_grid' => (
+        is          => 'rw', 
+        isa         => 'Wx::FlexGridSizer',     
+        lazy_build  => 1,
+    );
     has 'lbl_header'    => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1   );
     has 'lbl_text'      => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1   );
 
@@ -33,18 +50,33 @@ package LacunaWaX::MainSplitterWindow::RightPane::SummaryPane {
     sub BUILD {
         my $self = shift;
 
+        wxTheApp->borders_off();    # Change to borders_on to see borders around sizers
+
+        $self->fill_res_grid();
+
         $self->szr_header->Add($self->lbl_header, 0, 0, 0);
         $self->content_sizer->Add($self->szr_header, 0, 0, 0);
         $self->content_sizer->AddSpacer(20);
         $self->content_sizer->Add($self->lbl_text, 0, 0, 0);
+        $self->content_sizer->AddSpacer(20);
+        $self->content_sizer->Add($self->szr_res_grid, 0, 0, 0);
 
         $self->fix_tree_for_stations();
 
+        $self->_set_events();
         return $self;
     }
+    sub _build_szr_res_grid {#{{{
+        my $self = shift;
+
+        ### 7 rows (5 data, 1 header, 1 spacer), 4 cols, 2px vgap, 50px hgap.
+        my $szr_res_grid = Wx::FlexGridSizer->new(7, 4, 2, 50);
+
+        return $szr_res_grid;
+    }#}}}
     sub _build_szr_header {#{{{
         my $self = shift;
-        return $self->build_sizer($self->parent, wxVERTICAL, 'Header');
+        return wxTheApp->build_sizer($self->parent, wxVERTICAL, 'Header');
     }#}}}
     sub _build_lbl_header {#{{{
         my $self = shift;
@@ -54,7 +86,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::SummaryPane {
             wxDefaultPosition, 
             Wx::Size->new(-1, 30)
         );
-        $v->SetFont( $self->get_font('/header_1') );
+        $v->SetFont( wxTheApp->get_font('header_1') );
         return $v;
     }#}}}
     sub _build_lbl_text {#{{{
@@ -63,9 +95,13 @@ package LacunaWaX::MainSplitterWindow::RightPane::SummaryPane {
             $self->parent, -1, 
             $self->text, 
             wxDefaultPosition, 
-            Wx::Size->new(400,600)
+            ### If you start changing the height on this, check the result on 
+            ### both a station and on a planet.  Station text is bigger.  
+            ### Also, stations with warning text ("OMG we haven't seize our 
+            ### own star!") will need even more height here.
+            Wx::Size->new(400,220)
         );
-        $v->SetFont( $self->get_font('/para_text_2') );
+        $v->SetFont( wxTheApp->get_font('para_text_2') );
         return $v;
     }#}}}
     sub _build_owner {#{{{
@@ -74,16 +110,17 @@ package LacunaWaX::MainSplitterWindow::RightPane::SummaryPane {
     }#}}}
     sub _build_planet_id {#{{{
         my $self = shift;
-        return $self->game_client->planet_id( $self->planet_name );
+        return wxTheApp->game_client->planet_id( $self->planet_name );
     }#}}}
     sub _build_status {#{{{
         my $self = shift;
 
         my $s = try {
-            $self->game_client->get_body_status( $self->planet_id );
+            wxTheApp->game_client->get_body_status( $self->planet_id );
         }
         catch {
-            $self->poperr("$_->{'text'} ($_)");
+            my $msg = (ref $_) ? $_->text : $_;
+            wxTheApp->poperr("$msg");
             return;
         };
         return $s;
@@ -117,6 +154,7 @@ Orbit $s->{orbit} around $s->{star_name} (ID $s->{star_id}), in zone $s->{zone}\
         $text .= "Size $s->{size}\n";
         $text .= "$s->{plots_available} plots available\n";
         $text .= "$s->{building_count} buildings\n";
+        $text .= "\n";
 
         if( $self->type eq 'Station' ) {
             my($spent, $total) = @{$s->{'influence'}}{qw(spent total)};
@@ -128,7 +166,7 @@ Orbit $s->{orbit} around $s->{star_name} (ID $s->{star_id}), in zone $s->{zone}\
             }
             $text .= "\n";
 
-            my $parl = try { $self->game_client->get_building($self->planet_id, 'Parliament') };
+            my $parl = try { wxTheApp->game_client->get_building($self->planet_id, 'Parliament') };
             my $laws = try { $parl->view_laws($self->planet_id) } if $parl;
 
             my @non_seizure_laws = ();
@@ -155,84 +193,102 @@ Orbit $s->{orbit} around $s->{star_name} (ID $s->{star_id}), in zone $s->{zone}\
     }#}}}
     sub _set_events {}
 
+    sub fill_res_grid {#{{{
+        my $self = shift;
+
+        foreach my $number_name(qw(
+            food_stored food_capacity food_hour
+            ore_stored ore_capacity ore_hour
+            water_stored water_capacity water_hour
+            energy_stored energy_capacity energy_hour
+            happiness happiness_hour
+        )) {
+            my $commaized_field_name = "c_" . $number_name;
+            my $val = wxTheApp->commaize_number($self->status->{$number_name});
+            $self->status->{$commaized_field_name} = $val;
+        }
+
+        my @grid = (
+            'Type',     'Stored',               'Capacity',             'Production/hour',
+            '----',     '------',               '--------',             '---------------',
+            'Food:',    'c_food_stored',        'c_food_capacity',      'c_food_hour',
+            'Ore:',     'c_ore_stored',         'c_ore_capacity',       'c_ore_hour',
+            'Water:',   'c_water_stored',       'c_water_capacity',     'c_water_hour',
+            'Energy:',  'c_energy_stored',      'c_energy_capacity',    'c_energy_hour',
+            'Happy:',   'c_happiness',          q{},                    'c_happiness_hour',
+        );
+
+        foreach my $add_this_to_grid( @grid ) {
+            ### The alignments will only work when wxEXPAND is _not_ included.
+            my( $text, $font, $style );
+            if( defined $self->status->{$add_this_to_grid} ) { ### Data
+                $text   = sprintf "%s", $self->status->{$add_this_to_grid};
+                $font   = wxTheApp->get_font('modern_text_2');
+                $style  = wxALIGN_RIGHT;
+            }
+            else { ### Header
+                $text   = $add_this_to_grid;
+                $font   = wxTheApp->get_font('bold_modern_text_2');
+                $style  = ($add_this_to_grid =~ /:/) 
+                    ? wxALIGN_LEFT            # left column header
+                    : wxALIGN_CENTRE;         # top row header
+            }
+
+            my $v = Wx::StaticText->new( $self->parent, -1, $text, wxDefaultPosition, Wx::Size->new(-1, -1) );
+            $v->SetFont( $font );
+            $self->szr_res_grid->Add($v, 0, $style);
+        }
+    }#}}}
+
     sub fix_tree_for_stations {#{{{
         my $self = shift;
 
         return unless defined $self->status->{'influence'};
 
-        ### Still here?  The current body is a Space Station.
+        my $bodies_tree             = wxTheApp->left_pane->bodies_tree;
+        my $treectrl                = $bodies_tree->treeview->treectrl;
 
-        ### On Windows, the FirstVisibleItem is "Bodies", which is what we 
-        ### want...
-        my $tree        = $self->get_left_pane->bodies_tree->treectrl;
-        my $bodies_leaf = $tree->GetFirstVisibleItem;
+        ### Get the first planet listed under 'Bodies'
+        my( $planet_id, $cookie )   = $treectrl->GetFirstChild( $bodies_tree->bodies_item_id );
+        my $data                    = $treectrl->GetItemData( $planet_id );
+        my $hr                      = $data->GetData;
+        my $planet_name             = $hr->{'cookie'}{'node'};
 
-        ### leaf_cookie needs to be declared now.  Might as well declare 
-        ### orbital_leaf while we're at it.
-        my($orbital_leaf, $leaf_cookie);
-
-        ### ...but on Ubuntu, the FirstVisibleItem is the root item, which is 
-        ### not visible dagnabit.  Anyway, if that's what we've got, get _its_ 
-        ### first child, which _will_ be "Bodies".
-        if( $tree->GetItemText($bodies_leaf) =~ /root/i ) {
-            ($bodies_leaf, $leaf_cookie) = $tree->GetFirstChild($bodies_leaf);
+        ### If that first planet listed is not our current planet, iterate 
+        ### through all of that first planet's siblings until we find our 
+        ### current planet
+        unless( $planet_name eq $self->planet_name ) {
+            PLANET_NAME_CHECK:
+            while( $planet_id = $treectrl->GetNextSibling($planet_id) ) {
+                last unless $planet_id->IsOk;
+                my $data        = $treectrl->GetItemData($planet_id);
+                my $hr          = $data->GetData;
+                $planet_name    = $hr->{'cookie'}{'node'};
+                last PLANET_NAME_CHECK if $planet_name eq $self->planet_name;
+            }
         }
 
-        ### Find the $orbital_leaf that represents the current body, which we 
-        ### now know to be a Space Station.
-        ($orbital_leaf, $leaf_cookie) = $tree->GetFirstChild($bodies_leaf);
-
-        my $orbital_leafname = $tree->GetItemText($orbital_leaf);
-        while( $orbital_leafname ne $self->planet_name ) {
-            ($orbital_leaf, $leaf_cookie) = $tree->GetNextChild($bodies_leaf, $leaf_cookie); 
-            last unless $orbital_leaf->IsOk;
-            $orbital_leafname = $tree->GetItemText($orbital_leaf);
-        }
-        if( $orbital_leafname ne $self->planet_name ) {
+        unless( $planet_name eq $self->planet_name ) {
+            ### Should never happen.
             say "No leaf on the tree matches our current planet.  Wat?";
             return;
         }
-
-        ### Now search the child leaves of our current Space Station.  If it's 
-        ### already displaying Station-specific child leaves, we're ok 
-        ### (meaning that this station is known to the application as a 
-        ### station).
-        my($body_child, $child_cookie) = $tree->GetFirstChild($orbital_leaf);
-        my $body_child_leafname = $tree->GetItemText($body_child);
-        while( 1 ) {
-
-            ### These are SS-only leaves.  If we find one, the app already 
-            ### knows this body is a station and we're done.
-            return if (
-                   $body_child_leafname eq 'Fire the BFG'
-                or $body_child_leafname eq 'Health Alerts'
-                or $body_child_leafname eq 'Incoming'
-                or $body_child_leafname eq 'Propositions'
-            );
-
-            ### These are Planet-only leaves.  If we find one, the app does 
-            ### _NOT_ already know that this body is a station.  Break out of 
-            ### our loop and go fix the tree.
-            last if (
-                   $body_child_leafname eq 'Glyphs'
-                or $body_child_leafname eq 'Lottery'
-                or $body_child_leafname eq 'Spies'
-            );
-
-            ($body_child, $child_cookie) = $tree->GetNextChild($orbital_leaf, $child_cookie); 
-            last unless $body_child->IsOk;
-            $body_child_leafname = $tree->GetItemText($body_child);
+            
+        my( $planet_child_id, $planet_child_cookie ) = $treectrl->GetFirstChild( $planet_id );
+        my $planet_child_name = $treectrl->GetItemText( $planet_child_id );
+        if( $planet_child_name eq 'Fire the BFG' ) {
+            ### Our current leaf is already set up as a station, so we don't 
+            ### have to do anything.
+            return;
         }
 
-        ### Still here?  We have a station whose tree is currently showing the 
-        ### default 'body' child leaves.  Fix that.
+        ### Still here?  The current leaf is a new-to-this-user Space Station, 
+        ### and it's currently displaying the child leaves of a Planet.  
+        ### Update the tree.
 
-        #$self->get_left_pane->bodies_tree->fill_tree();
-        #$self->get_left_pane->bodies_tree->add_fresh_tree();
-        $self->get_left_pane->add_fresh_tree();
+        wxTheApp->left_pane->bodies_tree->fill_tree;
+        return 1;
 
-        $self->get_left_pane->bodies_tree->_set_events();
-        $self->get_left_pane->main_panel->Layout();
     }#}}}
 
     no Moose;

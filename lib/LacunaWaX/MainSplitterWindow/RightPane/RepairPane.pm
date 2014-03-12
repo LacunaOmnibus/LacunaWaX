@@ -10,9 +10,21 @@ package LacunaWaX::MainSplitterWindow::RightPane::RepairPane {
     use Wx qw(:everything);
     use Wx::Event qw(EVT_BUTTON EVT_CLOSE EVT_LIST_COL_CLICK);
     with 'LacunaWaX::Roles::MainSplitterWindow::RightPane';
-    no if $] >= 5.017011, warnings => 'experimental::smartmatch';
 
-    has 'sizer_debug'   => (is => 'rw', isa => 'Int',                           lazy => 1,      default => 0    );
+    has 'ancestor' => (
+        is          => 'rw',
+        isa         => 'LacunaWaX::MainSplitterWindow::RightPane',
+        required    => 1,
+    );
+
+    has 'parent' => (
+        is          => 'rw',
+        isa         => 'Wx::ScrolledWindow',
+        required    => 1,
+    );
+
+    #########################################
+
     has 'planet_id'     => (is => 'rw', isa => 'Int',                           lazy_build => 1                 );
     has 'body'          => (is => 'rw', isa => 'Games::Lacuna::Client::Body',   lazy_build => 1                 );
     has 'planet_name'   => (is => 'rw', isa => 'Str',                                           required => 1   );
@@ -53,14 +65,8 @@ package LacunaWaX::MainSplitterWindow::RightPane::RepairPane {
     );
 
     has 'row' => (
-        is => 'rw',
-        isa => 'Int',
-        traits      => ['Counter'],
-        handles => {
-            inc_row   => 'inc',
-            dec_row   => 'dec',
-            reset_row => 'reset',
-        },
+        is      => 'rw',
+        isa     => 'Int',
         default => 0,
         documentation => q{
             Keeps track of which row we're working on while inserting items into a list.
@@ -72,12 +78,6 @@ package LacunaWaX::MainSplitterWindow::RightPane::RepairPane {
         is          => 'rw',
         isa         => 'ArrayRef[Str]',
         lazy_build  => 1,
-        traits      => ['Array'],
-        handles     => {
-            all_glyph_bldgs     => 'elements',
-            add_glyph_bldg      => 'push',
-            find_glyph_bldg     => 'first',
-        },
         documentation => q{
             Just a list of glyph buildings.  Spelling and spacing match the human names
             ("space port" rather than "spaceport"), but all lc().
@@ -87,11 +87,6 @@ package LacunaWaX::MainSplitterWindow::RightPane::RepairPane {
     has 'buildings' => (    # id => bldg_hashref
         is          => 'rw',
         isa         => 'HashRef',
-        traits      => ['Hash'],
-        handles => {
-            bldg_ids => 'keys',
-            get_bldg => 'get',
-        },
         lazy_build  => 1,
     );
 
@@ -119,6 +114,8 @@ package LacunaWaX::MainSplitterWindow::RightPane::RepairPane {
 
     sub BUILD {
         my $self = shift;
+
+        wxTheApp->borders_off();    # Change to borders_on to see borders around sizers
 
         ### Add buildings to the left list.
         $self->populate_bldgs_list( $self->lst_bldgs_onsite );
@@ -164,11 +161,12 @@ package LacunaWaX::MainSplitterWindow::RightPane::RepairPane {
         $self->content_sizer->AddSpacer(20);
         $self->content_sizer->Add($self->res_bar->szr_main, 0, 0, 0);
 
+        $self->_set_events();
         return $self;
     }
     sub _build_body {#{{{
         my $self = shift;
-        my $body = $self->game_client->get_body( $self->planet_id );
+        my $body = wxTheApp->game_client->get_body( $self->planet_id );
         return $body;
     }#}}}
     sub _build_btn_add {#{{{
@@ -179,7 +177,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::RepairPane {
             wxDefaultPosition,
             Wx::Size->new($self->btn_w, $self->btn_h),
         );
-        $v->SetFont( $self->get_font('/bold_para_text_1') );
+        $v->SetFont( wxTheApp->get_font('bold_para_text_1') );
         my $tt = Wx::ToolTip->new("Add");
         $v->SetToolTip($tt);
         return $v;
@@ -192,7 +190,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::RepairPane {
             wxDefaultPosition,
             Wx::Size->new($self->btn_w, $self->btn_h),
         );
-        $v->SetFont( $self->get_font('/bold_para_text_1') );
+        $v->SetFont( wxTheApp->get_font('bold_para_text_1') );
         my $tt = Wx::ToolTip->new("Add All");
         $v->SetToolTip($tt);
         return $v;
@@ -205,7 +203,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::RepairPane {
             wxDefaultPosition,
             Wx::Size->new($self->btn_w, $self->btn_h),
         );
-        $v->SetFont( $self->get_font('/para_text_1') );
+        $v->SetFont( wxTheApp->get_font('para_text_1') );
         my $tt = Wx::ToolTip->new("Glyph buildings are free to repair, so you usually want to do them first.");
         $v->SetToolTip($tt);
         return $v;
@@ -218,7 +216,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::RepairPane {
             wxDefaultPosition,
             Wx::Size->new($self->btn_w, $self->btn_h),
         );
-        $v->SetFont( $self->get_font('/bold_para_text_1') );
+        $v->SetFont( wxTheApp->get_font('bold_para_text_1') );
         my $tt = Wx::ToolTip->new("Remove");
         $v->SetToolTip($tt);
         return $v;
@@ -231,7 +229,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::RepairPane {
             wxDefaultPosition,
             Wx::Size->new($self->btn_w, $self->btn_h),
         );
-        $v->SetFont( $self->get_font('/bold_para_text_1') );
+        $v->SetFont( wxTheApp->get_font('bold_para_text_1') );
         my $tt = Wx::ToolTip->new("Remove All");
         $v->SetToolTip($tt);
         return $v;
@@ -244,7 +242,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::RepairPane {
             wxDefaultPosition,
             Wx::Size->new(100, 50),
         );
-        $v->SetFont( $self->get_font('/bold_para_text_1') );
+        $v->SetFont( wxTheApp->get_font('bold_para_text_1') );
         my $tt = Wx::ToolTip->new("Repair all buildings listed on the right");
         $v->SetToolTip($tt);
         return $v;
@@ -271,11 +269,11 @@ call it as
 =cut
 
         my $bldgs = try {
-            $self->game_client->get_buildings($self->planet_id, undef, $force);
+            wxTheApp->game_client->get_buildings($self->planet_id, undef, $force);
         }
         catch {
             my $msg = (ref $_) ? $_->text : $_;
-            $self->poperr($msg);
+            wxTheApp->poperr($msg);
             return;
         };
 
@@ -351,7 +349,7 @@ call it as
             "Repair Damaged Buildings on " . $self->planet_name,
             wxDefaultPosition, Wx::Size->new(-1, 40)
         );
-        $y->SetFont( $self->get_font('/header_1') );
+        $y->SetFont( wxTheApp->get_font('header_1') );
         return $y;
     }#}}}
     sub _build_lbl_instructions {#{{{
@@ -368,7 +366,7 @@ If many buildings are damaged, you may run out of resources before you can repai
             wxDefaultPosition, 
             Wx::Size->new(-1, 50)
         );
-        $y->SetFont( $self->get_font('/para_text_2') );
+        $y->SetFont( wxTheApp->get_font('para_text_2') );
         $y->Wrap( 560 );
 
         return $y;
@@ -394,7 +392,7 @@ If many buildings are damaged, you may run out of resources before you can repai
         $v->SetColumnWidth(3,40);
         $v->SetColumnWidth(4,100);
         $v->Arrange(wxLIST_ALIGN_TOP);
-        $self->yield;
+        wxTheApp->Yield;
 
         return $v;
     }#}}}
@@ -419,21 +417,18 @@ If many buildings are damaged, you may run out of resources before you can repai
         $v->SetColumnWidth(3,40);
         $v->SetColumnWidth(4,100);
         $v->Arrange(wxLIST_ALIGN_TOP);
-        $self->yield;
+        wxTheApp->Yield;
         return $v;
     }#}}}
     sub _build_planet_id {#{{{
         my $self = shift;
-        return $self->game_client->planet_id( $self->planet_name );
+        return wxTheApp->game_client->planet_id( $self->planet_name );
     }#}}}
     sub _build_res_bar {#{{{
         my $self = shift;
         my $res_bar = LacunaWaX::Generics::ResBar->new(
-            app         => $self->app,
-            ancestor    => $self->ancestor,
             parent      => $self->parent,
             planet_name => $self->planet_name,
-            
         );
         return $res_bar;
     }#}}}
@@ -441,33 +436,32 @@ If many buildings are damaged, you may run out of resources before you can repai
         my $self = shift;
 
         my $v = LacunaWaX::Dialog::Status->new( 
-            app         => $self->app,
-            ancestor    => $self,
-            title       => 'Repairing',
-            recsep      => '-=-=-=-=-=-=-',
+            parent  => $self,
+            title   => 'Repairing',
+            recsep  => '-=-=-=-=-=-=-',
         );
         $v->hide;
         return $v;
     }#}}}
     sub _build_szr_header {#{{{
         my $self = shift;
-        return $self->build_sizer($self->parent, wxVERTICAL, 'Header');
+        return wxTheApp->build_sizer($self->parent, wxVERTICAL, 'Header');
     }#}}}
     sub _build_szr_btn_list {#{{{
         my $self = shift;
-        return $self->build_sizer($self->parent, wxVERTICAL, 'Buttons');
+        return wxTheApp->build_sizer($self->parent, wxVERTICAL, 'Buttons');
     }#}}}
     sub _build_szr_lists {#{{{
         my $self = shift;
-        return $self->build_sizer($self->parent, wxHORIZONTAL, 'Lists');
+        return wxTheApp->build_sizer($self->parent, wxHORIZONTAL, 'Lists');
     }#}}}
     sub _build_szr_repair_out {#{{{
         my $self = shift;
-        return $self->build_sizer($self->parent, wxHORIZONTAL, 'Repair Outside');
+        return wxTheApp->build_sizer($self->parent, wxHORIZONTAL, 'Repair Outside');
     }#}}}
     sub _build_szr_repair_in {#{{{
         my $self = shift;
-        return $self->build_sizer($self->parent, wxHORIZONTAL, 'Repair Inside');
+        return wxTheApp->build_sizer($self->parent, wxHORIZONTAL, 'Repair Inside');
     }#}}}
     sub _set_events {#{{{
         my $self = shift;
@@ -519,10 +513,10 @@ inserting.
 
 =cut
 
-        $name   = $self->str_trim($name);
-        $x      = $self->str_trim($x);
-        $y      = $self->str_trim($y);
-        $damage = $self->str_trim($damage);
+        $name   = wxTheApp->str_trim($name);
+        $x      = wxTheApp->str_trim($x);
+        $y      = wxTheApp->str_trim($y);
+        $damage = wxTheApp->str_trim($damage);
         $damage =~ s/[%]//g;
 
         ### Set the current zero-based row number as the item's data.  We have 
@@ -538,7 +532,7 @@ inserting.
         $list->SetItem( $row_idx, 3, sprintf("%2d", $y)         );
         $list->SetItem( $row_idx, 4, sprintf("%3d%%", $damage)  );
 
-        $self->inc_row;
+        $self->row( $self->row + 1 );
         return $row_idx;
     }#}}}
     sub byname_rev {#{{{
@@ -585,18 +579,18 @@ assignments intact.
         my $i2_off = $list->FindItemData(-1, $bee);
         my $i1 = $list->GetItem($i1_off, $col);
         my $i2 = $list->GetItem($i2_off, $col);
-        my $n1 = $self->str_trim( $i1->GetText );
-        my $n2 = $self->str_trim( $i2->GetText );
+        my $n1 = wxTheApp->str_trim( $i1->GetText );
+        my $n2 = wxTheApp->str_trim( $i2->GetText );
 
         my $ix1 = $list->GetItem($i1_off, 1);
         my $ix2 = $list->GetItem($i2_off, 1);
-        my $nx1 = $self->str_trim( $ix1->GetText );
-        my $nx2 = $self->str_trim( $ix2->GetText );
+        my $nx1 = wxTheApp->str_trim( $ix1->GetText );
+        my $nx2 = wxTheApp->str_trim( $ix2->GetText );
 
         my $iy1 = $list->GetItem($i1_off, 2);
         my $iy2 = $list->GetItem($i2_off, 2);
-        my $ny1 = $self->str_trim( $iy1->GetText );
-        my $ny2 = $self->str_trim( $iy2->GetText );
+        my $ny1 = wxTheApp->str_trim( $iy1->GetText );
+        my $ny2 = wxTheApp->str_trim( $iy2->GetText );
 
         my $rv = ( ($n1 cmp $n2) or ($nx1 <=> $nx2) or ($ny2 <=> $ny2) );
         return $rv;
@@ -621,8 +615,8 @@ assignments intact.
         my $i2_off = $list->FindItemData(-1, $bee);
         my $i1 = $list->GetItem($i1_off, $col);
         my $i2 = $list->GetItem($i2_off, $col);
-        my $n1 = $self->str_trim( $i1->GetText );
-        my $n2 = $self->str_trim( $i2->GetText );
+        my $n1 = wxTheApp->str_trim( $i1->GetText );
+        my $n2 = wxTheApp->str_trim( $i2->GetText );
 
         my $dat_1_1 = $n1 =~ s/[\s%]+//gr;
         my $dat_1_2 = $n2 =~ s/[\s%]+//gr;
@@ -636,8 +630,8 @@ assignments intact.
         if( defined $col2 ) {
             $i1 = $list->GetItem($i1_off, $col2);
             $i2 = $list->GetItem($i2_off, $col2);
-            $n1 = $self->str_trim( $i1->GetText );
-            $n2 = $self->str_trim( $i2->GetText );
+            $n1 = wxTheApp->str_trim( $i1->GetText );
+            $n2 = wxTheApp->str_trim( $i2->GetText );
             my $dat_2_1 = $n1 =~ s/[\s%]+//gr;
             my $dat_2_2 = $n2 =~ s/[\s%]+//gr;
             $rv = ( ($dat_1_1 <=> $dat_1_2) or ($dat_2_1 <=> $dat_2_2) );
@@ -657,8 +651,8 @@ assignments intact.
 
         ### Each insert goes _above_ the previous item, so start with a 
         ### reverse sort.
-        foreach my $bldg_id( sort{$self->byname_rev}$self->bldg_ids ) {
-            my $bldg_hr = $self->get_bldg($bldg_id);
+        foreach my $bldg_id( sort{$self->byname_rev}(keys %{$self->buildings}) ) {
+            my $bldg_hr = $self->buildings->{$bldg_id} // next;
 
             $self->add_row(
                 $list,
@@ -670,7 +664,7 @@ assignments intact.
             );
         }
 
-        $self->reset_row;
+        $self->row( 0 );
     }#}}}
     sub post_repair_cleanup {#{{{
         my $self = shift;
@@ -703,11 +697,11 @@ I have not tested the "fails if we're out of res" yet.
 
 =cut
 
-        foreach my $id( $self->bldg_ids ) {
-            my $hr = $self->get_bldg($id);
+        foreach my $id( keys %{ $self->buildings } ) {
+            my $hr = $self->buildings->{$id} // next;
             next unless ($hr->{'name'} eq $name and $hr->{'x'} eq $x and $hr->{'y'} eq $y);
 
-            my $obj = $self->game_client->get_building_object(
+            my $obj = wxTheApp->game_client->get_building_object(
                 $self->planet_id,
                 $hr,
             );
@@ -796,12 +790,12 @@ I have not tested the "fails if we're out of res" yet.
             last if $row == -1;
 
             my $itm  = $self->lst_bldgs_onsite->GetItem($row);
-            my $id   = $self->str_trim( $itm->GetText );
-            my $name = $self->str_trim( $self->lst_bldgs_onsite->GetItem($row, 1)->GetText );
-            if( $self->find_glyph_bldg(sub{$_ eq lc $name}) ) {
-                my $x = $self->str_trim( $self->lst_bldgs_onsite->GetItem($row, 2)->GetText );
-                my $y = $self->str_trim( $self->lst_bldgs_onsite->GetItem($row, 3)->GetText );
-                my $d = $self->str_trim( $self->lst_bldgs_onsite->GetItem($row, 4)->GetText );
+            my $id   = wxTheApp->str_trim( $itm->GetText );
+            my $name = wxTheApp->str_trim( $self->lst_bldgs_onsite->GetItem($row, 1)->GetText );
+            if( my $bldg = first{ $_ eq lc $name }@{$self->glyph_bldgs} ) {
+                my $x = wxTheApp->str_trim( $self->lst_bldgs_onsite->GetItem($row, 2)->GetText );
+                my $y = wxTheApp->str_trim( $self->lst_bldgs_onsite->GetItem($row, 3)->GetText );
+                my $d = wxTheApp->str_trim( $self->lst_bldgs_onsite->GetItem($row, 4)->GetText );
                 unshift @glyph_rows, [$id, $name, $x, $y, $d];
 
                 $self->lst_bldgs_onsite->DeleteItem( $row );
@@ -926,10 +920,10 @@ I have not tested the "fails if we're out of res" yet.
             last if $row == -1;
             last if $self->flg_stop;
 
-            my $id      = $self->str_trim( $self->lst_bldgs_to_repair->GetItem($row)->GetText );
-            my $name    = $self->str_trim( $self->lst_bldgs_to_repair->GetItem($row, 1)->GetText );
-            my $x       = $self->str_trim( $self->lst_bldgs_to_repair->GetItem($row, 2)->GetText );
-            my $y       = $self->str_trim( $self->lst_bldgs_to_repair->GetItem($row, 3)->GetText );
+            my $id      = wxTheApp->str_trim( $self->lst_bldgs_to_repair->GetItem($row)->GetText );
+            my $name    = wxTheApp->str_trim( $self->lst_bldgs_to_repair->GetItem($row, 1)->GetText );
+            my $x       = wxTheApp->str_trim( $self->lst_bldgs_to_repair->GetItem($row, 2)->GetText );
+            my $y       = wxTheApp->str_trim( $self->lst_bldgs_to_repair->GetItem($row, 3)->GetText );
 
             $self->lst_bldgs_to_repair->DeleteItem( $row );
             $self->status_say("Repairing $name ($x,$y)...");
@@ -1003,10 +997,10 @@ I have not tested the "fails if we're out of res" yet.
         my @ids_to_repair = ();
         while( 1 ) {
             my $row = -1;
-            $self->yield;
+            wxTheApp->Yield;
             $row = $self->lst_bldgs_to_repair->GetNextItem($row, wxLIST_NEXT_ALL, wxLIST_STATE_DONTCARE);
             last if $row == -1;
-            my $id = $self->str_trim( $self->lst_bldgs_to_repair->GetItem($row)->GetText );
+            my $id = wxTheApp->str_trim( $self->lst_bldgs_to_repair->GetItem($row)->GetText );
             push @ids_to_repair, $id;
             $self->lst_bldgs_to_repair->DeleteItem( $row );
         }

@@ -1,14 +1,49 @@
 
 package LacunaWaX::Dialog::NonScrolled {
     use v5.14;
-    use Moose;
     use Try::Tiny;
     use Wx qw(:everything);
     use Wx::Event qw();
-    with 'LacunaWaX::Roles::GuiElement';
 
-    use MooseX::NonMoose::InsideOut;
-    extends 'Wx::Dialog';
+    use Moose;
+
+    ### Perlapp does not like MooseX-NonMoose::InsideOut one little bit.  
+    ### Outside of perlapp it works just fine.
+    ###
+    ### We'll attempt to at least partially imitate it, by allowing the dialog 
+    ### attribute to handle the Wx-y methods, rather than having the actual 
+    ### object (LogViewer, Calculator, whatever) extend Wx::Dialog.
+    ###
+    ### If your extending class needs to call a Wx::Dialog method that's not 
+    ### listed below, just add it.
+    ###
+    ### So your object should still mostly behave as if it were extending 
+    ### Wx::Dialog.  The exception is when you need to send a parent object 
+    ### along to create another Wx widget; in that case, you must send 
+    ### $self->dialog rather than just $self.
+    ###
+    ### That does not extend to setting up events; $self is fine for that.
+    has 'dialog' => (
+        is          => 'rw',
+        isa         => 'Wx::Dialog',
+        lazy_build  => 1,
+        handles => {
+            Centre              => "Centre",
+            Close               => "Close",
+            Connect             => "Connect",
+            Destroy             => "Destroy",
+            EndModal            => "EndModal",
+            GetClientSize       => "GetClientSize",
+            GetWindowStyleFlag  => "GetWindowStyleFlag",
+            Layout              => "Layout",
+            SetSize             => "SetSize",
+            SetSizer            => "SetSizer",
+            SetTitle            => "SetTitle",
+            SetWindowStyle      => "SetWindowStyle",
+            Show                => "Show",
+            ShowModal           => "ShowModal",
+        },
+    );
 
     has 'page_sizer'    => (is => 'rw', isa => 'Wx::BoxSizer',  lazy_build => 1, documentation => 'horizontal'  );
     has 'main_sizer'    => (is => 'rw', isa => 'Wx::Sizer',     lazy_build => 1, documentation => 'vertical'    );
@@ -16,32 +51,31 @@ package LacunaWaX::Dialog::NonScrolled {
     has 'position'      => (is => 'rw', isa => 'Wx::Point',     lazy_build => 1);
     has 'size'          => (is => 'rw', isa => 'Wx::Size',      lazy_build => 1);
 
-    sub FOREIGNBUILDARGS {## no critic qw(RequireArgUnpacking) {{{
-        my $self = shift;
-        my %args = @_;
-
-        my $pos = $args{'position'} // Wx::Point->new(10,10);
-
-        return (
-            undef, -1, 
-            q{},
-            $pos,
-            wxDefaultSize,
-            wxRESIZE_BORDER|wxDEFAULT_DIALOG_STYLE
-        );
-    }#}}}
     sub BUILD {
         my $self = shift;
         return $self;
     }
+    sub _build_dialog {#{{{
+        my $self = shift;
+
+        my $d = Wx::Dialog->new(
+            undef, -1, 
+            q{},
+            $self->position || Wx::Point->new(10,10),
+            $self->size || wxDefaultSize,
+            wxRESIZE_BORDER|wxDEFAULT_DIALOG_STYLE
+        );
+
+        return $d;
+    }#}}}
     sub _build_main_sizer {#{{{
         my $self = shift;
-        my $v = $self->build_sizer($self, wxVERTICAL, 'Main Sizer');
+        my $v = wxTheApp->build_sizer($self, wxVERTICAL, 'Main Sizer');
         return $v;
     }#}}}
     sub _build_page_sizer {#{{{
         my $self = shift;
-        my $v = $self->build_sizer($self, wxHORIZONTAL, 'Page Sizer');
+        my $v = wxTheApp->build_sizer($self, wxHORIZONTAL, 'Page Sizer');
         return $v;
     }#}}}
     sub _build_position {#{{{
@@ -95,8 +129,9 @@ without testing it there first.
         return 1;
     }#}}}
 
+
     no Moose;
-    __PACKAGE__->meta->make_immutable; 
+    __PACKAGE__->meta->make_immutable(); 
 }
 
 1;
@@ -111,10 +146,6 @@ LacunaWaX::Dialog::NonScrolled - A non-scrolled dialog with margins.
 
 This is not meant to be used on its own; it's meant to be extended to create a 
 dialog box with just a scoche of margin.
-
-LacunaWaX::Dialog::NonScrolled implements the LacunaWaX::Roles::GuiElement role, 
-so extending classes will require app, ancestor, and parent arguments passed to 
-their constructors.
 
 =head1 SYNOPSIS
 
@@ -172,13 +203,12 @@ their constructors.
 
 =head1 ARGUMENTS
 
-=head2 app, ancestor, parent (required)
-
-The standard arguments required by LacunaWaX::Roles::GuiElement
+CHECK FIX THIS
 
 =head2 position (optional)
 
 A Wx::Point object defining the NW corner of the dialog.  Defaults to (10,10).
 
 =cut
+
 

@@ -6,19 +6,20 @@ package LacunaWaX::Generics::ResBar {
     use Number::Format;
     use Try::Tiny;
     use Wx qw(:everything);
-    with 'LacunaWaX::Roles::GuiElement';
 
-    has 'sizer_debug' => (
-        is              => 'rw',
-        isa             => 'Int',
-        lazy            => 1,
-        default         => 0,
-        documentation   => q{
-            When true, all sizers will be drawn with boxes for easy visibility.
-            Note those boxes add width; do not attempt to fool with screen centering while 
-            this is turned on!
-        }
+    has 'parent' => (
+        is          => 'rw',
+        isa         => 'Wx::Window',
+        required    => 1,
     );
+
+    has 'planet_name' => (
+        is          => 'rw',
+        isa         => 'Str',
+        required    => 1,
+    );
+
+    #########################################
 
     has 'res_test_mode' => (
         is              => 'rw',
@@ -30,12 +31,6 @@ package LacunaWaX::Generics::ResBar {
             update_res will visibly update the labels.  When false, the actual res amounts 
             are displayed.
         }
-    );
-
-    has 'planet_name' => (
-        is          => 'rw',
-        isa         => 'Str',
-        required    => 1,
     );
 
     has 'planet_id' => (
@@ -80,6 +75,7 @@ package LacunaWaX::Generics::ResBar {
     sub BUILD {
         my $self = shift;
 
+        wxTheApp->borders_off();    # Change to borders_on to see borders around sizers
         $self->update_res;
 
         my $szr_food    = $self->make_res_box('food');
@@ -102,12 +98,13 @@ package LacunaWaX::Generics::ResBar {
         $self->szr_main->Add($self->szr_res_in, 0, wxALIGN_CENTER, 0);
         $self->szr_main->AddStretchSpacer(1);
 
+        $self->_set_events;
         return $self;
     }
     sub _build_img_food {#{{{
         my $self = shift;
 
-        my $img  = $self->wxbb->resolve(service => '/Assets/images/res_l/food.png');
+        my $img  = wxTheApp->get_image('res_l/food.png');
         $img->Rescale(45, 45);
         my $bmp  = Wx::Bitmap->new($img);
         return Wx::StaticBitmap->new(
@@ -122,7 +119,7 @@ package LacunaWaX::Generics::ResBar {
     sub _build_img_ore {#{{{
         my $self = shift;
 
-        my $img  = $self->wxbb->resolve(service => '/Assets/images/res_l/ore.png');
+        my $img  = wxTheApp->get_image('res_l/ore.png');
         $img->Rescale(39, 45);
         my $bmp  = Wx::Bitmap->new($img);
         return Wx::StaticBitmap->new(
@@ -136,7 +133,7 @@ package LacunaWaX::Generics::ResBar {
     sub _build_img_water {#{{{
         my $self = shift;
 
-        my $img  = $self->wxbb->resolve(service => '/Assets/images/res_l/water.png');
+        my $img  = wxTheApp->get_image('res_l/water.png');
         $img->Rescale(36, 45);
         my $bmp  = Wx::Bitmap->new($img);
         return Wx::StaticBitmap->new(
@@ -150,7 +147,7 @@ package LacunaWaX::Generics::ResBar {
     sub _build_img_energy {#{{{
         my $self = shift;
 
-        my $img  = $self->wxbb->resolve(service => '/Assets/images/res_l/energy.png');
+        my $img  = wxTheApp->get_image('res_l/energy.png');
         $img->Rescale(31, 45);
         my $bmp  = Wx::Bitmap->new($img);
         return Wx::StaticBitmap->new(
@@ -168,7 +165,7 @@ package LacunaWaX::Generics::ResBar {
             q{},
             wxDefaultPosition, Wx::Size->new($self->lbl_w, $self->lbl_h)
         );
-        $y->SetFont( $self->get_font('/bold_modern_text_2') );
+        $y->SetFont( wxTheApp->get_font('bold_modern_text_2') );
         return $y;
     }#}}}
     sub _build_lbl_ore {#{{{
@@ -178,7 +175,7 @@ package LacunaWaX::Generics::ResBar {
             q{},
             wxDefaultPosition, Wx::Size->new($self->lbl_w, $self->lbl_h)
         );
-        $y->SetFont( $self->get_font('/bold_modern_text_2') );
+        $y->SetFont( wxTheApp->get_font('bold_modern_text_2') );
         return $y;
     }#}}}
     sub _build_lbl_water {#{{{
@@ -188,7 +185,7 @@ package LacunaWaX::Generics::ResBar {
             q{},
             wxDefaultPosition, Wx::Size->new($self->lbl_w, $self->lbl_h)
         );
-        $y->SetFont( $self->get_font('/bold_modern_text_2') );
+        $y->SetFont( wxTheApp->get_font('bold_modern_text_2') );
         return $y;
     }#}}}
     sub _build_lbl_energy {#{{{
@@ -198,20 +195,20 @@ package LacunaWaX::Generics::ResBar {
             q{},
             wxDefaultPosition, Wx::Size->new($self->lbl_w, $self->lbl_h)
         );
-        $y->SetFont( $self->get_font('/bold_modern_text_2') );
+        $y->SetFont( wxTheApp->get_font('bold_modern_text_2') );
         return $y;
     }#}}}
     sub _build_planet_id {#{{{
         my $self = shift;
-        return $self->game_client->planet_id( $self->planet_name );
+        return wxTheApp->game_client->planet_id( $self->planet_name );
     }#}}}
     sub _build_szr_main {#{{{
         my $self = shift;
-        return $self->build_sizer($self->parent, wxHORIZONTAL, 'Res Outside');
+        return wxTheApp->build_sizer($self->parent, wxHORIZONTAL, 'Res Outside');
     }#}}}
     sub _build_szr_res_in {#{{{
         my $self = shift;
-        return $self->build_sizer($self->parent, wxHORIZONTAL, 'Res Inside');
+        return wxTheApp->build_sizer($self->parent, wxHORIZONTAL, 'Res Inside');
     }#}}}
     sub _set_events {#{{{
         my $self = shift;
@@ -230,9 +227,9 @@ package LacunaWaX::Generics::ResBar {
         ### Call this by passing in the res type: 'food', 'ore', 'water' or 
         ### 'energy'.  Passing in anything else will explode.
 
-        my $szr_main = $self->build_sizer($self->parent, wxVERTICAL, $type);
-        my $szr_img  = $self->build_sizer($self->parent, wxHORIZONTAL, "$type img");
-        my $szr_lbl  = $self->build_sizer($self->parent, wxHORIZONTAL, "$type lbl");
+        my $szr_main = wxTheApp->build_sizer($self->parent, wxVERTICAL, $type);
+        my $szr_img  = wxTheApp->build_sizer($self->parent, wxHORIZONTAL, "$type img");
+        my $szr_lbl  = wxTheApp->build_sizer($self->parent, wxHORIZONTAL, "$type lbl");
 
         $szr_main->SetMinSize( Wx::Size->new($self->res_w, $self->res_h) );
         $szr_img->SetMinSize( Wx::Size->new($self->res_w, $self->res_h) );
@@ -257,7 +254,7 @@ package LacunaWaX::Generics::ResBar {
     sub update_res {#{{{
         my $self = shift;
 
-        my $status = $self->game_client->get_body_status($self->planet_id, 1);  # force
+        my $status = wxTheApp->game_client->get_body_status($self->planet_id, 1);  # force
 
         my $food    = $self->format_num($status->{'food_stored'});
         my $ore     = $self->format_num($status->{'ore_stored'});
@@ -293,8 +290,6 @@ number of each res currently onsite.
 =head1 SYNOPSIS
 
  my $res = LacunaWaX::Generics::ResBar->new(
-  app         => $self->app,
-  ancestor    => $self->ancestor,
   parent      => $self->parent,
   planet_name => $self->planet_name,
  );

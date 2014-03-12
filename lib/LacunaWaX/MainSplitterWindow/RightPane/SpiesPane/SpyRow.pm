@@ -7,23 +7,44 @@ package LacunaWaX::MainSplitterWindow::RightPane::SpiesPane::SpyRow {
     use Try::Tiny;
     use Wx qw(:everything);
     use Wx::Event qw(EVT_TEXT EVT_LEAVE_WINDOW);
-    with 'LacunaWaX::Roles::GuiElement';
 
-    has 'sizer_debug'   => (is => 'rw', isa => 'Int', lazy => 1, default => 0);
+    has 'ancestor' => (
+        is          => 'rw',
+        isa         => 'LacunaWaX::MainSplitterWindow::RightPane::SpiesPane',
+        required    => 1,
+    );
 
-    has 'spy' => (is => 'rw', isa => 'LacunaWaX::Model::Client::Spy',
+    has 'parent' => (
+        is          => 'rw',
+        isa         => 'Wx::ScrolledWindow',
+        required    => 1,
+    );
+
+    #########################################
+
+    has 'spy' => (
+        is          => 'rw',
+        isa         => 'LacunaWaX::Model::Client::Spy',
         documentation => q{
             Not required so we can generate a header, but othewise it's needed.
         }
     );
 
-    has 'text_none'     => (is => 'rw', isa => 'Str', lazy => 1, default => 'None',
+    has 'text_none' => (
+        is          => 'rw',
+        isa         => 'Str',
+        lazy        => 1,
+        default     => 'None',
         documentation => q{
             Simply the string value used to indicate 'no training' in the training select box.
         }
     );
 
-    has 'is_header'     => (is => 'rw', isa => 'Int', lazy => 1, default => 0,
+    has 'is_header' => (
+        is          => 'rw',
+        isa         => 'Int',
+        lazy        => 1,
+        default     => 0,
         documentation => q{
             If true, the produced Row will be a simple header with no input
             controls and no events.  The advantage is that the header's size will 
@@ -31,7 +52,9 @@ package LacunaWaX::MainSplitterWindow::RightPane::SpiesPane::SpyRow {
         }
     );
 
-    has 'new_name' => ( is => 'rw', isa => 'Str',
+    has 'new_name' => (
+        is          => 'rw',
+        isa         => 'Str',
         documentation => q{
             If the user wants to change the name of the spy, that new name goes in here.  Upon 
             clicking the "rename" button, any spy rows that have a new_name that's not equal to 
@@ -89,6 +112,9 @@ package LacunaWaX::MainSplitterWindow::RightPane::SpiesPane::SpyRow {
     sub BUILD {
         my $self = shift;
 
+        wxTheApp->borders_off();    # Change to borders_on to see borders around sizers
+        wxTheApp->Yield;
+
         if( $self->is_header ) {#{{{
             ### Don't forget to return from set_events when is_header is true 
             ### also
@@ -115,7 +141,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::SpiesPane::SpyRow {
                     )
                 );
 
-                $self->$header->SetFont( $self->get_font('/header_7') );
+                $self->$header->SetFont( wxTheApp->get_font('header_7') );
                 $self->szr_main->Add($self->$header, 0, 0, 0);
             }
             return;
@@ -142,7 +168,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::SpiesPane::SpyRow {
         $self->szr_main->Add($self->szr_theft, 0, 0, 0);
         $self->szr_main->Add($self->szr_train, 0, 0, 0);
 
-        $self->yield;
+        $self->_set_events;
         return $self;
     }
     sub _build_chc_train {#{{{
@@ -151,25 +177,25 @@ package LacunaWaX::MainSplitterWindow::RightPane::SpiesPane::SpyRow {
             $self->parent, -1, 
             wxDefaultPosition, 
             Wx::Size->new($self->train_width, $self->row_height), 
-            [$self->text_none, @{$self->game_client->spy_training_choices} ]
+            [$self->text_none, @{$self->ancestor->spy_training_choices} ]
         );
 
         my $selection = 0;
-        my $schema = $self->get_main_schema;
+        my $schema = wxTheApp->main_schema;
         if( my $rec = $schema->resultset('SpyTrainPrefs')->find({spy_id => $self->spy->id}) ) {
-            $selection = $v->FindString( ucfirst $rec->train );
+            $selection = $v->FindString( ucfirst $rec->train ) if $rec->train;
         }
         $v->SetSelection($selection);
-        $v->SetFont( $self->get_font('/para_text_1') );
+        $v->SetFont( wxTheApp->get_font('para_text_1') );
         return $v;
     }#}}}
     sub _build_int_min {#{{{
         my $self = shift;
         my $im = try {
-            $self->game_client->get_building($self->planet_id, 'Intelligence Ministry');
+            wxTheApp->game_client->get_building($self->planet_id, 'Intelligence Ministry');
         }
         catch {
-            $self->poperr($_->text);
+            wxTheApp->poperr($_->text);
             return;
         };
 
@@ -184,7 +210,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::SpiesPane::SpyRow {
             wxDefaultPosition, 
             Wx::Size->new(60, $self->row_height)
         );
-        $y->SetFont( $self->get_font('/para_text_1') );
+        $y->SetFont( wxTheApp->get_font('para_text_1') );
         return $y;
     }#}}}
     sub _build_lbl_intel {#{{{
@@ -195,7 +221,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::SpiesPane::SpyRow {
             wxDefaultPosition, 
             Wx::Size->new($self->skill_width, $self->row_height - 10)
         );
-        $y->SetFont( $self->get_font('/para_text_1') );
+        $y->SetFont( wxTheApp->get_font('para_text_1') );
         return $y;
     }#}}}
     sub _build_lbl_level {#{{{
@@ -207,14 +233,14 @@ package LacunaWaX::MainSplitterWindow::RightPane::SpiesPane::SpyRow {
             wxDefaultPosition, 
             Wx::Size->new($self->level_width, $self->row_height)
         );
-        $y->SetFont( $self->get_font('/para_text_1') );
+        $y->SetFont( wxTheApp->get_font('para_text_1') );
         return $y;
     }#}}}
     sub _build_lbl_loc {#{{{
         my $self = shift;
 
         my($loc, $tooltip);
-        if( $loc = $self->game_client->planet_name($self->spy->assigned_to_id) ) {
+        if( $loc = wxTheApp->game_client->planet_name($self->spy->assigned_to_id) ) {
             substr $loc, 12, (length $loc), '...' if(length $loc > 15);
             $tooltip = Wx::ToolTip->new('Location ID: ' . $self->spy->assigned_to_id);
         }
@@ -231,7 +257,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::SpiesPane::SpyRow {
         );
         $y->SetToolTip($tooltip);
 
-        $y->SetFont( $self->get_font('/para_text_1') );
+        $y->SetFont( wxTheApp->get_font('para_text_1') );
         return $y;
     }#}}}
     sub _build_lbl_mayhem {#{{{
@@ -242,7 +268,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::SpiesPane::SpyRow {
             wxDefaultPosition, 
             Wx::Size->new($self->skill_width, $self->row_height - 10)
         );
-        $y->SetFont( $self->get_font('/para_text_1') );
+        $y->SetFont( wxTheApp->get_font('para_text_1') );
         return $y;
     }#}}}
     sub _build_lbl_name {#{{{
@@ -260,7 +286,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::SpiesPane::SpyRow {
             Wx::Size->new($self->name_width - 12, $self->row_height)
         );
 
-        $y->SetFont( $self->get_font('/para_text_1') );
+        $y->SetFont( wxTheApp->get_font('para_text_1') );
         return $y;
     }#}}}
     sub _build_lbl_task {#{{{
@@ -280,7 +306,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::SpiesPane::SpyRow {
             $y->SetToolTip($tt);
         }
 
-        $y->SetFont( $self->get_font('/para_text_1') );
+        $y->SetFont( wxTheApp->get_font('para_text_1') );
         return $y;
     }#}}}
     sub _build_lbl_offense {#{{{
@@ -292,7 +318,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::SpiesPane::SpyRow {
             wxDefaultPosition, 
             Wx::Size->new(60, $self->row_height)
         );
-        $y->SetFont( $self->get_font('/para_text_1') );
+        $y->SetFont( wxTheApp->get_font('para_text_1') );
         return $y;
     }#}}}
     sub _build_lbl_politics {#{{{
@@ -303,7 +329,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::SpiesPane::SpyRow {
             wxDefaultPosition, 
             Wx::Size->new($self->skill_width, $self->row_height - 10)
         );
-        $y->SetFont( $self->get_font('/para_text_1') );
+        $y->SetFont( wxTheApp->get_font('para_text_1') );
         return $y;
     }#}}}
     sub _build_lbl_placeholder {#{{{
@@ -328,61 +354,61 @@ package LacunaWaX::MainSplitterWindow::RightPane::SpiesPane::SpyRow {
             wxDefaultPosition, 
             Wx::Size->new($self->skill_width, $self->row_height - 10)
         );
-        $y->SetFont( $self->get_font('/para_text_1') );
+        $y->SetFont( wxTheApp->get_font('para_text_1') );
         return $y;
     }#}}}
     sub _build_szr_task {#{{{
         my $self = shift;
-        return $self->build_sizer($self->parent, wxHORIZONTAL, 'Task');
+        return wxTheApp->build_sizer($self->parent, wxHORIZONTAL, 'Task');
     }#}}}
     sub _build_szr_level {#{{{
         my $self = shift;
-        return $self->build_sizer($self->parent, wxHORIZONTAL, 'Level');
+        return wxTheApp->build_sizer($self->parent, wxHORIZONTAL, 'Level');
     }#}}}
     sub _build_szr_loc {#{{{
         my $self = shift;
-        return $self->build_sizer($self->parent, wxHORIZONTAL, 'Loc');
+        return wxTheApp->build_sizer($self->parent, wxHORIZONTAL, 'Loc');
     }#}}}
     sub _build_szr_offense {#{{{
         my $self = shift;
-        return $self->build_sizer($self->parent, wxHORIZONTAL, 'Offense');
+        return wxTheApp->build_sizer($self->parent, wxHORIZONTAL, 'Offense');
     }#}}}
     sub _build_szr_defense {#{{{
         my $self = shift;
-        return $self->build_sizer($self->parent, wxHORIZONTAL, 'Defense');
+        return wxTheApp->build_sizer($self->parent, wxHORIZONTAL, 'Defense');
     }#}}}
     sub _build_szr_intel {#{{{
         my $self = shift;
-        return $self->build_sizer($self->parent, wxHORIZONTAL, 'Intel');
+        return wxTheApp->build_sizer($self->parent, wxHORIZONTAL, 'Intel');
     }#}}}
     sub _build_szr_main {#{{{
         my $self = shift;
-        my $v = $self->build_sizer($self->parent, wxHORIZONTAL, 'Spy Row');
+        my $v = wxTheApp->build_sizer($self->parent, wxHORIZONTAL, 'Spy Row');
         $v->SetMinSize( Wx::Size->new($self->row_width, $self->row_height) );
         return $v;
     }#}}}
     sub _build_szr_mayhem {#{{{
         my $self = shift;
-        return $self->build_sizer($self->parent, wxHORIZONTAL, 'Mayhem');
+        return wxTheApp->build_sizer($self->parent, wxHORIZONTAL, 'Mayhem');
     }#}}}
     sub _build_szr_name {#{{{
         my $self = shift;
-        my $v = $self->build_sizer($self->parent, wxHORIZONTAL, 'Name');
+        my $v = wxTheApp->build_sizer($self->parent, wxHORIZONTAL, 'Name');
         my $size = Wx::Size->new($self->name_width, $self->row_height);
         $v->SetMinSize($size);
         return $v;
     }#}}}
     sub _build_szr_politics {#{{{
         my $self = shift;
-        return $self->build_sizer($self->parent, wxHORIZONTAL, 'Politics');
+        return wxTheApp->build_sizer($self->parent, wxHORIZONTAL, 'Politics');
     }#}}}
     sub _build_szr_theft {#{{{
         my $self = shift;
-        return $self->build_sizer($self->parent, wxHORIZONTAL, 'Theft');
+        return wxTheApp->build_sizer($self->parent, wxHORIZONTAL, 'Theft');
     }#}}}
     sub _build_szr_train {#{{{
         my $self = shift;
-        return $self->build_sizer($self->parent, wxHORIZONTAL, 'Train');
+        return wxTheApp->build_sizer($self->parent, wxHORIZONTAL, 'Train');
     }#}}}
     sub _build_tt_name {#{{{
         my $self = shift;
@@ -467,7 +493,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::SpiesPane::SpyRow {
         ### sizers and positions.
         ### So Layout() has to be called on the ScrolledWindow, which 
         ### understands how to deal with its own scrolling.
-        my $grandparent = $self->ancestor->ancestor;
+        my $grandparent = wxTheApp->main_frame->splitter->right_pane;
         $grandparent->main_panel->Layout();
 
         $self->txt_name->Show(1);

@@ -4,9 +4,78 @@ This panel allows you to choose to be alerted when possibly negative things happ
 station.
 <p>
 
-To receive alerts for a station, simply check the box to enable alerts, and enter the 
-minimum amount of resources per hour that the station should be receiving.
-<p>
+There are several alert types you can enable for a station:
+<ul>
+    <li>
+        <b>Turn on alerts</b>
+        <ul>
+            <li>
+                This must be on for any alerts to work.  Enabling any alert will 
+                automatically turn this on, and turning this off will automatically 
+                disable all alerts.
+            </li>
+        </ul>
+    </li>
+    <li>
+        <b>Enable hostile ship alerts</b>
+        <ul>
+            <li>
+                Alerts you if any hostile ships are inbound.
+            </li>
+            <li>
+                "Hostile" means "not from your alliance".
+            </li>
+            <li>
+                Requires a Police Station.
+            </li>
+        </ul>
+    </li>
+    <li>
+        <b>Enable hostile spy alerts</b>
+        <ul>
+            <li>
+                Alerts you if any hostile spies are onsite.
+            </li>
+            <li>
+                There's no way to tell if a foreign spy (in this case, "foreign" means 
+                "not owned by you") is actually hostile or not.  So what this is actually 
+                doing is checking what task foreign spies are assigned to.  If it's 
+                anything other than "Counter Espionage", the spies are considered to be 
+                hostile.
+            </li>
+            <li>
+                Requires a Police Station.
+            </li>
+        </ul>
+    </li>
+    <li>
+        <b>Enable own star seizure alerts?</b>
+        <ul>
+            <li>
+                Alerts if the star that the station is orbiting is not seized by the 
+                station itself.
+            </li>
+            <li>
+                A station's star should certainly be seized by a station belonging to your 
+                alliance.  This is generally the current station, but in some cases, one 
+                of your alliance's stations will have seized the stars of another of your 
+                alliance's stations.  If that's the case, don't enable this alert, or 
+                you'll get false positives.
+            </li>
+        </ul>
+    </li>
+    <li>
+        <b>Alert if any res drops below X (per hour)</b>
+        <ul>
+            <li>
+                Alerts if any of your stations resource per hour counts drops below this 
+                number.  This is a big one; if the station's supplier goes awol, or gets 
+                hit by a fissure, or is under attack, or any number of things, then the 
+                station's res production will drop.  This is easy to miss.
+            </li>
+        </ul>
+    </li>
+</ul>
 
 <h2>Mail</h2>
 Alerts will be sent to you in game mail.  If you're in the habit of ignoring your mail or 
@@ -20,50 +89,3 @@ Since the health alert mails are sent from your own account to yourself, they co
 "mails sent from players".
 <p>
 
-<h2>What triggers an alert?</h2>
-Several things:
-<ul>
-    <li>
-        Any resource income on the station drops below the number you set in LacunaWaX.  
-        You'll be pestered a bit if you try to set that number below 10 million, but you 
-        can do so if you wish.
-    </li>
-    <li>
-        Any non-alliance ships are inbound to your station.
-    </li>
-    <li>
-        Any spies are found on the station who are not currently set to Counter Espionage.
-            <dd>When spies are found on a station, their originating planet and even 
-            empire name is not available.  However, the task to which they're currently 
-            set <em>is</em> available.  So the closest we can come to identifying enemy 
-            spies is by finding spies who aren't actively defending the station.
-
-            <dd>If you have alliance mates who have spies on your station who aren't doing 
-            anything, and you keep getting alerted that they may be enemies, tell your 
-            silly alliance mates to set their spies to Counter as long as they're taking 
-            advantage of your hospitality.
-    </li>
-    <li>
-        If the star that your station is orbiting is unseized, the station is vulnerable, 
-        and this will trigger an alert.  A station should always seize its own star.
-    </li>
-    <li>
-        If the star that your station is orbiting is seized by another station, your 
-        station may be more than just vulnerable; it may be under active attack.<br>
-
-        If your station's star has been seized by an alliance-mate's station, it's 
-        certainly not under attack, but you're going to get alerted anyway.  It's a silly 
-        situation; seize your own star.
-    </li>
-</ul>
-<p>
-
-<h2>Who should be watching a station?</h2>
-You should definitely set up alerts for each station you have personally launched.  But 
-some redundancy here is not a bad thing - each station should be watched by at least two 
-players.  So if somebody goes on vacation or just isn't paying attention to their mail or 
-whatever, your alliance will still be notified if something goes wrong.
-<p>
-
-You can choose to be alerted to problems on every station in your alliance if you wish.
-<p>

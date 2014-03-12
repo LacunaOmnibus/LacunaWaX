@@ -5,10 +5,25 @@ package LacunaWaX::MainSplitterWindow {
     use Try::Tiny;
     use Wx qw(:allclasses :everything);
     use Wx::Event qw(EVT_CLOSE);
-    with 'LacunaWaX::Roles::GuiElement';
 
     use LacunaWaX::MainSplitterWindow::LeftPane;
     use LacunaWaX::MainSplitterWindow::RightPane;
+
+    has 'parent' => (
+        is          => 'rw',
+        required    => 1,
+
+        ### CHECK
+        ### The parent arg is coming in here as a hashref, causing this 
+        ### constraint to die with:
+        ###     Bizarre copy of HASH in list assignment at...
+        ###
+        ### If we leave the constraint out, the parent arg comes in here and 
+        ### proceeds to behave normally.
+        #isa         => 'LacunaWax::MainFrame',
+    );
+
+    #########################################
 
     has 'size' => (is => 'rw', isa => 'Wx::Size', lazy_build => 1);
 
@@ -21,7 +36,7 @@ package LacunaWaX::MainSplitterWindow {
 
 
     sub BUILD {
-        my($self, @params) = @_;
+        my $self = shift;
 
         $self->splitter_window->Show(0);
 
@@ -37,11 +52,7 @@ package LacunaWaX::MainSplitterWindow {
     };
     sub _build_left_pane {#{{{
         my $self = shift;
-        my $y = LacunaWaX::MainSplitterWindow::LeftPane->new(
-            app      => $self->app,
-            ancestor => $self,
-            parent   => $self->splitter_window,
-        );
+        my $y = LacunaWaX::MainSplitterWindow::LeftPane->new( parent => $self );
         return $y;
     }#}}}
     sub _build_main_sizer {#{{{
@@ -51,11 +62,7 @@ package LacunaWaX::MainSplitterWindow {
     }#}}}
     sub _build_right_pane {#{{{
         my $self = shift;
-        my $y = LacunaWaX::MainSplitterWindow::RightPane->new(
-            app      => $self->app,
-            ancestor => $self,
-            parent   => $self->splitter_window,
-        );
+        my $y = LacunaWaX::MainSplitterWindow::RightPane->new( parent => $self );
         return $y;
     }#}}}
     sub _build_size {#{{{
@@ -66,7 +73,7 @@ package LacunaWaX::MainSplitterWindow {
     sub _build_splitter_window {#{{{
         my $self = shift;
         my $y = Wx::SplitterWindow->new(
-            $self->parent, -1, 
+            $self->parent->frame, -1, 
             wxDefaultPosition, 
             $self->size,
             wxSP_3D|wxSP_BORDER
@@ -104,6 +111,7 @@ You can then check which pane has focus with:
  }
 
 =cut
+
     sub defocus {#{{{
         my $self = shift;
         $self->left_pane->has_focus(0);

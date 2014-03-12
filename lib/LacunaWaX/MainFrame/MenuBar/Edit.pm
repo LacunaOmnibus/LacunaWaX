@@ -4,30 +4,23 @@ package LacunaWaX::MainFrame::MenuBar::Edit {
     use Moose;
     use Wx qw(:everything);
     use Wx::Event qw(EVT_MENU);
-    with 'LacunaWaX::Roles::GuiElement';
 
     use LacunaWaX::Dialog::Prefs;
-
-    ### Wx::Menu is a non-hash object.  Extending such requires 
-    ### MooseX::NonMoose::InsideOut instead of plain MooseX::NonMoose.
-    use MooseX::NonMoose::InsideOut;
-    extends 'Wx::Menu';
+    with 'LacunaWaX::Roles::MainFrame::MenuBar::Menu';
 
     has 'itm_prefs'   => (is => 'rw', isa => 'Wx::MenuItem',  lazy_build => 1);
 
-    sub FOREIGNBUILDARGS {#{{{
-        return; # Wx::Menu->new() takes no arguments
-    }#}}}
     sub BUILD {
         my $self = shift;
         $self->Append( $self->itm_prefs );
+        $self->_set_events();
         return $self;
     }
 
     sub _build_itm_prefs {#{{{
         my $self = shift;
         return Wx::MenuItem->new(
-            $self, -1,
+            $self->menu, -1,
             '&Preferences',
             'Preferences',
             wxITEM_NORMAL,
@@ -44,12 +37,9 @@ package LacunaWaX::MainFrame::MenuBar::Edit {
         my $self = shift;
 
         ### Determine starting point of Prefs window
-        my $tlc         = $self->get_top_left_corner;
+        my $tlc         = wxTheApp->get_top_left_corner;
         my $self_origin = Wx::Point->new( $tlc->x + 30, $tlc->y + 30 );
         my $prefs_frame = LacunaWaX::Dialog::Prefs->new(
-            app         => $self->app,
-            ancestor    => $self,
-            parent      => undef,
             title       => "Preferences",
             position    => $self_origin,
         );

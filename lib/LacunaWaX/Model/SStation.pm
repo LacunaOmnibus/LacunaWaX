@@ -17,6 +17,11 @@ package LacunaWaX::Model::SStation {
         required    => 1,
     );
 
+    has 'command' => (
+        is          => 'rw',
+        isa         => 'Maybe[LacunaWaX::Model::SStation::Command]', 
+        lazy_build  => 1,
+    );
     has 'police' => (
         is          => 'rw',
         isa         => 'Maybe[LacunaWaX::Model::SStation::Police]', 
@@ -33,6 +38,21 @@ package LacunaWaX::Model::SStation {
     sub _build_name {#{{{
         my $self = shift;
         return $self->game_client->planet_name ($self->id );
+    }#}}}
+    sub _build_command {#{{{
+        my $self = shift;
+        my $bldg = try {
+            $self->game_client->get_building($self->id, 'command');
+        };
+
+        my $comm = undef;
+        if( $bldg ) {
+            $comm = LacunaWaX::Model::SStation::Command->new( 
+                scc         => $bldg,
+                game_client => $self->game_client,
+            )
+        }
+        return $comm;
     }#}}}
     sub _build_police {#{{{
         my $self = shift;
@@ -67,7 +87,7 @@ package LacunaWaX::Model::SStation {
 
         my $view = $self->game_client->get_building_view(
             $self->id, 
-            $self->police->precinct,
+            $self->command->scc,
         );
 
         foreach my $res( qw(food ore water energy) ) {

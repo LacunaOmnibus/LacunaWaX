@@ -1,8 +1,4 @@
 
-### Lineage:
-###     ancestor: RightPane.pm
-###     ancestor->ancestor: MainSplitterWindow.pm
-
 package LacunaWaX::MainSplitterWindow::RightPane::GlyphsPane {
     use v5.14;
     use Moose;
@@ -13,9 +9,26 @@ package LacunaWaX::MainSplitterWindow::RightPane::GlyphsPane {
 
     use LacunaWaX::MainSplitterWindow::RightPane::GlyphsPane::RecipeForm;
 
-    has 'sizer_debug' => (is => 'rw', isa => 'Int',  lazy => 1, default => 0);
+    has 'ancestor' => (
+        is          => 'rw',
+        isa         => 'LacunaWaX::MainSplitterWindow::RightPane',
+        required    => 1,
+    );
 
-    has 'planet_name'   => (is => 'rw', isa => 'Str', required => 1     );
+    has 'parent' => (
+        is          => 'rw',
+        isa         => 'Wx::ScrolledWindow',
+        required    => 1,
+    );
+
+    has 'planet_name' => (
+        is          => 'rw',
+        isa         => 'Str',
+        required    => 1,
+    );
+
+    #########################################
+
     has 'planet_id'     => (is => 'rw', isa => 'Int', lazy_build => 1   );
 
     has 'glyph_total' => (
@@ -23,11 +36,6 @@ package LacunaWaX::MainSplitterWindow::RightPane::GlyphsPane {
         isa     => 'Int', 
         lazy    => 1, 
         default => 0,
-        traits  => ['Number'],
-        handles => {
-            set_total       => 'set',
-            add_to_total    => 'add',
-        },
     );
 
     has 'has_arch_min'  => (is => 'rw', isa => 'Int', lazy => 1,        default => 1,
@@ -77,6 +85,9 @@ package LacunaWaX::MainSplitterWindow::RightPane::GlyphsPane {
     sub BUILD {
         my $self = shift;
 
+        wxTheApp->throb();
+        wxTheApp->borders_off();    # Turn on to see borders around sizers
+
         ### See comments in the method as to why it's '_make', not '_build'.
         $self->dialog_status( $self->_make_dialog_status );
 
@@ -97,19 +108,22 @@ package LacunaWaX::MainSplitterWindow::RightPane::GlyphsPane {
         $self->recipe_box->AddSpacer(10);
         $self->recipe_box->Add($self->halls_btn_sizer, 0, 0, 0);
         $self->recipe_box->AddSpacer(20);
+        wxTheApp->Yield;
 
-        foreach my $rname( sort keys %{$self->game_client->glyph_recipes} ) {
+        foreach my $rname( sort keys %{wxTheApp->game_client->glyph_recipes} ) {
             my $form = LacunaWaX::MainSplitterWindow::RightPane::GlyphsPane::RecipeForm->new(
-                app                 => $self->app,
                 parent              => $self->parent,
                 ancestor            => $self,
                 recipe_name         => $rname,
-                recipe_ingredients  => $self->game_client->glyph_recipes->{$rname},
+                recipe_ingredients  => wxTheApp->game_client->glyph_recipes->{$rname},
             );
             $self->recipe_box->Add($form->main_sizer, 0, 0, 0);
+            wxTheApp->Yield;
         }
         $self->content_sizer->Add($self->recipe_box, 0, 0, 0);
         $self->refocus_window_name( 'lbl_planet_name' );
+
+        wxTheApp->endthrob();
         return $self;
     }
     sub _build_auto_search_box {#{{{
@@ -133,28 +147,28 @@ package LacunaWaX::MainSplitterWindow::RightPane::GlyphsPane {
     sub _build_btn_auto_search {#{{{
         my $self = shift;
         my $v = Wx::Button->new($self->parent, -1, "Set Auto Search");
-        $v->SetFont( $self->get_font('/para_text_1') );
+        $v->SetFont( wxTheApp->get_font('para_text_1') );
         return $v;
     }#}}}
     sub _build_btn_build_all_halls {#{{{
         my $self = shift;
         my $v = Wx::Button->new($self->parent, -1, "Build as Many Halls as Possible");
-        $v->SetFont( $self->get_font('/para_text_1') );
+        $v->SetFont( wxTheApp->get_font('para_text_1') );
         return $v;
     }#}}}
     sub _build_btn_push_glyphs {#{{{
         my $self = shift;
         my $v = Wx::Button->new($self->parent, -1, "Set Glyph Push");
-        $v->SetFont( $self->get_font('/para_text_1') );
+        $v->SetFont( wxTheApp->get_font('para_text_1') );
         return $v;
     }#}}}
     sub _build_chc_auto_search {#{{{
         my $self = shift;
 
-        my $ore_types = $self->game_client->ore_types;
+        my $ore_types = wxTheApp->game_client->ore_types;
         my $selection_ss = 0;
 
-        my $schema = $self->get_main_schema;
+        my $schema = wxTheApp->main_schema;
         if( $self->prefs_rec ) {
             my $cnt = 0;
             for my $o(@{$ore_types}) {
@@ -175,15 +189,15 @@ package LacunaWaX::MainSplitterWindow::RightPane::GlyphsPane {
             ['None', @{$ore_types}],
         );
         $v->SetSelection($selection_ss);
-        $v->SetFont( $self->get_font('/para_text_1') );
+        $v->SetFont( wxTheApp->get_font('para_text_1') );
         return $v;
     }#}}}
     sub _build_chc_glyph_home {#{{{
         my $self = shift;
 
-        my %planets_by_id = reverse %{$self->game_client->planets};
+        my %planets_by_id = reverse %{wxTheApp->game_client->planets};
 
-        my $schema = $self->get_main_schema;
+        my $schema = wxTheApp->main_schema;
         foreach my $id( keys %planets_by_id ) {
             ### Get SSs out of the dropdown
             if( my $rec = $schema->resultset('BodyTypes')->find({body_id => $id, type_general => 'space station'}) ) {
@@ -218,13 +232,13 @@ package LacunaWaX::MainSplitterWindow::RightPane::GlyphsPane {
             ['None', @sorted_planets],
         );
         $v->SetSelection($selection_ss);
-        $v->SetFont( $self->get_font('/para_text_1') );
+        $v->SetFont( wxTheApp->get_font('para_text_1') );
         return $v;
     }#}}}
     sub _build_glyph_pusher_box {#{{{
         my $self = shift;
 
-        my $dest_and_ship_sizer = $self->build_sizer($self->parent, wxHORIZONTAL, 'Dest and Ship');
+        my $dest_and_ship_sizer = wxTheApp->build_sizer($self->parent, wxHORIZONTAL, 'Dest and Ship');
         $dest_and_ship_sizer->Add($self->lbl_glyph_home, 0, 0, 0);
         $dest_and_ship_sizer->Add($self->chc_glyph_home, 0, 0, 0);
         $dest_and_ship_sizer->AddSpacer(15);
@@ -232,7 +246,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::GlyphsPane {
         $dest_and_ship_sizer->Add($self->txt_pusher_ship, 0, 0, 0);
 
 
-        my $res_glyphs_sizer = $self->build_sizer($self->parent, wxHORIZONTAL, 'Reserve Glyphs');
+        my $res_glyphs_sizer = wxTheApp->build_sizer($self->parent, wxHORIZONTAL, 'Reserve Glyphs');
         $res_glyphs_sizer->Add($self->lbl_reserve_glyphs, 0, 0, 0);
         $res_glyphs_sizer->Add($self->txt_reserve_glyphs, 0, 0, 0);
         $res_glyphs_sizer->AddSpacer(20);
@@ -253,11 +267,11 @@ package LacunaWaX::MainSplitterWindow::RightPane::GlyphsPane {
     }#}}}
     sub _build_halls_btn_sizer {#{{{
         my $self = shift;
-        return $self->build_sizer($self->parent, wxHORIZONTAL, 'All Halls');
+        return wxTheApp->build_sizer($self->parent, wxHORIZONTAL, 'All Halls');
     }#}}}
     sub _build_header_sizer {#{{{
         my $self = shift;
-        return $self->build_sizer($self->parent, wxVERTICAL, 'Header');
+        return wxTheApp->build_sizer($self->parent, wxVERTICAL, 'Header');
     }#}}}
     sub _build_lbl_glyph_home {#{{{
         my $self = shift;
@@ -267,7 +281,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::GlyphsPane {
             wxDefaultPosition, 
             Wx::Size->new(100, 30)
         );
-        $lbl_glyph_home->SetFont( $self->get_font('/para_text_1') );
+        $lbl_glyph_home->SetFont( wxTheApp->get_font('para_text_1') );
         return $lbl_glyph_home;
     }#}}}
     sub _build_lbl_pusher_ship {#{{{
@@ -278,7 +292,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::GlyphsPane {
             wxDefaultPosition, 
             Wx::Size->new(70, 30)
         );
-        $lbl_pusher_ship->SetFont( $self->get_font('/para_text_1') );
+        $lbl_pusher_ship->SetFont( wxTheApp->get_font('para_text_1') );
         return $lbl_pusher_ship;
     }#}}}
     sub _build_lbl_reserve_glyphs {#{{{
@@ -289,19 +303,18 @@ package LacunaWaX::MainSplitterWindow::RightPane::GlyphsPane {
             wxDefaultPosition, 
             Wx::Size->new(160, 30)
         );
-        $lbl_pusher_ship->SetFont( $self->get_font('/para_text_1') );
+        $lbl_pusher_ship->SetFont( wxTheApp->get_font('para_text_1') );
         return $lbl_pusher_ship;
     }#}}}
     sub _build_list_glyphs {#{{{
         my $self = shift;
-        $self->throb();
-        $self->yield;
+        wxTheApp->Yield;
 
         my $sorted_glyphs = try {
-            $self->game_client->get_glyphs($self->planet_id);
+            wxTheApp->game_client->get_glyphs($self->planet_id);
         }
         catch {
-            $self->poperr($_->text);
+            wxTheApp->poperr($_->text);
             return;
         };
 
@@ -327,8 +340,8 @@ package LacunaWaX::MainSplitterWindow::RightPane::GlyphsPane {
         $list_ctrl->SetColumnWidth(1,125);
         $list_ctrl->SetColumnWidth(2,100);
         $list_ctrl->Arrange(wxLIST_ALIGN_TOP);
-        $list_ctrl->AssignImageList( $self->app->build_img_list_glyphs, wxIMAGE_LIST_SMALL );
-        $self->yield;
+        $list_ctrl->AssignImageList( wxTheApp->build_img_list_glyphs, wxIMAGE_LIST_SMALL );
+        wxTheApp->Yield;
 
         ### Add glyphs to the listctrl
         my $row = 0;
@@ -338,14 +351,13 @@ package LacunaWaX::MainSplitterWindow::RightPane::GlyphsPane {
             my $row_idx = $list_ctrl->InsertImageItem($row, $row);
             $list_ctrl->SetItem($row_idx, 1, $hr->{name});
             $list_ctrl->SetItem($row_idx, 2, $hr->{quantity});
-            $self->add_to_total( $hr->{quantity} );
+            $self->glyph_total( $self->glyph_total + $hr->{quantity} );
             $row++;
-            $self->yield;
+            wxTheApp->Yield;
         }#}}}
 
-        $list_ctrl->SetFont( $self->get_font('/para_text_1') );
+        $list_ctrl->SetFont( wxTheApp->get_font('para_text_1') );
 
-        $self->endthrob();
         return $list_ctrl;
     }#}}}
     sub _build_lbl_planet_name {#{{{
@@ -356,24 +368,24 @@ package LacunaWaX::MainSplitterWindow::RightPane::GlyphsPane {
             wxDefaultPosition, 
             Wx::Size->new(640, 40)
         );
-        $v->SetFont( $self->get_font('/header_1') );
+        $v->SetFont( wxTheApp->get_font('header_1') );
         return $v;
     }#}}}  
     sub _build_list_sizer {#{{{
         my $self = shift;
-        return $self->build_sizer($self->parent, wxVERTICAL, 'Glyphs List');
+        return wxTheApp->build_sizer($self->parent, wxVERTICAL, 'Glyphs List');
     }#}}}
     sub _build_planet_id {#{{{
         my $self = shift;
-        return $self->game_client->planet_id( $self->planet_name );
+        return wxTheApp->game_client->planet_id( $self->planet_name );
     }#}}}
     sub _build_prefs_rec {#{{{
         my $self = shift;
 
-        my $schema = $self->get_main_schema;
+        my $schema = wxTheApp->main_schema;
         if( my $rec = $schema->resultset('ArchMinPrefs')->find_or_create(
             {
-                server_id   => $self->get_connected_server->id,
+                server_id   => wxTheApp->server->id,
                 body_id     => $self->planet_id,
             },
             {
@@ -417,7 +429,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::GlyphsPane {
 
         my $v = Wx::TextCtrl->new(
             $self->parent, -1, 
-            $self->prefs_rec->reserve_glyphs,
+            $self->prefs_rec->reserve_glyphs || 0,
             wxDefaultPosition, 
             Wx::Size->new(50,25)
         );
@@ -498,10 +510,9 @@ The problem here is:
 =cut
 
         return LacunaWaX::Dialog::Status->new( 
-            app         => $self->app,
-            ancestor    => $self,
-            title       => 'Building all halls',
-            recsep      => '-=-=-=-=-=-=-',
+            parent  => $self,
+            title   => 'Building all halls',
+            recsep  => '-=-=-=-=-=-=-',
         );
     }#}}}
     sub _set_events {#{{{
@@ -584,7 +595,7 @@ The problem here is:
         my $reserve_count       = $self->txt_reserve_glyphs->GetLineText(0);
         my $glyph_home_idx      = $self->chc_glyph_home->GetSelection;
         my $glyph_home_str      = $self->chc_glyph_home->GetString( $glyph_home_idx );
-        my $glyph_home_id       = (lc $glyph_home_str ne 'none') ? $self->game_client->planet_id($glyph_home_str) : undef;
+        my $glyph_home_id       = (lc $glyph_home_str ne 'none') ? wxTheApp->game_client->planet_id($glyph_home_str) : undef;
 
         $reserve_count =~ s/\D//g;
         $reserve_count ||= 0;
@@ -595,10 +606,10 @@ The problem here is:
         $self->prefs_rec->update;
 
         if( lc $glyph_home_str eq 'none' or not $pusher_ship_name ) {
-            $self->popmsg("Your glyphs will not be pushed anywhere.");
+            wxTheApp->popmsg("Your glyphs will not be pushed anywhere.");
         }
         else {
-            $self->popmsg("Your glyphs will be pushed to $glyph_home_str onboard $pusher_ship_name.  $reserve_count of each glyph type will remain onsite.");
+            wxTheApp->popmsg("Your glyphs will be pushed to $glyph_home_str onboard $pusher_ship_name.  $reserve_count of each glyph type will remain onsite.");
         }
         return 1;
     }#}}}
@@ -615,10 +626,10 @@ The problem here is:
         $self->prefs_rec->update;
 
         if( $search_str ) {
-            $self->popmsg("Your Arch Min will search for $search_str glyphs.");
+            wxTheApp->popmsg("Your Arch Min will search for $search_str glyphs.");
         }
         else {
-            $self->popmsg("Your Arch Min will not search for glyphs.");
+            wxTheApp->popmsg("Your Arch Min will not search for glyphs.");
         }
         return 1;
     }#}}}
@@ -633,8 +644,8 @@ The problem here is:
         $self->dialog_status->show;
         my $total_built = 0;
         RECIPE:
-        foreach my $rname( sort keys %{$self->game_client->glyph_recipes} ) {
-            $self->yield;
+        foreach my $rname( sort keys %{wxTheApp->game_client->glyph_recipes} ) {
+            wxTheApp->Yield;
             ### If the user closes the status dialog, calling ->say on it will 
             ### segfault.  So we're checking for its existence, and stopping 
             ### halls builds if it's gone.
@@ -651,13 +662,13 @@ The problem here is:
                     last RECIPE;
                 }
 
-                my $ingredients = $self->game_client->glyph_recipes->{$rname};
+                my $ingredients = wxTheApp->game_client->glyph_recipes->{$rname};
                 my $rv = try {
-                    $self->game_client->cook_glyphs($self->planet_id, $ingredients);   # no quantity sent; make the max.
+                    wxTheApp->game_client->cook_glyphs($self->planet_id, $ingredients);   # no quantity sent; make the max.
                 }
                 catch {
                     my $msg = (ref $_) ? $_->text : $_;
-                    $self->poperr($msg);
+                    wxTheApp->poperr($msg);
                     return;
                 };
                 if( ref $rv eq 'HASH' ) {
@@ -679,7 +690,7 @@ The problem here is:
             $self->dialog_status->hide;
             $self->dialog_status->erase;
         }
-        $self->popmsg("Created $total_built Halls of Vrbansk $plan_plural.", 'Success!');
+        wxTheApp->popmsg("Created $total_built Halls of Vrbansk $plan_plural.", 'Success!');
         return 1;
     }#}}}
     sub OnMouseEnterGlyphsList {#{{{

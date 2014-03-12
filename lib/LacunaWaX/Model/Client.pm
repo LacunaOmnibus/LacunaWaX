@@ -1,160 +1,4 @@
 
-=head1 NAME 
-
-LacunaWaX::Model::Client - Game server client
-
-=head1 SYNOPSIS
-
- my $game_client = LacunaWaX::Model::Client->new (
-  app         => C<LacunaWaX object>,
-  bb          => C<LacunaWaX::Model::Container object>,
-  wxbb        => C<LacunaWaX::Model::WxContainer object>,
-  server_id   => C<Integer ID (in local Servers table) of server to connect to>
-  allow_sleep => 0,
- );
-
- if( $game_client->ping ) {
-  ...connected OK...
- }
- else {
-  ...connected NOK...
- }
-
-=head1 DESCRIPTION
-
-Does not technically extend Games::Lacuna::Client, but uses AUTOLOAD to allow 
-treating objects of this class as GLC objects.
-
-So to get a GLC map object, instead of having to do
-
- $game_client->client->map()
-
-Which just feels hackneyed, you can skip the separate call to client:
-
- $game_client->map()
-
-=head1 CONSTRUCTION
-
-The user's default empire name and password are saved in the database, so those 
-creds do not generally need to be sent.
-
-Database connection is passed in the LacunaWaX::Model::Container (bb attribute), and 
-the integer server_id allows Client to find the actual game connection creds.
-
-If you need to create a client using credentials other than what are stored as 
-the current LacunaWaX user's default creds, you may also pass empire_name and 
-empire_pass:
-
- my $other_client = LacunaWaX::Model::Client->new (
-  app         => C<LacunaWaX object>,
-  bb          => C<LacunaWaX::Model::Container object>,
-  wxbb        => C<LacunaWaX::Model::WxContainer object>,
-  server_id   => C<ID of server>
-  allow_sleep => 0,
-
-  empire_name => 'some other empire',
-  empire_pass => 'some other pass',
- );
-
-=head1 PASSABLE ATTRIBUTES
-
-=head2 app (Required)
-
-A LacunaWaX object
-
-=head2 bb (Required)
-
-A LacunaWaX::Model::Container object
-
-=head2 server_id (Required)
-
-The integer ID of the server, in the local Servers table, to which to connect.  
-This must currently be either 1 (US1) or 2 (PT).
-
-=head2 wxbb
-
-A LacunaWaX::Model::WxContainer object
-
-Contains services pertaining to the GUI.  Clients that should not attempt to 
-interact with the GUI (such as clients created during a scheduled task) should 
-not include a wxbb upon construction.
-
-=head2 allow_sleep
-
-Defaults to false.  If true, the client will sleep for 61 seconds after 
-receiving the "More than 60 RPCs used per minute" error from the server.  This 
-should generally I<only> be used by non-GUI clients.
-
-=head2 rpc_sleep
-
-Integer number of seconds to pause between each request passed to the game 
-server to avoid soaking up the 60 allowed RPCs per minute.  Defaults to 0, but a 
-value of at least 1 is encouraged.  Scheduled tasks should probably use a value 
-of 2 or 3.
-
-=head1 PROVIDED ATTRIBUTES
-
-=head2 server_rec, account_rec
-
-The Servers and ServerAccounts table records representing the current LacunaWaX 
-user.
-
-Note that these will continue to represent the I<current LacunaWaX user> even if 
-another user's empire_name and empire_pass are being used.
-
-=head2 url, protocol, empire_name, empire_pass
-
-Connection information pertaining to the current client.
-
-=head2 client
-
-This is the actual Games::Lacuna::Client object.  You shouldn't ever need to 
-touch this.
-
-=head2 ore_types, glyph_types
-
-Alphabetically-sorted arrayref of all possible types of ore in the game.  The 
-two methods are identical; both are provided as convenience.  The types are 
-returned as lower-cased strings.
-
-This list is hard-coded, but since it's exhaustive, it's not likely to change.
-
-=head2 warships
-
-Alphabetically-sorted arrayref of all warships in the game.  The names are those 
-recognized by the game, not the human-readable names (so 'placebo4', not 
-'Placebo IV').
-
-This list is hard-coded, and I<not> exhaustive.  I listed the ships that I think 
-look like "war" ships.
-
-=head2 glyph_recipes
-
-HoA keyed off the final product name:
-
- 'Interdimensional Rift' => [qw(methane zircon fluorite)],
- 'Kalavian Ruins'        => [qw(galena gold)],
- 'Library of Jith'       => [qw(anthracite bauxite beryl chalcopyrite)],
- ...
-
-=head2 planets
-
-Hashref of the current empire's planets: C<name =E<gt> ID>
-
-=head1 METHODS
-
-=head2 EXCEPTIONAL METHODS
-
-Many of the methods need to hit the game server, and as such, might encounter 
-various server errors.  These methods will all throw exceptions in that case, 
-and should therefore have their calls wrapped in try/catch blocks.
-
-All methods whose name begins with C<get_>, along with the C<cook_glyphs> and 
-C<rearrange> methods fall into this category, as well as any methods that are 
-actually Games::Lacuna::Client methods.
-
-=cut
-
 package LacunaWaX::Model::Client {
     use v5.14;
     use Carp;
@@ -170,20 +14,31 @@ package LacunaWaX::Model::Client {
 
     our $AUTOLOAD;
 
-    has 'app'           => (is => 'rw', isa => 'LacunaWaX',                     weak_ref => 1   ); 
-    has 'bb'            => (is => 'rw', isa => 'LacunaWaX::Model::Container',   required => 1   );
-    has 'server_id'     => (is => 'rw', isa => 'Int',                           required => 1   );
+    has 'app'           => (is => 'rw', isa => 'LacunaWaX', weak_ref => 1   ); 
+    has 'server_id'     => (is => 'rw', isa => 'Int',       required => 1   );
 
-    has 'wxbb' => (is => 'rw', isa => 'LacunaWaX::Model::WxContainer',
-        documentation => q{
-            This should be passed in on construction if you've got one, meaning that you're creating 
-            this client in the context of a GUI app.
-            If this client is being created by a non-GUI, eg one of the scheduled tools, this will 
-            be undef.
+    has 'globals' => (
+        is          => 'rw', 
+        isa         => 'LacunaWaX::Model::Globals',
+        lazy_build  => 1,
+        handles     => {
+            logger          => 'logger',
+            log_schema      => 'log_schema',
+            main_schema     => 'main_schema',
         }
     );
 
     has 'empire_status'   => (is => 'rw', isa => 'HashRef');
+
+    has 'use_gui' => (
+        is          => 'rw',
+        isa         => 'Int',
+        default     => 0,
+        documentation => q{
+            If true, will use the cache and any Wx-related items needed.  If 
+            false, will avoid those.
+        }
+    );
 
     has 'allow_sleep'   => (is => 'rw', isa => 'Int', lazy => 1,  default => 0,
         trigger => \&_change_allow_sleep,
@@ -270,7 +125,7 @@ package LacunaWaX::Model::Client {
     sub _build_account_rec {#{{{
         my $self = shift;
 
-        my $schema = $self->bb->resolve( service => '/Database/schema' );
+        my $schema = $self->globals->main_schema;
         my $rec = $schema->resultset('ServerAccounts')->search({
             server_id           => $self->server_id,
             default_for_server  => '1'
@@ -303,11 +158,13 @@ package LacunaWaX::Model::Client {
     }#}}}
     sub _build_empire_name {#{{{
         my $self = shift;
-        return $self->account_rec->username;
+        my $en = $self->account_rec->username;
+        return $en;
     }#}}}
     sub _build_empire_pass {#{{{
         my $self = shift;
-        return $self->account_rec->password;
+        my $pw = $self->account_rec->password;
+        return $pw;
     }#}}}
     sub _build_glyphs {#{{{
         my $self = shift;
@@ -316,7 +173,7 @@ package LacunaWaX::Model::Client {
     sub _build_glyph_recipes {#{{{
         my $self = shift;
         return {
-            'Halls of Vrbansk (all)'        => [qw(various)],                           # Not a real recipe!
+            'Halls of Vrbansk (all)'        => [qw(various)], # Obviously not a real recipe
             'Halls of Vrbansk (1)'          => [qw(goethite halite gypsum trona)],
             'Halls of Vrbansk (2)'          => [qw(gold anthracite uraninite bauxite)],
             'Halls of Vrbansk (3)'          => [qw(kerogen methane sulfur zircon)],
@@ -333,7 +190,7 @@ package LacunaWaX::Model::Client {
             'Oracle of Anid'                => [qw(gold uraninite bauxite goethite)],
             'Pantheon of Hagness'           => [qw(gypsum trona beryl anthracite)],
             'Temple of the Drajilites'      => [qw(kerogen rutile chromite chalcopyrite)],
-            'Terraforming Platform'         => [qw(gypsum sulfur monazite)],
+            'Terraforming Platform'         => [qw(methane zircon magnetite beryl)],
         };
     }#}}}
     sub _build_ore_types {#{{{
@@ -368,7 +225,7 @@ package LacunaWaX::Model::Client {
     sub _build_server_rec {#{{{
         my $self = shift;
 
-        my $schema = $self->bb->resolve( service => '/Database/schema' );
+        my $schema = $self->globals->main_schema;
         my $rec = $schema->resultset('Servers')->find({
             id => $self->server_id
         }) or croak "Could not find server with id '" . $self->server_id . q{'.};
@@ -447,7 +304,7 @@ false and never die.
 
 =cut
 
-        my $logger = $self->bb->resolve( service => '/Log/logger' );
+        my $logger = $self->globals->logger;
         $logger->component('Client');
         $logger->debug('ping() called');
         $self->app->Yield if $self->app;
@@ -466,7 +323,6 @@ false and never die.
         }
 
         $self->app->Yield if $self->app;
-
 
         my $rv = try {
             $self->get_empire_status
@@ -561,7 +417,6 @@ doing so returns much more quickly than having to recreate them.
             uri         => $self->uri,
             server_id   => $self->server_id,
             api_key     => $self->api_key,
-            bb          => $self->bb,
             allow_sleep => $self->allow_sleep,
             rpc_sleep   => $self->rpc_sleep,
         );
@@ -592,9 +447,6 @@ is given, now() is assumed.
         my $later       = $origin_time->clone->add_duration($dur);
         my $seconds_dur = $later->subtract_datetime_absolute($origin_time);
         return $seconds_dur->seconds;
-    }#}}}
-    sub spy_training_choices {#{{{
-        return [qw(Intel Mayhem Politics Theft)];
     }#}}}
     sub travel_speed {#{{{
         my $self = shift;
@@ -658,8 +510,8 @@ where rate is a ship's listed speed.
         ### if the user is not in an alliance.
 
         my $alliance_id;
-        if( $self->wxbb ) {
-            my $chi  = $self->wxbb->resolve( service => '/Cache/raw_memory' );
+        if( $self->use_gui ) {
+            my $chi  = $self->app->get_cache;
             my $key  = $self->make_key('ALLIANCE_ID');
             $alliance_id = $chi->compute($key, '1 hour', sub {
                 my $emp = $self->client->empire;
@@ -694,8 +546,8 @@ where rate is a ship's listed speed.
         ### ...get the alliance object for that ID...
         my $alliance;
         my $alliance_profile;
-        if( $self->wxbb ) {
-            my $chi  = $self->wxbb->resolve( service => '/Cache/raw_memory' );
+        if( $self->use_gui ) {
+            my $chi  = $self->app->get_cache;
             my $a_key  = join q{:}, ('ALLIANCE', $alliance_id);
             $alliance = $chi->compute($a_key, '1 hour', sub {
                 $self->alliance( id => $alliance_id );
@@ -785,8 +637,8 @@ If you want just a subset, send an arrayref of the types you're interested in:
         my $filter = {task => 'Docked'};
 
         my $ships;
-        if( $self->wxbb ) {
-            my $chi  = $self->wxbb->resolve( service => '/Cache/raw_memory' );
+        if( $self->use_gui ) {
+            my $chi  = $self->app->get_cache;
             my $key  = $self->make_key('BODIES', 'SHIPS', 'AVAILABLE', (sort @{$types}), $pid);
             $filter->{type} = $types;
             $self->app->Yield if $self->app;
@@ -806,8 +658,8 @@ If you want just a subset, send an arrayref of the types you're interested in:
         my $pid  = shift;
 
         my $body;
-        if( $self->wxbb ) {
-            my $chi  = $self->wxbb->resolve( service => '/Cache/raw_memory' );
+        if( $self->use_gui ) {
+            my $chi  = $self->app->get_cache;
             my $key  = $self->make_key('BODIES', $pid);
             $body = $chi->compute($key, '1 hour', sub {
                 $self->client->body(id => $pid);
@@ -843,7 +695,7 @@ planet.
             $cbs = $cbs->{'body'};
 
             if( defined $cbs->{'empire'} and $cbs->{'empire'}{'alignment'} eq 'self' ) { # this is my planet
-                my $schema = $self->bb->resolve( service => '/Database/schema' );
+                my $schema = $self->globals->main_schema;
 
                 my $body_type_rec = $schema->resultset('BodyTypes')->find_or_create({ 
                     body_id   => $cbs->{'id'}, 
@@ -862,8 +714,8 @@ planet.
         };
 
         my $bs;
-        if( $self->wxbb and not $force ) {
-            my $chi = $self->wxbb->resolve( service => '/Cache/raw_memory' );
+        if( $self->use_gui and not $force ) {
+            my $chi  = $self->app->get_cache;
             my $key = $self->make_key('BODIES', 'STATUS', $pid);
             $bs     = $chi->compute($key, '1 hour', $code_to_cache);
             ### Something failed; don't keep the failure in the cache.
@@ -944,8 +796,8 @@ sending a true value as the third ('force') arg:
 
 
         my $all_bldgs;
-        if( $self->wxbb ) {
-            my $chi = $self->wxbb->resolve( service => '/Cache/raw_memory' );
+        if( $self->use_gui ) {
+            my $chi  = $self->app->get_cache;
             my $key = $self->make_key('BODIES', 'BULIDINGS', $pid);
             $chi->remove($key) if $force;
             $all_bldgs = $chi->compute($key, '1 hour', $code_to_cache);
@@ -998,9 +850,8 @@ GLC building object.
         my $type = substr $bldg_hr->{'url'}, 1;   # remove the leading slash from the url
         
         my $obj;
-        if( $self->wxbb ) {
-            ### wxbb only present from the GUI; it's where the cache lives.
-            my $chi = $self->wxbb->resolve( service => '/Cache/raw_memory' );
+        if( $self->use_gui ) {
+            my $chi  = $self->app->get_cache;
             my $key = $self->make_key('BODIES', 'BULIDINGS', 'OBJECTS', $pid, $id);
             $chi->remove($key) if $force;
             $obj = $chi->compute($key, '1 hour', sub {
@@ -1054,9 +905,8 @@ Returns a hashref containing 'status' (sigh) and 'building', which is what you w
         my $bid = $bldg_obj->{'building_id'};
 
         my $view;
-        if( $self->wxbb ) {
-            ### wxbb only present from the GUI; it's where the cache lives.
-            my $chi = $self->wxbb->resolve( service => '/Cache/raw_memory' );
+        if( $self->use_gui ) {
+            my $chi  = $self->app->get_cache;
             my $key = $self->make_key('BODIES', 'BULIDINGS', 'VIEWS', $pid, $bid);
             $view = $chi->compute($key, '1 hour', sub {
                 $bldg_obj->view();
@@ -1084,7 +934,12 @@ necessary, call ping() instead.
         $self->app->Yield if $self->app;
         my $empire = $self->client->empire;
         $self->app->Yield if $self->app;
-        my $status = $empire->get_status;
+        my $status = try {
+            $empire->get_status;
+        }
+        catch {
+            return;
+        };
         ref $status eq 'HASH' or return;
         $self->empire_status($status);
 
@@ -1154,8 +1009,8 @@ game, this returns all glyphs, including those we have zero of.
         };
 
         my $sorted_glyphs;
-        if( $self->wxbb ) {
-            my $chi = $self->wxbb->resolve( service => '/Cache/raw_memory' );
+        if( $self->use_gui ) {
+            my $chi  = $self->app->get_cache;
             my $key = $self->make_key('BODIES', 'GLYPHS', $pid);
             $sorted_glyphs = $chi->compute($key, '1 hour', $code_to_cache);
             $self->app->Yield if $self->app;
@@ -1221,8 +1076,8 @@ access those links in the first place; hence the need for the planet_id.
 
         my $chi;
         my $key = $self->make_key('LOTTERY', 'OPTIONS');
-        if( $self->wxbb ) {
-            $chi  = $self->wxbb->resolve( service => '/Cache/raw_memory' );
+        if( $self->use_gui ) {
+            $chi  = $self->app->get_cache;
         }
 
 
@@ -1310,8 +1165,8 @@ by GLC's view_all_ships.  The filter for get_ships() differs in that:
         ### resultset ourselves.
 
         my $ships;
-        if( $self->wxbb ) {
-            my $chi  = $self->wxbb->resolve( service => '/Cache/raw_memory' );
+        if( $self->use_gui ) {
+            my $chi  = $self->app->get_cache;
             my $key  = $self->make_key('BODIES', 'SHIPS', $pid);
             $ships = $chi->compute($key, '1 hour', sub {
                 $sp->view_all_ships({no_paging => 1})->{'ships'};
@@ -1406,8 +1261,8 @@ Returns an AoH, one spy per H.
 
 
         my $spies;
-        if( $self->wxbb ) {
-            my $chi  = $self->wxbb->resolve( service => '/Cache/raw_memory' );
+        if( $self->use_gui ) {
+            my $chi  = $self->app->get_cache;
             my $key  = $self->make_key('BODIES', 'SPIES', $pid);
             $spies = $chi->compute($key, '1 hour', $code_to_cache);
             $self->app->Yield if $self->app;
@@ -1463,7 +1318,7 @@ hashref.
 
 =cut
 
-        my $logger = $self->bb->resolve( service => '/Log/logger' );
+        my $logger = $self->globals->logger;
         $logger->component('Client');
 
         my $am = $self->get_building($planet_id, 'Archaeology Ministry');
@@ -1536,3 +1391,149 @@ Returns a hashref which includes an arrayref of moved buildings keyed off
 
 1;
 
+__END__
+
+=head1 NAME 
+
+LacunaWaX::Model::Client - Game server client
+
+=head1 SYNOPSIS
+
+ my $game_client = LacunaWaX::Model::Client->new (
+  app         => C<LacunaWaX object>,
+  server_id   => C<Integer ID (in local Servers table) of server to connect to>
+  allow_sleep => 0,
+ );
+
+ if( $game_client->ping ) {
+  ...connected OK...
+ }
+ else {
+  ...connected NOK...
+ }
+
+=head1 DESCRIPTION
+
+Does not technically extend Games::Lacuna::Client, but uses AUTOLOAD to allow 
+treating objects of this class as GLC objects.
+
+So to get a GLC map object, instead of having to do
+
+ $game_client->client->map()
+
+Which just feels hackneyed, you can skip the separate call to client:
+
+ $game_client->map()
+
+=head1 CONSTRUCTION
+
+The user's default empire name and password are saved in the database, so those 
+creds do not generally need to be sent.
+
+If you need to create a client using credentials other than what are stored as 
+the current LacunaWaX user's default creds, you may also pass empire_name and 
+empire_pass:
+
+ my $other_client = LacunaWaX::Model::Client->new (
+  app         => C<LacunaWaX object>,
+  server_id   => C<ID of server>
+  allow_sleep => 0,
+
+  empire_name => 'some other empire',
+  empire_pass => 'some other pass',
+ );
+
+=head1 PASSABLE ATTRIBUTES
+
+=head2 app (Required)
+
+A LacunaWaX object
+
+=head2 server_id (Required)
+
+The integer ID of the server, in the local Servers table, to which to connect.  
+This must currently be either 1 (US1) or 2 (PT).
+
+=head2 use_gui
+
+Indicates whether we're attached to a GUI or not.  If so, we can use Wx-related 
+globals, as well as the CHI cache.  If we're not (eg from a scheduled task), we 
+won't use those.
+
+Defaults to false.
+
+=head2 allow_sleep
+
+Defaults to false.  If true, the client will sleep for 61 seconds after 
+receiving the "More than 60 RPCs used per minute" error from the server.  This 
+should generally I<only> be used by non-GUI clients.
+
+=head2 rpc_sleep
+
+Integer number of seconds to pause between each request passed to the game 
+server to avoid soaking up the 60 allowed RPCs per minute.  Defaults to 0, but a 
+value of at least 1 is encouraged.  Scheduled tasks should probably use a value 
+of 2 or 3.
+
+=head1 PROVIDED ATTRIBUTES
+
+=head2 server_rec, account_rec
+
+The Servers and ServerAccounts table records representing the current LacunaWaX 
+user.
+
+Note that these will continue to represent the I<current LacunaWaX user> even if 
+another user's empire_name and empire_pass are being used.
+
+=head2 url, protocol, empire_name, empire_pass
+
+Connection information pertaining to the current client.
+
+=head2 client
+
+This is the actual Games::Lacuna::Client object.  You shouldn't ever need to 
+touch this.
+
+=head2 ore_types, glyph_types
+
+Alphabetically-sorted arrayref of all possible types of ore in the game.  The 
+two methods are identical; both are provided as convenience.  The types are 
+returned as lower-cased strings.
+
+This list is hard-coded, but since it's exhaustive, it's not likely to change.
+
+=head2 warships
+
+Alphabetically-sorted arrayref of all warships in the game.  The names are those 
+recognized by the game, not the human-readable names (so 'placebo4', not 
+'Placebo IV').
+
+This list is hard-coded, and I<not> exhaustive.  I listed the ships that I think 
+look like "war" ships.
+
+=head2 glyph_recipes
+
+HoA keyed off the final product name:
+
+ 'Interdimensional Rift' => [qw(methane zircon fluorite)],
+ 'Kalavian Ruins'        => [qw(galena gold)],
+ 'Library of Jith'       => [qw(anthracite bauxite beryl chalcopyrite)],
+ ...
+
+=head2 planets
+
+Hashref of the current empire's planets: C<name =E<gt> ID>
+
+=head1 METHODS
+
+=head2 EXCEPTIONAL METHODS
+
+Many of the methods need to hit the game server, and as such, might encounter 
+various server errors.  These methods will all throw exceptions in that case, 
+and should therefore have their calls wrapped in try/catch blocks.
+
+All methods whose name begins with C<get_>, along with the C<cook_glyphs> and 
+C<rearrange> methods fall into this category, as well as any methods that are 
+actually Games::Lacuna::Client methods.
+
+=cut

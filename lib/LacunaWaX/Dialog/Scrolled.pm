@@ -5,10 +5,31 @@ package LacunaWaX::Dialog::Scrolled {
     use Try::Tiny;
     use Wx qw(:everything);
     use Wx::Event qw();
-    with 'LacunaWaX::Roles::GuiElement';
 
-    use MooseX::NonMoose::InsideOut;
-    extends 'Wx::Dialog';
+    ### See comment in ./NonScrolled re: MooseX-NonMoose
+    has 'dialog' => (
+        is          => 'rw',
+        isa         => 'Wx::Dialog',
+        lazy_build  => 1,
+        handles => {
+            Centre              => "Centre",
+            Close               => "Close",
+            Connect             => "Connect",
+            Destroy             => "Destroy",
+            EndModal            => "EndModal",
+            Fit                 => "Fit",
+            GetClientSize       => "GetClientSize",
+            GetSize             => "GetSize",
+            GetWindowStyleFlag  => "GetWindowStyleFlag",
+            Layout              => "Layout",
+            SetSize             => "SetSize",
+            SetSizer            => "SetSizer",
+            SetTitle            => "SetTitle",
+            SetWindowStyle      => "SetWindowStyle",
+            Show                => "Show",
+            ShowModal           => "ShowModal",
+        },
+    );
 
     has 'page_sizer'    => (is => 'rw', isa => 'Wx::BoxSizer',          lazy_build => 1, documentation => 'horizontal'  );
     has 'main_sizer'    => (is => 'rw', isa => 'Wx::Sizer',             lazy_build => 1, documentation => 'vertical'    );
@@ -39,14 +60,28 @@ package LacunaWaX::Dialog::Scrolled {
         $self->swindow->SetSizer($self->page_sizer);
         return $self;
     };
+
+    sub _build_dialog {#{{{
+        my $self = shift;
+
+        my $d = Wx::Dialog->new(
+            undef, -1, 
+            q{},
+            $self->position || Wx::Point->new(10,10),
+            $self->size || wxDefaultSize,
+            wxRESIZE_BORDER|wxDEFAULT_DIALOG_STYLE
+        );
+
+        return $d;
+    }#}}}
     sub _build_main_sizer {#{{{
         my $self = shift;
-        my $v = $self->build_sizer($self, wxVERTICAL, 'Main Sizer');
+        my $v = wxTheApp->build_sizer($self, wxVERTICAL, 'Main Sizer');
         return $v;
     }#}}}
     sub _build_page_sizer {#{{{
         my $self = shift;
-        my $v = $self->build_sizer($self->swindow, wxHORIZONTAL, 'Page Sizer');
+        my $v = wxTheApp->build_sizer($self->swindow, wxHORIZONTAL, 'Page Sizer');
         return $v;
     }#}}}
     sub _build_size {#{{{
@@ -57,7 +92,7 @@ package LacunaWaX::Dialog::Scrolled {
         my $self = shift;
 
         my $v = Wx::ScrolledWindow->new(
-            $self, -1, 
+            $self->dialog, -1, 
             wxDefaultPosition, 
             wxDefaultSize, 
             wxTAB_TRAVERSAL
@@ -118,10 +153,6 @@ NonScrolled before, pay attention.
 The main difference is the addition of the swindow (Wx::ScrolledWindow) attribute,
 which is what your extending class's Wx components should be added to.
 
-LacunaWaX::Dialog::Scrolled implements the LacunaWaX::Roles::GuiElement role, 
-so extending classes will require app, ancestor, and parent arguments passed to 
-their constructors.
-
 =head1 SYNOPSIS
 
  package ExtendingClass;
@@ -180,10 +211,6 @@ likely never make a difference, but it's possible it could, so plan for it.
  # class does not need to touch page_sizer.
 
 =head1 ARGUMENTS
-
-=head2 app, ancestor, parent (required)
-
-The standard arguments required by LacunaWaX::Roles::GuiElement
 
 =head2 position (optional)
 

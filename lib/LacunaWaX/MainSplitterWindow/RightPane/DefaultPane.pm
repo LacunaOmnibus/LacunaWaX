@@ -6,7 +6,19 @@ package LacunaWaX::MainSplitterWindow::RightPane::DefaultPane {
     use Wx qw(:everything);
     with 'LacunaWaX::Roles::MainSplitterWindow::RightPane';
 
-    has 'sizer_debug'           => (is => 'rw', isa => 'Int', lazy => 1, default => 0);
+    has 'ancestor' => (
+        is          => 'rw',
+        isa         => 'LacunaWaX::MainSplitterWindow::RightPane',
+        required    => 1,
+    );
+
+    has 'parent' => (
+        is          => 'rw',
+        isa         => 'Wx::ScrolledWindow',
+        required    => 1,
+    );
+
+    #########################################
 
     has 'text' => (is => 'rw', isa => 'Str', lazy_build => 1 );
 
@@ -17,6 +29,8 @@ package LacunaWaX::MainSplitterWindow::RightPane::DefaultPane {
     sub BUILD {
         my $self = shift;
 
+        wxTheApp->borders_off();    # Change to borders_on to see borders around sizers
+
         $self->header_sizer->Add($self->lbl_header, 0, 0, 0);
         $self->content_sizer->Add($self->header_sizer, 0, 0, 0);
         $self->content_sizer->AddSpacer(20);
@@ -26,7 +40,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::DefaultPane {
     }
     sub _build_header_sizer {#{{{
         my $self = shift;
-        return $self->build_sizer($self->parent, wxVERTICAL, 'Header');
+        return wxTheApp->build_sizer($self->parent, wxVERTICAL, 'Header');
     }#}}}
     sub _build_lbl_header {#{{{
         my $self = shift;
@@ -36,7 +50,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::DefaultPane {
             wxDefaultPosition, 
             Wx::Size->new(-1, 30)
         );
-        $v->SetFont( $self->get_font('/header_1') );
+        $v->SetFont( wxTheApp->get_font('header_1') );
         return $v;
     }#}}}
     sub _build_lbl_text {#{{{
@@ -47,7 +61,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::DefaultPane {
             wxDefaultPosition, 
             Wx::Size->new(500,400)
         );
-        $v->SetFont( $self->get_font('/para_text_2') );
+        $v->SetFont( wxTheApp->get_font('para_text_2') );
         return $v;
     }#}}}
     sub _build_text {#{{{
@@ -57,7 +71,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::DefaultPane {
 
 You had to check it to enter your empire name and password, but now that you're logged in, there are new options there that weren't available before logging in.
 
-If any of your Space Stations in the tree on the left are displaying child leaves that would only apply to Planets, not stations (eg 'Glyphs', 'Lottery', 'Spies'), just double-click on the Station's name.  This will display a summary screen and update the tree to display the correct leaves.
+If any of your Space Stations in the tree on the left are displaying child leaves that would only apply to Planets, not stations (eg 'Glyphs', 'Spies'), just double-click on the Station's name.  This will display a summary screen and update the tree to display the correct leaves.
 
 The main LacunaWaX program you're looking at right now provides some tools, and also allows you to set up preferences for exactly what you want the scheduled tasks (like Autovote) to do.
 

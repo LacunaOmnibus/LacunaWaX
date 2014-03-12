@@ -4,31 +4,26 @@ package LacunaWaX::MainFrame::MenuBar::Help {
     use Moose;
     use Wx qw(:everything);
     use Wx::Event qw(EVT_MENU);
-    with 'LacunaWaX::Roles::GuiElement';
 
+    with 'LacunaWaX::Roles::MainFrame::MenuBar::Menu';
     use LacunaWaX::Dialog::About;
     use LacunaWaX::Dialog::Help;
-
-    use MooseX::NonMoose::InsideOut;
-    extends 'Wx::Menu';
 
     has 'itm_about' => (is => 'rw', isa => 'Wx::MenuItem',  lazy_build => 1);
     has 'itm_help'  => (is => 'rw', isa => 'Wx::MenuItem',  lazy_build => 1);
 
-    sub FOREIGNBUILDARGS {#{{{
-        return; # Wx::Menu->new() takes no arguments
-    }#}}}
     sub BUILD {
         my $self = shift;
         $self->Append( $self->itm_about );
         $self->Append( $self->itm_help );
+        $self->_set_events();
         return $self;
     }
 
     sub _build_itm_about {#{{{
         my $self = shift;
         return Wx::MenuItem->new(
-            $self, -1,
+            $self->menu, -1,
             '&About',
             'Show about dialog',
             wxITEM_NORMAL,
@@ -38,7 +33,7 @@ package LacunaWaX::MainFrame::MenuBar::Help {
     sub _build_itm_help {#{{{
         my $self = shift;
         return Wx::MenuItem->new(
-            $self, -1,
+            $self->menu, -1,
             '&Help',
             'Show HTML help',
             wxITEM_NORMAL,
@@ -56,11 +51,7 @@ package LacunaWaX::MainFrame::MenuBar::Help {
         my $self  = shift;
         my $frame = shift;  # Wx::Frame
         my $event = shift;  # Wx::CommandEvent
-        my $d = LacunaWaX::Dialog::About->new(
-            app         => $self->app,
-            ancestor    => $self,
-            parent      => undef,
-        );
+        my $d = LacunaWaX::Dialog::About->new();
         $d->show();
         return 1;
     }#}}}
@@ -68,11 +59,7 @@ package LacunaWaX::MainFrame::MenuBar::Help {
         my $self  = shift;
         my $frame = shift;  # Wx::Frame
         my $event = shift;  # Wx::CommandEvent
-        my $d = LacunaWaX::Dialog::Help->new(
-            app         => $self->app,
-            ancestor    => $self,
-            parent      => undef,
-        );
+        my $d = LacunaWaX::Dialog::Help->new();
         return 1;
     }#}}}
 

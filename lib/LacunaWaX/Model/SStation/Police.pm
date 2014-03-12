@@ -25,11 +25,7 @@ package LacunaWaX::Model::SStation::Police {
     has 'alliance_members' => (
         is          => 'rw',
         isa         => 'ArrayRef',
-        traits      => ['Array'],
         lazy_build  => 1,
-        handles => {
-            isa_member => 'first',
-        }
     );
 
     sub _build_alliance_members {#{{{
@@ -45,6 +41,7 @@ package LacunaWaX::Model::SStation::Police {
 
         return $ar;
     }#}}}
+
     sub has_hostile_spies {#{{{
         my $self = shift;
 
@@ -122,6 +119,11 @@ bother trying to page through all of the results.
         }
 
         return 0;
+    }#}}}
+    sub isa_member {#{{{
+        my $self = shift;
+        my $name = shift;
+        return( first{ $_ eq $name }@{$self->alliance_members} ) ? 1 : 0;
     }#}}}
 
     no Moose;

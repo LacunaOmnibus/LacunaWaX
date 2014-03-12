@@ -5,10 +5,21 @@ package LacunaWaX::MainSplitterWindow::RightPane::SpiesPane::BatchRenameForm {
     use Try::Tiny;
     use Wx qw(:everything);
     use Wx::Event qw(EVT_BUTTON);
-    with 'LacunaWaX::Roles::GuiElement';
-    no if $] >= 5.017011, warnings => 'experimental::smartmatch';
 
-    has 'sizer_debug'   => (is => 'rw', isa => 'Int',                       lazy => 1, default => 0 );
+    has 'ancestor' => (
+        is          => 'rw',
+        isa         => 'LacunaWaX::MainSplitterWindow::RightPane::SpiesPane',
+        required    => 1,
+    );
+
+    has 'parent' => (
+        is          => 'rw',
+        isa         => 'Wx::ScrolledWindow',
+        required    => 1,
+    );
+
+    #########################################
+
     has 'dialog_status' => (is => 'rw', isa => 'LacunaWaX::Dialog::Status', lazy_build  => 1        );
     has 'fix_labels'    => (is => 'rw', isa => 'ArrayRef',                  lazy_build  => 1        );
 
@@ -34,6 +45,8 @@ package LacunaWaX::MainSplitterWindow::RightPane::SpiesPane::BatchRenameForm {
     sub BUILD {
         my $self = shift;
 
+        wxTheApp->borders_off();    # Change to borders_on to see borders around sizers
+
         $self->szr_center_name->AddSpacer(5);
         $self->szr_center_name->Add($self->txt_name, 0, 0, 0);
        
@@ -47,6 +60,8 @@ package LacunaWaX::MainSplitterWindow::RightPane::SpiesPane::BatchRenameForm {
         $self->szr_center_button->Add($self->btn_rename, 0, 0, 0);
 
         $self->szr_main->Add($self->szr_center_button, 0, 0, 0);
+
+        $self->_set_events();
         return $self;
     }
     sub _build_btn_rename {#{{{
@@ -55,17 +70,16 @@ package LacunaWaX::MainSplitterWindow::RightPane::SpiesPane::BatchRenameForm {
             $self->parent, -1,
             "Rename all spies"
         );
-        $v->SetFont( $self->get_font('/para_text_1') );
+        $v->SetFont( wxTheApp->get_font('para_text_1') );
         return $v;
     }#}}}
     sub _build_dialog_status {#{{{
         my $self = shift;
 
         my $v = LacunaWaX::Dialog::Status->new( 
-            app         => $self->app,
-            ancestor    => $self,
-            title       => 'Batch Rename Spies',
-            recsep      => '-=-=-=-=-=-=-',
+            parent  => $self,
+            title   => 'Batch Rename Spies',
+            recsep  => '-=-=-=-=-=-=-',
         );
         $v->hide;
         return $v;
@@ -91,15 +105,15 @@ package LacunaWaX::MainSplitterWindow::RightPane::SpiesPane::BatchRenameForm {
     }#}}}
     sub _build_szr_center_button {#{{{
         my $self = shift;
-        return $self->build_sizer($self->parent, wxHORIZONTAL, 'Center Button');
+        return wxTheApp->build_sizer($self->parent, wxHORIZONTAL, 'Center Button');
     }#}}}
     sub _build_szr_center_name {#{{{
         my $self = shift;
-        return $self->build_sizer($self->parent, wxHORIZONTAL, 'Center Name');
+        return wxTheApp->build_sizer($self->parent, wxHORIZONTAL, 'Center Name');
     }#}}}
     sub _build_szr_main {#{{{
         my $self = shift;
-        return $self->build_sizer($self->parent, wxVERTICAL, 'Batch Rename', 1, undef, Wx::Size->new(200, 150));
+        return wxTheApp->build_sizer($self->parent, wxVERTICAL, 'Batch Rename', 1, undef, Wx::Size->new(200, 150));
     }#}}}
     sub _build_txt_name {#{{{
         my $self = shift;
@@ -109,7 +123,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::SpiesPane::BatchRenameForm {
             wxDefaultPosition, 
             Wx::Size->new(150, 20)
         );
-        $v->SetFont( $self->get_font('/para_text_1') );
+        $v->SetFont( wxTheApp->get_font('para_text_1') );
         $v->SetToolTip( 'This will be the name of all of your spies, modified by the Pre- or Suf- fix' );
         return $v;
     }#}}}
@@ -162,25 +176,25 @@ package LacunaWaX::MainSplitterWindow::RightPane::SpiesPane::BatchRenameForm {
         my $fix       = $self->rdo_fix->GetString( $self->rdo_fix->GetSelection );
 
         unless($base_name) {
-            $self->poperr("You must enter a name to rename spies.");
+            wxTheApp->poperr("You must enter a name to rename spies.");
             return;
         }
         if( $fix eq 'None' ) {
-            if( wxNO == $self->popconf("Without a prefix or suffix, all of your spies on this planet will have the same name.\nThis is legal if it's what you really want - is it?", "Are you sure?") ) {
-                $self->popmsg("OK - add either a prefix or suffix and try again.");
+            if( wxNO == wxTheApp->popconf("Without a prefix or suffix, all of your spies on this planet will have the same name.\nThis is legal if it's what you really want - is it?", "Are you sure?") ) {
+                wxTheApp->popmsg("OK - add either a prefix or suffix and try again.");
                 return;
             }
         }
 
         $self->dialog_status->erase;
         $self->dialog_status->show;
-        $self->yield;
+        wxTheApp->Yield;
 
         ### Most people will have 90 spies, and the server seems to handle 
         ### renames pretty quickly, so make sure that we're sleeping a second 
         ### between each request.  We'll put it back again when we're done.
-        my $old_rpc_sleep = $self->game_client->rpc_sleep;
-        $self->game_client->rpc_sleep(1);
+        my $old_rpc_sleep = wxTheApp->game_client->rpc_sleep;
+        wxTheApp->game_client->rpc_sleep(1);
 
         my $cnt = my $renamed = 0;
         SPY_ROW:
@@ -215,7 +229,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::SpiesPane::BatchRenameForm {
                 my $msg = (ref $_) ? $_->text : $_;
                 if( $msg =~ /slow down/i ) {
                     my $start = time();
-                    my $resp  = $self->popconf("You just went over 60 RPC/minute - wait a minute and try again?");
+                    my $resp  = wxTheApp->popconf("You just went over 60 RPC/minute - wait a minute and try again?");
                     if( $resp == wxYES ) {
                         my $slp_cnt = 0;
                         SLEEP:
@@ -225,7 +239,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::SpiesPane::BatchRenameForm {
                             last SLEEP if $slp_cnt > 62;    # failsafe
                             $self->dialog_status_say("$slp_cnt) Sleeping...");
                             sleep 1;
-                            $self->yield;
+                            wxTheApp->Yield;
                         }
                         return 'redo';
                     }
@@ -235,7 +249,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::SpiesPane::BatchRenameForm {
                         return 'last';
                     }
                 }
-                $self->poperr($msg);
+                wxTheApp->poperr($msg);
                 $self->clear_dialog_status;
                 return;
             };
@@ -247,20 +261,18 @@ package LacunaWaX::MainSplitterWindow::RightPane::SpiesPane::BatchRenameForm {
                 $row->change_name( $new_name );
                 $renamed++;
             }
-            $self->yield;
+            wxTheApp->Yield;
         }
 
         if( $renamed ) {
             ### Spies have been renamed, so expire the spies currently in the 
             ### cache so the new names show up on the next screen load.
-            if( $self->wxbb ) {
-                my $chi  = $self->get_chi;
-                my $key  = join q{:}, ('BODIES', 'SPIES', $self->ancestor->planet_id);
-                $chi->remove($key);
-            }
+            my $chi  = wxTheApp->get_cache;
+            my $key  = join q{:}, ('BODIES', 'SPIES', $self->ancestor->planet_id);
+            $chi->remove($key);
         }
 
-        $self->game_client->rpc_sleep($old_rpc_sleep);
+        wxTheApp->game_client->rpc_sleep($old_rpc_sleep);
         $self->dialog_status_say_recsep;
         $self->dialog_status_say("Renamed $renamed spies.");
         $self->dialog_status_say("You may now close this window.");

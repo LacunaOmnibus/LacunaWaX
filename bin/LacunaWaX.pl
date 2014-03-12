@@ -2,19 +2,25 @@
 
 use v5.14;
 use strict;
+
 use File::Copy;
-use FindBin;
-use IO::Handle;
+use IO::All;
 use Wx qw(:allclasses);
-use lib $FindBin::Bin . '/../lib';
+
+BEGIN {
+    use FindBin;
+    use lib "$FindBin::Bin/../lib";
+    use LacunaWaX::Preload::Perlapp;
+    use Wx::Perl::SplashFast( "$FindBin::Bin/../splash.jpg", 2000 );
+}
 use LacunaWaX;
+use LacunaWaX::Util;
 use LacunaWaX::Model::DefaultData;
 
-no if $] >= 5.017011, warnings => 'experimental::smartmatch';
-
-my $root_dir = "$FindBin::Bin/..";
+my $root_dir = LacunaWaX::Util::find_root();
 my $app_db   = "$root_dir/user/lacuna_app.sqlite";
 my $log_db   = "$root_dir/user/lacuna_log.sqlite";
+my $globals  = LacunaWaX::Model::Globals->new( root_dir => $root_dir );
 
 unless(-e $app_db and -e $log_db ) {#{{{
     autoflush STDOUT 1;
@@ -23,22 +29,22 @@ Running for the first time, so databases must be deployed first.
 
 This takes a few seconds; please be patient...  ";
 
-    my $c = LacunaWaX::Model::Container->new(
-        name        => 'my container',
-        root_dir    => $FindBin::Bin . "/..",
-        db_file     => $app_db,
-        db_log_file => $log_db,
-    );
-
+    ### ->deploy does not function properly for the installed version, and it 
+    ### would take too long anyway.  So the installer needs to include empty 
+    ### versions of both databases.
+    ###
+    ### This deploy bit is here for the benefit of people running from source.
     unless(-e $app_db ) {
-        my $app_schema = $c->resolve( service => '/Database/schema' );
+        my $app_schema = $globals->main_schema;
+say "deploying app";
         $app_schema->deploy;
         my $d = LacunaWaX::Model::DefaultData->new();
         $d->add_servers($app_schema);
         $d->add_stations($app_schema);
     }
     unless(-e $log_db ) {
-        my $log_schema = $c->resolve( service => '/DatabaseLog/schema' );
+        my $log_schema = $globals->logs_schema;
+say "deploying log";
         $log_schema->deploy;
     }
 

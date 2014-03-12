@@ -2,20 +2,34 @@
 package LacunaWaX::Dialog::About {
     use Moose;
     use Try::Tiny;
-    with 'LacunaWaX::Roles::GuiElement';
+    use Wx qw(:everything);
 
     has 'info'  => (is => 'rw', isa => 'Wx::AboutDialogInfo');
+
+    has 'developers' => (
+        is          => 'ro',
+        isa         => 'ArrayRef[Str]',
+        lazy_build  => 1,
+    );
 
     sub BUILD {
         my $self = shift;
 
         $self->info( Wx::AboutDialogInfo->new() );
-        $self->info->SetName(
-            $self->bb->resolve(service => '/Strings/app_name')
-        );
+        $self->info->SetName( wxTheApp->GetAppName );
+
+        my $maj = wxMAJOR_VERSION;
+        my $min = wxMINOR_VERSION;
+        ### These are documented, but don't work under wxperl
+        #my $rel = wxRELEASE_NUMBER;
+        #my $sub = wxSUBRELEASE_NUMBER;
+
+        my $wxwidgets_version = join '.', ($maj, $min);
+
         $self->info->SetVersion(
-            "$LacunaWaX::VERSION - wxPerl $Wx::VERSION"
+            "$LacunaWaX::VERSION - wxPerl $Wx::VERSION (wxwidgets version $wxwidgets_version)"
         );
+
         $self->info->SetCopyright(
             'Copyright 2012, 2013 Jonathan D. Barton'
         );
@@ -27,18 +41,29 @@ package LacunaWaX::Dialog::About {
             'This is free software; you can redistribute it and/or modify it under
             the same terms as the Perl 5 programming language system itself.'
         );
-        for my $d( @{$self->bb->resolve(service => '/Strings/developers')} ) {
+        for my $d( @{ $self->developers } ) {
             $self->info->AddDeveloper($d);
         }
 
         return $self;
     }
+    sub _build_developers {#{{{
+        my $self = shift;
+
+        return [
+            'Jonathan D. Barton (tmtowtdi@gmail.com)',
+            'Nathan McCalllum',
+            'Swamp Thing',
+        ];
+    }#}}}
     sub _set_events { }
+
     sub show {#{{{
         my $self = shift;
         Wx::AboutBox($self->info);
         return;
     }#}}}
+
 
     no Moose;
     __PACKAGE__->meta->make_immutable;

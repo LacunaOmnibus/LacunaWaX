@@ -13,12 +13,8 @@ package LacunaWaX::Schedule::Spies {
     has 'types_of_training' => (
         is      => 'ro',
         isa     => 'ArrayRef',
-        traits  => ['Array'],
         lazy    => 1,
         default => sub{ [qw(Intel Mayhem Politics Theft)] },
-        handles => {
-            training_types => 'elements',
-        }
     );
 
     sub BUILD {
@@ -185,7 +181,7 @@ If no training buildings exist on the planet, returns undef.
 
         my $training_bldgs = {};
         my $got_one = 0;
-        foreach my $type( $self->training_types ) {
+        foreach my $type( @{$self->types_of_training} ) {
             my $name = $type . 'Training'; 
             my $bldg = try   { $self->game_client->get_building($pid, $name); }
                        catch { return; };

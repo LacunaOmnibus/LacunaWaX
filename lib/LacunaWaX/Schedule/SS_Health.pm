@@ -1,9 +1,5 @@
 use v5.14;
 
-
-### See CHECK
-
-
 package LacunaWaX::Schedule::SS_Health {
     use Carp;
     use English qw( -no_match_vars );
@@ -12,6 +8,7 @@ package LacunaWaX::Schedule::SS_Health {
     with 'LacunaWaX::Roles::ScheduledTask';
 
     use LacunaWaX::Model::SStation;
+    use LacunaWaX::Model::SStation::Command;
     use LacunaWaX::Model::SStation::Police;
 
     has 'station' => (
@@ -21,12 +18,20 @@ package LacunaWaX::Schedule::SS_Health {
             subpar_res              => 'subpar_res',
             incoming_hostiles       => 'incoming_hostiles',
             has_hostile_spies       => 'has_hostile_spies',
+            has_command             => 'has_command',
+            has_police              => 'has_police',
             star_unseized           => 'star_unseized',
             star_seized_by_other    => 'star_seized_by_other',
         },
         documentation => q{
             This cannot be built until after a call to game_connect().
         }
+    );
+
+    has 'alerts' => (
+        is          => 'rw',
+        isa         => 'ArrayRef[Str]',
+        default     => sub{ [] },
     );
 
     has 'inbox' => (
@@ -45,33 +50,15 @@ package LacunaWaX::Schedule::SS_Health {
         return $self->game_client->inbox
     }#}}}
 
-    sub alert {#{{{
+    sub add_alert {#{{{
         my $self = shift;
-        my $msg = shift;
-
-        $self->logger->info( "PROBLEM - $msg" );    # SS name has already been mentioned in the log
-        $self->inbox->send_message(
-            $self->game_client->empire_name,
-            $self->station->name . " ALERT",
-            "
-While performing a routine checkup of your station, I 
-found a problem that could be dangerous to its long 
-term health and happiness.
-
-Please look into this immediately.
-            
-The problem I found was:
---------------------------------------------------
-$msg
---------------------------------------------------
-
-Your humble station physician,
-Dr. Flurble J. Notaqwak
-
-",
-        );
-
+        my $alert = shift;
+        push( @{$self->alerts}, $alert );
         return 1;
+    }#}}}
+    sub has_alerts {#{{{
+        my $self = shift;
+        return scalar @{$self->alerts};
     }#}}}
     sub diagnose_all_servers {#{{{
         my $self        = shift;
@@ -123,32 +110,43 @@ Dr. Flurble J. Notaqwak
         my $ss_rec  = shift;    # SSAlerts table record
 
         return unless $ss_rec->enabled;
+        $self->alerts([]);
         $self->logger->info("Diagnosing " . $self->station->name);
 
         $self->logger->info("Checking we have sufficient resources");
         if( my $restype = $self->station->subpar_res($ss_rec->min_res) ) {
-            $self->alert("$restype per hour has dropped too low!");
+            $self->add_alert("At _least_ one res ($restype) per hour has dropped too low!");
         }
 
-        $self->logger->info("Looking for hostile inbound ships");
-        if( my $shipcount = $self->incoming_hostiles() ) {
-            $self->alert("There are hostile ships inbound!");
-        }
+        if( $self->has_police ) {
+            if( $ss_rec->hostile_ships ) {
+                $self->logger->info("Looking for hostile inbound ships");
+                if( my $shipcount = $self->incoming_hostiles() ) {
+                    $self->add_alert("There are hostile ships inbound!");
+                }
+            }
 
-        $self->logger->info("Looking for hostile spies onsite");
-        if( $self->has_hostile_spies($ss_rec) ) {
-            $self->alert("There are spies onsite who are not set to Counter Espionage.  These may be hostiles.")
+            if( $ss_rec->hostile_spies ) {
+                $self->logger->info("Looking for hostile spies onsite");
+                if( $self->has_hostile_spies($ss_rec) ) {
+                    $self->add_alert("There are spies onsite who are not set to Counter Espionage.  These may be hostiles.");
+                }
+            }
         }
 
         $self->logger->info("Making sure our star is seized...");
         if( $self->star_unseized() ) {
-            $self->alert("The station's star is unseized.")
+            $self->add_alert("The station's star is unseized!");
         }
 
-        $self->logger->info("...and making sure it's seized by us.");
-        if( $self->star_seized_by_other() ) {
-            $self->alert("Star has been seized by another SS")
+        if( $ss_rec->own_star_seized ) {
+            $self->logger->info("...and making sure it's seized by us.");
+            if( $self->star_seized_by_other() ) {
+                $self->add_alert("Star has been seized by another SS!");
+            }
         }
+
+        $self->send_alert_mail();
 
         return;
     }#}}}
@@ -160,6 +158,44 @@ Dr. Flurble J. Notaqwak
             game_client => $self->game_client,
         );
         $self->station( $station );
+        return 1;
+    }#}}}
+    sub send_alert_mail {#{{{
+        my $self = shift;
+
+        return 0 unless $self->has_alerts;
+
+        my $body = "
+While performing a routine checkup of your station, I 
+found a problem that could be dangerous to its long 
+term health and happiness.
+
+Please look into this immediately.
+            
+The problem I found was:
+--------------------------------------------------
+";
+
+        #foreach my $a( $self->all_alerts ) {
+        foreach my $a( @{$self->alerts} ) {
+            $self->logger->info( "PROBLEM - $a" );    # SS name has already been mentioned in the log
+            $body .= "$a\n";
+        }
+
+        $body .= "--------------------------------------------------
+
+Your humble station physician,
+Dr. Flurble J. Notaqwak
+
+";
+
+
+        $self->inbox->send_message(
+            $self->game_client->empire_name,        # to
+            'SS ALERT: ' . $self->station->name,    # subject
+            $body,                                  # 3 guesses
+        );
+
         return 1;
     }#}}}
 

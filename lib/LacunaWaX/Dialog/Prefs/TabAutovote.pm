@@ -4,7 +4,14 @@ package LacunaWax::Dialog::Prefs::TabAutovote {
     use Try::Tiny;
     use Wx qw(:everything);
     use Wx::Event qw(EVT_BUTTON);
-    with 'LacunaWaX::Roles::GuiElement';
+
+    has 'parent' => (
+        is          => 'rw',
+        isa         => 'LacunaWaX::Dialog::Prefs',
+        required    => 1,
+    );
+
+    #################################
 
     has 'box_height' => (is => 'rw', isa => 'Int', lazy => 1, default => 140,
         documentation => q{
@@ -20,7 +27,7 @@ package LacunaWax::Dialog::Prefs::TabAutovote {
     has 'rdo_autovote'      => (is => 'rw', isa => 'Wx::RadioBox',              lazy_build => 1);
 
     sub BUILD {
-        my($self, @params) = @_;
+        my $self = shift;
 
         my $szr_av = Wx::BoxSizer->new(wxVERTICAL);
         $szr_av->AddSpacer(10);
@@ -65,7 +72,7 @@ package LacunaWax::Dialog::Prefs::TabAutovote {
             wxDefaultPosition, 
             Wx::Size->new(365,25)
         );
-        $v->SetFont( $self->get_font('/bold_para_text_1') );
+        $v->SetFont( wxTheApp->get_font('bold_para_text_1') );
         return $v;
     }#}}}
     sub _build_list_known_ss {#{{{
@@ -82,14 +89,14 @@ package LacunaWax::Dialog::Prefs::TabAutovote {
         $v->InsertColumn(0, 'Known Stations');
         $v->SetColumnWidth(0, 127);
         $v->Arrange(wxLIST_ALIGN_TOP);
-        $self->yield;
+        wxTheApp->Yield;
 
-        my $schema = $self->get_main_schema;
-        my $ss_rs = $schema->resultset('BodyTypes')->search({type_general => 'space station', server_id => $self->get_connected_server->id});
+        my $schema = wxTheApp->main_schema;
+        my $ss_rs = $schema->resultset('BodyTypes')->search({type_general => 'space station', server_id => wxTheApp->server->id});
 
         my @stations = ();
         while(my $rec = $ss_rs->next) {
-            if(my $pname = $self->game_client->planet_name($rec->body_id)) {
+            if(my $pname = wxTheApp->game_client->planet_name($rec->body_id)) {
                 push @stations, $pname;
             }
         }
@@ -103,16 +110,16 @@ package LacunaWax::Dialog::Prefs::TabAutovote {
     }#}}}
     sub _build_pnl_main {#{{{
         my $self = shift;
-        my $v = Wx::Panel->new($self->parent, -1, wxDefaultPosition, wxDefaultSize);
+        my $v = Wx::Panel->new($self->parent->notebook, -1, wxDefaultPosition, wxDefaultSize);
         return $v;
     }#}}}
     sub _build_rdo_autovote {#{{{
         my $self = shift;
-        my $schema = $self->get_main_schema;
+        my $schema = wxTheApp->main_schema;
 
         my $choices = [qw(None Owner All)];
         my $checked = $choices->[0];
-        if( my $rec = $schema->resultset('ScheduleAutovote')->find({server_id => $self->get_connected_server->id}) ) {
+        if( my $rec = $schema->resultset('ScheduleAutovote')->find({server_id => wxTheApp->server->id}) ) {
             $checked = ucfirst $rec->proposed_by;
         }
 
@@ -131,7 +138,7 @@ package LacunaWax::Dialog::Prefs::TabAutovote {
     }#}}}
     sub _set_events {#{{{
         my $self = shift;
-        EVT_BUTTON( $self->pnl_main,  $self->btn_save->GetId,     sub{$self->ancestor->OnSavePrefs(@_)} );
+        EVT_BUTTON( $self->pnl_main,  $self->btn_save->GetId,     sub{$self->parent->OnSavePrefs(@_)} );
         return 1;
     }#}}}
 

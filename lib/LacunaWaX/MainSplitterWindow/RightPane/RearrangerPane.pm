@@ -12,7 +12,19 @@ package LacunaWaX::MainSplitterWindow::RightPane::RearrangerPane {
     use LacunaWaX::MainSplitterWindow::RightPane::RearrangerPane::Buttons;
     use LacunaWaX::MainSplitterWindow::RightPane::RearrangerPane::SavedBuilding;
 
-    has 'sizer_debug' => (is => 'rw', isa => 'Int',  lazy => 1, default => 0);
+    has 'ancestor' => (
+        is          => 'rw',
+        isa         => 'LacunaWaX::MainSplitterWindow::RightPane',
+        required    => 1,
+    );
+
+    has 'parent' => (
+        is          => 'rw',
+        isa         => 'Wx::ScrolledWindow',
+        required    => 1,
+    );
+
+    #########################################
 
     has 'planet_name'   => (is => 'rw', isa => 'Str',                           required => 1       );
     has 'planet_id'     => (is => 'rw', isa => 'Int',       lazy_build => 1                         );
@@ -45,6 +57,8 @@ package LacunaWaX::MainSplitterWindow::RightPane::RearrangerPane {
     sub BUILD {
         my $self = shift;
 
+        wxTheApp->borders_off();    # Change to borders_on to see borders around sizers
+
         $self->clear_saved_bldg;
         $self->reset_gauge();
         $self->set_surface_buttons;
@@ -56,11 +70,13 @@ package LacunaWaX::MainSplitterWindow::RightPane::RearrangerPane {
         $self->content_sizer->Add($self->gridszr_buttons, 0, 0, 0);
         $self->content_sizer->Add($self->szr_bottom_buttons, 0, 0, 0);
         $self->refocus_window_name( 'lbl_planet_name' );
+
+        $self->_set_events();
         return $self;
     }
     sub _build_blank_image {#{{{
         my $self = shift;
-        my $img = $self->get_image('/planetside/blank.png');
+        my $img = wxTheApp->get_image('planetside/blank.png');
         $img->Rescale(50, 50);
         return Wx::Bitmap->new($img);
     }#}}}
@@ -69,10 +85,10 @@ package LacunaWaX::MainSplitterWindow::RightPane::RearrangerPane {
         my $force = shift || 0;
 
         my $bldgs = try {
-            $self->game_client->get_buildings($self->planet_id, undef, $force);
+            wxTheApp->game_client->get_buildings($self->planet_id, undef, $force);
         }
         catch {
-            $self->poperr($_->text);
+            wxTheApp->poperr($_->text);
             return;
         };
 
@@ -85,13 +101,13 @@ package LacunaWaX::MainSplitterWindow::RightPane::RearrangerPane {
     sub _build_btn_rearrange {#{{{
         my $self = shift;
         my $v = Wx::Button->new($self->parent, -1, 'Rearrange');
-        $v->SetFont( $self->get_font('/para_text_2') );
+        $v->SetFont( wxTheApp->get_font('para_text_2') );
         return $v;
     }#}}}
     sub _build_btn_reload {#{{{
         my $self = shift;
         my $v = Wx::Button->new($self->parent, -1, 'Reload');
-        $v->SetFont( $self->get_font('/para_text_2') );
+        $v->SetFont( wxTheApp->get_font('para_text_2') );
         return $v;
     }#}}}
     sub _build_gridszr_buttons {#{{{
@@ -106,12 +122,12 @@ package LacunaWaX::MainSplitterWindow::RightPane::RearrangerPane {
             wxDefaultPosition, 
             Wx::Size->new(640, 40)
         );
-        $v->SetFont( $self->get_font('/header_1') );
+        $v->SetFont( wxTheApp->get_font('header_1') );
         return $v;
     }#}}}
     sub _build_planet_id {#{{{
         my $self = shift;
-        return $self->game_client->planet_id( $self->planet_name );
+        return wxTheApp->game_client->planet_id( $self->planet_name );
     }#}}}
     sub _build_saved_bldg {#{{{
         my $self = shift;
@@ -123,7 +139,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::RearrangerPane {
     }#}}}
     sub _build_szr_bottom_buttons {#{{{
         my $self = shift;
-        return $self->build_sizer($self->parent, wxHORIZONTAL, 'Bottom Buttons');
+        return wxTheApp->build_sizer($self->parent, wxHORIZONTAL, 'Bottom Buttons');
     }#}}}
     sub _set_events {#{{{
         my $self = shift;
@@ -153,7 +169,9 @@ package LacunaWaX::MainSplitterWindow::RightPane::RearrangerPane {
         my $panel   = shift;
         my $event   = shift;
 
-        $self->throb();
+        $self->btn_rearrange->Enable(0);
+
+        wxTheApp->throb();
         my $layout = [];
         foreach my $b( $self->buttons->all ) {
             next if $b->name eq 'Empty';
@@ -170,30 +188,30 @@ package LacunaWaX::MainSplitterWindow::RightPane::RearrangerPane {
         }
 
         my $rv = try {
-            $self->game_client->rearrange($self->planet_id, $layout);
+            wxTheApp->game_client->rearrange($self->planet_id, $layout);
         }
         catch {
-            $self->poperr($_->text);
+            wxTheApp->poperr($_->text);
             return;
         };
-        $self->endthrob();
+        wxTheApp->endthrob();
 
         if( ref $rv eq 'HASH' and defined $rv->{'moved'} and scalar @{$rv->{'moved'}} ) {
             my $n = scalar @{$rv->{'moved'}};
             my $plural = ($n == 1) ? ' was' : 's were';
-            $self->popmsg(
+            wxTheApp->popmsg(
                 "$n building${plural} relocated.",
                 'Success!'
             );
         }
         else {
-            $self->popmsg(
+            wxTheApp->popmsg(
                 'Nothing changed position.',
                 "What's wrong with you?"
             );
         }
 
-        $event->Skip();
+        $self->btn_rearrange->Enable(1);
         return 1;
     }#}}}
     sub OnReloadButtonClick {#{{{
@@ -213,7 +231,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::RearrangerPane {
         my $self = shift;
         my $inc  = shift || 1;
         $self->gauge_value($self->gauge_value + $inc); 
-        my $sb = $self->get_main_frame->status_bar;
+        my $sb = wxTheApp->main_frame->status_bar;
         $sb->gauge->SetValue($self->gauge_value);
         $sb->gauge->Update();
         return $self->gauge_value;
@@ -262,7 +280,7 @@ building, then makes the one the user just clicked out currently-saved.
     }#}}}
     sub reset_gauge {#{{{
         my $self = shift;
-        my $sb = $self->get_main_frame->status_bar;
+        my $sb = wxTheApp->main_frame->status_bar;
         $sb->gauge->SetRange(121);
         $self->gauge_value(0); 
         $sb->gauge->SetValue($self->gauge_value);
@@ -284,7 +302,7 @@ building, then makes the one the user just clicked out currently-saved.
 
                 my $bitmap;
                 if( defined $bldg_hr->{'image'} ) {
-                    my $img = $self->get_image("/planetside/$bldg_hr->{'image'}.png");
+                    my $img = wxTheApp->get_image("planetside/$bldg_hr->{'image'}.png");
                     $img->Rescale(50, 50);
                     $bitmap = Wx::Bitmap->new($img);
                 }
@@ -293,9 +311,9 @@ building, then makes the one the user just clicked out currently-saved.
                 }
 
                 my $bmp_butt = LacunaWaX::MainSplitterWindow::RightPane::RearrangerPane::BitmapButton->new( 
-                        app         => $self->app, 
+                        #app         => wxTheApp, 
                         parent      => $self->parent,
-                        ancestor    => $self,
+                        #ancestor    => $self,
                         bitmap      => $bitmap,
                         bldg_id     => $bldg_hr->{'bldg_id'}     || 0,
                         name        => $bldg_hr->{'name'}        || 'Empty',
@@ -310,7 +328,7 @@ building, then makes the one the user just clicked out currently-saved.
                 EVT_BUTTON( $self->parent, $bmp_butt->GetId, sub{$self->OnPlotButtonClick($bmp_butt->GetId, @_)} );
 
                 $self->gridszr_buttons->Add(
-                    $bmp_butt, 0, wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 0
+                    $bmp_butt->bitmap_button, 0, wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 0
                 );
             }
         }

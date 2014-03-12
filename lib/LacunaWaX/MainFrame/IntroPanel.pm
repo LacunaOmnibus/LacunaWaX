@@ -6,7 +6,14 @@ package LacunaWaX::MainFrame::IntroPanel {
     use Try::Tiny;
     use Wx qw(:everything);
     use Wx::Event qw(EVT_BUTTON);
-    with 'LacunaWaX::Roles::GuiElement';
+
+    has 'parent' => (
+        is          => 'rw',
+        isa         => 'LacunaWaX::MainFrame',
+        required    => 1,
+    );
+
+    ##########################################
 
     has 'is_on' => (is => 'rw', isa => 'Int', lazy => 1, default => 1);
 
@@ -20,6 +27,18 @@ package LacunaWaX::MainFrame::IntroPanel {
     has 'bottom_panel_sizer'        => (is => 'rw', isa => 'Wx::Sizer',  lazy_build => 1, documentation => 'vertical'   );
 
     has 'logo' => (is => 'rw', isa => 'Wx::StaticBitmap', lazy_build => 1);
+
+    has 'has_enabled_button' => (
+        is      => 'rw', 
+        isa     => 'Bool',
+        default => 0,
+    );
+
+    has 'lbl_firsttime' => (
+        is          => 'rw',
+        isa         => 'Wx::StaticText',
+        lazy_build  => 1,
+    );
 
     has 'buttons' => (
         is => 'rw', isa => 'HashRef[Wx::Button]', lazy_build => 1,
@@ -51,14 +70,22 @@ package LacunaWaX::MainFrame::IntroPanel {
         foreach my $srvr_id(keys %{$self->buttons}) {
             $self->bottom_panel_sizer->Add( $self->buttons->{$srvr_id}, 0, wxALIGN_CENTER_VERTICAL|wxALIGN_CENTER_HORIZONTAL, 0);
         }
+
+        unless( $self->has_enabled_button ) {
+            $self->bottom_panel_sizer->AddSpacer(20);
+            $self->lbl_firsttime->Show(1);
+            $self->bottom_panel_sizer->Add( $self->lbl_firsttime, 0, wxALIGN_CENTER_VERTICAL|wxALIGN_CENTER_HORIZONTAL, 0 );
+        }
+
         $self->bottom_panel_sizer->AddStretchSpacer(2);
         $self->bottom_panel->SetSizer($self->bottom_panel_sizer);
 
         ### Main
-        $self->main_sizer->Add($self->top_panel,    2, wxEXPAND, 0);
-        $self->main_sizer->Add($self->bottom_panel, 4, wxEXPAND, 0);
+        $self->main_sizer->Add($self->top_panel,    2, wxEXPAND, 1);
+        $self->main_sizer->Add($self->bottom_panel, 4, wxEXPAND, 1);
         $self->main_panel->SetSizer( $self->main_sizer );
 
+        $self->_set_events();
         $self->main_panel->Show(1);
         return $self;
     }
@@ -66,7 +93,8 @@ package LacunaWaX::MainFrame::IntroPanel {
         my $self = shift;
         my $panel = Wx::Panel->new(
             $self->main_panel, -1, 
-            wxDefaultPosition, wxDefaultSize,
+            wxDefaultPosition, 
+            Wx::Size->new(1,1),
             0,
             'midPanel',
         );
@@ -80,12 +108,27 @@ package LacunaWaX::MainFrame::IntroPanel {
     sub _build_buttons {#{{{
         return {};
     }#}}}
+    sub _build_lbl_firsttime {#{{{
+        my $self = shift;
+        my $text = "Before you can do anything, you have to go to Edit... Preferences and enter your login info, or import preferences from a previously-installed version of LacunaWaX.";
+        my $v = Wx::StaticText->new(
+            $self->bottom_panel, -1, 
+            $text, 
+            wxDefaultPosition, 
+            Wx::Size->new(800,150),
+            wxALIGN_CENTRE,
+        );
+        $v->Show(0);
+        $v->SetForegroundColour(Wx::Colour->new(200,200,200));
+        $v->SetFont( wxTheApp->get_font('header_3') );
+        return $v;
+    }#}}}
     sub _build_logo {#{{{
         my $self = shift;
 
         ### The logo is already the correct size and does not need to be 
         ### rescaled.
-        my $img  = $self->wxbb->resolve(service => '/Assets/images/app/logo-280x70.png');
+        my $img  = wxTheApp->get_image( 'app/logo-280x70.png');
         my $bmp  = Wx::Bitmap->new($img);
         return Wx::StaticBitmap->new(
             $self->top_panel, -1, 
@@ -101,7 +144,7 @@ package LacunaWaX::MainFrame::IntroPanel {
     sub _build_main_panel {#{{{
         my $self = shift;
         return Wx::Panel->new(
-            $self->parent, -1, 
+            $self->parent->frame, -1, 
             wxDefaultPosition, wxDefaultSize,
             0,
             'mainPanel'
@@ -113,7 +156,7 @@ package LacunaWaX::MainFrame::IntroPanel {
             Wx::Panel->new(
                 $self->main_panel, -1, 
                 wxDefaultPosition, 
-                wxDefaultSize,
+                Wx::Size->new(1,1),
                 wxFULL_REPAINT_ON_RESIZE,
                 'topPanel',
             )
@@ -133,18 +176,18 @@ package LacunaWaX::MainFrame::IntroPanel {
         my $self = shift;
         foreach my $srvr_id(keys %{$self->buttons}) {
             my $btn = $self->buttons->{$srvr_id};
-            EVT_BUTTON( $self->main_panel,  $btn->GetId,   sub{$self->get_main_frame->OnGameServerConnect($srvr_id, @_)} );
+            EVT_BUTTON( $self->main_panel,  $btn->GetId,   sub{wxTheApp->main_frame->OnGameServerConnect($srvr_id, @_)} );
         }
         return 1;
     }#}}}
 
     sub add_connect_buttons {#{{{
         my $self    = shift;
-        my $schema  = $self->get_main_schema;
+        my $schema = wxTheApp->main_schema;
 
         ### One connect button per server
-        for my $srvr_id( sort{$a<=>$b}$self->server_ids ) {
-            my $srvr_rec = $self->server_record_by_id($srvr_id);
+        for my $srvr_id( sort{$a<=>$b}wxTheApp->server_ids ) {
+            my $srvr_rec = wxTheApp->server_record_by_id($srvr_id);
             my $b = Wx::Button->new(
                 $self->bottom_panel, -1,
                 "Connect to " . $srvr_rec->name,
@@ -152,16 +195,23 @@ package LacunaWaX::MainFrame::IntroPanel {
                 Wx::Size->new(200, 30),
                 0,
             );
-            $b->SetFont( $self->wxbb->resolve(service => '/Fonts/para_text_2') );
+            $b->SetFont( wxTheApp->get_font('para_text_2') );
 
             if(
                 my $prefs = $schema->resultset('ServerAccounts')->find({ server_id => $srvr_id, default_for_server => 1 })
             ) {
                 ### Disable the connect buttons until the user has entered their 
                 ### credentials in Preferences
-                unless( $prefs->username and $prefs->password ) { $b->Disable; }
+                if( $prefs->username and $prefs->password ) {
+                    $self->has_enabled_button(1);
+                }
+                else {
+                    $b->Disable; 
+                }
             }
-            else { $b->Disable; }
+            else {
+                $b->Disable;
+            }
             $self->buttons->{$srvr_id} = $b;
         }
 
@@ -170,6 +220,7 @@ package LacunaWaX::MainFrame::IntroPanel {
         ### connect to the first server listed (which should be US1).
         my $first_id = (sort{$a<=>$b}(keys %{$self->buttons}))[0];
         $self->buttons->{$first_id}->SetFocus;
+
         return 1;
     }#}}}
     sub hide {#{{{

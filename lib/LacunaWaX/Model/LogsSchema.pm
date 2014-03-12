@@ -4,7 +4,7 @@ package LacunaWaX::Model::LogsSchema::Logs {#{{{
     use base 'DBIx::Class::Core';
     use Carp;
     use DateTime;
-    use DateTime::Format::ISO8601;
+    use DateTime::Format::RFC3339;
 
     __PACKAGE__->table('Logs');
     __PACKAGE__->load_components(qw/FilterColumn/);
@@ -45,7 +45,13 @@ package LacunaWaX::Model::LogsSchema::Logs {#{{{
         $cand =~ s/^(\d{4}-\d\d-\d\d) (\d\d:\d\d:\d\d)$/$1T$2/;
 
         if( $cand =~ m/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d$/ ) {
-            return DateTime::Format::ISO8601->parse_datetime($cand);
+            ### RFC3339 requires a tz spec at the end.
+            ###     2014-01-09T14:02:12Z        ("Z" at the end == UTC)
+            ###     2014-01-09T14:02:12-05:00   ("-05:00" at the end is the 
+            ###     offset from UTC)
+            ### If we got no TZ spec, assume UTC.
+            $cand .= 'Z' unless ($cand =~ /Z$/ or $cand =~ /[-+]\d\d:\d\d$/);
+            return DateTime::Format::RFC3339->parse_datetime($cand);
         }
         else {
             croak "Invalid datetime format in database -$cand-"

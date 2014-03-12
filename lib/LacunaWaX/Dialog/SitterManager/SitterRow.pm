@@ -8,9 +8,14 @@ package LacunaWaX::Dialog::SitterManager::SitterRow {
     use Try::Tiny;
     use Wx qw(:everything);
     use Wx::Event qw(EVT_BUTTON EVT_TEXT);
-    with 'LacunaWaX::Roles::GuiElement';
 
-    has 'sizer_debug' => (is => 'rw', isa => 'Int',  lazy => 1, default => 0);
+    has 'parent' => (
+        is          => 'rw',
+        isa         => 'LacunaWaX::Dialog::SitterManager', 
+        required    => 1,
+    );
+
+    ##########################
 
     has 'main_sizer' => (is => 'rw', isa => 'Wx::BoxSizer', lazy_build => 1, documentation => 'vertical');
 
@@ -68,28 +73,12 @@ If is_header is passed in with a true value, the row returned will be a header
 row, respecting the same size constraints that define an actual row.  show() 
 still needs to be called on header rows.
 
-
-
-LAYOUT
-
-parent (SitterManager's dialog)
-    main_sizer
-        row_panel
-            row_panel_sizer
-                controls
-
-The reason for the above is so that all controls on a given row can be jammed 
-onto that row_panel, which can then be easily hidden or shown.
-
-This show/hide bit allows us to create a new, empty Sitter row when the Add New 
-Sitter button is clicked, and not have this new row create ugly artifacts all 
-over the dialog while the row is being created.
-
 =cut
 
     sub BUILD {
         my $self = shift;
 
+        wxTheApp->borders_off();    # Change to borders_on to see borders around sizers
         $self->row_panel->SetSizer($self->row_panel_sizer);
 
         if( $self->is_header ) {#{{{
@@ -110,8 +99,8 @@ over the dialog while the row is being created.
                 )
             );
 
-            $self->name_header->SetFont( $self->get_font('/header_5') );
-            $self->pass_header->SetFont( $self->get_font('/header_5') );
+            $self->name_header->SetFont( wxTheApp->get_font('header_5') );
+            $self->pass_header->SetFont( wxTheApp->get_font('header_5') );
 
             $self->row_panel_sizer->Add($self->name_header, 0, 0, 0);
             $self->row_panel_sizer->Add($self->pass_header, 0, 0, 0);
@@ -127,26 +116,24 @@ over the dialog while the row is being created.
         $self->row_panel_sizer->AddSpacer(5);  # Separate delete button a hair
         $self->row_panel_sizer->Add($self->btn_delete, 0, 0, 0);
         $self->main_sizer->Add($self->row_panel, 0, 0, 0);
-        $self->yield;
+        wxTheApp->Yield;
 
         $self->_set_events;
         return $self;
     }
     sub _build_main_sizer {#{{{
         my $self = shift;
-        #return Wx::BoxSizer->new(wxHORIZONTAL);
-        return $self->build_sizer($self->parent, wxHORIZONTAL, 'Row Main Sizer');
+        return wxTheApp->build_sizer($self->parent->swindow, wxHORIZONTAL, 'Row Main Sizer');
     }#}}}
     sub _build_row_panel_sizer {#{{{
         my $self = shift;
-        #return Wx::BoxSizer->new(wxHORIZONTAL);
-        return $self->build_sizer($self->row_panel, wxHORIZONTAL, 'Row');
+        return wxTheApp->build_sizer($self->row_panel, wxHORIZONTAL, 'Row');
     }#}}}
     sub _build_row_panel {#{{{
         my $self = shift;
 
         my $y = Wx::Panel->new(
-            $self->parent, -1, 
+            $self->parent->swindow, -1, 
             wxDefaultPosition, wxDefaultSize,
             wxTAB_TRAVERSAL,
             'mainPanel',
@@ -251,22 +238,13 @@ over the dialog while the row is being created.
         my $name = shift;
 
         my $hr = try {
-            $self->game_client->empire->find($name);   ## no critic qw(ProhibitLongChainsOfMethodCalls)
+            wxTheApp->game_client->empire->find($name);   ## no critic qw(ProhibitLongChainsOfMethodCalls)
         }
         catch {
             my $msg = (ref $_) ? $_->text : $_;
-            $self->poperr($msg, "Error");
+            wxTheApp->poperr($msg, "Error");
             return;
         };
-
-# 'empires' => [
-#   {
-#     'name' => 'kiamo',
-#     'id' => '22710'
-#   }
-# ],
-#
-# empires is defined but points to empty arref if name not found.
 
         return $hr->{'empires'}[0]{'id'} // undef;
     }#}}}
@@ -306,8 +284,8 @@ test_sitter_gui(), is unacceptable.
 
 =cut
 
-        my $uri     = $self->get_connected_server->protocol . '://' . $self->get_connected_server->url;
-        my $api_key = $self->bb->resolve( service => '/Globals/api_key' );
+        my $uri     = wxTheApp->server->protocol . '://' . wxTheApp->server->url;
+        my $api_key = wxTheApp->globals->api_key;
 
         my $client = Games::Lacuna::Client->new(
             name        => $name,
@@ -358,14 +336,14 @@ else {
         }
         catch {
             if( $_ =~ /empire does not exist/i ) {
-                $self->poperr("No such empire exists - check spelling of empire name.", 'Error');
+                wxTheApp->poperr("No such empire exists - check spelling of empire name.", 'Error');
                 return;
             }
             elsif( $_ =~ /password incorrect/i ) {
-                $self->poperr("Bad password - check your spelling.", 'Error');
+                wxTheApp->poperr("Bad password - check your spelling.", 'Error');
                 return;
             }
-            $self->poperr("Attempt to test sitter password returned error '$_'", 'Error');
+            wxTheApp->poperr("Attempt to test sitter password returned error '$_'", 'Error');
         };
 
         return $rv || 0;
@@ -414,15 +392,15 @@ else {
             if( $self->test_sitter_gui($name, $pass) ) {
 
                 my $player_id = $self->find_player_id($name) or do { # WTF?
-                    $self->poperr("Unable to find player name after it passed testing.", "WTF?");
+                    wxTheApp->poperr("Unable to find player name after it passed testing.", "WTF?");
                     return;
                 };
 
-                my $schema = $self->get_main_schema;
+                my $schema = wxTheApp->main_schema;
                 if(
                     my $rec = $schema->resultset('SitterPasswords')->find_or_create(
                         {
-                            server_id => $self->get_connected_server->id,
+                            server_id => wxTheApp->server->id,
                             player_id => $player_id
                         },
                         { key => 'one_player_per_server' }
@@ -436,17 +414,17 @@ else {
                     $self->btn_save->SetLabel('Update Sitter');
                 }
                 else { # WTF?
-                    $self->poperr("Player record creation should not have failed, but it did.", "WTF?");
+                    wxTheApp->poperr("Player record creation should not have failed, but it did.", "WTF?");
                     return;
                 }
             }
             else {
-                $self->poperr("The player name and sitter you entered are not a valid game login.", "Invalid Credentials!");
+                wxTheApp->poperr("The player name and sitter you entered are not a valid game login.", "Invalid Credentials!");
                 return;
             }
         }
         $self->btn_delete->Enable(1);
-        $self->popmsg("Sitter credentials have been saved.", "Success!");
+        wxTheApp->popmsg("Sitter credentials have been saved.", "Success!");
         return 1;
     }#}}}
     sub OnTest {#{{{
@@ -458,7 +436,7 @@ else {
         my $pass    = $self->txt_sitter->GetLineText(0);
 
         if( $self->test_sitter_gui($name, $pass) ) {
-            $self->popmsg("Credentials are valid.", "Success!");
+            wxTheApp->popmsg("Credentials are valid.", "Success!");
         }
         return 1;
     }#}}}
@@ -468,7 +446,7 @@ else {
         my $event   = shift;    # Wx::CommandEvent
 
         return unless $self->player_rec;
-        return if wxNO == $self->popconf("Delete sitter for " . $self->player_rec->player_name . " - are you sure?");
+        return if wxNO == wxTheApp->popconf("Delete sitter for " . $self->player_rec->player_name . " - are you sure?");
 
         $self->player_rec->delete;
         $self->player_rec( undef );
@@ -477,7 +455,7 @@ else {
         $self->btn_save->SetLabel('Add Sitter');
         $self->btn_delete->Enable(0);
 
-        $self->popmsg("The sitter has been deleted.", "Success!");
+        wxTheApp->popmsg("The sitter has been deleted.", "Success!");
         return 1;
     }#}}}
 

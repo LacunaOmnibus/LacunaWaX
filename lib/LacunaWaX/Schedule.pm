@@ -14,7 +14,6 @@ package LacunaWaX::Schedule {
     use Carp;
     use Data::Dumper;
     use LacunaWaX::Preload::Cava;
-    use LacunaWaX::Model::Container;
     use LacunaWaX::Model::Mutex;
     use LacunaWaX::Model::Client;
     use LWP::UserAgent;
@@ -27,7 +26,7 @@ package LacunaWaX::Schedule {
     use LacunaWaX::Schedule::Spies;
     use LacunaWaX::Schedule::SS_Health;
 
-    has 'bb'            => (is => 'rw', isa => 'LacunaWaX::Model::Container',   required    => 1);
+    has 'globals'       => (is => 'rw', isa => 'LacunaWaX::Model::Globals',     required    => 1);
     has 'schedule'      => (is => 'rw', isa => 'Str',                           required    => 1);
     has 'mutex'         => (is => 'rw', isa => 'LacunaWaX::Model::Mutex',       lazy_build  => 1);
     has 'game_client'   => (is => 'rw', isa => 'LacunaWaX::Model::Client',
@@ -45,7 +44,7 @@ package LacunaWaX::Schedule {
         my $orig = shift;
         my $self = shift;
 
-        my $logger = $self->bb->resolve( service => '/Log/logger' );
+        my $logger = $self->globals->logger;
         $logger->component('Schedule');
         $logger->info("# -=-=-=-=-=-=- #");
         $logger->info("Scheduler beginning with task '" . $self->schedule .  q{'.});
@@ -69,13 +68,13 @@ package LacunaWaX::Schedule {
     };#}}}
     sub _build_mutex {#{{{
         my $self = shift;
-        return LacunaWaX::Model::Mutex->new( bb => $self->bb, name => 'schedule' );
+        return LacunaWaX::Model::Mutex->new( globals => $self->globals, name => 'schedule' );
     }#}}}
 
     sub archmin {#{{{
         my $self = shift;
 
-        my $am       = LacunaWaX::Schedule::Archmin->new( bb => $self->bb );
+        my $am       = LacunaWaX::Schedule::Archmin->new( globals => $self->globals );
         my $pushes   = $am->push_all_servers;
         my $searches = $am->search_all_servers;
         $am->logger->info("--- Archmin Run Complete ---");
@@ -85,7 +84,7 @@ package LacunaWaX::Schedule {
     sub autovote {#{{{
         my $self = shift;
 
-        my $av  = LacunaWaX::Schedule::Autovote->new( bb => $self->bb );
+        my $av  = LacunaWaX::Schedule::Autovote->new( globals => $self->globals );
         my $cnt = $av->vote_all_servers;
         $av->logger->info("--- Autovote Run Complete ---");
 
@@ -94,7 +93,7 @@ package LacunaWaX::Schedule {
     sub lottery {#{{{
         my $self = shift;
 
-        my $lottery = LacunaWaX::Schedule::Lottery->new( bb => $self->bb );
+        my $lottery = LacunaWaX::Schedule::Lottery->new( globals => $self->globals );
         my $cnt     = $lottery->play_all_servers;
         $lottery->logger->info("--- Lottery Run Complete ---");
 
@@ -103,7 +102,7 @@ package LacunaWaX::Schedule {
     sub spies {#{{{
         my $self = shift;
 
-        my $spies = LacunaWaX::Schedule::Spies->new( bb => $self->bb );
+        my $spies = LacunaWaX::Schedule::Spies->new( globals => $self->globals );
         my $cnt   = $spies->train_all_servers;
         $spies->logger->info("--- Spy Training Run Complete ---");
 
@@ -112,7 +111,7 @@ package LacunaWaX::Schedule {
     sub ss_health {#{{{
         my $self = shift;
 
-        my $ss_health = LacunaWaX::Schedule::SS_Health->new( bb => $self->bb );
+        my $ss_health = LacunaWaX::Schedule::SS_Health->new( globals => $self->globals );
         my $cnt = $ss_health->diagnose_all_servers;
         $ss_health->logger->info("--- Station Health Check Complete ---");
 
@@ -122,7 +121,7 @@ package LacunaWaX::Schedule {
     sub test {#{{{
         my $self = shift;
 
-        my $logger = $self->bb->resolve( service => '/Log/logger' );
+        my $logger = $self->globals->logger;
         $logger->component('ScheduleTest');
         $logger->info("ScheduleTest has been called.");
 

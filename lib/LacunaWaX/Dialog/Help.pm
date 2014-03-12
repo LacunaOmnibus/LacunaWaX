@@ -7,7 +7,7 @@ package LacunaWaX::Dialog::Help {
     use File::Slurp;
     use File::Spec;
     use File::Util;
-    use HTML::Strip;
+    use HTML::Scrubber;
     use HTML::TreeBuilder::XPath;
     use Lucy::Analysis::PolyAnalyzer;
     use Lucy::Index::Indexer;
@@ -19,24 +19,13 @@ package LacunaWaX::Dialog::Help {
     use Try::Tiny;
     use Wx qw(:everything);
     use Wx::Event qw(EVT_BUTTON EVT_CLOSE EVT_HTML_LINK_CLICKED EVT_SIZE EVT_TEXT_ENTER);
-    with 'LacunaWaX::Roles::GuiElement';
 
-    use MooseX::NonMoose::InsideOut;
-    extends 'Wx::Dialog', 'LacunaWaX::Dialog::NonScrolled';
-
-    has 'sizer_debug' => (is => 'rw', isa => 'Int',  lazy => 1, default => 0,
-        documentation => q{
-            Turning this on adds extra space usage because of the boxes drawn 
-            around the sizers.  This will mess up the sizing on the navbar.
-            That's OK, just be aware of it and don't try to fix the navbar sizing 
-            while this is on.
-        }
-    );
+    extends 'LacunaWaX::Dialog::NonScrolled';
 
     has 'index_file'    => (is => 'rw', isa => 'Str',       lazy_build => 1);
     has 'history'       => (is => 'rw', isa => 'ArrayRef',  lazy_build => 1);
     has 'history_idx'   => (is => 'rw', isa => 'Int',       lazy_build => 1);
-    has 'html_dir' => (is => 'rw', isa => 'Str', lazy_build => 1);
+
     has 'prev_click_href' => (is => 'rw', isa => 'Str', lazy => 1, default => q{},
         documentation => q{ See OnLinkClicked for details.  }
     );
@@ -44,7 +33,7 @@ package LacunaWaX::Dialog::Help {
     has 'tt'                => (is => 'rw', isa => 'Template',  lazy_build => 1                 );
 
     has 'title' => (is => 'rw', isa => 'Str',       lazy_build => 1);
-    has 'size'  => (is => 'rw', isa => 'Wx::Szie',  lazy_build => 1);
+    has 'size'  => (is => 'rw', isa => 'Wx::Size',  lazy_build => 1);
 
     has 'nav_img_h'     => (is => 'rw', isa => 'Int',  lazy => 1, default => 32     );
     has 'nav_img_w'     => (is => 'rw', isa => 'Int',  lazy => 1, default => 32     );
@@ -66,21 +55,11 @@ package LacunaWaX::Dialog::Help {
     ### main_sizer is required by our NonScrolled parent.
     has 'main_sizer' => (is => 'rw', isa => 'Wx::Sizer', lazy_build => 1, documentation => q{vertical});
 
-    sub FOREIGNBUILDARGS {## no critic qw(RequireArgUnpacking) {{{
-        my $self = shift;
-        my %args = @_;
-
-        return (
-            undef, -1, 
-            q{},        # the title
-            wxDefaultPosition,
-            Wx::Size->new(600, 700),
-            wxRESIZE_BORDER|wxDEFAULT_DIALOG_STYLE
-        );
-    }#}}}
     sub BUILD {
         my($self, @params) = @_;
         $self->Show(0);
+
+        wxTheApp->borders_off();    # Change to borders_on to see borders around sizers
 
         $self->make_search_index;
 
@@ -95,22 +74,23 @@ package LacunaWaX::Dialog::Help {
         $self->main_sizer->Add($self->szr_html, 0, 0, 0);
 
         unless( $self->load_html_file($self->index_file) ) {
-            $self->poperr("GONG!  Unable to load help files!", "GONG!");
+            wxTheApp->poperr("GONG!  Unable to load help files!", "GONG!");
             $self->Destroy;
             return;
         }
 
+        $self->_set_events;
         $self->init_screen();
         $self->Show(1);
         return $self;
     };
     sub _build_bmp_home {#{{{
         my $self = shift;
-        my $img = $self->get_image('/app/home.png');
+        my $img = wxTheApp->get_image('app/home.png');
         $img->Rescale($self->nav_img_w - 10, $self->nav_img_h - 10);    # see build_bmp_left
         my $bmp = Wx::Bitmap->new($img);
         my $v = Wx::BitmapButton->new(
-            $self, -1, 
+            $self->dialog, -1, 
             $bmp,
             wxDefaultPosition,
             Wx::Size->new($self->nav_img_w, $self->nav_img_h),
@@ -120,14 +100,14 @@ package LacunaWaX::Dialog::Help {
     }#}}}
     sub _build_bmp_left {#{{{
         my $self = shift;
-        my $img = $self->get_image('/app/arrow-left.png');
+        my $img = wxTheApp->get_image('app/arrow-left.png');
         ### On Ubuntu, there's a margin inside the button.  If the image is 
         ### the same size as the button, that margin obscures part of the 
         ### image.  So the image must be a bit smaller than the button.
         $img->Rescale($self->nav_img_w - 10, $self->nav_img_h - 10);
         my $bmp = Wx::Bitmap->new($img);
         my $v = Wx::BitmapButton->new(
-            $self, -1, 
+            $self->dialog, -1, 
             $bmp,
             wxDefaultPosition,
             Wx::Size->new($self->nav_img_w, $self->nav_img_h),
@@ -137,11 +117,11 @@ package LacunaWaX::Dialog::Help {
     }#}}}
     sub _build_bmp_right {#{{{
         my $self = shift;
-        my $img = $self->get_image('/app/arrow-right.png');
+        my $img = wxTheApp->get_image('app/arrow-right.png');
         $img->Rescale($self->nav_img_w - 10, $self->nav_img_h - 10);    # see build_bmp_left
         my $bmp = Wx::Bitmap->new($img);
         return Wx::BitmapButton->new(
-            $self, -1, 
+            $self->dialog, -1, 
             $bmp,
             wxDefaultPosition,
             Wx::Size->new($self->nav_img_w, $self->nav_img_h),
@@ -150,11 +130,11 @@ package LacunaWaX::Dialog::Help {
     }#}}}
     sub _build_bmp_search {#{{{
         my $self = shift;
-        my $img = $self->get_image('/app/search.png');
+        my $img = wxTheApp->get_image('app/search.png');
         $img->Rescale($self->nav_img_w - 10, $self->nav_img_h - 10);    # see build_bmp_left
         my $bmp = Wx::Bitmap->new($img);
         my $v = Wx::BitmapButton->new(
-            $self, -1, 
+            $self->dialog, -1, 
             $bmp,
             wxDefaultPosition,
             Wx::Size->new($self->nav_img_w, $self->nav_img_h),
@@ -173,7 +153,7 @@ package LacunaWaX::Dialog::Help {
         my $self = shift;
 
         my $v = Wx::HtmlWindow->new(
-            $self, -1, 
+            $self->dialog, -1, 
             wxDefaultPosition, 
             Wx::Size->new($self->get_html_width, $self->get_html_height),
             wxHW_SCROLLBAR_AUTO
@@ -181,30 +161,26 @@ package LacunaWaX::Dialog::Help {
         );
         return $v;
     }#}}}
-    sub _build_html_dir {#{{{
-        my $self = shift;
-        return $self->bb->resolve(service => '/Directory/html');
-    }#}}}
     sub _build_index_file {#{{{
         return 'index.html';
     }#}}}
     sub _build_size {#{{{
         my $self = shift;
-        return Wx::Size->new( 500, 600 );
+        return Wx::Size->new( 600, 700 );
     }#}}}
     sub _build_szr_main {#{{{
         my $self = shift;
-        my $v = $self->build_sizer($self, wxVERTICAL, 'Main Sizer');
+        my $v = wxTheApp->build_sizer($self->dialog, wxVERTICAL, 'Main Sizer');
         return $v;
     }#}}}
     sub _build_szr_html {#{{{
         my $self = shift;
-        my $v = $self->build_sizer($self, wxVERTICAL, 'LacunaWaX Help');
+        my $v = wxTheApp->build_sizer($self->dialog, wxVERTICAL, 'LacunaWaX Help');
         return $v;
     }#}}}
     sub _build_szr_navbar {#{{{
         my $self = shift;
-        my $v = $self->build_sizer($self, wxHORIZONTAL, 'Nav bar');
+        my $v = wxTheApp->build_sizer($self->dialog, wxHORIZONTAL, 'Nav bar');
         return $v;
     }#}}}
     sub _build_title {#{{{
@@ -213,9 +189,9 @@ package LacunaWaX::Dialog::Help {
     sub _build_tt {#{{{
         my $self = shift;
         my $tt = Template->new(
-            INCLUDE_PATH => $self->html_dir,
+            INCLUDE_PATH => wxTheApp->globals->dir_html,
             INTERPOLATE => 1,
-            OUTPUT_PATH => $self->html_dir,
+            OUTPUT_PATH => wxTheApp->globals->dir_html,
             WRAPPER => 'wrapper',
         );
         return $tt;
@@ -223,7 +199,7 @@ package LacunaWaX::Dialog::Help {
     sub _build_txt_search {#{{{
         my $self = shift;
         my $v = Wx::TextCtrl->new(
-            $self, -1, 
+            $self->dialog, -1, 
             q{},
             wxDefaultPosition, 
             Wx::Size->new($self->search_box_w, $self->search_box_h),
@@ -256,45 +232,55 @@ package LacunaWaX::Dialog::Help {
     }#}}}
     sub get_docs {#{{{
         my $self    = shift;
-        my $kandi   = HTML::Strip->new();
+        my $loofa   = HTML::Scrubber->new();
         my $docs    = {};
-        my $dir     = $self->bb->resolve(service => '/Directory/html');
+        my $dir     = wxTheApp->globals->dir_html;
+
+        use HTML::TreeBuilder;
         foreach my $f(glob("\"$dir\"/*.html")) {
             my $html = read_file($f);
 
-            my $content = $kandi->parse( $html );
-            $kandi->eof;
+            my $content = $loofa->scrub( $html );
 
-            ### The templates we're parsing are not full HTML documents, since 
-            ### the wrapper contains our header and footer.  Tack on opening 
-            ### and closing html and body tags to the content to make XPath 
-            ### happy.
-            my $x = HTML::TreeBuilder::XPath->new();
+            my $x = HTML::TreeBuilder->new();
             $x->parse("<html><body>$html</body></html>");
-            my $title   = $x->findvalue('/html/body/h1') || 'No Title';
-            my $summary = $self->get_doc_summary($x) || 'No Summary';
+
+            my $title_elem  = ($x->find_by_tag_name('h1'))[0];
+            my $title_text  = (ref $title_elem eq 'HTML::Element') ? $title_elem->as_text : 'No Title';
+            my $summary     = $self->get_doc_summary($x) || 'No Summary';
 
             $docs->{$f} = {
                 content     => $content,
                 summary     => $summary,
-                title       => $title,
+                title       => $title_text,
             }
         }
         return $docs;
     }#}}}
     sub get_doc_summary {#{{{
-        my $self  = shift;
-        my $xpath = shift;
+        my $self = shift;
+        my $tree = shift;
 
-        my @nodeset = $xpath->findnodes('/html/body/*');
-        my $summary  = q{};
-        NODE:
-        for my $n(@nodeset) {
-            next if $n->getName =~ /^h/i;   # skip headers
-            $summary .= $self->clean_text($n->getValue);
-            last NODE if length $summary > $self->summary_length;
-        }
-        return $summary;
+        ### TBD
+        ### This used to avoid the H1 tag contents before summarizing the body 
+        ### tag contents.
+        ###
+        ### But HTML::TreeBuilder::XPath, which I was using before, does not 
+        ### play well with being packaged by perlapp.
+        ###
+        ### I'm sure there's a way to remove the H1 tag contents using 
+        ### TreeBuilder like I'm doing now, but having that H1 contents in the 
+        ### summary is extremely minor and I doubt anybody but me will ever 
+        ### even notice, and I want this thing out the door.
+        ###
+        ### So I'm gonna punt.
+
+        my $body_elem = ($tree->find_by_tag_name('body'))[0];
+        my $body_text = (ref $body_elem eq 'HTML::Element') ? $body_elem->as_text : 'No Body Text';
+        $body_text = $self->clean_text( $body_text );
+        $body_text = substr($body_text, 0, $self->summary_length);
+        return $body_text;
+
     }#}}}
     sub get_html_width {#{{{
         my $self = shift;
@@ -308,19 +294,19 @@ package LacunaWaX::Dialog::Help {
         my $self = shift;
         my $file = shift || return;
 
-        my $fqfn = join q{/}, ($self->html_dir, $file);
+        my $fqfn = join q{/}, (wxTheApp->globals->dir_html, $file);
         unless(-e $fqfn) {
-            $self->poperr("$fqfn: No such file or directory");
+            wxTheApp->poperr("$fqfn: No such file or directory");
             return;
         }
 
         my $vars = {
             ### fix the .. in the paths, since it might confuse muggles.
-            bin_dir     => File::Spec->rel2abs($self->bb->resolve(service => '/Directory/bin')),
+            bin_dir     => wxTheApp->globals->dir_bin,
             dir_sep     => File::Util->SL,
-            html_dir    => File::Spec->rel2abs($self->html_dir),
-            user_dir    => File::Spec->rel2abs($self->bb->resolve(service => '/Directory/user')),
-            lucy_index  => File::Spec->rel2abs($self->bb->resolve(service => '/Lucy/index')),
+            html_dir    => wxTheApp->globals->dir_html,
+            user_dir    => wxTheApp->globals->dir_user,
+            lucy_index  => wxTheApp->globals->dir_html_idx,
         };
 
         my $output  = q{};
@@ -331,8 +317,7 @@ package LacunaWaX::Dialog::Help {
     sub make_search_index {#{{{
         my $self = shift;
 
-        my $idx = $self->bb->resolve(service => '/Lucy/index');
-        return if -e $idx;
+        return if -e wxTheApp->globals->dir_html_idx;
         my $docs = $self->get_docs;
 
         # Create a Schema which defines index fields.
@@ -351,7 +336,7 @@ package LacunaWaX::Dialog::Help {
         # Create the index and add documents.
         my $indexer = Lucy::Index::Indexer->new(
             schema => $schema,  
-            index  => $idx,
+            index  => wxTheApp->globals->dir_html_idx,
             create => 1,
             truncate => 1,  # if index already exists with content, trash them before adding more.
         );
@@ -442,13 +427,13 @@ package LacunaWaX::Dialog::Help {
             my $ok = Browser::Open::open_browser($info->GetHref);
 
             if( $ok ) {
-                $self->poperr(
+                wxTheApp->poperr(
                     "LacunaWaX encountered an error while attempting to open the URL in your web browser.  The URL you were attempting to reach was '" . $info->GetHref . q{'.},
                     "Error opening web browser"
                 );
             }
             elsif(not defined $ok) {
-                $self->poperr(
+                wxTheApp->poperr(
                     "LacunaWaX was unable to open the URL in your web browser.  The URL you were attempting to reach was '" . $info->GetHref . q{'.},
                     "Unable to open web browser"
                 );
@@ -508,13 +493,13 @@ package LacunaWaX::Dialog::Help {
 
         my $term = $self->txt_search->GetValue;
         unless($term) {
-            $self->popmsg("Searching for nothing isn't going to return many results.");
+            wxTheApp->popmsg("Searching for nothing isn't going to return many results.");
             return;
         }
 
         ### Search results do not get recorded in history.
 
-        my $searcher = $self->bb->resolve(service => '/Lucy/searcher');
+        my $searcher = wxTheApp->globals->lucy_searcher;
         my $hits = $searcher->hits( query => $term );
         my $vars = {
             term => $term,

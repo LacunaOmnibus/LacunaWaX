@@ -2,6 +2,7 @@ use v5.14;
 
 package LacunaWaX::Schedule::Autovote {
     use Carp;
+    use Data::Dumper;
     use Moose;
     use Try::Tiny;
 
@@ -59,8 +60,8 @@ package LacunaWaX::Schedule::Autovote {
         else { return $server_votes; }
 
         my $ss_rs = $self->schema->resultset('BodyTypes')->search({
-            type_general => 'space station', 
-            server_id => $av_rec->server_id
+            type_general    => 'space station', 
+            server_id       => $av_rec->server_id
         });
         my @ss_recs = $ss_rs->all;
         $self->logger->info("User has set up autovote on " . @ss_recs . " stations.");

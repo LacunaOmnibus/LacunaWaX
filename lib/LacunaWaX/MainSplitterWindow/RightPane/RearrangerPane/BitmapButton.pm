@@ -4,14 +4,28 @@ package LacunaWaX::MainSplitterWindow::RightPane::RearrangerPane::BitmapButton {
     use Moose;
     use Try::Tiny;
     use Wx qw(:everything);
-    with 'LacunaWaX::Roles::GuiElement';
 
-    ### Wx::Menu is a non-hash object.  Extending such requires 
-    ### MooseX::NonMoose::InsideOut instead of plain MooseX::NonMoose.
-    use MooseX::NonMoose::InsideOut;
-    extends 'Wx::BitmapButton';
+    has 'parent' => (
+        is          => 'rw',
+        isa         => 'Wx::ScrolledWindow',
+        required    => 1,
+    );
 
-    has 'sizer_debug' => (is => 'rw', isa => 'Int',  lazy => 1, default => 0);
+    ##########################################
+
+    has 'bitmap_button' => (
+        is          => 'rw',
+        isa         => 'Wx::BitmapButton',
+        lazy_build  => 1,
+        handles     => {
+            Enable          => "Enable",
+            GetId           => "GetId",
+            GetBitmapLabel  => "GetBitmapLabel",
+            GetLabel        => "GetLabel",
+            SetBitmapLabel  => "SetBitmapLabel",
+            SetToolTip      => "SetToolTip",
+        }
+    );
 
     has 'bitmap'        => (is => 'rw', isa => 'Wx::Bitmap' );
     has 'bldg_id'       => (is => 'rw', isa => 'Maybe[Int]' );
@@ -23,16 +37,21 @@ package LacunaWaX::MainSplitterWindow::RightPane::RearrangerPane::BitmapButton {
     has 'x'             => (is => 'rw', isa => 'Maybe[Int]' );
     has 'y'             => (is => 'rw', isa => 'Maybe[Int]' );
 
-    sub FOREIGNBUILDARGS {## no critic qw(RequireArgUnpacking) {{{
-        my $self = shift;
-        my %args = @_;
-        return ( $args{'parent'}, -1, $args{'bitmap'} );
-    }#}}}
     sub BUILD {
         my($self, @params) = @_;
+
+        wxTheApp->borders_off();    # Change to borders_on to see borders around sizers
         $self->update_button_tooltip();
+
         return $self;
     };
+    sub _build_bitmap_button {#{{{
+        my $self = shift;
+        return Wx::BitmapButton->new(
+            $self->parent, -1,
+            $self->bitmap,
+        );
+    }#}}}
     sub _set_events { }
 
     sub id_for_tooltip {#{{{

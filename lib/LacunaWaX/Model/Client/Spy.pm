@@ -3,11 +3,23 @@ package LacunaWaX::Model::Client::Spy {
     use Moose;
     use Try::Tiny;
 
-    has 'hr'                => ( is => 'rw', isa => 'HashRef', required => 1 );
+    has 'hr' => (
+        is          => 'rw', 
+        isa         => 'HashRef',
+        required    => 1,
+        documentation => q{
+            The hashref returned from the Intelligence Ministry's view_spy or 
+            view_all_spies.
+        }
+    );
+
+    ############################
+
     has 'id'                => ( is => 'rw', isa => 'Int', lazy_build => 1 );
     has 'name'              => ( is => 'rw', isa => 'Str', lazy_build => 1 );
     has 'assignment'        => ( is => 'rw', isa => 'Str', lazy_build => 1 );
     has 'level'             => ( is => 'rw', isa => 'Int', lazy_build => 1 );
+    has 'idle'              => ( is => 'rw', isa => 'Int', lazy_build => 1 );
     has 'politics'          => ( is => 'rw', isa => 'Int', lazy_build => 1 );
     has 'mayhem'            => ( is => 'rw', isa => 'Int', lazy_build => 1 );
     has 'theft'             => ( is => 'rw', isa => 'Int', lazy_build => 1 );
@@ -20,15 +32,6 @@ package LacunaWaX::Model::Client::Spy {
     has 'seconds_remaining' => ( is => 'rw', isa => 'Int', lazy_build => 1 );
     has 'mission_count_off' => ( is => 'rw', isa => 'Int', lazy_build => 1 );
     has 'mission_count_def' => ( is => 'rw', isa => 'Int', lazy_build => 1 );
-
-### POD {#{{{
-=pod
-
-Passed a hashref, as from an Int Min's view_spies or view_all_spies, returns a 
-spy object.
-
-=cut
-### }#}}}
 
     sub BUILD {
         my $self = shift;
@@ -48,6 +51,10 @@ spy object.
     sub _build_level {#{{{
         my $self = shift;
         return $self->hr->{'level'};
+    }#}}}
+    sub _build_idle {#{{{
+        my $self = shift;
+        return 1;
     }#}}}
     sub _build_politics {#{{{
         my $self = shift;
