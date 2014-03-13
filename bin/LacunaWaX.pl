@@ -7,11 +7,17 @@ use File::Copy;
 use IO::All;
 use Wx qw(:allclasses);
 
+my $i;
 BEGIN {
     use FindBin;
     use lib "$FindBin::Bin/../lib";
+    opendir my $splash_dir, "$FindBin::Bin/../splash";
+    my @imgs = grep{ $_ !~ /^\.\.?$/ }readdir $splash_dir;
+    $i = "$FindBin::Bin/../splash/" . $imgs[int rand @imgs];
+}
+BEGIN {
     use LacunaWaX::Preload::Perlapp;
-    use Wx::Perl::SplashFast( "$FindBin::Bin/../splash.jpg", 2000 );
+    use Wx::Perl::SplashFast( $i, 2000 );
 }
 use LacunaWaX;
 use LacunaWaX::Util;
