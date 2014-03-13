@@ -89,7 +89,9 @@ package LacunaWaX::MainFrame::MenuBar::File {
             q{},
             wxFD_SAVE|wxFD_OVERWRITE_PROMPT
         );
-        $file_browser->ShowModal();
+        if( $file_browser->ShowModal() == wxID_CANCEL ) {
+            return;
+        }
 
         my $source_db_file  = wxTheApp->db_file;
         my $dest_db_file    = join '/', ($file_browser->GetDirectory, $file_browser->GetFilename);
@@ -116,7 +118,10 @@ package LacunaWaX::MainFrame::MenuBar::File {
             'SQLite Databases (*.sqlite)|*.sqlite|All Files (*.*)|*.*',
             wxFD_OPEN|wxFD_FILE_MUST_EXIST
         );
-        $file_browser->ShowModal();
+        if( $file_browser->ShowModal() == wxID_CANCEL ) {
+say "import cancel";
+            return;
+        }
 
         my $db_file = join '/', ($file_browser->GetDirectory, $file_browser->GetFilename);
         unless( $file_browser->GetFilename ) {
