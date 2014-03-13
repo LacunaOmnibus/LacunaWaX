@@ -647,7 +647,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::SpiesPane {
             ### And record their training setup in our database
             my $rec = $schema->resultset('SpyTrainPrefs')->find_or_create({
                 spy_id      => $spy->id,
-                server_id   => $self->get_connected_server->id
+                server_id   => wxTheApp->server->id,
             });
             $rec->update;
         }
