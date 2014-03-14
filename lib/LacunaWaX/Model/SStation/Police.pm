@@ -111,9 +111,11 @@ bother trying to page through all of the results.
 
         if( $ships_inc->{'number_of_ships'} ) {
             for my $s( @{$ships_inc->{'ships'}} ) {
-                my $empire = $s->{'from'}{'empire'}{'name'};
-                unless( $self->isa_member(sub{$_->{'name'} eq $empire}) ) {
+                my $empire = $s->{'from'}{'empire'}{'name'} || q{}; # An unknown $empire will be ''.
+                unless( $self->isa_member($empire) ) {
                     return 1;
+                }
+                else {
                 }
             }
         }
@@ -123,7 +125,23 @@ bother trying to page through all of the results.
     sub isa_member {#{{{
         my $self = shift;
         my $name = shift;
-        return( first{ $_ eq $name }@{$self->alliance_members} ) ? 1 : 0;
+
+        ### Tested - sent two identical sweepers to a SS with a low level 
+        ### Police.  One sweeper from an account in the SS's alliance, and one 
+        ### sweeper from an account outside the alliance.
+        ###
+        ### The SS _is_ able to ID the sweeper from inside the alliance, but 
+        ### not the one from outside.  So that means the Police station can 
+        ### always ID ships from our own alliance.  So it if the inc is coming 
+        ### from and Unknown, that's definitely a "hostile" (outside our 
+        ### alliance) ship, and we need to alert on it.
+        return 0 unless $name;
+
+        for my $a( @{$self->alliance_members} ) {
+            return 1 if $a->{'name'} eq $name;
+        }
+        return 0;
+
     }#}}}
 
     no Moose;

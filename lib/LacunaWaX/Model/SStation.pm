@@ -34,6 +34,11 @@ package LacunaWaX::Model::SStation {
 
     sub BUILD {
         my $self = shift;
+
+        ### Gotta force the lazy builder.
+        $self->police;
+
+        return $self;
     }
     sub _build_name {#{{{
         my $self = shift;
@@ -63,7 +68,7 @@ package LacunaWaX::Model::SStation {
         my $popo = undef;
         if( $bldg ) {
             $popo = LacunaWaX::Model::SStation::Police->new( 
-                precinct => $bldg,
+                precinct    => $bldg,
                 game_client => $self->game_client,
             )
         }
