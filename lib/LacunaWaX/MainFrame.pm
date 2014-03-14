@@ -59,10 +59,10 @@ package LacunaWaX::MainFrame {
     has 'size'      => (is => 'rw', isa => 'Wx::Size',  lazy_build => 1);
     has 'icon'      => (is => 'rw', isa => 'Wx::Icon',  lazy_build => 1);
 
-    ### If you change these from 800 and 900, see FOREIGNBUILDARGS, where the 
-    ### values are hardcoded again.
-    has 'default_width'     => (is => 'ro', isa => 'Int', default => 800);
-    has 'default_height'    => (is => 'ro', isa => 'Int', default => 900);
+    ### First run will try to start at 800x900 unless that's too big for the 
+    ### current screen resolution.
+    has 'default_width'     => (is => 'ro', isa => 'Int', lazy_build => 1);
+    has 'default_height'    => (is => 'ro', isa => 'Int', lazy_build => 1);
 
     has 'menu_bar'      => (is => 'rw', isa => 'LacunaWaX::MainFrame::MenuBar',     lazy_build => 1 );
 
@@ -108,6 +108,18 @@ package LacunaWaX::MainFrame {
         return $self;
     };
 
+    sub _build_default_height {#{{{
+        my $self = shift;
+        my( $sw, $sh ) = $self->get_screen_resolution;
+        my $desired = 900;
+        return( $sh < $desired ) ? $sh - 50 : $desired;
+    }#}}}
+    sub _build_default_width {#{{{
+        my $self = shift;
+        my( $sw, $sh ) = $self->get_screen_resolution;
+        my $desired = 800;
+        return( $sw < $desired ) ? $sw - 50 : $desired;
+    }#}}}
     sub _build_frame {#{{{
         my $self = shift;
 
@@ -160,17 +172,10 @@ package LacunaWaX::MainFrame {
     sub _build_size {#{{{
         my $self = shift;
 
-        ### This is fucked up.  If I start with a Wx::Size object using the 
-        ### constructor, the resulting window ends up being way too small, as 
-        ### if it received no size specification.
-        #my $s = Wx::Size->new(800,700);     # Broke
-
-        ### But if I start with a wxDefaultSize object, I can then call 
-        ### SetWidth and SetHeight on it and end up with the specified dimensions.
-        my $s = wxDefaultSize;             # works
+        my $s = wxDefaultSize;
 
         ### Maintain the h/w most recently set by the user
-        my($w,$h) = (900,800);  # defaults
+        my($w,$h) = ( $self->default_width, $self->default_height );  # defaults
         my $schema = wxTheApp->main_schema;
         if( my $db_w = $schema->resultset('AppPrefsKeystore')->find({ name => 'MainWindowW' }) ) {
             $w = $db_w->value;
@@ -238,26 +243,11 @@ package LacunaWaX::MainFrame {
         return;
     };#}}}
 
-    ### Subroutine, not a method!
-    sub get_size_from_prefs {#{{{
-
-        ### Called from FOREIGNBUILDARGS as a sub, so we don't yet have any 
-        ### access to $self.
-
-        my $schema = wxTheApp->main_schema;
-
-        my($w,$h) = (800, 900);
-        if( my $db_w = $schema->resultset('AppPrefsKeystore')->find({ name => 'MainWindowW' }) ) {
-            $w = $db_w->value if( $db_w->value > 0);
-        }
-        if( my $db_h = $schema->resultset('AppPrefsKeystore')->find({ name => 'MainWindowH' }) ) {
-            $h = $db_h->value if( $db_h->value > 0);
-        }
-
-        my $size = wxDefaultSize;
-        $size->SetWidth($w);
-        $size->SetHeight($h);
-        return $size;
+    sub get_screen_resolution {#{{{
+        my $self = shift;
+        my $d = Wx::Display->new(0);
+        my $s = $d->GetClientArea;
+        return( $s->width, $s->height );
     }#}}}
 
     sub OnClose {#{{{
