@@ -200,12 +200,22 @@ package LacunaWaX::MainSplitterWindow::RightPane::SpiesPane {
         ### screen, this will cause that text to gain focus, thereby enabling 
         ### the user's mousewheel to scroll the long spies list as they'd 
         ### expect.
-        $self->lbl_instructions->Connect(
-            $self->lbl_instructions->GetId,
-            wxID_ANY,
-            wxEVT_LEFT_DOWN,
-            sub{$self->OnStaticTextClick(@_)},
-        );
+        ###
+        ### I'm starting to think that this crap is what's causing the spy 
+        ### pane to be so non-responsive.  The problem is that 
+        ### non-responsiveness was only periodic anyway, so I'm not sure if 
+        ### the fact that it's not showing up now is due to my commenting this 
+        ### out or whether it's just due to luck.
+        ###
+        ### Leave this commented for a bit.  If no more slowness happens on 
+        ### this pane after a few days (03/13 now), call it fixed and delete 
+        ### all this.
+#        $self->lbl_instructions->Connect(
+#            $self->lbl_instructions->GetId,
+#            wxID_ANY,
+#            wxEVT_LEFT_DOWN,
+#            sub{$self->OnStaticTextClick(@_)},
+#        );
 
         return 1;
     }#}}}

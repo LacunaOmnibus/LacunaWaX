@@ -95,6 +95,9 @@ package LacunaWaX::Schedule::SS_Health {
         STATION_RECORD:
         foreach my $ss_rec(@ss_alert_recs) {
             $self->make_station($ss_rec);
+            unless( $self->station->has_command ) {
+                next STATION_RECORD;
+            }
             try {
                 $self->diagnose_station($ss_rec);
             }
@@ -122,6 +125,7 @@ package LacunaWaX::Schedule::SS_Health {
             if( $ss_rec->hostile_ships ) {
                 $self->logger->info("Looking for hostile inbound ships");
                 if( my $shipcount = $self->incoming_hostiles() ) {
+                    $self->logger->info("Found incoming hostile ship(s).");
                     $self->add_alert("There are hostile ships inbound!");
                 }
             }
@@ -129,6 +133,7 @@ package LacunaWaX::Schedule::SS_Health {
             if( $ss_rec->hostile_spies ) {
                 $self->logger->info("Looking for hostile spies onsite");
                 if( $self->has_hostile_spies($ss_rec) ) {
+                    $self->logger->info("Found spies onsite that might be hostile.");
                     $self->add_alert("There are spies onsite who are not set to Counter Espionage.  These may be hostiles.");
                 }
             }

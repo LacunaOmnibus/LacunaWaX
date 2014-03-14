@@ -35,14 +35,27 @@ package LacunaWaX::Model::SStation {
     sub BUILD {
         my $self = shift;
 
-        ### Gotta force the lazy builder.
+        ### Gotta force this lazy builder.
         $self->police;
+
+        unless( $self->command ) {
+            ### All stations have a command center.  So here, we have prefs 
+            ### for an old station that has gone away, or the user is running 
+            ### under somebody else's account (somebody in a different 
+            ### alliance).
+            ###
+            ### In that case, $self->command is undef, but $self->has_command 
+            ### still returns true, since the attribute is a Maybe[], and it 
+            ### has been set.  Clearing it will cause calls to has_command() 
+            ### to return false.
+            $self->clear_command;
+        }
 
         return $self;
     }
     sub _build_name {#{{{
         my $self = shift;
-        return $self->game_client->planet_name ($self->id );
+        return $self->game_client->planet_name ($self->id ) || q{};
     }#}}}
     sub _build_command {#{{{
         my $self = shift;
@@ -57,6 +70,7 @@ package LacunaWaX::Model::SStation {
                 game_client => $self->game_client,
             )
         }
+
         return $comm;
     }#}}}
     sub _build_police {#{{{
