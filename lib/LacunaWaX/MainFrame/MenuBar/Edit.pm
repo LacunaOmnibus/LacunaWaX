@@ -8,15 +8,30 @@ package LacunaWaX::MainFrame::MenuBar::Edit {
     use LacunaWaX::Dialog::Prefs;
     with 'LacunaWaX::Roles::MainFrame::MenuBar::Menu';
 
-    has 'itm_prefs'   => (is => 'rw', isa => 'Wx::MenuItem',  lazy_build => 1);
+    has 'itm_copy'      => (is => 'rw', isa => 'Wx::MenuItem',  lazy_build => 1);
+    has 'itm_prefs'     => (is => 'rw', isa => 'Wx::MenuItem',  lazy_build => 1);
 
     sub BUILD {
         my $self = shift;
+        ### See the right pane's DefaultPane and figure out how to change its 
+        ### StaticText to a TextCtrl.  At which point, the itm_copy below 
+        ### should (maybe) work.
+        #$self->Append( $self->itm_copy );
         $self->Append( $self->itm_prefs );
         $self->_set_events();
         return $self;
     }
 
+    sub _build_itm_copy {#{{{
+        my $self = shift;
+        return Wx::MenuItem->new(
+            $self->menu, -1,
+            '&Copy',
+            'Copy selected text',
+            wxITEM_NORMAL,
+            undef   # if defined, this is a sub-menu
+        );
+    }#}}}
     sub _build_itm_prefs {#{{{
         my $self = shift;
         return Wx::MenuItem->new(
@@ -29,10 +44,27 @@ package LacunaWaX::MainFrame::MenuBar::Edit {
     }#}}}
     sub _set_events {#{{{
         my $self = shift;
-        EVT_MENU($self->parent,  $self->itm_prefs->GetId, sub{$self->OnPrefs(@_)});
+        EVT_MENU($self->parent,  $self->itm_prefs->GetId,   sub{$self->OnPrefs(@_)});
+        EVT_MENU($self->parent,  $self->itm_copy->GetId,    sub{$self->OnCopy(@_)});
         return 1;
     }#}}}
 
+    sub OnCopy {#{{{
+        my $self = shift;
+        my $window = shift;
+
+        #my $widget = $window->FindFocus();
+        my $widget = Wx::Window::FindFocus();
+        if( $widget->can('GetStringSelection') ) {
+my $text = $widget->GetStringSelection();
+say "--$text--";
+        }
+        else {
+            say "No GetStringSelection for " . (ref $widget);
+        }
+
+        return 1;
+    }#}}}
     sub OnPrefs {#{{{
         my $self = shift;
 

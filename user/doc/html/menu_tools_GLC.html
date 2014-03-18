@@ -1,0 +1,91 @@
+<h1>Tools... GLC</h1>
+
+This will install the current version of the most popular and common scripting library, 
+Games::Lacuna::Client (which I'll refer to as just "GLC" from now on), as well as the Perl 
+libraries it depends on.
+<p>
+
+This will <em>not</em> install Perl itself for you; you'll need to do that yourself first.  
+I tend to recommend <a href="http://www.activestate.com/activeperl/downloads">ActiveState 
+Perl</a> (use version 5.16, <strong>not 5.18</strong>), but <a 
+href="http://strawberryperl.com/">Strawberry Perl</a> should work as well if you prefer 
+that.
+<p>
+
+Once you have Perl installed, you can use these tools to get yourself a working scripting 
+setup without (hopefully) all the heartache.
+<p>
+
+<strong>Non-Windows Users</strong> - these tools should work just fine on not-windows.  
+The directions below are Windows-centric because, well, you know why.  But they should 
+work for any OS.
+<p>
+
+<h2>Install GLC</h2>
+This will download and extract the current version of GLC for you, and set up your config 
+file as well.
+<p>
+
+The config file includes your empire name and password.  The only way for LacunaWaX to 
+know which credentials to use are for you to connect first, so this Install GLC option 
+will be disabled until you connect to a server.
+<p>
+
+Once connected to the server, selecting Tools... Install GLC will display a directory 
+chooser window.  You can choose to download GLC to any directory you wish, but I recommend 
+using <code>C:\Lacuna\tsee</code>.  This is the standard directory structure for 
+installing GLC, and installing there will make it easier for you to get help if you need 
+it.  If that directory does not already exist, the directory chooser window will allow you 
+to create it.
+<p>
+
+After selecting the directory, the most recent version of GLC will be downloaded, 
+unzipped, extracted, and your config file will be created.
+<p>
+
+<h2>Install Mods</h2>
+The scripts included in the GLC package require a number of other Perl modules be 
+installed.  Selecting Tools... Install Mods will attempt to install them for you.
+<p>
+
+Re-installing modules you've already got installed won't hurt anything.  You don't have to 
+tell this tool where you installed Perl, or give it any other information.  Just select it 
+and it will do its best to install the required modules for you.
+<p>
+
+<h2>Testing the Setup</h2>
+After installing GLC and the required modules, you should be able to open a CMD window and 
+move to the GLC examples directory, where the scripts are stored:
+<ul>
+    <li>
+        Start... Run... type "CMD.exe"
+    </li>
+    <li>
+        In the black window that pops up, type:<br>
+        <code>cd C:\Lacuna\tsee\examples</code><br>
+        (if you installed GLC somewhere else, you're on your own to figure out how to get 
+        there).
+    </li>
+    <li>
+        Test by running the build_report script.  Make sure that you've got at least one 
+        building in the build queue at any one of your colonies, then type:<br>
+        <code>perl build_report.pl</code>
+    </li>
+    <li>
+        The script will take several seconds to connect and talk to the server, and then 
+        it will begin producing reports on what's building on which planets.
+    </li>
+    <li>
+        The script may stop, producing an error that looks like:<br>
+        <code>RPC Error (1010): Slow down YOURNAME! No more than 60 requests per minute.  
+        </code><br>
+        That's fine.  The point of this exercise was to test that your setup works.  If 
+        you see that error, you're in good shape..
+    </li>
+</ul>
+
+<h2>Next Step</h2>
+From here, you just need to learn about the individual scripts.  How they work, how they 
+need to be called, etc.
+<p>
+
