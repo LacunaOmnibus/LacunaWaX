@@ -12,7 +12,7 @@ BEGIN {
     use FindBin;
     use lib "$FindBin::Bin/../lib";
     opendir my $splash_dir, "$FindBin::Bin/../splash";
-    my @imgs = grep{ $_ !~ /^\.\.?$/ }readdir $splash_dir;
+    my @imgs = grep{ $_ =~ /\.(png|jpe?g)$/; }readdir $splash_dir;
     $i = "$FindBin::Bin/../splash/" . $imgs[int rand @imgs];
 }
 BEGIN {

@@ -22,8 +22,9 @@ package LacunaWaX::Dialog::Status {
 
     has 'dialog'    => (is => 'rw', isa => 'Wx::Dialog', lazy_build => 1 );
 
-    has 'title'         => (is => 'rw', isa => 'Str', lazy_build => 1, documentation => "goes on the dialog, not the sizer" );
-    has 'recsep'        => (is => 'rw', isa => 'Str', lazy_build => 1 );
+    has 'title'             => (is => 'rw', isa => 'Str', lazy_build => 1, documentation => "goes on the dialog, not the sizer" );
+    has 'recsep'            => (is => 'rw', isa => 'Str', lazy_build => 1 );
+    has 'user_closeable'    => (is => 'rw', isa => 'Int', default    => 1 );
 
     has 'position'  => (is => 'rw', isa => 'Wx::Point', lazy_build => 1);
     has 'size'      => (is => 'rw', isa => 'Wx::Size',  lazy_build => 1);
@@ -46,7 +47,7 @@ package LacunaWaX::Dialog::Status {
             Controls top and bottom margins.
         }
     );
-    has 'header_sizer'      => (is => 'rw', isa => 'Wx::Sizer', lazy_build => 1, documentation => q{vertical});
+    has 'header_sizer' => (is => 'rw', isa => 'Wx::Sizer', lazy_build => 1, documentation => q{vertical});
 
     has 'lbl_header'    => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1     );
     has 'txt_status'    => (is => 'rw', isa => 'Wx::TextCtrl',      lazy_build => 1     );
@@ -84,14 +85,15 @@ package LacunaWaX::Dialog::Status {
     }#}}}
     sub _build_dialog {#{{{
         my $self = shift;
+
+        my $style = wxRESIZE_BORDER|wxCAPTION;
+        $style |= wxDEFAULT_DIALOG_STYLE if $self->user_closeable;
         return Wx::Dialog->new(
             undef, -1, 
             $self->title, 
             $self->position, 
             $self->size,
-            wxRESIZE_BORDER
-            |
-            wxDEFAULT_DIALOG_STYLE,
+            $style,
             "LacunaWaX Status"
         );
     }#}}}
@@ -295,6 +297,12 @@ package LacunaWaX::Dialog::Status {
         $self->dialog->Layout();
         return 1;
     }#}}}
+    sub show_modal {#{{{
+        my $self = shift;
+        $self->dialog->ShowModal();
+        $self->dialog->Layout();
+        return 1;
+    }#}}}
 
     sub OnClose {#{{{
         my $self    = shift;
@@ -448,18 +456,39 @@ will be called by the Dialog::Status's OnClose event.
   say "You just closed the status dialog.";
  }
 
-=head2 Opening the same status dialog multiple times
+=head2 Dealing with premature status window closure
 
-The situation:  The user does $something, to which you respond with some text 
-written in a status dialog.  The user then closes that dialog and then does 
-another iteration of $something, which attempts to write to that status dialog 
-again, but the user closed it.
+By default, a Status window will have regular window controls on it, including 
+the red X.  If your program attempts to write to the status window after the 
+user has closed it that way, LacunaWaX will produce a crash upon app close 
+(this crash is a little tricksy because it does not occur immediately upon the 
+attempt to write to the closed status window; ONLY upon app close).
 
-Attempting to write to an already-closed dialog will cause a crash.  And once 
-we've opened a status dialog, we have no idea if the user has closed it again 
-the next time we want to write to it.
+There are two ways of dealing with this.
 
-In that situation, I tend to add:
+The easiest way is simply to pass the user_closeable option with a false value 
+upon construction of your status window:
+
+ my $status = LacunaWaX::Dialog::Status->new(
+  app               => $self->app,
+  title             => 'My Output Window',
+  user_closeable    => 0,
+ );
+
+The default for that option is true (meaning that the status window will 
+include the red X).  By turning it off, you're making it impossible for the 
+user to close the status window.
+
+The caveats here are that you must close the status window once you're 
+finished with it by calling $status->close, and any output that the user might 
+have wanted to look at will disappear as soon as you do that.  FWIW - it would 
+be reasonable to include a possibly-optional "close this status window" button 
+that only becomes enabled after you're finished writing output to that window.  
+That button would need to be added to this module, and does not exist yet.
+
+The second option is to include some extra methods in the class that wants to 
+write to that status window.  These methods need to check if the status window 
+still exists, and respond to its close event when the user does close it.
 
  sub status_say {
   my $self = shift;
@@ -486,8 +515,9 @@ In that situation, I tend to add:
  }
 
 At the top of the event that triggers writing to the status window, be sure to 
-include $self->status->show.  This will call the lazy_builder for your status 
-window if it doesn't already exist, and cause no issues if it does.
+include $self->status->show.  That call will have no effect if the status 
+window is already shown, but will call the lazy_builder for the status window 
+if it doesn't already exist (including if the user closed it).
 
  sub SomeEvent {
   my $self = shift;

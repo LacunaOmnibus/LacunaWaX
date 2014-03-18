@@ -119,7 +119,6 @@ package LacunaWaX::MainFrame::MenuBar::File {
             wxFD_OPEN|wxFD_FILE_MUST_EXIST
         );
         if( $file_browser->ShowModal() == wxID_CANCEL ) {
-say "import cancel";
             return;
         }
 

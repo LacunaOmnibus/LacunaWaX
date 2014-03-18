@@ -632,10 +632,6 @@ Returns true if the database passed in contains the correct tables and columns.
         my $self = shift;
         $self->main_frame->status_bar->endthrob;
     }#}}}
-    sub get_top_left_corner {#{{{
-        my $self = shift;
-        return $self->GetTopWindow()->GetPosition;
-    }#}}}
     sub game_connect {#{{{
         my $self = shift;
 
@@ -688,6 +684,24 @@ Returns true/false on success/fail.
         }
         $self->Yield;
         return $self->game_client->ping;    # rslt of the previous call was cached, so this is OK.
+    }#}}}
+    sub gauge_range {#{{{
+        my $self    = shift;
+        my $val     = shift || 0;
+        $self->main_frame->status_bar->gauge->SetRange($val);
+    }#}}}
+    sub gauge_update {#{{{
+        my $self    = shift;
+        $self->main_frame->status_bar->gauge->Update();
+    }#}}}
+    sub gauge_value {#{{{
+        my $self    = shift;
+        my $val     = shift || 0;
+        $self->main_frame->status_bar->gauge->SetValue($val);
+    }#}}}
+    sub get_top_left_corner {#{{{
+        my $self = shift;
+        return $self->GetTopWindow()->GetPosition;
     }#}}}
     sub halls_to_level {#{{{
         my $self    = shift;
