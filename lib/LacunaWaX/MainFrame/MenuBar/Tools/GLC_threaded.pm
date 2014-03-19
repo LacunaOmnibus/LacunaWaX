@@ -1,6 +1,19 @@
 
+=pod
+
+When run under a threaded Perl, this copy is a drop-in replacement for GLC.pm.
+
+However, it's not going to work under a non-threaded Perl, and I'm not getting 
+any benefit out of it regardless.
+
+I'm leaving it here as something to return to later.
+
+=cut
+
 package LacunaWaX::MainFrame::MenuBar::Tools::GLC {
     use v5.14;
+    use threads;
+    use threads::shared;
     use Archive::Zip;
     use Capture::Tiny qw(:all);
     use CPAN;
@@ -10,7 +23,7 @@ package LacunaWaX::MainFrame::MenuBar::Tools::GLC {
     use Moose;
     use Try::Tiny;
     use Wx qw(:everything);
-    use Wx::Event qw(EVT_MENU);
+    use Wx::Event qw(EVT_MENU EVT_COMMAND EVT_TIMER);
     use YAML::Any qw(DumpFile);
 
     with 'LacunaWaX::Roles::MainFrame::MenuBar::Menu';
@@ -41,6 +54,15 @@ package LacunaWaX::MainFrame::MenuBar::Tools::GLC {
         isa         => 'LacunaWaX::Dialog::Status',
         lazy_build  => 1,
     );
+    has 'timer' => (
+        is          => 'rw', 
+        isa         => 'Wx::Timer',
+        lazy_build  => 1,
+        handles => {
+            start => 'Start',
+            stop => 'Stop',
+        },
+    );
     has 'ua' => (
         is          => 'rw',
         isa         => 'LWP::UserAgent',
@@ -51,6 +73,14 @@ package LacunaWaX::MainFrame::MenuBar::Tools::GLC {
         my $self    = shift;
         $self->_set_events();
 
+        ### Uncomment these to see what the timer here is supposed to be 
+        ### doing.  It's not sexy, but it works (here).
+        ###
+        ### But it doesn't produce any output while the CPAN thread is 
+        ### working, so it's not really being used anywhere.
+        #$self->status->show();
+        #$self->start( 100, wxTIMER_CONTINUOUS );
+
         return $self;
     }
     sub _set_events {#{{{
@@ -58,6 +88,7 @@ package LacunaWaX::MainFrame::MenuBar::Tools::GLC {
 
         EVT_MENU(       $self->parent,                  $self->itm_install_glc->GetId,      sub{ $self->OnInstallGLC()  }   );
         EVT_MENU(       $self->parent,                  $self->itm_install_mods->GetId,     sub{ $self->OnInstallMods() }   );
+        EVT_TIMER(      $self->parent->frame,           $self->timer->GetId,                sub{$self->OnTimer(@_) }        );
 
         return 1;
     }#}}}
@@ -113,6 +144,12 @@ package LacunaWaX::MainFrame::MenuBar::Tools::GLC {
             user_closeable  => 0,
         );
         return $status;
+    }#}}}
+    sub _build_timer {#{{{
+        my $self = shift;
+        my $t = Wx::Timer->new();
+        $t->SetOwner( $self->parent->frame );
+        return $t;
     }#}}}
     sub _build_ua {#{{{
         my $self = shift;
@@ -238,7 +275,16 @@ package LacunaWaX::MainFrame::MenuBar::Tools::GLC {
             if( $exit != 0 ) {
                 ### Either the user hasn't got PPM on their system (non-AS 
                 ### Perl), or the ppm install attempt failed.
-                CPAN::Shell->install($m);
+
+                ### $worker has to be declared in list context to be able to 
+                ### receive multiple return values.
+                ###
+                ### The threading here works.  But trying to start a 
+                ### pseudo-gauge in the status window with:
+                ###     $self->start( 100, wxTIMER_CONTINUOUS );
+                ### doesn't ever produce any output.
+                my ($worker) = threads->create( \&thread_cpan_install, $m );
+                my( $out, $err, $xit ) = $worker->join();
             }
 
             ### PPM or CPAN, the mod should be installed.  Make sure.
@@ -264,6 +310,42 @@ package LacunaWaX::MainFrame::MenuBar::Tools::GLC {
         wxTheApp->gauge_value(0);
 
         return 1;
+    }#}}}
+    sub OnDone {#{{{
+        my $self = shift;
+        my $frame = shift;
+        my $event = shift;
+        say "in OnDone";
+        say "--" . $event->GetData . "--";
+    }#}}}
+    sub OnTimer {#{{{
+        my $self = shift;
+
+        if( $self->has_status ) {
+            $self->status->print('.');
+        }
+        wxTheApp->Yield;
+
+        return 1;
+    }#}}}
+
+    sub thread_cpan_install {#{{{
+        my $mod     = shift;
+        my $frame   = shift;
+        
+        my($out, $err, $xit) = capture {
+            CPAN::Shell->install($mod);
+        };
+        return( $out, $err, $xit );
+
+        ### This is the equivalent of work() from the example here:
+        ### http://search.cpan.org/dist/Wx/lib/Wx/Thread.pod
+        ###
+        ### The bit about the PlThreadEvent in that example was causing a 
+        ### complaint about locking when I included it here.  I realized I 
+        ### don't need this worker to fire an event anyway, so I just removed 
+        ### the offending code, but it'd be nice to figure out what the 
+        ### problem was.
     }#}}}
 
     no Moose;
