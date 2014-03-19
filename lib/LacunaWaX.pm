@@ -663,7 +663,6 @@ Returns true/false on success/fail.
             $self->Yield;
             $self->account( $server_account );
 
-say "trying to make client";
             my $game_client = LacunaWaX::Model::Client->new (
                     app         => $self,
                     server_id   => $self->server->id,
