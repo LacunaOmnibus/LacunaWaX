@@ -257,7 +257,7 @@ package LacunaWaX::MainFrame::MenuBar::Tools::GLC {
                 ### Perl), or the ppm install attempt failed.
                 $self->start( 100, wxTIMER_CONTINUOUS );
                 #my $thr = threads->create( sub{ CPAN::Shell->install($m); } );
-                my @rv  = $thr->join();
+                #my @rv  = $thr->join();
 #say "install thread says --" . (join ', ', @rv) . "------------------------------------------------";
                 my $rv = CPAN::Shell->install($m);
                 $self->stop();
