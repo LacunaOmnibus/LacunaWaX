@@ -90,7 +90,6 @@ package LacunaWaX::MainFrame::StatusBar {
         unless( $y = $self->parent->GetStatusBar ) {
             ### Don't recreate the statusbar if it already exists, as in the 
             ### transition from the intro panel to the main splitter window.
-            #$y = $self->parent->CreateStatusBar(2);
             $y = $self->parent->CreateStatusBar(3);
         }
         return $y;
@@ -129,7 +128,7 @@ package LacunaWaX::MainFrame::StatusBar {
     sub bar_reset {#{{{
         my $self = shift;
         $self->status_bar->DestroyChildren();
-        $self->status_bar->SetStatusWidths(-3, -4, -2);
+        $self->status_bar->SetStatusWidths(-5, -3, -2);
         $self->status_bar->SetStatusText( $self->caption, $self->rect_caption );
 
         my $rect = $self->status_bar->GetFieldRect( $self->rect_gauge );
@@ -182,8 +181,8 @@ package LacunaWaX::MainFrame::StatusBar {
         ### between 12 and 24 hour time.  For now, I'm forcing 12.
         my $type = wxTheApp->clock_type || 12;
         my $status = ($type == 12)
-            ? "Local: " . $self->hms_12($loc). " | Server: " . $self->hms_12($gmt)
-            : "Local: " . $self->hms_24($loc). " | Server: " . $self->hms_24($gmt);
+            ? "Here: " . $self->hms_12($loc). " | GMT: " . $self->hms_12($gmt)
+            : "Here: " . $self->hms_24($loc). " | GMT: " . $self->hms_24($gmt);
 
         $self->status_bar->SetStatusText( $status, $self->rect_clock );
         wxTheApp->Yield;

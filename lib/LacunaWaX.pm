@@ -547,7 +547,7 @@ perform arithmetic on it without Math::BigFloat.
 
         return sqrt( ($tx - $ox)**2 + ($ty - $oy)**2 );
     }#}}}
-    sub commaize_number {
+    sub commaize_number {#{{{
         my $self    = shift;
         my $num     = shift;
         return $num unless( $num =~ /^[\d]{4,}$/ );
@@ -569,7 +569,7 @@ perform arithmetic on it without Math::BigFloat.
         }
 
         return join ',', @pieces;
-    }
+    }#}}}
     sub database_checks_out  {#{{{
         my $self    = shift;
         my $dbh     = shift;

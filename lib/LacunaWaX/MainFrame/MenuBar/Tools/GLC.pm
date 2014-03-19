@@ -1,6 +1,7 @@
 
 package LacunaWaX::MainFrame::MenuBar::Tools::GLC {
     use v5.14;
+    #use threads;
     use Archive::Zip;
     use Capture::Tiny qw(:all);
     use CPAN;
@@ -9,7 +10,7 @@ package LacunaWaX::MainFrame::MenuBar::Tools::GLC {
     use Moose;
     use Try::Tiny;
     use Wx qw(:everything);
-    use Wx::Event qw(EVT_MENU);
+    use Wx::Event qw(EVT_MENU EVT_TIMER);
     use YAML::Any qw(DumpFile);
 
     with 'LacunaWaX::Roles::MainFrame::MenuBar::Menu';
@@ -40,6 +41,15 @@ package LacunaWaX::MainFrame::MenuBar::Tools::GLC {
         isa         => 'LacunaWaX::Dialog::Status',
         lazy_build  => 1,
     );
+    has 'timer' => (
+        is          => 'rw', 
+        isa         => 'Wx::Timer',
+        lazy_build  => 1,
+        handles => {
+            start => 'Start',
+            stop  => 'Stop',
+        }
+    );
     has 'ua' => (
         is          => 'rw',
         isa         => 'LWP::UserAgent',
@@ -54,11 +64,13 @@ package LacunaWaX::MainFrame::MenuBar::Tools::GLC {
     sub _set_events {#{{{
         my $self = shift;
 
-        EVT_MENU( $self->parent, $self->itm_install_glc->GetId,     sub{ $self->OnInstallGLC()  } );
-        EVT_MENU( $self->parent, $self->itm_install_mods->GetId,    sub{ $self->OnInstallMods() } );
+        EVT_MENU(   $self->parent,          $self->itm_install_glc->GetId,       sub{ $self->OnInstallGLC()  } );
+        EVT_MENU(   $self->parent,          $self->itm_install_mods->GetId,      sub{ $self->OnInstallMods() } );
+        EVT_TIMER(  $self->parent->frame,   $self->timer->GetId,                 sub{$self->OnTimer(@_)} );
 
         return 1;
     }#}}}
+
     sub _build_itm_install_glc {#{{{
         my $self = shift;
         my $menu_item = $self->Append( -1, 'Install &GLC', "Install current GLC package" );
@@ -110,6 +122,12 @@ package LacunaWaX::MainFrame::MenuBar::Tools::GLC {
             user_closeable  => 0,
         );
         return $status;
+    }#}}}
+    sub _build_timer {#{{{
+        my $self = shift;
+        my $t = Wx::Timer->new();
+        $t->SetOwner( $self->parent->frame );
+        return $t;
     }#}}}
     sub _build_ua {#{{{
         my $self = shift;
@@ -229,14 +247,20 @@ package LacunaWaX::MainFrame::MenuBar::Tools::GLC {
             $exit = 1;
             if( $has_ppm ) {
                 ($out,$err,$exit) = capture {
+                    $self->start( 100, wxTIMER_CONTINUOUS );
                     system("ppm", "install", $m);
+                    $self->stop();
                 }
             }
             if( $exit != 0 ) {
                 ### Either the user hasn't got PPM on their system (non-AS 
                 ### Perl), or the ppm install attempt failed.
+                $self->start( 100, wxTIMER_CONTINUOUS );
+                #my $thr = threads->create( sub{ CPAN::Shell->install($m); } );
+                my @rv  = $thr->join();
+#say "install thread says --" . (join ', ', @rv) . "------------------------------------------------";
                 my $rv = CPAN::Shell->install($m);
-
+                $self->stop();
             }
 
             ### PPM or CPAN, the mod should be installed.  Make sure.
@@ -257,10 +281,20 @@ package LacunaWaX::MainFrame::MenuBar::Tools::GLC {
         }
         $self->status->say_recsep;
         $self->status->say('Module Installation Complete!');
-        sleep 1;
-sleep 5;
+        sleep 6;
         $self->status->close;
         wxTheApp->gauge_value(0);
+
+        return 1;
+    }#}}}
+    sub OnTimer {#{{{
+        my $self = shift;
+
+say "ON TIMER";
+        if( $self->has_status ) {
+            $self->status->print('.');
+        }
+        wxTheApp->Yield;
 
         return 1;
     }#}}}

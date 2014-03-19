@@ -274,6 +274,18 @@ package LacunaWaX::Dialog::Status {
         my $size = Wx::Size->new($width, $height);
         return $size;
     }#}}}
+    sub print {## no critic qw(ProhibitBuiltinHomonyms) {{{
+        my $self = shift;
+        my $text = shift // q{};
+        $self->txt_status->AppendText($text);
+        $self->txt_status->Layout();
+        ### The short MilliSleep following the Yield gives the main thread 
+        ### enough time to actually respond to the Yield and flush the output 
+        ### buffer.
+        wxTheApp->Yield(1);
+        Wx::MilliSleep(100);
+        return 1;
+    }#}}}
     sub say {## no critic qw(ProhibitBuiltinHomonyms) {{{
         my $self = shift;
         my $text = shift // q{};
@@ -281,7 +293,7 @@ package LacunaWaX::Dialog::Status {
         $self->txt_status->Layout();
         ### The short MilliSleep following the Yield gives the main thread 
         ### enough time to actually respond to the Yield and flush the output 
-        ### buffer, which is the point.
+        ### buffer.
         wxTheApp->Yield(1);
         Wx::MilliSleep(100);
         return 1;
