@@ -82,6 +82,7 @@ package LacunaWaX::MainFrame::MenuBar::Tools::GLC {
             'Date::Parse',
             'DateTime',
             'Exception::Class',
+            'File::HomeDir',
             'HTTP::Request',
             'HTTP::Response',
             'IO::Interactive',
@@ -126,7 +127,7 @@ package LacunaWaX::MainFrame::MenuBar::Tools::GLC {
             return;
         }
 
-        my $attempt_dir;
+        my $attempt_dir = q{};
         if( $^O eq 'MSWin32' ) {
             $attempt_dir = 'C:\Lacuna\tsee';
             mkdir $attempt_dir unless -e $attempt_dir;
@@ -150,6 +151,10 @@ package LacunaWaX::MainFrame::MenuBar::Tools::GLC {
         }
         my $dest = $dir_browser->GetPath;
 
+        ### Trailing slash has to be forced, or the extract will actually 
+        ### occur in $dest/../
+        $dest .= '/' unless $dest =~ m{[\/]$};
+
         ### LWP the GLC zip file
         my $resp = $self->ua->get( $self->glc_url );
         unless( $resp->is_success ) {
@@ -163,7 +168,7 @@ package LacunaWaX::MainFrame::MenuBar::Tools::GLC {
         print $zh $resp->decoded_content;
         close $zh;
 
-        ### Unzip it the directory chosen by the user
+        ### Unzip it to the directory chosen by the user
         my $zip = Archive::Zip->new( $zn );
         $zip->extractTree( 'Games-Lacuna-Client-master/', $dest );
 
@@ -205,7 +210,7 @@ package LacunaWaX::MainFrame::MenuBar::Tools::GLC {
             $has_ppm = q{};
         }
 
-        ### We can use a determinant gauge here.
+        ### Set determinant gauge range.
         wxTheApp->gauge_range( scalar @{$self->mods_to_install} );
 
         ### tell CPAN calls to accept any default options instead of blocking 
@@ -230,7 +235,6 @@ package LacunaWaX::MainFrame::MenuBar::Tools::GLC {
             if( $exit != 0 ) {
                 ### Either the user hasn't got PPM on their system (non-AS 
                 ### Perl), or the ppm install attempt failed.
-                $self->status->say("\tPPM failed - falling back to CPAN");
                 my $rv = CPAN::Shell->install($m);
 
             }
