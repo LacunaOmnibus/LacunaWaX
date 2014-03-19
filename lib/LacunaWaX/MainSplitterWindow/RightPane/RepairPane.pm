@@ -859,22 +859,21 @@ I have not tested the "fails if we're out of res" yet.
         my $parent  = shift;    # Wx::ScrolledWindow
         my $event   = shift;    # Wx::ListEvent
 
-        given($event->GetColumn) {  # zero-based integer offset
-            when(0) {   # name
-                $self->lst_bldgs_onsite->SortItems( sub{$self->list_sort_alpha(@_, $self->lst_bldgs_onsite, 0)} );
-            }
-            when(1) {   # X
-                my $rv = $self->lst_bldgs_onsite->SortItems( sub{$self->list_sort_num(@_, $self->lst_bldgs_onsite, 1)} );
-            }
-            when(2) {   # Y
-                my $rv = $self->lst_bldgs_onsite->SortItems( sub{$self->list_sort_num(@_, $self->lst_bldgs_onsite, 2)} );
-            }
-            when(3) {   # Damage (reverse sort)
-                my $rv = $self->lst_bldgs_onsite->SortItems( sub{$self->list_sort_num(@_, $self->lst_bldgs_onsite, 3, 1)} );
-            }
-            default {
-                my $rv = $self->lst_bldgs_onsite->SortItems( sub{$self->list_sort_alpha(@_, $self->lst_bldgs_onsite, 0)} );
-            }
+        my $clicked_col = $event->GetColumn;
+        if( $clicked_col == 0 ) {   # name
+            $self->lst_bldgs_onsite->SortItems( sub{$self->list_sort_alpha(@_, $self->lst_bldgs_onsite, 0)} );
+        }
+        elsif( $clicked_col == 1 ) {    # X
+            my $rv = $self->lst_bldgs_onsite->SortItems( sub{$self->list_sort_num(@_, $self->lst_bldgs_onsite, 1)} );
+        }
+        elsif( $clicked_col == 2 ) {    # Y
+            my $rv = $self->lst_bldgs_onsite->SortItems( sub{$self->list_sort_num(@_, $self->lst_bldgs_onsite, 2)} );
+        }
+        elsif( $clicked_col == 3 ) {    # Damage (reverse sort)
+            my $rv = $self->lst_bldgs_onsite->SortItems( sub{$self->list_sort_num(@_, $self->lst_bldgs_onsite, 3, 1)} );
+        }
+        else {
+            my $rv = $self->lst_bldgs_onsite->SortItems( sub{$self->list_sort_alpha(@_, $self->lst_bldgs_onsite, 0)} );
         }
 
         $event->Skip;
@@ -884,22 +883,21 @@ I have not tested the "fails if we're out of res" yet.
         my $parent  = shift;    # Wx::ScrolledWindow
         my $event   = shift;    # Wx::ListEvent
 
-        given($event->GetColumn) {  # zero-based integer offset
-            when(0) {   # name
-                $self->lst_bldgs_to_repair->SortItems( sub{$self->list_sort_alpha(@_, $self->lst_bldgs_to_repair, 0)} );
-            }
-            when(1) {   # x
-                my $rv = $self->lst_bldgs_to_repair->SortItems( sub{$self->list_sort_num(@_, $self->lst_bldgs_to_repair, 1)} );
-            }
-            when(2) {   # y
-                my $rv = $self->lst_bldgs_to_repair->SortItems( sub{$self->list_sort_num(@_, $self->lst_bldgs_to_repair, 2)} );
-            }
-            when(3) {   # Damage (reverse sort)
-                my $rv = $self->lst_bldgs_to_repair->SortItems( sub{$self->list_sort_num(@_, $self->lst_bldgs_to_repair, 3, 1)} );
-            }
-            default {
-                my $rv = $self->lst_bldgs_to_repair->SortItems( sub{$self->list_sort_alpha(@_, $self->lst_bldgs_to_repair, 0)} );
-            }
+        my $clicked_col = $event->GetColumn;
+        if( $clicked_col == 0 ) {   # name
+            $self->lst_bldgs_to_repair->SortItems( sub{$self->list_sort_alpha(@_, $self->lst_bldgs_to_repair, 0)} );
+        }
+        elsif( $clicked_col == 1 ) {    # X
+            my $rv = $self->lst_bldgs_to_repair->SortItems( sub{$self->list_sort_num(@_, $self->lst_bldgs_to_repair, 1)} );
+        }
+        elsif( $clicked_col == 2 ) {    # Y
+            my $rv = $self->lst_bldgs_to_repair->SortItems( sub{$self->list_sort_num(@_, $self->lst_bldgs_to_repair, 2)} );
+        }
+        elsif( $clicked_col == 3 ) {    # Damage (reverse sort)
+            my $rv = $self->lst_bldgs_to_repair->SortItems( sub{$self->list_sort_num(@_, $self->lst_bldgs_to_repair, 3, 1)} );
+        }
+        else {
+            my $rv = $self->lst_bldgs_to_repair->SortItems( sub{$self->list_sort_alpha(@_, $self->lst_bldgs_to_repair, 0)} );
         }
 
         $event->Skip;

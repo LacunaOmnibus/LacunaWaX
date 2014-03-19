@@ -208,10 +208,14 @@ package LacunaWaX::MainSplitterWindow::RightPane::SpiesPane::BatchRenameForm {
             }
 
             my $new_name;
-            given($fix) {
-                when( 'Prefix' ) { $new_name = $cnt . " $base_name"; }
-                when( 'Suffix' ) { $new_name = "$base_name " . $cnt; }
-                default { $new_name = $base_name; }
+            if( $fix eq 'Prefix' ) {
+                $new_name = $cnt . " $base_name";
+            }
+            elsif( $fix eq 'Suffix' ) {
+                $new_name = "$base_name " . $cnt;
+            }
+            else {
+                $new_name = $base_name;
             }
 
             if( $row->spy->name eq $new_name ) {
