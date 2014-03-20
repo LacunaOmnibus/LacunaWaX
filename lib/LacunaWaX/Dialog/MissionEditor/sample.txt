@@ -1,0 +1,42 @@
+# config-file-type: JSON 1
+{
+    "name":"Action Stations!!",
+    "description":"O.M.E.G.A. is initiating a combat preparation initiative in exchange for financing their efforts providing Glyph reactor components and powering the base, O.M.E.G.A will turn some spare Essentia, Ships, and a ruined Battle-cruiser into plans for a battle ready base... This is a offer that an empire soon going to war would see has a must have.",
+    "network_19_completion":"O.M.E.G.A.  has dispatches a combat assistance corps. to  %S.","max_university_level":"30","network_19_headline":"O.M.E.G.A. Preparing to deploy emergency combat forces to aid empires in need."
+    "mission_reward":{
+        "plans":[
+            {"classname":"Lacuna::DB::Result::Building::MunitionsLab","level":1,"extra_build_level":8},
+            {"classname":"Lacuna::DB::Result::Building::SAW","level":1,"extra_build_level":4},
+            {"classname":"Lacuna::DB::Result::Building::SAW","level":1,"extra_build_level":4},
+            {"classname":"Lacuna::DB::Result::Building::SpacePort","level":1,"extra_build_level":9},
+            {"classname":"Lacuna::DB::Result::Building::Energy::Singularity","level":1,"extra_build_level":4},
+            {"classname":"Lacuna::DB::Result::Building::PilotTraining","level":1,"extra_build_level":2}
+        ]
+    },
+    "mission_objective": {
+        "resources":{
+            "gold":2000000,
+            "energy":5000000
+        },
+        "essentia":10,
+        "ships":[
+            {"hold_size":0,"name":"","type":"drone","stealth":0,"combat":13000,"speed":0},
+            {"hold_size":0,"name":"","type":"drone","stealth":0,"combat":17000,"speed":0},
+            {"hold_size":0,"name":"","type":"snark","stealth":500,"combat":13000,"speed":500},
+            {"hold_size":2000000,"name":"","type":"hulk","stealth":0,"combat":0,"speed":1000},
+            {"hold_size":0,"name":"","type":"drone","stealth":0,"combat":15000,"speed":0}
+        ],
+        "glyphs":[
+            "anthracite", "uraninite", "sulfur", "sulfur", "uraninite", "magnetite", "anthracite",
+            "chromite", "chromite", "chromite", "magnetite", "methane"
+        ],
+        "happiness":5000000,
+        "plans":[
+            {"classname":"Lacuna::DB::Result::Building::Permanent::CrashedShipSite","level":1,"extra_build_level":3},
+            {"classname":"Lacuna::DB::Result::Building::Permanent::Crater","level":1,"extra_build_level":0},
+            {"classname":"Lacuna::DB::Result::Building::Permanent::Crater","level":1,"extra_build_level":0},
+            {"classname":"Lacuna::DB::Result::Building::Permanent::Crater","level":1,"extra_build_level":0},
+            {"classname":"Lacuna::DB::Result::Building::Permanent::Crater","level":1,"extra_build_level":0}
+        ]
+    },
+}

@@ -97,7 +97,7 @@ package LacunaWaX::MainFrame::MenuBar::File {
         my $dest_db_file    = join '/', ($file_browser->GetDirectory, $file_browser->GetFilename);
 
         $dest_db_file =~ s{\\}{/}g;
-        io($dest_db_file) < io($source_db_file);
+        io($dest_db_file) < io($source_db_file) or die $!;
 
         wxTheApp->popmsg(
             "Your database has been exported to $dest_db_file.",

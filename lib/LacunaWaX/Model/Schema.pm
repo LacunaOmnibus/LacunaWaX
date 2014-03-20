@@ -91,6 +91,62 @@ package LacunaWaX::Model::Schema::LotteryPrefs {#{{{
     __PACKAGE__->set_primary_key( 'id' ); 
     __PACKAGE__->add_unique_constraint( 'LotteryPrefs_body' => [qw(body_id server_id)] ); 
 }#}}}
+package LacunaWaX::Model::Schema::Mission {#{{{
+    use v5.14;
+    use base 'DBIx::Class::Core';
+
+    __PACKAGE__->table('Mission');
+    __PACKAGE__->add_columns( 
+        id          => {data_type => 'integer', is_auto_increment => 1, is_nullable => 0, extra => {unsigned => 1} },
+        name        => {data_type => 'varchar', size => 32,             is_nullable => 0,  },
+        description => {data_type => 'text',                            is_nullable => 0,  },
+        net19       => {data_type => 'text',                            is_nullable => 0,  },
+    );
+    __PACKAGE__->set_primary_key( 'id' ); 
+    __PACKAGE__->add_unique_constraint( 'Mission_name' => [qw(name)] ); 
+    __PACKAGE__->has_many(
+        objectives => 'LacunaWaX::Model::Schema::MissionObjective', 
+        { 'foreign.mission_id' => 'self.id' }
+    );
+    __PACKAGE__->has_many(
+        rewards => 'LacunaWaX::Model::Schema::MissionReward', 
+        { 'foreign.mission_id' => 'self.id' }
+    );
+}#}}}
+package LacunaWaX::Model::Schema::MissionObjective {#{{{
+    use v5.14;
+    use base 'DBIx::Class::Core';
+
+    __PACKAGE__->table('MissionObjective');
+    __PACKAGE__->add_columns( 
+        id          => {data_type => 'integer', is_auto_increment => 1, is_nullable => 0, extra => {unsigned => 1} },
+        mission_id  => {data_type => 'integer', is_auto_increment => 0, is_nullable => 0, extra => {unsigned => 1} },
+        type        => {data_type => 'varchar', size => 32,             is_nullable => 0,  },
+        value       => {data_type => 'varchar', size => 32,             is_nullable => 0,  },
+    );
+    __PACKAGE__->set_primary_key( 'id' ); 
+    __PACKAGE__->has_one(
+        mission => 'LacunaWaX::Model::Schema::Mission', 
+        { 'foreign.id' => 'self.mission_id' }
+    );
+}#}}}
+package LacunaWaX::Model::Schema::MissionReward {#{{{
+    use v5.14;
+    use base 'DBIx::Class::Core';
+
+    __PACKAGE__->table('MissionReward');
+    __PACKAGE__->add_columns( 
+        id          => {data_type => 'integer', is_auto_increment => 1, is_nullable => 0, extra => {unsigned => 1} },
+        mission_id  => {data_type => 'integer', is_auto_increment => 0, is_nullable => 0, extra => {unsigned => 1} },
+        type        => {data_type => 'varchar', size => 32,             is_nullable => 0,  },
+        value       => {data_type => 'varchar', size => 32,             is_nullable => 0,  },
+    );
+    __PACKAGE__->set_primary_key( 'id' ); 
+    __PACKAGE__->has_one(
+        mission => 'LacunaWaX::Model::Schema::Mission', 
+        { 'foreign.id' => 'self.mission_id' }
+    );
+}#}}}
 package LacunaWaX::Model::Schema::ScheduleAutovote {#{{{
     use v5.14;
     use base 'DBIx::Class::Core';
@@ -255,6 +311,9 @@ package LacunaWaX::Model::Schema {
         ArchMinPrefs
         BodyTypes
         LotteryPrefs
+        Mission
+        MissionObjective
+        MissionReward
         ScheduleAutovote
         ServerAccounts
         Servers

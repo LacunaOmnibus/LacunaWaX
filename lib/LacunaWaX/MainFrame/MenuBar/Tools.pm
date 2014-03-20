@@ -9,6 +9,7 @@ package LacunaWaX::MainFrame::MenuBar::Tools {
     use LacunaWaX::Dialog::Calculator;
     use LacunaWaX::Dialog::LogViewer;
     use LacunaWaX::Dialog::Mail;
+    use LacunaWaX::Dialog::MissionEditor;
     use LacunaWaX::Dialog::SitterManager;
     use LacunaWaX::Dialog::Captcha;
     use LacunaWaX::MainFrame::MenuBar::Tools::GLC;
@@ -17,6 +18,7 @@ package LacunaWaX::MainFrame::MenuBar::Tools {
     has 'itm_glc'       => (is => 'rw', isa => 'LacunaWaX::MainFrame::MenuBar::Tools::GLC', lazy_build => 1);
     has 'itm_logview'   => (is => 'rw', isa => 'Wx::MenuItem',  lazy_build => 1);
     has 'itm_mail'      => (is => 'rw', isa => 'Wx::MenuItem',  lazy_build => 1);
+    has 'itm_mission'   => (is => 'rw', isa => 'Wx::MenuItem',  lazy_build => 1);
     has 'itm_sitter'    => (is => 'rw', isa => 'Wx::MenuItem',  lazy_build => 1);
 
     sub FOREIGNBUILDARGS {#{{{
@@ -28,6 +30,7 @@ package LacunaWaX::MainFrame::MenuBar::Tools {
         $self->Append           ( $self->itm_calc      );
         $self->Append           ( $self->itm_logview   );
         $self->Append           ( $self->itm_mail      );
+        $self->Append           ( $self->itm_mission   );
         $self->Append           ( $self->itm_sitter    );
 
         (wxTheApp->server) ? $self->show_connected : $self->show_not_connected;
@@ -72,6 +75,16 @@ package LacunaWaX::MainFrame::MenuBar::Tools {
             undef   # if defined, this is a sub-menu
         );
     }#}}}
+    sub _build_itm_mission {#{{{
+        my $self = shift;
+        return Wx::MenuItem->new(
+            $self->menu, -1,
+            'Mission &Editor',
+            'Open the Mission Editor',
+            wxITEM_NORMAL,
+            undef   # if defined, this is a sub-menu
+        );
+    }#}}}
     sub _build_itm_sitter {#{{{
         my $self = shift;
         return Wx::MenuItem->new(
@@ -87,6 +100,7 @@ package LacunaWaX::MainFrame::MenuBar::Tools {
         EVT_MENU($self->parent,  $self->itm_calc->GetId,        sub{$self->OnCalculator(@_)});
         EVT_MENU($self->parent,  $self->itm_logview->GetId,     sub{$self->OnLogViewer(@_)});
         EVT_MENU($self->parent,  $self->itm_mail->GetId,        sub{$self->OnMail(@_)});
+        EVT_MENU($self->parent,  $self->itm_mission->GetId,     sub{$self->OnMission(@_)});
         EVT_MENU($self->parent,  $self->itm_sitter->GetId,      sub{$self->OnSitterManager(@_)});
         return 1;
     }#}}}
@@ -155,6 +169,20 @@ package LacunaWaX::MainFrame::MenuBar::Tools {
         $mail->Show(1);
 
         $status->close();
+        return 1;
+    }#}}}
+    sub OnMission {#{{{
+        my $self = shift;
+
+        my $tlc         = wxTheApp->get_top_left_corner;
+        my $self_origin = Wx::Point->new( $tlc->x + 30, $tlc->y + 30 );
+
+        my $mission = LacunaWaX::Dialog::MissionEditor->new(
+            title       => 'Mission Editor',
+            position    => $self_origin,
+        );
+        $mission->Show(1);
+
         return 1;
     }#}}}
     sub OnSitterManager {#{{{
