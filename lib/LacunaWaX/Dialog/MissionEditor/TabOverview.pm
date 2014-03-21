@@ -38,6 +38,8 @@ package LacunaWax::Dialog::MissionEditor::TabOverview {
         lazy_build  => 1
     );
 
+    ### CHECK
+    ### I might move these to parent and place them under the notebook.
     has [qw( btn_delete btn_save )] => (
         is          => 'rw',
         isa         => 'Wx::Button',
@@ -68,8 +70,8 @@ package LacunaWax::Dialog::MissionEditor::TabOverview {
     sub BUILD {
         my $self = shift;
 
-        $self->cmbo_name();         # mention it to trigger its lazy_build
-        $self->fill_cmbo_name();    # now that it exists, fill it.
+        $self->cmbo_name();             # mention it to trigger its lazy_build
+        $self->update_cmbo_name();      # now that it exists, put data in it.
 
         $self->szr_data_grid->Add( $self->lbl_name );
         $self->szr_data_grid->Add( $self->cmbo_name );
@@ -222,7 +224,7 @@ package LacunaWax::Dialog::MissionEditor::TabOverview {
         return $v;
     }#}}}
 
-    sub fill_cmbo_name {#{{{
+    sub update_cmbo_name {#{{{
         my $self = shift;
 
         ### Fills the combo box with mission names as they exist in the 

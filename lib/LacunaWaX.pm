@@ -505,6 +505,175 @@ called.
 
         return $hr->{'sizer'};
     }#}}}
+    sub building_types {#{{{
+        my $self    = shift;
+        my $format  = shift;
+
+        ### See the comments in this hash; it's missing a few things.
+        my %bldgs = (#{{{
+            Algae => 'Algae Cropper',
+            AlgaePond => 'Algae Pond',
+            AmalgusMeadow => 'Amalgus Meadow',
+            Apple => 'Apple Orchard',
+            Archaeology => 'Archaeology Ministry',
+            AtmosphericEvaporator => 'AtmosphericEvaporator',
+            ### The in-game name for beaches 1-9 is "Beach N", not "Beach 0N" 
+            ### as below.  Zero-padding added to fix the broken asciibetical 
+            ### sorting.
+            'Beach[1]' => 'Beach 01',
+            'Beach[2]' => 'Beach 02',
+            'Beach[3]' => 'Beach 03',
+            'Beach[4]' => 'Beach 04',
+            'Beach[5]' => 'Beach 05',
+            'Beach[6]' => 'Beach 06',
+            'Beach[7]' => 'Beach 07',
+            'Beach[8]' => 'Beach 08',
+            'Beach[9]' => 'Beach 09',
+            'Beach[10]' => 'Beach 10',
+            'Beach[11]' => 'Beach 11',
+            'Beach[12]' => 'Beach 12',
+            'Beach[13]' => 'Beach 13',
+            Bean => 'Amalgus Bean Plantation',
+            Beeldeban => 'Beeldeban Herder',
+            BeeldebanNest => 'Beeldeban Nest',
+            BlackHoleGenerator => 'Black Hole Generator',
+            Bread => 'Bread Bakery',
+            Burger => 'Malcud Burger Packer',
+            Capitol => 'Capitol',
+            Cheese => 'Cheese Maker',
+            Chip => 'Denton Root Chip Fryer',
+            Cider => 'Apple Cider Bottler',
+            CitadelOfKnope => 'Citadel Of Knope',
+            CloakingLab => 'Cloaking Lab',
+            Corn => 'Corn Plantation',
+            CornMeal => 'Corn Meal Grinder',
+            CrashedShipSite => 'Crashed Ship Site',
+            Crater => 'Crater',
+            Dairy => 'Dairy Farm',
+            Denton => 'Denton Root Patch',
+            DentonBrambles => 'Denton Brambles',
+            DeployedBleeder => 'Deployed Bleeder',
+            Development => 'Development Ministry',
+            DistributionCenter => 'Distribution Center',
+            Embassy => 'Embassy',
+            EnergyReserve => 'Energy Reserve',
+            Entertainment => 'Entertainment District',
+            Espionage => 'Espionage Ministry',
+            EssentiaVein => 'Essentia Vein',
+            Fission => 'Fission Reacor',
+            Fissure => 'Fissure',
+            FoodReserve => 'Food Reserve',
+            Fusion => 'Fusion Reactor',
+            GasGiantLab => 'Gas Giant Lab',
+            GasGiantPlatform => 'Gas Giant Platform',
+            GeneticsLab => 'Genetics Lab',
+            Geo => 'Geo Energy Plant',
+            GeoThermalVent => 'Geo Thermal Vent',
+            GratchsGauntlet => q{Gratch's Gauntlet},
+            GreatBallOfJunk => 'Great Ball Of Junk',
+            Grove => 'Grove of Trees',
+            HallsOfVrbansk => 'Halls Of Vrbansk',
+            Hydrocarbon => 'Hydrocarbon Energy Plant',
+            Intelligence => 'Intelligence Ministry',
+            IntelTraining => 'Intel Training',
+            InterDimensionalRift => 'Inter Dimensional Rift',
+            JunkHengeSculpture => 'Junk Henge Sculpture',
+            KalavianRuins => 'Kalavian Ruins',
+            KasternsKeep => 'Kasterns Keep',
+            Lake => 'Lake',
+            Lagoon => 'Lagoon',
+            Lapis => 'Lapis Orchard',
+            LapisForest => 'Lapis Forest',
+            LibraryOfJith => 'Library Of Jith',
+            ### CHECK
+            ### I'm not real clear on how to deal with these.
+            #LostCityOfTyleon => 'Lost City Of Tyleon (A)',
+            #LostCityOfTyleon => 'Lost City Of Tyleon (B)',
+            #LostCityOfTyleon => 'Lost City Of Tyleon (C)',
+            #LostCityOfTyleon => 'Lost City Of Tyleon (D)',
+            #LostCityOfTyleon => 'Lost City Of Tyleon (E)',
+            #LostCityOfTyleon => 'Lost City Of Tyleon (F)',
+            #LostCityOfTyleon => 'Lost City Of Tyleon (G)',
+            #LostCityOfTyleon => 'Lost City Of Tyleon (H)',
+            #LostCityOfTyleon => 'Lost City Of Tyleon (I)',
+            LuxuryHousing => 'Luxury Housing',
+            Malcud => 'Malcud Fungus Farm',
+            MalcudField => 'Malcud Field',
+            MassadsHenge => 'Massads Henge',
+            MayhemTraining => 'Mayhem Training',
+            MercenariesGuild => 'Mercenaries Guild',
+            MetalJunkArches => 'Metal Junk Arches',
+            Mine => 'Mine',
+            MiningMinistry => 'Mining Ministry',
+            MissionCommand => 'Mission Command',
+            MunitionsLab => 'Munitions Lab',
+            NaturalSpring => 'Natural Spring',
+            Network19 => 'Network 19',
+            Observatory => 'Observatory',
+            OracleOfAnid => 'Oracle Of Anid',
+            OreRefinery => 'Ore Refinery',
+            OreStorage => 'Ore Storage',
+            Oversight => 'Oversight Ministry',
+            Pancake => 'Potato Pancake Factory',
+            PantheonOfHagness => 'Pantheon Of Hagness',
+            Park => 'Park',
+            Pie => 'Lapis Pie Bakery',
+            PilotTraining => 'Pilot Training',
+            PlanetaryCommand => 'Planetary Command Center',
+            PoliticsTraining => 'Politics Training',
+            Potato => 'Potato Patch',
+            Propulsion => 'Propulsion System Factory',
+            PyramidJunkSculpture => 'Pyramid Junk Sculpture',
+            Ravine => 'Ravine',
+            RockyOutcrop => 'Rocky Outcropping',
+            Sand => 'Patch of Sand',
+            SAW => 'Shield Against Weapons',
+            Security => 'Security Ministry',
+            Shake => 'Beeldeban Protein Shake Factory',
+            Shipyard => 'Shipyard',
+            Singularity => 'Singularity Energy Plant',
+            Soup => 'Amalgus Bean Soup Cannery',
+            SpaceJunkPark => 'Space Junk Park',
+            SpacePort => 'Space Port',
+            SpaceStationLab => 'Space Station Lab',
+            Stockpile => 'Stockpile',
+            SubspaceSupplyDepot => 'Subspace Supply Depot',
+            ### CHECK
+            ### Again, not sure how to deal with the levels.
+            #SupplyPod => 'Supply Pod',
+            Syrup => 'Algae Syrup Bottler',
+            TempleOfTheDrajilites => 'Temple Of The Drajilites',
+            TerraformingLab => 'Terraforming Lab',
+            TerraformingPlatform => 'Terraforming Platform',
+            TheDillonForge => 'The Dillon Forge',
+            TheftTraining => 'Theft Training',
+            ThemePark => 'Theme Park',
+            Trade => 'Trade Ministry',
+            Transporter => 'Subspace Transporter',
+            University => 'University',
+            Volcano => 'Volcano',
+            WasteDigester => 'Waste Digester',
+            WasteEnergy => 'Waste Energy',
+            WasteExchanger => 'Waste Exchanger',
+            WasteRecycling => 'Waste Recycling',
+            WasteSequestration => 'Waste Sequestration',
+            WasteTreatment => 'Waste Treatment Center',
+            WaterProduction => 'Water Production Plant',
+            WaterPurification => 'Water Purification Plant',
+            WaterReclamation => 'Water Reclamation Facility',
+            WaterStorage => 'Water Storage',
+            Wheat => 'Wheat Farm',
+        );#}}}
+
+        if( $format eq 'class' ) {
+            return [ sort keys %bldgs ];
+        }
+        if( $format eq 'human' ) {
+            return [ sort values %bldgs ];
+        }
+
+        return { %bldgs };
+    }#}}}
     sub caption {#{{{
         my $self = shift;
         my $msg  = shift;
@@ -631,6 +800,12 @@ Returns true if the database passed in contains the correct tables and columns.
     sub endthrob {#{{{
         my $self = shift;
         $self->main_frame->status_bar->endthrob;
+    }#}}}
+    sub food_types {#{{{
+        return [qw(
+            algae apple bean beetle burger bread cheese chip cider corn fungus 
+            lapis meal milk pancake pie potato root shake soup syrup wheat
+        )]
     }#}}}
     sub game_connect {#{{{
         my $self = shift;
@@ -811,6 +986,11 @@ Returns the number of halls needed to get from one level to another.
 
         return 1;
     }#}}}
+    sub ore_types {#{{{
+        return [qw( anthracite bauxite beryl chromite chalcopyrite fluorite galena 
+        goethite gold gypsum halite kerogen magnetite methane monazite 
+        rutile sulfur trona uraninite zircon water energy)]
+    }#}}}
     sub poperr {#{{{
         my $self    = shift;
         my $message = shift || 'Unknown error occurred';
@@ -897,6 +1077,72 @@ the second argument to receive a fully accurate (to the second) result.
 =cut
 
         return ($exact_flag) ? duration_exact($secs) : duration($secs);
+    }#}}}
+    sub ship_types {#{{{
+        my $self    = shift;
+        my $format  = shift;
+
+        my %ships = (#{{{
+            'barge' => 'Barge',
+            'bleeder' => 'Bleeder',
+            'cargo_ship' => 'Cargo Ship',
+            'colony_ship' => 'Colony Ship',
+            'detonator' => 'Detonator',
+            'dory' => 'Dory',
+            'drone' => 'Drone',
+            'excavator' => 'Excavator',
+            'fighter' => 'Fighter',
+            'fissure_sealer' => 'Fissure Sealer',
+            'freighter' => 'Freighter',
+            'galleon' => 'Galleon',
+            'gas_giant_settlement_ship' => 'Gas Giant Settlement Ship',
+            'hulk' => 'Hulk',
+            'hulk_fast' => 'Hulk fast',
+            'hulk_huge' => 'Hulk huge',
+            'mining_platform_ship' => 'Mining Platform Ship',
+            'observatory_seeker' => 'Observatory Seeker',
+            'placebo' => 'Placebo',
+            'placebo2' => 'Placebo II',
+            'placebo3' => 'Placebo III',
+            'placebo4' => 'Placebo IV',
+            'placebo5' => 'Placebo V',
+            'placebo6' => 'Placebo VI',
+            'probe' => 'Probe',
+            'scanner' => 'Scanner',
+            'scow' => 'Scow',
+            'scow_fast' => 'Scow Fast',
+            'scow_large' => 'Scow Large',
+            'scow_mega' => 'Scow Mega',
+            'security_ministry_seeker' => 'Security Ministry Seeker',
+            'short_range_colony_ship' => 'Short Range Colony Ship',
+            'smuggler_ship' => 'Smuggler Ship',
+            'snark' => 'Snark',
+            'snark2' => 'Snark II',
+            'snark3' => 'Snark III',
+            'space_station' => 'Space Station',
+            'spaceport_seeker' => 'Spaceport Seeker',
+            'spy_pod' => 'Spy Pod',
+            'spy_shuttle' => 'Spy Shuttle',
+            'stake' => 'Stake',
+            'supply_pod' => 'Supply Pod',
+            'supply_pod2' => 'Supply Pod II',
+            'supply_pod3' => 'Supply Pod III',
+            'supply_pod4' => 'Supply Pod IV',
+            'supply_pod5' => 'Supply Pod V',
+            'surveyor' => 'Surveyor',
+            'sweeper' => 'Sweeper',
+            'terraforming_platform_ship' => 'Terraforming Platform Ship',
+            'thud' => 'Thud',
+        );#}}}
+
+        if( $format eq 'class' ) {
+            return [ sort keys %ships ];
+        }
+        if( $format eq 'human' ) {
+            return [ sort values %ships ];
+        }
+
+        return { %ships };
     }#}}}
     sub str_trim {#{{{
         my $self = shift;

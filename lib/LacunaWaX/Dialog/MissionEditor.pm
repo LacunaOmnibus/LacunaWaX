@@ -4,13 +4,19 @@ package LacunaWaX::Dialog::MissionEditor {
     use Moose;
     use Try::Tiny;
     use Wx qw(:everything);
-    use Wx::Event qw(EVT_CLOSE);
+    use Wx::Event qw(EVT_CLOSE EVT_NOTEBOOK_PAGE_CHANGED);
 
     extends 'LacunaWaX::Dialog::NonScrolled';
 
     use LacunaWaX::Dialog::MissionEditor::TabOverview;
-    #use LacunaWaX::Dialog::MissionEditor::TabObjective;
+    use LacunaWaX::Dialog::MissionEditor::TabObjective;
     #use LacunaWaX::Dialog::MissionEditor::TabReward;
+
+    has [qw(width height)] => (
+        is          => 'rw',
+        isa         => 'Int',
+        lazy_build  => 1
+    );
 
     has 'current_mission' => (
         is          => 'rw',
@@ -52,6 +58,7 @@ package LacunaWaX::Dialog::MissionEditor {
         $self->SetSize( $self->size );
 
         $self->notebook->AddPage( $self->tab_overview->pnl_main, "Overview" );
+        $self->notebook->AddPage( $self->tab_objective->pnl_main, "Objectives" );
 
         $self->main_sizer->AddSpacer(5);
         $self->main_sizer->Add($self->notebook, 1, wxEXPAND, 0);
@@ -62,19 +69,23 @@ package LacunaWaX::Dialog::MissionEditor {
     };
     sub _set_events {#{{{
         my $self = shift;
-        EVT_CLOSE($self, sub{$self->OnClose(@_)});
+        EVT_CLOSE(                  $self,                          sub{$self->OnClose(@_)}     );
+        EVT_NOTEBOOK_PAGE_CHANGED(  $self, $self->notebook->GetId,  sub{$self->OnTabChange(@_)} );
         return 1;
     }#}}}
 
+    sub _build_height {#{{{
+        return 750;
+    }#}}}
+    sub _build_width {#{{{
+        return 700;
+    }#}}}
     sub _build_notebook {#{{{
         my $self = shift;
         my $v = Wx::Notebook->new(
             $self->dialog, -1, 
             wxDefaultPosition, 
-            Wx::Size->new(
-                $self->GetClientSize->width - 10,
-                $self->GetClientSize->height - 10
-            ),
+            Wx::Size->new( $self->width - 10, $self->height - 10 ),
             0
         );
         return $v;
@@ -106,8 +117,8 @@ package LacunaWaX::Dialog::MissionEditor {
     sub _build_size {#{{{
         my $self = shift;
         my $s = wxDefaultSize;
-        $s->SetWidth(500);
-        $s->SetHeight(600);
+        $s->SetWidth( $self->width );
+        $s->SetHeight( $self->height );
         return $s;
     }#}}}
     sub _build_title {#{{{
@@ -152,10 +163,8 @@ package LacunaWaX::Dialog::MissionEditor {
 
         return unless $self->has_current_mission;
         $self->current_mission->delete;
-        $self->tab_overview->fill_cmbo_name();
+        $self->tab_overview->update_cmbo_name();
         $self->reset;
-
-        wxTheApp->popmsg("Mission Deleted.");
         return 1;
     }#}}}
     sub OnSave {#{{{
@@ -176,9 +185,18 @@ package LacunaWaX::Dialog::MissionEditor {
             },
             { key => 'mission_name' }
         );
-        $self->tab_overview->fill_cmbo_name();
+        $self->tab_overview->update_cmbo_name();
 
         wxTheApp->popmsg("Mission Saved.");
+        return 1;
+    }#}}}
+    sub OnTabChange {#{{{
+        my $self    = shift;
+        my $dialog  = shift;    # Wx::Dialog
+        my $event   = shift;    # Wx::NotebookEvent
+
+        ### Hits when the user switches tabs
+
         return 1;
     }#}}}
 
