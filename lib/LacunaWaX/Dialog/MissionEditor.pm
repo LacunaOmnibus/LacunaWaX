@@ -150,16 +150,36 @@ package LacunaWaX::Dialog::MissionEditor {
         my $dialog  = shift;
         my $event   = shift;
 
-say "on delete";
+        return unless $self->has_current_mission;
+        $self->current_mission->delete;
+        $self->tab_overview->fill_cmbo_name();
+        $self->reset;
 
+        wxTheApp->popmsg("Mission Deleted.");
+        return 1;
     }#}}}
     sub OnSave {#{{{
         my $self    = shift;
         my $dialog  = shift;
         my $event   = shift;
 
-say "on save";
+        my $schema = wxTheApp->main_schema;
 
+        ### CHECK
+        ### all 3 of those columns are required, so sanity checking needs to 
+        ### happen first, and the "|| q{}" need to all go away.
+        $schema->resultset('Mission')->find_or_create(
+            {
+                name            => $self->tab_overview->cmbo_name->GetValue         || q{},
+                description     => $self->tab_overview->txt_description->GetValue   || q{},
+                net19           => $self->tab_overview->txt_net19->GetValue         || q{},
+            },
+            { key => 'mission_name' }
+        );
+        $self->tab_overview->fill_cmbo_name();
+
+        wxTheApp->popmsg("Mission Saved.");
+        return 1;
     }#}}}
 
     no Moose;

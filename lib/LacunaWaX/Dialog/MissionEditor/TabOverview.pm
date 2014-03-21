@@ -68,6 +68,9 @@ package LacunaWax::Dialog::MissionEditor::TabOverview {
     sub BUILD {
         my $self = shift;
 
+        $self->cmbo_name();         # mention it to trigger its lazy_build
+        $self->fill_cmbo_name();    # now that it exists, fill it.
+
         $self->szr_data_grid->Add( $self->lbl_name );
         $self->szr_data_grid->Add( $self->cmbo_name );
         $self->szr_data_grid->Add( $self->lbl_description );
@@ -182,18 +185,11 @@ package LacunaWax::Dialog::MissionEditor::TabOverview {
     sub _build_cmbo_name {#{{{
         my $self = shift;
 
-        my $schema = wxTheApp->main_schema;
-        my $rs = $schema->resultset('Mission')->search();
-        my $names = [ $self->new_rec_str ];
-        while( my $r = $rs->next ) {
-            push @{$names}, $r->name;
-        }
-
         my $v = Wx::ComboBox->new(
             $self->pnl_main, -1,
             q{},
             wxDefaultPosition, Wx::Size->new(300,-1),
-            $names,
+            [],
             wxCB_SORT
         );
         $v->SetFont( wxTheApp->get_font('para_text_1') );
@@ -226,20 +222,30 @@ package LacunaWax::Dialog::MissionEditor::TabOverview {
         return $v;
     }#}}}
 
+    sub fill_cmbo_name {#{{{
+        my $self = shift;
+
+        ### Fills the combo box with mission names as they exist in the 
+        ### database right now.
+
+        $self->cmbo_name->Clear;
+
+        my $schema = wxTheApp->main_schema;
+        my $rs = $schema->resultset('Mission')->search({}, {order_by => 'name'});
+        $self->cmbo_name->Append( $self->new_rec_str );
+        while( my $r = $rs->next ) {
+            $self->cmbo_name->Append( $r->name );
+        }
+
+        return 1;
+    }#}}}
+
     sub OnNameCombo {#{{{
         my $self = shift;
 
         my $name  = $self->cmbo_name->GetValue;
         my $desc  = $self->txt_description->GetValue;
         my $net19 = $self->txt_net19->GetValue;
-
-        if( $desc or $net19 ) {
-            ### Don't check if $name is set.  We got here by the user changing 
-            ### it, so it definitely will be set.
-            if( wxNO == wxTheApp->popconf('Start/open a new mission.  Unsaved progress will be lost; continue?') ) {
-                return;
-            }
-        }
 
         if( $name eq $self->new_rec_str ) {
             $self->parent->reset();

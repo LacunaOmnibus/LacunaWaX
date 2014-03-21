@@ -103,7 +103,7 @@ package LacunaWaX::Model::Schema::Mission {#{{{
         net19       => {data_type => 'text',                            is_nullable => 0,  },
     );
     __PACKAGE__->set_primary_key( 'id' ); 
-    __PACKAGE__->add_unique_constraint( 'Mission_name' => [qw(name)] ); 
+    __PACKAGE__->add_unique_constraint( 'mission_name' => [qw(name)] ); 
     __PACKAGE__->has_many(
         objectives => 'LacunaWaX::Model::Schema::MissionObjective', 
         { 'foreign.mission_id' => 'self.id' }
