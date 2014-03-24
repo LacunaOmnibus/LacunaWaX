@@ -1,7 +1,7 @@
 
 
-### This now works using FlexGridSizer, but I think it should work with 
-### GridSizer.  And if it does, a lot of the stupid can be removed from here.
+### This now works using GridSizer, but I think it should work with GridSizer.  
+### And if it does, a lot of the stupid can be removed from here.
 
 
 package LacunaWax::Dialog::MissionEditor::ResourceRow {
@@ -22,6 +22,12 @@ package LacunaWax::Dialog::MissionEditor::ResourceRow {
 
     #################################
 
+    has [qw( ctrl_width ctrl_height )] => (
+        is          => 'rw',
+        isa         => 'Int',
+        lazy_build  => 1,
+    );
+
     has 'pnl_main' => (
         is          => 'rw',
         isa         => 'Wx::Panel',
@@ -35,8 +41,7 @@ package LacunaWax::Dialog::MissionEditor::ResourceRow {
     );
 
     has [qw(
-        spin_entity_quantity 
-        spin_extra_level
+        spin_entity_quantity spin_extra_level
         spin_min_berth spin_min_cargo spin_min_combat spin_min_occupants spin_min_speed spin_min_stealth
     )] => (
         is          => 'rw',
@@ -46,50 +51,24 @@ package LacunaWax::Dialog::MissionEditor::ResourceRow {
 
     has 'szr_grid_data' => (
         is          => 'rw',
-        isa         => 'Wx::FlexGridSizer',
+        isa         => 'Wx::GridSizer',
         lazy_build  => 1
-    );
-
-    has [qw(
-        lbl_space_02 lbl_space_03 lbl_space_04 lbl_space_05
-        lbl_space_10 lbl_space_11 lbl_space_12 lbl_space_13 lbl_space_14 lbl_space_15
-    )] => (
-        is          => 'rw',
-        isa         => 'Wx::StaticText',
-        lazy        => 1,
-        default     => sub {
-            my $self = shift;
-            my $v = Wx::StaticText->new(
-                $self->pnl_main, -1, q{test},
-                wxDefaultPosition, Wx::Size->new(100,30)
-            );
-            return $v;
-        }
     );
 
     sub BUILD {
         my $self = shift;
 
-        ### Row 1
-        $self->szr_grid_data->Add( $self->chc_entity_type );
-        $self->szr_grid_data->Add( $self->spin_entity_quantity );
-        $self->szr_grid_data->Add( $self->lbl_space_02 );
-        $self->szr_grid_data->Add( $self->lbl_space_03 );
-        $self->szr_grid_data->Add( $self->lbl_space_04 );
-        $self->szr_grid_data->Add( $self->lbl_space_05 );
-
-        ### Row 2
-        $self->szr_grid_data->Add( $self->lbl_space_10 );
-        $self->szr_grid_data->Add( $self->lbl_space_11 );
-        $self->szr_grid_data->Add( $self->lbl_space_12 );
-        $self->szr_grid_data->Add( $self->lbl_space_13 );
-        $self->szr_grid_data->Add( $self->lbl_space_14 );
-        $self->szr_grid_data->Add( $self->lbl_space_15 );
+        $self->initialize_grid_data();
 
         $self->pnl_main->SetSizer( $self->szr_grid_data );
         $self->_set_events;
         return $self;
     }
+    sub clearme {#{{{
+        my $self = shift;
+        ### Destroys all windows for the current row.
+        $self->pnl_main->Destroy();
+    }#}}}
     sub _set_events {#{{{
         my $self = shift;
         EVT_CHOICE(   $self->pnl_main,  $self->chc_entity_type->GetId,    sub{$self->OnChangeType(@_)}   );
@@ -103,7 +82,7 @@ package LacunaWax::Dialog::MissionEditor::ResourceRow {
 
         my $v = Wx::Choice->new(
             $self->pnl_main, -1,
-            wxDefaultPosition, Wx::Size->new(100,-1),
+            wxDefaultPosition, Wx::Size->new( $self->ctrl_width, $self->ctrl_height ),
             $types,
         );
         $v->SetFont( wxTheApp->get_font('para_text_1') );
@@ -115,20 +94,25 @@ package LacunaWax::Dialog::MissionEditor::ResourceRow {
 
         my $v = Wx::Choice->new(
             $self->pnl_main, -1,
-            wxDefaultPosition, Wx::Size->new(100,-1),
+            wxDefaultPosition, Wx::Size->new( $self->ctrl_width, $self->ctrl_height ),
             []
         );
         $v->SetFont( wxTheApp->get_font('para_text_1') );
 
         return $v;
     }#}}}
+    sub _build_ctrl_height {#{{{
+        return 25;
+    }#}}}
+    sub _build_ctrl_width {#{{{
+        return 100;
+    }#}}}
     sub _build_spin_entity_quantity {#{{{
         my $self = shift;
 
         my $v = Wx::SpinCtrl->new(
             $self->pnl_main, -1, q{}, 
-            wxDefaultPosition, 
-            Wx::Size->new(100, -1), 
+            wxDefaultPosition, Wx::Size->new( $self->ctrl_width, $self->ctrl_height ),
             wxSP_ARROW_KEYS|wxSP_WRAP, 
             0, 0, 0  # min, max, initial
         );
@@ -140,8 +124,7 @@ package LacunaWax::Dialog::MissionEditor::ResourceRow {
 
         my $v = Wx::SpinCtrl->new(
             $self->pnl_main, -1, q{}, 
-            wxDefaultPosition, 
-            Wx::Size->new(100, -1), 
+            wxDefaultPosition, Wx::Size->new( $self->ctrl_width, $self->ctrl_height ),
             wxSP_ARROW_KEYS|wxSP_WRAP, 
             0, 30, 0  # min, max, initial
         );
@@ -155,8 +138,7 @@ package LacunaWax::Dialog::MissionEditor::ResourceRow {
 
         my $v = Wx::SpinCtrl->new(
             $self->pnl_main, -1, q{}, 
-            wxDefaultPosition, 
-            Wx::Size->new(100, -1), 
+            wxDefaultPosition, Wx::Size->new( $self->ctrl_width, $self->ctrl_height ),
             wxSP_ARROW_KEYS|wxSP_WRAP, 
             0, 0, 0  # min, max, initial
         );
@@ -170,8 +152,7 @@ package LacunaWax::Dialog::MissionEditor::ResourceRow {
 
         my $v = Wx::SpinCtrl->new(
             $self->pnl_main, -1, q{}, 
-            wxDefaultPosition, 
-            Wx::Size->new(100, -1), 
+            wxDefaultPosition, Wx::Size->new( $self->ctrl_width, $self->ctrl_height ),
             wxSP_ARROW_KEYS|wxSP_WRAP, 
             0, 0, 0  # min, max, initial
         );
@@ -185,8 +166,7 @@ package LacunaWax::Dialog::MissionEditor::ResourceRow {
 
         my $v = Wx::SpinCtrl->new(
             $self->pnl_main, -1, q{}, 
-            wxDefaultPosition, 
-            Wx::Size->new(100, -1), 
+            wxDefaultPosition, Wx::Size->new( $self->ctrl_width, $self->ctrl_height ),
             wxSP_ARROW_KEYS|wxSP_WRAP, 
             0, 0, 0  # min, max, initial
         );
@@ -200,8 +180,7 @@ package LacunaWax::Dialog::MissionEditor::ResourceRow {
 
         my $v = Wx::SpinCtrl->new(
             $self->pnl_main, -1, q{}, 
-            wxDefaultPosition, 
-            Wx::Size->new(100, -1), 
+            wxDefaultPosition, Wx::Size->new( $self->ctrl_width, $self->ctrl_height ),
             wxSP_ARROW_KEYS|wxSP_WRAP, 
             0, 0, 0  # min, max, initial
         );
@@ -215,8 +194,7 @@ package LacunaWax::Dialog::MissionEditor::ResourceRow {
 
         my $v = Wx::SpinCtrl->new(
             $self->pnl_main, -1, q{}, 
-            wxDefaultPosition, 
-            Wx::Size->new(100, -1), 
+            wxDefaultPosition, Wx::Size->new( $self->ctrl_width, $self->ctrl_height ),
             wxSP_ARROW_KEYS|wxSP_WRAP, 
             0, 0, 0  # min, max, initial
         );
@@ -230,8 +208,7 @@ package LacunaWax::Dialog::MissionEditor::ResourceRow {
 
         my $v = Wx::SpinCtrl->new(
             $self->pnl_main, -1, q{}, 
-            wxDefaultPosition, 
-            Wx::Size->new(100, -1), 
+            wxDefaultPosition, Wx::Size->new( $self->ctrl_width, $self->ctrl_height ),
             wxSP_ARROW_KEYS|wxSP_WRAP, 
             0, 0, 0  # min, max, initial
         );
@@ -259,8 +236,22 @@ package LacunaWax::Dialog::MissionEditor::ResourceRow {
         ###     spin_min_occupants
         ###     spin_min_speed
         ###     spin_min_stealth
-        my $v = Wx::FlexGridSizer->new( 2, 6, 5, 5 );   # r, c, vgap, hgap
+        my $v = Wx::GridSizer->new( 2, 6, 5, 5 );   # r, c, vgap, hgap
+
         return $v;
+    }#}}}
+
+    sub initialize_grid_data {#{{{
+        my $self = shift;
+
+        ### Add the type and quantity controls, which always appear, then add 
+        ### spacers into the rest of the cells, which is needed to keep the 
+        ### second row from collapsing the first.
+        $self->szr_grid_data->Add( $self->chc_entity_type );
+        $self->szr_grid_data->Add( $self->spin_entity_quantity );
+        for(3..6) { $self->szr_grid_data->Add( 0,0,0 ); }
+        for(1..6) { $self->szr_grid_data->Add( 0,0,0 ); }
+        $self->szr_grid_data->Layout();
     }#}}}
 
     sub OnChangeType {#{{{
@@ -268,7 +259,18 @@ package LacunaWax::Dialog::MissionEditor::ResourceRow {
         my $a = shift;
         my $b = shift;
 
-        ### Reset any conditional controls
+        my $type = $self->chc_entity_type->GetStringSelection;
+        return if $type eq 'SELECT';
+
+        wxTheApp->throb();
+
+        ### Clear the sizer, then re-add controls that appear for every 
+        ### resource
+        $self->szr_grid_data->Clear();
+        $self->szr_grid_data->Add( $self->chc_entity_type );
+        $self->szr_grid_data->Add( $self->spin_entity_quantity );
+
+        ### Hide any inputs that might be showing
         $self->chc_entity_name->Hide();
         $self->spin_extra_level->Hide();
         $self->spin_min_berth->Hide();
@@ -278,39 +280,35 @@ package LacunaWax::Dialog::MissionEditor::ResourceRow {
         $self->spin_min_speed->Hide();
         $self->spin_min_stealth->Hide();
 
-        my $type = $self->chc_entity_type->GetStringSelection;
-        return if $type eq 'SELECT';
-
         ### CHECK
-        ### All values for $max in here are arbitrary and almost certainly 
+        ### All values for $max below are arbitrary and almost certainly 
         ### wrong.
 
         if( $type =~ /(essentia|happiness)/ ) {#{{{
-            $self->chc_entity_name->Show(0);
             my $max = ( $type eq 'essentia' ) ? 100 : 1_000_000;
             $self->spin_entity_quantity->SetRange(0, $max);
             my $cmax = wxTheApp->commaize_number($max);
             $self->spin_entity_quantity->SetToolTip("Quantity - maximum is $cmax");
-            return 1;
+            $self->szr_grid_data->Layout();
         }#}}}
-        if( $type eq 'glyphs' ) {#{{{
+        elsif( $type eq 'glyphs' ) {#{{{
             $self->chc_entity_name->Clear();
             for my $t(@{ wxTheApp->ore_types }) {
+                wxTheApp->Yield();
                 $self->chc_entity_name->Append($t);
             }
             my $max = 100;
             $self->spin_entity_quantity->SetRange(0, $max);
             $self->spin_entity_quantity->SetToolTip("Quantity - maximum is $max");
 
+            $self->szr_grid_data->Add( $self->chc_entity_name );
             $self->chc_entity_name->Show(1);
-            $self->szr_grid_data->Replace( $self->lbl_space_02, $self->chc_entity_name );
             $self->szr_grid_data->Layout();
-
-            return 1;
         }#}}}
-        if( $type eq 'plans' ) {#{{{
+        elsif( $type eq 'plans' ) {#{{{
             $self->chc_entity_name->Clear();
             for my $t(@{ wxTheApp->building_types('human') }) {
+                wxTheApp->Yield();
                 $self->chc_entity_name->Append($t);
             }
             my $max = 10;
@@ -318,17 +316,18 @@ package LacunaWax::Dialog::MissionEditor::ResourceRow {
             my $cmax = wxTheApp->commaize_number($max);
             $self->spin_entity_quantity->SetToolTip("Quantity - maximum is $cmax");
 
+            $self->szr_grid_data->Add( $self->chc_entity_name );
+            $self->szr_grid_data->Add( $self->spin_extra_level );
             $self->chc_entity_name->Show(1);
             $self->spin_extra_level->Show(1);
-            $self->szr_grid_data->Replace( $self->lbl_space_02, $self->chc_entity_name );
-            $self->szr_grid_data->Replace( $self->lbl_space_03, $self->spin_extra_level );
             $self->szr_grid_data->Layout();
 
-            return 1;
+            wxTheApp->Yield();
         }#}}}
-        if( $type eq 'resources' ) {#{{{
+        elsif( $type eq 'resources' ) {#{{{
             $self->chc_entity_name->Clear();
             for my $t(@{ wxTheApp->food_types }, @{ wxTheApp->ore_types} ) {
+                wxTheApp->Yield();
                 $self->chc_entity_name->Append($t);
             }
             my $max = 1_000_000;
@@ -336,21 +335,30 @@ package LacunaWax::Dialog::MissionEditor::ResourceRow {
             my $cmax = wxTheApp->commaize_number($max);
             $self->spin_entity_quantity->SetToolTip("Quantity - maximum is $cmax");
 
+            $self->szr_grid_data->Add( $self->chc_entity_name );
             $self->chc_entity_name->Show(1);
-            $self->szr_grid_data->Replace( $self->lbl_space_02, $self->chc_entity_name );
             $self->szr_grid_data->Layout();
 
-            return 1;
+            wxTheApp->Yield();
         }#}}}
-        if( $type eq 'ships' ) {#{{{
+        elsif( $type eq 'ships' ) {#{{{
             $self->chc_entity_name->Clear();
             for my $t(@{ wxTheApp->ship_types('human') }) {
+                wxTheApp->Yield();
                 $self->chc_entity_name->Append($t);
             }
             my $max = 10;
             $self->spin_entity_quantity->SetRange(0, $max);
             my $cmax = wxTheApp->commaize_number($max);
             $self->spin_entity_quantity->SetToolTip("Quantity - maximum is $cmax");
+
+            $self->szr_grid_data->Add( $self->chc_entity_name );
+            $self->szr_grid_data->Add( $self->spin_min_berth );
+            $self->szr_grid_data->Add( $self->spin_min_cargo );
+            $self->szr_grid_data->Add( $self->spin_min_combat );
+            $self->szr_grid_data->Add( $self->spin_min_occupants );
+            $self->szr_grid_data->Add( $self->spin_min_speed );
+            $self->szr_grid_data->Add( $self->spin_min_stealth );
 
             $self->chc_entity_name->Show(1);
             $self->spin_min_berth->Show(1);
@@ -359,18 +367,13 @@ package LacunaWax::Dialog::MissionEditor::ResourceRow {
             $self->spin_min_occupants->Show(1);
             $self->spin_min_speed->Show(1);
             $self->spin_min_stealth->Show(1);
-            $self->szr_grid_data->Replace( $self->lbl_space_02, $self->chc_entity_name );
-            $self->szr_grid_data->Replace( $self->lbl_space_10, $self->spin_min_berth );
-            $self->szr_grid_data->Replace( $self->lbl_space_11, $self->spin_min_cargo );
-            $self->szr_grid_data->Replace( $self->lbl_space_12, $self->spin_min_combat );
-            $self->szr_grid_data->Replace( $self->lbl_space_13, $self->spin_min_occupants );
-            $self->szr_grid_data->Replace( $self->lbl_space_14, $self->spin_min_speed );
-            $self->szr_grid_data->Replace( $self->lbl_space_15, $self->spin_min_stealth );
+
             $self->szr_grid_data->Layout();
 
-            return 1;
+            wxTheApp->Yield();
         }#}}}
 
+        wxTheApp->endthrob();
         return 1;
     }#}}}
     sub OnChangeTypeOrig {#{{{
