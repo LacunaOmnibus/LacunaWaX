@@ -10,7 +10,7 @@ package LacunaWaX::Dialog::MissionEditor {
 
     use LacunaWaX::Dialog::MissionEditor::TabOverview;
     use LacunaWaX::Dialog::MissionEditor::TabObjective;
-    #use LacunaWaX::Dialog::MissionEditor::TabReward;
+    use LacunaWaX::Dialog::MissionEditor::TabReward;
 
     has [qw(width height)] => (
         is          => 'rw',
@@ -59,6 +59,7 @@ package LacunaWaX::Dialog::MissionEditor {
 
         $self->notebook->AddPage( $self->tab_overview->pnl_main, "Overview" );
         $self->notebook->AddPage( $self->tab_objective->pnl_main, "Objectives" );
+        $self->notebook->AddPage( $self->tab_reward->pnl_main, "Rewards" );
 
         $self->main_sizer->AddSpacer(5);
         $self->main_sizer->Add($self->notebook, 1, wxEXPAND, 0);

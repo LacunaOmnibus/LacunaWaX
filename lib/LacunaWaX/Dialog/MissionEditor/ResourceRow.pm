@@ -20,6 +20,15 @@ package LacunaWax::Dialog::MissionEditor::ResourceRow {
         }
     );
 
+    has 'type' => (
+        is          => 'rw',
+        isa         => 'Str',
+        required    => 1,
+        documentation => q{
+            must be either 'objective' or 'reward'
+        }
+    );
+
     #################################
 
     has [qw( ctrl_width ctrl_height )] => (
@@ -142,7 +151,9 @@ package LacunaWax::Dialog::MissionEditor::ResourceRow {
             wxSP_ARROW_KEYS|wxSP_WRAP, 
             0, 0, 0  # min, max, initial
         );
-        $v->SetToolTip("Minimum berth level");
+        my $text = ($self->type eq 'objective') ? 'Minimum ' : q{};
+        $text .= 'Berth Level';
+        $v->SetToolTip($text);
         $v->Hide();
 
         return $v;
@@ -156,7 +167,9 @@ package LacunaWax::Dialog::MissionEditor::ResourceRow {
             wxSP_ARROW_KEYS|wxSP_WRAP, 
             0, 0, 0  # min, max, initial
         );
-        $v->SetToolTip("Minimum cargo hold size");
+        my $text = ($self->type eq 'objective') ? 'Minimum ' : q{};
+        $text .= 'Cargo Hold Size';
+        $v->SetToolTip($text);
         $v->Hide();
 
         return $v;
@@ -170,7 +183,9 @@ package LacunaWax::Dialog::MissionEditor::ResourceRow {
             wxSP_ARROW_KEYS|wxSP_WRAP, 
             0, 0, 0  # min, max, initial
         );
-        $v->SetToolTip("Minimum combat rating");
+        my $text = ($self->type eq 'objective') ? 'Minimum ' : q{};
+        $text .= 'Combat Rating';
+        $v->SetToolTip($text);
         $v->Hide();
 
         return $v;
@@ -184,7 +199,9 @@ package LacunaWax::Dialog::MissionEditor::ResourceRow {
             wxSP_ARROW_KEYS|wxSP_WRAP, 
             0, 0, 0  # min, max, initial
         );
-        $v->SetToolTip("Minimum occupants");
+        my $text = ($self->type eq 'objective') ? 'Minimum ' : q{};
+        $text .= 'Occupants';
+        $v->SetToolTip($text);
         $v->Hide();
 
         return $v;
@@ -198,7 +215,9 @@ package LacunaWax::Dialog::MissionEditor::ResourceRow {
             wxSP_ARROW_KEYS|wxSP_WRAP, 
             0, 0, 0  # min, max, initial
         );
-        $v->SetToolTip("Minimum speed");
+        my $text = ($self->type eq 'objective') ? 'Minimum ' : q{};
+        $text .= 'Speed';
+        $v->SetToolTip($text);
         $v->Hide();
 
         return $v;
@@ -212,7 +231,9 @@ package LacunaWax::Dialog::MissionEditor::ResourceRow {
             wxSP_ARROW_KEYS|wxSP_WRAP, 
             0, 0, 0  # min, max, initial
         );
-        $v->SetToolTip("Minimum stealth rating");
+        my $text = ($self->type eq 'objective') ? 'Minimum ' : q{};
+        $text .= 'Stealth Rating';
+        $v->SetToolTip($text);
         $v->Hide();
 
         return $v;
@@ -352,7 +373,13 @@ package LacunaWax::Dialog::MissionEditor::ResourceRow {
             my $cmax = wxTheApp->commaize_number($max);
             $self->spin_entity_quantity->SetToolTip("Quantity - maximum is $cmax");
 
+            ### Finish up row 1
             $self->szr_grid_data->Add( $self->chc_entity_name );
+            $self->szr_grid_data->Add( 0,0,0 );
+            $self->szr_grid_data->Add( 0,0,0 );
+            $self->szr_grid_data->Add( 0,0,0 );
+
+            ### Row 2
             $self->szr_grid_data->Add( $self->spin_min_berth );
             $self->szr_grid_data->Add( $self->spin_min_cargo );
             $self->szr_grid_data->Add( $self->spin_min_combat );
@@ -373,95 +400,8 @@ package LacunaWax::Dialog::MissionEditor::ResourceRow {
             wxTheApp->Yield();
         }#}}}
 
+        $self->parent->pnl_main->Layout;
         wxTheApp->endthrob();
-        return 1;
-    }#}}}
-    sub OnChangeTypeOrig {#{{{
-        my $self = shift;
-        my $a = shift;
-        my $b = shift;
-
-        ### Reset any conditional controls
-        $self->spin_extra_level->Hide();
-        $self->spin_min_berth->Hide();
-        $self->spin_min_cargo->Hide();
-        $self->spin_min_combat->Hide();
-        $self->spin_min_occupants->Hide();
-        $self->spin_min_speed->Hide();
-        $self->spin_min_stealth->Hide();
-
-        my $type = $self->chc_entity_type->GetStringSelection;
-        return if $type eq 'SELECT';
-
-        ### CHECK
-        ### All values for $max in here are arbitrary and almost certainly 
-        ### wrong.
-
-        if( $type =~ /(essentia|happiness)/ ) {#{{{
-            $self->chc_entity_name->Show(0);
-            my $max = ( $type eq 'essentia' ) ? 100 : 1_000_000;
-            $self->spin_entity_quantity->SetRange(0, $max);
-            my $cmax = wxTheApp->commaize_number($max);
-            $self->spin_entity_quantity->SetToolTip("Quantity - maximum is $cmax");
-            return 1;
-        }#}}}
-        if( $type eq 'glyphs' ) {#{{{
-            $self->chc_entity_name->Clear();
-            for my $t(@{ wxTheApp->ore_types }) {
-                $self->chc_entity_name->Append($t);
-            }
-            my $max = 100;
-            $self->spin_entity_quantity->SetRange(0, $max);
-            $self->spin_entity_quantity->SetToolTip("Quantity - maximum is $max");
-            $self->chc_entity_name->Show(1);
-            return 1;
-        }#}}}
-        if( $type eq 'plans' ) {#{{{
-            $self->chc_entity_name->Clear();
-            for my $t(@{ wxTheApp->building_types('human') }) {
-                $self->chc_entity_name->Append($t);
-            }
-            my $max = 10;
-            $self->spin_entity_quantity->SetRange(0, $max);
-            my $cmax = wxTheApp->commaize_number($max);
-            $self->spin_entity_quantity->SetToolTip("Quantity - maximum is $cmax");
-            $self->chc_entity_name->Show(1);
-            $self->spin_extra_level->Show(1);
-            wxTheApp->Yield;
-            return 1;
-        }#}}}
-        if( $type eq 'resources' ) {#{{{
-            $self->chc_entity_name->Clear();
-            for my $t(@{ wxTheApp->food_types }, @{ wxTheApp->ore_types} ) {
-                $self->chc_entity_name->Append($t);
-            }
-            my $max = 1_000_000;
-            $self->spin_entity_quantity->SetRange(0, $max);
-            my $cmax = wxTheApp->commaize_number($max);
-            $self->spin_entity_quantity->SetToolTip("Quantity - maximum is $cmax");
-            $self->chc_entity_name->Show(1);
-            return 1;
-        }#}}}
-        if( $type eq 'ships' ) {#{{{
-            $self->chc_entity_name->Clear();
-            for my $t(@{ wxTheApp->ship_types('human') }) {
-                $self->chc_entity_name->Append($t);
-            }
-            my $max = 10;
-            $self->spin_entity_quantity->SetRange(0, $max);
-            my $cmax = wxTheApp->commaize_number($max);
-            $self->spin_entity_quantity->SetToolTip("Quantity - maximum is $cmax");
-            $self->chc_entity_name->Show(1);
-            $self->spin_min_berth->Show(1);
-            $self->spin_min_cargo->Show(1);
-            $self->spin_min_combat->Show(1);
-            $self->spin_min_occupants->Show(1);
-            $self->spin_min_speed->Show(1);
-            $self->spin_min_stealth->Show(1);
-
-            return 1;
-        }#}}}
-
         return 1;
     }#}}}
 

@@ -1,293 +1,249 @@
 
-package LacunaWax::Dialog::Prefs::TabServer {
+package LacunaWax::Dialog::MissionEditor::TabReward {
+    use v5.14;
+    use Data::UUID;
     use Moose;
     use Try::Tiny;
     use Wx qw(:everything);
-    use Wx::Event qw(EVT_BUTTON EVT_CHOICE EVT_COMBOBOX);
+    use Wx::Event qw(EVT_BUTTON EVT_COMBOBOX);
+    use Wx::Perl::TextValidator;
+
+    use LacunaWaX::Dialog::MissionEditor::ResourceRow;
 
     has 'parent' => (
         is          => 'rw',
-        isa         => 'LacunaWaX::Dialog::Prefs',
+        isa         => 'LacunaWaX::Dialog::MissionEditor',
         required    => 1,
     );
 
     #################################
-    has 'main_sizer'        => (is => 'rw', isa => 'Wx::Sizer',                 lazy_build => 1);
-    has 'pnl_main'          => (is => 'rw', isa => 'Wx::Panel',                 lazy_build => 1);
 
-    has 'server_id'     => (is => 'rw', isa => 'Int');
-    has 'server_list'   => (is => 'ro', isa => 'ArrayRef', lazy_build => 1, 
-        documentation => q{Arrayref of server names only}
+    has [qw( btn_add_row )] => (
+        is          => 'rw',
+        isa         => 'Wx::Button',
+        lazy_build  => 1
     );
 
-    has 'grid_sizer'    => (is => 'rw', isa => 'Wx::FlexGridSizer',     lazy_build => 1);
-    has 'lbl_server'    => (is => 'rw', isa => 'Wx::StaticText',        lazy_build => 1);
-    has 'lbl_user'      => (is => 'rw', isa => 'Wx::StaticText',        lazy_build => 1);
-    has 'lbl_pass'      => (is => 'rw', isa => 'Wx::StaticText',        lazy_build => 1);
-    has 'chc_server'    => (is => 'rw', isa => 'Wx::Choice',            lazy_build => 1);
-    has 'rdo_http'      => (is => 'rw', isa => 'Wx::RadioButton',       lazy_build => 1);
-    has 'rdo_https'     => (is => 'rw', isa => 'Wx::RadioButton',       lazy_build => 1);
-    has 'txtbox_user'   => (is => 'rw', isa => 'Wx::TextCtrl',          lazy_build => 1);
-    has 'txtbox_pass'   => (is => 'rw', isa => 'Wx::TextCtrl',          lazy_build => 1);
-    has 'btn_save'      => (is => 'rw', isa => 'Wx::Button',            lazy_build => 1);
+    has [qw( lbl_instructions )] => (
+        is          => 'rw',
+        isa         => 'Wx::StaticText',
+        lazy_build  => 1
+    );
+
+    has 'pnl_main' => (
+        is          => 'rw',
+        isa         => 'Wx::Panel',
+        lazy_build  => 1,
+    );
+
+    has 'szr_grid_data' => (
+        is          => 'rw',
+        isa         => 'Wx::FlexGridSizer',
+        lazy_build  => 1
+    );
+
+    has 'szr_main' => (
+        is          => 'rw',
+        isa         => 'Wx::Sizer',
+        lazy_build  => 1
+    );
+
+    has 'rows' => (
+        is          => 'rw',
+        isa         => 'HashRef[LacunaWaX::Dialog::MissionEditor::ResourceRow]',
+        default     => sub{ {} },
+    );
+
+    has 'uuid' => (
+        is          => 'ro',
+        isa         => 'Data::UUID',
+        default     => sub{ Data::UUID->new() },
+    );
 
     sub BUILD {
         my $self = shift;
 
-        my $szr_vert = Wx::BoxSizer->new(wxVERTICAL);
-        $szr_vert->AddSpacer(10);
-        $szr_vert->Add($self->grid_sizer, 1, wxEXPAND, 0);
-        $szr_vert->AddSpacer(20);
-        $szr_vert->Add($self->btn_save, 0, 0, 0);
+        ### Start with one objective row showing.  The user can add more if 
+        ### needed.
+        $self->add_row();
 
-        $self->main_sizer->AddSpacer(10);
-        $self->main_sizer->Add($szr_vert, 0, 0, 0);
-        $self->pnl_main->SetSizer( $self->main_sizer );
+        $self->szr_main->AddSpacer(20);
+        $self->szr_main->Add( $self->lbl_instructions );
+        $self->szr_main->Add( $self->szr_grid_data );
+        $self->szr_main->Add( 0, 20, 0 );
+        $self->szr_main->Add( $self->btn_add_row );
 
-        $self->set_txtbox_user;
-        $self->set_pass;
+        $self->pnl_main->SetSizer( $self->szr_main );
+
         $self->_set_events;
-
         return $self;
     }
-    sub _build_server_list {#{{{
-        my $self    = shift;
-        my $schema  = wxTheApp->main_schema;
-        my $rs_servers = $schema->resultset('Servers')->search();
-
-        my $list = [];
-        while(my $rec = $rs_servers->next) {
-            push @{$list}, $rec->name;
-        }
-        return $list;
-    }#}}}
-    sub _build_grid_sizer {#{{{
+    sub _set_events {#{{{
         my $self = shift;
-
-        ### 3 rows, 3 cols, 5px vgap and hgap.
-        ### Column 1 is a small spacer column.
-        my $grid_sizer = Wx::FlexGridSizer->new(3, 3, 5, 5);
-
-        ### Row 1, server choice
-        $grid_sizer->Add($self->lbl_server, 0, 0, 0);
-        $grid_sizer->Add($self->chc_server, 0, 0, 0);
-        my $szr_radio = Wx::BoxSizer->new(wxHORIZONTAL);
-        $szr_radio->Add($self->rdo_http, 0, 0, 0);
-        $szr_radio->Add($self->rdo_https, 0, 0, 0);
-        $grid_sizer->Add($szr_radio, 0, 0, 0);
-
-        ### Row 2, username
-        $grid_sizer->Add($self->lbl_user, 0, 0, 0);
-        $grid_sizer->Add($self->txtbox_user, 0, 0, 0);
-        $grid_sizer->AddSpacer(5);
-
-        ### Row 3, password
-        $grid_sizer->Add($self->lbl_pass, 0, 0, 0);
-        $grid_sizer->Add($self->txtbox_pass, 0, 0, 0);
-
-        return $grid_sizer;
+        EVT_BUTTON(     $self->pnl_main,  $self->btn_add_row->GetId,     sub{$self->OnAddObjective(@_)}    );
+        return 1;
     }#}}}
-    sub _build_lbl_server {#{{{
+
+    sub _build_btn_add_row {#{{{
         my $self = shift;
-        my $v = Wx::StaticText->new($self->pnl_main, -1, "Server", wxDefaultPosition, Wx::Size->new(80,25));
-        $v->SetFont( wxTheApp->get_font('bold_para_text_1') );
+        my $v = Wx::Button->new($self->pnl_main, -1, "Add Another Reward");
+        $v->Enable(1);
         return $v;
     }#}}}
-    sub _build_lbl_user {#{{{
+    sub _build_lbl_instructions {#{{{
         my $self = shift;
-        my $v =  Wx::StaticText->new($self->pnl_main, -1, "Username", wxDefaultPosition, Wx::Size->new(80,25));
-        $v->SetFont( wxTheApp->get_font('bold_para_text_1') );
-        return $v;
-    }#}}}
-    sub _build_lbl_pass {#{{{
-        my $self = shift;
-        my $v = Wx::StaticText->new($self->pnl_main, -1, "Password", wxDefaultPosition, Wx::Size->new(80,25));
-        $v->SetFont( wxTheApp->get_font('bold_para_text_1') );
-        return $v;
-    }#}}}
-    sub _build_btn_save {#{{{
-        my $self = shift;
-        return Wx::Button->new($self->pnl_main, -1, "Save");
-    }#}}}
-    sub _build_chc_server {#{{{
-        my $self = shift;
-        my $v = Wx::Choice->new($self->pnl_main, -1, wxDefaultPosition, Wx::Size->new(150,25), $self->server_list);
-        $v->SetSelection(0);
-        return $v;
-    }#}}}
-    sub _build_rdo_protocol {#{{{
-        my $self = shift;
-        return Wx::RadioBox->new(
+
+        my $inst = "REWARD INSTRUCTIONS GO HERE.";
+
+        my $v = Wx::StaticText->new(
             $self->pnl_main, -1, 
-            "Connect with", 
+            $inst, 
             wxDefaultPosition, 
-            Wx::Size->new(150,30), 
-            ["http", "https"], 
-            1, 
-            wxRA_SPECIFY_ROWS
+            Wx::Size->new(365,25)
         );
-    }#}}}
-    sub _build_rdo_http {#{{{
-        my $self = shift;
 
-        my $v = Wx::RadioButton->new(
-            $self->pnl_main, -1, 
-            "http", 
-            wxDefaultPosition, 
-            Wx::Size->new(65,30), 
-            wxRB_GROUP,
-        );
-        $v->SetValue(1) if( $self->get_server_protocol eq 'http');
+        $v->SetFont( wxTheApp->get_font('para_text_1') );
         return $v;
-    }#}}}
-    sub _build_rdo_https {#{{{
-        my $self = shift;
-        my $v = Wx::RadioButton->new(
-            $self->pnl_main, -1, 
-            "https", 
-            wxDefaultPosition, 
-            Wx::Size->new(65,30), 
-        );
-        $v->SetToolTip(
-              "https is more secure, but PT tends to have issues with https.\n"
-            . "So if you get 'malformed JSON string' errors when connecting \n"
-            . "to PT, be sure its protocol is set to 'http', not 'https'."
-        );
-        $v->SetValue(1) if( $self->get_server_protocol eq 'https');
-        return $v;
-    }#}}}
-    sub _build_txtbox_user {#{{{
-        my $self = shift;
-        return Wx::TextCtrl->new($self->pnl_main, -1, q{}, wxDefaultPosition, Wx::Size->new(150,25));
-    }#}}}
-    sub _build_txtbox_pass {#{{{
-        my $self = shift;
-        return Wx::TextCtrl->new($self->pnl_main, -1, q{}, wxDefaultPosition, Wx::Size->new(150,25));
-    }#}}}
-    sub _build_main_sizer {#{{{
-        my $self = shift;
-        return Wx::BoxSizer->new(wxHORIZONTAL);
     }#}}}
     sub _build_pnl_main {#{{{
         my $self = shift;
-        return Wx::Panel->new($self->parent->notebook, -1, wxDefaultPosition, wxDefaultSize);
+        my $v = Wx::Panel->new($self->parent->notebook, -1, wxDefaultPosition, wxDefaultSize);
+        return $v;
     }#}}}
-    sub _set_events {#{{{
+    sub _build_szr_grid_data {#{{{
         my $self = shift;
-        EVT_BUTTON(     $self->pnl_main,  $self->btn_save->GetId,     sub{$self->parent->OnSavePrefs(@_)} );
-        EVT_CHOICE(     $self->pnl_main,  $self->chc_server->GetId,   sub{$self->OnChooseServer()} );
-        return 1;
+        my $v = Wx::FlexGridSizer->new( 0, 2, 10, 5 );   # r, c, vgap, hgap
+        return $v;
+    }#}}}
+    sub _build_szr_main {#{{{
+        my $self = shift;
+        my $v = Wx::BoxSizer->new(wxVERTICAL);
+        return $v;
     }#}}}
 
-    sub get_server_protocol {#{{{
-        my $self = shift;
-        my $server_name = $self->server_list->[ $self->chc_server->GetCurrentSelection ];
-        my $schema      = wxTheApp->main_schema;
-        my $server_rec  = $schema->resultset('Servers')->find({ name => $server_name });
-        return $server_rec->protocol;
-    }#}}}
-    sub set_proto {#{{{
-        my $self = shift;
-        my $schema      = wxTheApp->main_schema;
-        my $server_name = $self->server_list->[ $self->chc_server->GetCurrentSelection ];
+    sub add_row {#{{{
+        my $self    = shift;
+        my $delbtn  = shift // 1;
 
-        my $server_rec = $schema->resultset('Servers')->find({ name => $server_name });
-        if( $server_rec->protocol eq 'https' ) {
-            $self->rdo_https->SetValue(1);
-        }
-        else {
-            $self->rdo_http->SetValue(1);
-        }
-        return 1;
-    }#}}}
-    sub set_txtbox_user {#{{{
-        my $self        = shift;
-        my $schema      = wxTheApp->main_schema;
-        my $server_name = $self->server_list->[ $self->chc_server->GetCurrentSelection ];
+        ### Create a UUID that'll be used to associate the button with its 
+        ### ResourceRow object.
+        my $bin_uuid = $self->uuid->create();
+        my $txt_uuid = $self->uuid->to_string($bin_uuid);
 
-        my $rs = $schema->resultset('ServerAccounts')->search(
-            { 
-                'server.name' => $server_name,
-                'default_for_server' => 1,
-            },
-            { join => 'server' }
+        ### Add a blank row to our sizer
+        my $numrows = $self->szr_grid_data->GetRows();
+        $self->szr_grid_data->SetRows( $numrows + 1 );
+
+        ### Make a new row, put it in our hashref keyed off that UUID, and add 
+        ### it to our grid
+        my $row = LacunaWax::Dialog::MissionEditor::ResourceRow->new(
+            parent  => $self,
+            type    => 'reward',
         );
-        if( my $r = $rs->next ) {
-            $self->txtbox_user->SetValue($r->username);
+        $self->rows->{$txt_uuid} = $row;
+        $self->szr_grid_data->Add( $row->pnl_main );
+        
+        ### No delete button for the first row
+        unless( $delbtn ) {
+            $self->szr_grid_data->Add( 0, 0, 0 );
+            return 1;
         }
-        $self->txtbox_user->SetFocus();
+
+        ### Create button, name it our UUID, set up its event, add it to our 
+        ### grid
+        my $butt = Wx::Button->new(
+            $self->pnl_main, -1, 
+            'X',
+            wxDefaultPosition, Wx::Size->new(30,25),
+            0,  # style
+            Wx::Perl::TextValidator->new( '.+' ),
+            $txt_uuid,
+        );
+        $butt->SetForegroundColour( Wx::Colour->new(255, 0, 0) );
+        $self->szr_grid_data->Add( $butt );
+        EVT_BUTTON( $self->pnl_main, $butt->GetId, sub{$self->OnDelRow(@_, $butt)} );
+
+        $self->szr_grid_data->Layout();
         return 1;
     }#}}}
-    sub set_pass {#{{{
-        my $self = shift;
-        my $schema      = wxTheApp->main_schema;
-        my $server_name = $self->server_list->[ $self->chc_server->GetCurrentSelection ];
-        my $username    = $self->txtbox_user->GetLineText(0);
 
-        my $password = q{};
-        if( my $rec = $schema->resultset('ServerAccounts')->find(
-            { 
-                username        => $username,
-                'server.name'   => $server_name 
-            },
-            { join => 'server' }
-        ) ) {
-            $password = $rec->password;
-        }
-        $self->txtbox_pass->SetValue( $password );
+    sub OnAddObjective {#{{{
+        my $self    = shift;
+        $self->add_row();
+        $self->pnl_main->Layout();
         return 1;
     }#}}}
-    sub set_default_account {#{{{
-        my $self = shift;
-        my $schema      = wxTheApp->main_schema;
-        my $server_name = $self->server_list->[ $self->chc_server->GetCurrentSelection ];
-        my $username    = $self->txtbox_user->GetLineText(0);
+    sub OnDelRow {#{{{
+        my $self    = shift;
+        my $panel   = shift;    # Wx::Panel
+        my $event   = shift;    # Wx::CommandEvent
+        my $button  = shift;    # Wx::Button
 
-        my $password = q{};
-        my $state    = 0;
-        if( my $rec = $schema->resultset('ServerAccounts')->find(
-            { 
-                username        => $username,
-                'server.name'   => $server_name 
-            },
-            { join => 'server' }
-        ) ) {
-            $state = 1 if $rec->default_for_server;
+        my $uuid = $button->GetName;
+        my $numrows = $self->szr_grid_data->GetRows();
 
-        }
+=pod
 
-        ### Exactly one account has to be the default for each server.  If the 
-        ### user neglected to check the 'default' checkbox for their only 
-        ### account, force that account to be the default.
-        unless($state) {
-            my $rs = $schema->resultset('ServerAccounts')->search(
-                {
-                    default_for_server  => 1,
-                    'server.name'       => $server_name,
-                },
-                { join => 'server' }
-            );
-            unless( $rs->count ) {
-                $state = 1;
+While the GridSizer knows how many rows and columns it was created with, 
+either via its constructor or SetRows(), it doesn't have a true idea of what a 
+row is.  Think of it as an array, with each individual element being a single 
+field in the grid.  This means we can't just tell it to "delete row 3".
+
+    +--------------------+---------------+
+    | ResourceRow object | delete button |
+    | ResourceRow object | delete button |
+    | ResourceRow object | delete button |
+    +--------------------+---------------+
+
+To delete a "row":
+    - We're dealing with two columns, and the delete button is in the second 
+      column.
+        - So on the third "row", the delete button is occupying offset 5 in 
+          the grid.
+    - Also, when we built the ResourceRow and button objects, we created a 
+      UUID.  The ResourceRows are in a hash keyed off that UUID, and the 
+      associated button's name is that UUID.
+
+    - This event method is being handed a copy of the delete button clicked 
+      (in $button).
+
+    - Iterate all children of the Grid.  If the child is a Wx::Window, check 
+      its ID and see if it's the same ID as the $button we were handed.
+        - If so, we have the correct grid offset of the clicked button.
+
+    - Remove both the clicked delete button (current offset) and its 
+      associated row (current offset - 1) from the grid.
+
+    - Now, using the button's name (the UUID), find the associated ResourceRow 
+      from the $self->rows hashref (keyed off that UUID).  Call that 
+      ResourceRow's clearme() method and delete the entry from $self->rows.
+
+=cut
+
+        ### $child is a SizerItem, but GetItem requires a integer offset, so 
+        ### we do need $cnt.
+        my $cnt = 0;
+        for my $child ( $self->szr_grid_data->GetChildren() ) {
+            my $itm = $self->szr_grid_data->GetItem( $cnt );
+            if( my $win = $itm->GetWindow ) {
+                if( $win->GetId == $button->GetId ) {
+                    $self->szr_grid_data->Remove( $cnt );
+                    $self->szr_grid_data->Remove( $cnt - 1 );
+                    $button->Destroy;
+                    $self->rows->{ $uuid }->clearme;
+                    delete $self->rows->{ $uuid };
+                    $self->szr_grid_data->Layout();
+                    $self->pnl_main->Layout();
+                    return 1;
+                }
             }
+            $cnt++;
         }
+
+        say "whoopsie could not find row to delete";
         return 1;
     }#}}}
 
-    sub OnChooseServer {#{{{
-        my $self = shift;
-        $self->set_proto();
-        $self->set_txtbox_user();
-        $self->set_default_account();
-        $self->set_pass();
-        return 1;
-    }#}}}
-    sub OnChooseUser {#{{{
-        my $self = shift;
-        $self->set_default_account();
-        $self->set_pass();
-        return 1;
-    }#}}}
 
     no Moose;
     __PACKAGE__->meta->make_immutable; 
