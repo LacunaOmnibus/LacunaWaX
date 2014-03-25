@@ -134,7 +134,7 @@ package LacunaWax::Dialog::MissionEditor::TabObjective {
         my $v = Wx::ScrolledWindow->new(
             $self->pnl_main, -1, 
             wxDefaultPosition, 
-            Wx::Size->new( $self->pnl_main->GetClientSize->width - 20, $self->pnl_main->GetClientSize->height - 50 ),
+            Wx::Size->new( $self->pnl_main->GetClientSize->width - 20, $self->pnl_main->GetClientSize->height - 90 ),
             wxTAB_TRAVERSAL
             |wxALWAYS_SHOW_SB
         );

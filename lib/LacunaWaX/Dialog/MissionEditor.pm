@@ -21,7 +21,7 @@ package LacunaWaX::Dialog::MissionEditor {
     use Moose;
     use Try::Tiny;
     use Wx qw(:everything);
-    use Wx::Event qw(EVT_CLOSE EVT_NOTEBOOK_PAGE_CHANGED);
+    use Wx::Event qw(EVT_BUTTON EVT_CLOSE EVT_NOTEBOOK_PAGE_CHANGED);
 
     extends 'LacunaWaX::Dialog::NonScrolled';
 
@@ -32,6 +32,12 @@ package LacunaWaX::Dialog::MissionEditor {
     has [qw(width height)] => (
         is          => 'rw',
         isa         => 'Int',
+        lazy_build  => 1
+    );
+
+    has [qw( btn_delete btn_save )] => (
+        is          => 'rw',
+        isa         => 'Wx::Button',
         lazy_build  => 1
     );
 
@@ -46,6 +52,12 @@ package LacunaWaX::Dialog::MissionEditor {
     has 'notebook' => (
         is          => 'rw',
         isa         => 'Wx::Notebook',
+        lazy_build  => 1
+    );
+
+    has 'szr_buttons' => (
+        is          => 'rw',
+        isa         => 'Wx::Sizer', # horizontal
         lazy_build  => 1
     );
 
@@ -78,8 +90,13 @@ package LacunaWaX::Dialog::MissionEditor {
         $self->notebook->AddPage( $self->tab_objective->pnl_main, "Objectives" );
         $self->notebook->AddPage( $self->tab_reward->pnl_main, "Rewards" );
 
+        $self->szr_buttons->Add( $self->btn_save );
+        $self->szr_buttons->Add( $self->btn_delete );
+
         $self->main_sizer->AddSpacer(5);
         $self->main_sizer->Add($self->notebook, 1, wxEXPAND, 0);
+        $self->main_sizer->AddSpacer(5);
+        $self->main_sizer->Add($self->szr_buttons, 0, 0, 0);
 
         $self->_set_events();
         $self->init_screen();
@@ -88,11 +105,24 @@ package LacunaWaX::Dialog::MissionEditor {
     };
     sub _set_events {#{{{
         my $self = shift;
-        EVT_CLOSE(                  $self,                          sub{$self->OnClose(@_)}     );
-        EVT_NOTEBOOK_PAGE_CHANGED(  $self, $self->notebook->GetId,  sub{$self->OnTabChange(@_)} );
+        EVT_BUTTON(                 $self->dialog,  $self->btn_delete->GetId,   sub{$self->OnDelete(@_)}    );
+        EVT_BUTTON(                 $self->dialog,  $self->btn_save->GetId,     sub{$self->OnSave(@_)}      );
+        EVT_CLOSE(                  $self->dialog,                              sub{$self->OnClose(@_)}     );
+        EVT_NOTEBOOK_PAGE_CHANGED(  $self->dialog, $self->notebook->GetId,      sub{$self->OnTabChange(@_)} );
         return 1;
     }#}}}
 
+    sub _build_btn_delete {#{{{
+        my $self = shift;
+        my $v = Wx::Button->new($self->dialog, -1, "Delete");
+        $v->Enable(0);
+        return $v;
+    }#}}}
+    sub _build_btn_save {#{{{
+        my $self = shift;
+        my $v = Wx::Button->new($self->dialog, -1, "Save");
+        return $v;
+    }#}}}
     sub _build_height {#{{{
         return 750;
     }#}}}
@@ -104,7 +134,7 @@ package LacunaWaX::Dialog::MissionEditor {
         my $v = Wx::Notebook->new(
             $self->dialog, -1, 
             wxDefaultPosition, 
-            Wx::Size->new( $self->width - 10, $self->height - 10 ),
+            Wx::Size->new( $self->width - 10, $self->height - 50 ),
             0
         );
         return $v;
@@ -140,6 +170,11 @@ package LacunaWaX::Dialog::MissionEditor {
         $s->SetHeight( $self->height );
         return $s;
     }#}}}
+    sub _build_szr_buttons {#{{{
+        my $self = shift;
+        my $v = wxTheApp->build_sizer($self->dialog, wxHORIZONTAL, 'Buttons');
+        return $v;
+    }#}}}
     sub _build_title {#{{{
         my $self = shift;
         return 'Sitter Manager';
@@ -152,29 +187,49 @@ package LacunaWaX::Dialog::MissionEditor {
         ### mission.
 
         $self->clear_current_mission;
+        $self->btn_delete->Enable(0);
 
         $self->tab_overview->clear_all;
         $self->tab_objective->clear_all;
+        $self->tab_reward->clear_all;
     }#}}}
     sub update_current_mission {#{{{
         my $self = shift;
+
+        $self->notebook->Enable(0);
+        wxTheApp->throb;
 
         ### A new mission has been selected.  Set all of the inputs on all 
         ### tabs with data from that mission.  Triggered when 
         ### $self->current_mission changes.
 
+        $self->btn_delete->Enable(1);
+        $self->main_sizer->Layout();
+        wxTheApp->Yield();
+
         $self->tab_overview->cmbo_name->SetValue( $self->current_mission->name );
         $self->tab_overview->txt_description->SetValue( $self->current_mission->description );
         $self->tab_overview->txt_net19_head->SetValue( $self->current_mission->net19_head );
         $self->tab_overview->txt_net19_complete->SetValue( $self->current_mission->net19_complete );
-        $self->tab_overview->btn_delete->Enable(1);
+        wxTheApp->Yield();
 
         my $mo_rs = $self->current_mission->material_objective( {}, {order_by => {-asc => 'type'}} );
         while( my $mo_rec = $mo_rs->next ) {
+            wxTheApp->Yield();
             $self->tab_objective->add_material_row( $mo_rec );
         }
-        $self->tab_objective->pnl_main->Layout();
+        $self->tab_objective->swin_main->FitInside();
 
+        my $reward_rs = $self->current_mission->reward( {}, {order_by => {-asc => 'type'}} );
+        while( my $reward_rec = $reward_rs->next ) {
+            wxTheApp->Yield();
+            $self->tab_reward->add_material_row( $reward_rec );
+        }
+        $self->tab_reward->swin_main->FitInside();
+
+        wxTheApp->endthrob;
+        $self->notebook->Enable(1);
+        return 1;
     }#}}}
 
     sub OnClose {#{{{
@@ -199,7 +254,13 @@ package LacunaWaX::Dialog::MissionEditor {
         my $dialog  = shift;
         my $event   = shift;
 
+        wxTheApp->throb;
+
+        ### 
         ### Sanity-check inputs
+        ### 
+
+        ### Overview
         my %reqd = (
             tab_overview => {
                 cmbo_name => 'Name',
@@ -210,6 +271,7 @@ package LacunaWaX::Dialog::MissionEditor {
         );
         while( my($pnl, $reqs) = each %reqd ) {
             while( my($input, $text) = each %{$reqs} ) {
+                wxTheApp->Yield;
                 unless( $self->$pnl->$input->GetValue ) {
                     wxTheApp->poperr( "$reqd{$pnl}->{$input} is required!", "Missing required field");
                     return;
@@ -217,13 +279,30 @@ package LacunaWaX::Dialog::MissionEditor {
             }
         }
 
+        ### Objective rows
+        while( my($uuid, $res_row) = each %{ $self->tab_objective->res_rows } ) {
+            my $type = $res_row->chc_entity_type->GetStringSelection;
+            my $name = $res_row->chc_entity_name->GetStringSelection;
+            my $quan = $res_row->spin_quantity->GetValue;
+            if( grep{ $_ eq $type}qw(glyphs plans resources ships) ) {
+                wxTheApp->Yield;
+                unless( $name and $quan ) {
+                    wxTheApp->poperr("Name and quantity are required when specifying $type");
+                    return;
+                }
+            }
+        }
+
+        ### 
+        ### Sanity checks complete; add the records
+        ### 
+
+
         my $schema = wxTheApp->main_schema;
 
         ### Get our mission record (or create a new one)
         my $mission_rec = $schema->resultset('Mission')->find_or_create(
-            {
-                name            => $self->tab_overview->cmbo_name->GetValue,
-            },
+            { name => $self->tab_overview->cmbo_name->GetValue },
             { key => 'mission_name' }
         );
         $mission_rec->description(      $self->tab_overview->txt_description->GetValue      );
@@ -236,10 +315,8 @@ package LacunaWaX::Dialog::MissionEditor {
         $mission_rec->delete_related('reward');
 
         ### Add material objectives
-        ### CHECK
-        ### If we have a type and quantity (glyph, 10), make sure we also have 
-        ### a name (bauxite)
         while( my($uuid, $res_row) = each %{ $self->tab_objective->res_rows } ) {
+            wxTheApp->Yield;
             my $type = $res_row->chc_entity_type->GetStringSelection;
             next if $type eq 'SELECT';
             $mission_rec->create_related('material_objective', {
@@ -256,8 +333,32 @@ package LacunaWaX::Dialog::MissionEditor {
             })
         }
 
+        ### Need to add fleet objectives here
+
+        ### Add rewards
+        while( my($uuid, $res_row) = each %{ $self->tab_reward->res_rows } ) {
+            wxTheApp->Yield;
+            my $type = $res_row->chc_entity_type->GetStringSelection;
+            next if $type eq 'SELECT';
+            $mission_rec->create_related('reward', {
+                type        => $type,
+                name        => $res_row->chc_entity_name->GetStringSelection,
+                quantity    => $res_row->spin_quantity->GetValue,
+                extra_level => $res_row->spin_extra_level->GetValue,
+                berth       => $res_row->spin_min_berth->GetValue,
+                cargo       => $res_row->spin_min_cargo->GetValue,
+                combat      => $res_row->spin_min_combat->GetValue,
+                occupants   => $res_row->spin_min_occupants->GetValue,
+                speed       => $res_row->spin_min_speed->GetValue,
+                stealth     => $res_row->spin_min_stealth->GetValue,
+            })
+        }
+
+        wxTheApp->Yield;
         $mission_rec->update();
+        wxTheApp->Yield;
         $self->tab_overview->update_cmbo_name();
+        wxTheApp->endthrob;
         wxTheApp->popmsg("Mission Saved.");
         return 1;
     }#}}}

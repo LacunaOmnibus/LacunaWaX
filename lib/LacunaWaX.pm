@@ -48,6 +48,7 @@ package LacunaWaX {
         ### Do not change the order of the attributes without testing.
         ### db_file might depend on the existence of globals, etc.
         my @build_attrs = (
+            'is_throbbing',
             'globals', 'wxglobals',
             'clock_type', 'time_zone',
             'db_file', 'db_log_file',
@@ -116,6 +117,12 @@ package LacunaWaX {
         my $arg  = shift;
         $self->{'icon_image'} = $arg if $arg;
         return $self->{'icon_image'};
+    }#}}}
+    sub is_throbbing {#{{{
+        my $self = shift;
+        my $arg  = shift;
+        $self->{'is_throbbing'} = $arg if $arg;
+        return $self->{'is_throbbing'};
     }#}}}
     sub game_client {#{{{
         my $self = shift;
@@ -249,6 +256,9 @@ package LacunaWaX {
         $icon->CopyFromBitmap($bmp);
 
         return $icon;
+    }#}}}
+    sub _build_is_throbbing {#{{{
+        return 0;
     }#}}}
     sub _build_main_frame {#{{{
         my $self = shift;
@@ -488,7 +498,7 @@ called.
         my $self        = shift;
         my $parent      = shift;
         my $direction   = shift;
-        my $name        = shift or die "iSizer name is required.";
+        my $name        = shift or croak "Sizer name is required.";
         my $force_box   = shift || 0;
         my $pos         = shift || wxDefaultPosition;
         my $size        = shift || wxDefaultSize;
@@ -799,6 +809,7 @@ Returns true if the database passed in contains the correct tables and columns.
     }#}}}
     sub endthrob {#{{{
         my $self = shift;
+        $self->is_throbbing(0);
         $self->main_frame->status_bar->endthrob;
     }#}}}
     sub food_types {#{{{
@@ -1165,6 +1176,7 @@ string.
     }#}}}
     sub throb {#{{{
         my $self = shift;
+        $self->is_throbbing(1);
         $self->main_frame->status_bar->throb;
     }#}}}
     sub travel_time {#{{{

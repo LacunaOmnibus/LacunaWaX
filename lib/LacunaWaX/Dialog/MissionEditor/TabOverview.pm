@@ -44,14 +44,6 @@ package LacunaWax::Dialog::MissionEditor::TabOverview {
         lazy_build  => 1,
     );
 
-    ### CHECK
-    ### I might move these to parent and place them under the notebook.
-    has [qw( btn_delete btn_save )] => (
-        is          => 'rw',
-        isa         => 'Wx::Button',
-        lazy_build  => 1
-    );
-
     has 'new_rec_str' => (
         is          => 'rw',
         isa         => 'Str',
@@ -87,9 +79,6 @@ package LacunaWax::Dialog::MissionEditor::TabOverview {
         $self->szr_data_grid->Add( $self->lbl_net19_complete );
         $self->szr_data_grid->Add( $self->txt_net19_complete );
 
-        $self->szr_button_grid->Add( $self->btn_save );
-        $self->szr_button_grid->Add( $self->btn_delete );
-
         $self->szr_main->AddSpacer(20);
         $self->szr_main->Add( $self->lbl_instructions );
         $self->szr_main->Add( $self->szr_data_grid );
@@ -105,23 +94,10 @@ package LacunaWax::Dialog::MissionEditor::TabOverview {
     }
     sub _set_events {#{{{
         my $self = shift;
-        EVT_BUTTON(     $self->pnl_main,  $self->btn_delete->GetId,   sub{$self->parent->OnDelete(@_)}  );
-        EVT_BUTTON(     $self->pnl_main,  $self->btn_save->GetId,     sub{$self->parent->OnSave(@_)}    );
         EVT_COMBOBOX(   $self->pnl_main,  $self->cmbo_name->GetId,    sub{$self->OnNameCombo(@_)}       );
         return 1;
     }#}}}
 
-    sub _build_btn_delete {#{{{
-        my $self = shift;
-        my $v = Wx::Button->new($self->pnl_main, -1, "Delete");
-        $v->Enable(0);
-        return $v;
-    }#}}}
-    sub _build_btn_save {#{{{
-        my $self = shift;
-        my $v = Wx::Button->new($self->pnl_main, -1, "Save");
-        return $v;
-    }#}}}
     sub _build_lbl_instructions {#{{{
         my $self = shift;
 
@@ -271,7 +247,6 @@ package LacunaWax::Dialog::MissionEditor::TabOverview {
         $self->txt_description->SetValue(q{});
         $self->txt_net19_head->SetValue(q{});
         $self->txt_net19_complete->SetValue(q{});
-        $self->btn_delete->Enable(0);
         return 1;
     }#}}}
     sub update_cmbo_name {#{{{

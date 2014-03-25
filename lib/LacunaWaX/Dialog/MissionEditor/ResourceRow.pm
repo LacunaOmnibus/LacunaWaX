@@ -45,10 +45,12 @@ package LacunaWax::Dialog::MissionEditor::ResourceRow {
 
     has 'record' => (
         is          => 'rw',
-        isa         => 'Maybe[LacunaWaX::Model::Schema::MissionMaterialObjective]',
+        isa         => 'Maybe[DBIx::Class::Core]',
         predicate   => 'has_record',
         documentation => q{
-            If passed in, control values should be set to the values in the record.
+            If passed in, control values will be set to the values in the record.
+            This can be either a LacunaWaX::Model::Schema::MissionMaterialObjective 
+            or a LacunaWaX::Model::Schema::MissionReward. 
         }
     );
 
@@ -317,7 +319,15 @@ package LacunaWax::Dialog::MissionEditor::ResourceRow {
         my $type = $self->chc_entity_type->GetStringSelection;
         return if $type eq 'SELECT';
 
-        wxTheApp->throb();
+        ### When the user individually changes the type, we want to throb.  
+        ### Especially for ships and plans, which take a second or two to 
+        ### populate.
+        ### However, if the user is loading a previous mission from the 
+        ### database, that load process itself will already be running the 
+        ### throbber.  Restarting and stopping it here will only make it look 
+        ### choppy.
+        my $do_local_throb = ( wxTheApp->is_throbbing ) ? 0 : 1;
+        wxTheApp->throb() if $do_local_throb;
 
         ### Clear the sizer, then re-add controls that appear for every 
         ### resource
@@ -463,7 +473,7 @@ package LacunaWax::Dialog::MissionEditor::ResourceRow {
 
         #$self->parent->pnl_main->Layout;
         $self->parent->swin_main->Layout;
-        wxTheApp->endthrob();
+        wxTheApp->endthrob() if $do_local_throb;
         return 1;
     }#}}}
 

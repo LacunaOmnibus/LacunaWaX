@@ -1,11 +1,5 @@
 
-### Need to add another grid sizer with SendShipRow objects.  I'll probably 
-### want to create a SendShipRow class first.
-###
-### BEFORE DOING THAT finish up everything else first, then copy this to 
-### TabReward.pm (which won't need SendShipRow objects).
-
-package LacunaWax::Dialog::MissionEditor::TabObjective {
+package LacunaWax::Dialog::MissionEditor::TabReward {
     use v5.14;
     use Data::UUID;
     use Moose;
@@ -99,14 +93,14 @@ package LacunaWax::Dialog::MissionEditor::TabObjective {
 
     sub _build_btn_add_material_row {#{{{
         my $self = shift;
-        my $v = Wx::Button->new($self->swin_main, -1, "Add A Material Objective");
+        my $v = Wx::Button->new($self->swin_main, -1, "Add A Reward");
         $v->Enable(1);
         return $v;
     }#}}}
     sub _build_lbl_instructions {#{{{
         my $self = shift;
 
-        my $inst = "OBJECTIVE INSTRUCTIONS GO HERE.";
+        my $inst = "REWARD INSTRUCTIONS GO HERE.";
 
         my $v = Wx::StaticText->new(
             $self->swin_main, -1, 
@@ -134,7 +128,7 @@ package LacunaWax::Dialog::MissionEditor::TabObjective {
         my $v = Wx::ScrolledWindow->new(
             $self->pnl_main, -1, 
             wxDefaultPosition, 
-            Wx::Size->new( $self->pnl_main->GetClientSize->width - 20, $self->pnl_main->GetClientSize->height - 50 ),
+            Wx::Size->new( $self->pnl_main->GetClientSize->width - 20, $self->pnl_main->GetClientSize->height - 90 ),
             wxTAB_TRAVERSAL
             |wxALWAYS_SHOW_SB
         );
