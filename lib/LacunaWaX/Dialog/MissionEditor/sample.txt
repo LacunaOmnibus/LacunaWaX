@@ -1,3 +1,6 @@
+# JDB yoinked this from somebody's submission on the forum.  ./sample_better.txt 
+# is from Norway's github and is probably a better example, and includes ship 
+# movement.
 # config-file-type: JSON 1
 {
     "name":"Action Stations!!",

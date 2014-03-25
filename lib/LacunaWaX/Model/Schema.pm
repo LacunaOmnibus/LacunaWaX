@@ -97,35 +97,72 @@ package LacunaWaX::Model::Schema::Mission {#{{{
 
     __PACKAGE__->table('Mission');
     __PACKAGE__->add_columns( 
-        id          => {data_type => 'integer', is_auto_increment => 1, is_nullable => 0, extra => {unsigned => 1} },
-        name        => {data_type => 'varchar', size => 32,             is_nullable => 0,  },
-        description => {data_type => 'text',                            is_nullable => 0,  },
-        net19       => {data_type => 'text',                            is_nullable => 0,  },
+        id              => {data_type => 'integer', is_auto_increment => 1, is_nullable => 0, extra => {unsigned => 1} },
+        name            => {data_type => 'varchar', size => 32,             is_nullable => 0,  },
+        description     => {data_type => 'text',                            is_nullable => 0,  },
+        net19_head      => {data_type => 'text',                            is_nullable => 0,  },
+        net19_complete  => {data_type => 'text',                            is_nullable => 0,  },
     );
     __PACKAGE__->set_primary_key( 'id' ); 
     __PACKAGE__->add_unique_constraint( 'mission_name' => [qw(name)] ); 
     __PACKAGE__->has_many(
-        objectives => 'LacunaWaX::Model::Schema::MissionObjective', 
+        material_objective => 'LacunaWaX::Model::Schema::MissionMaterialObjective', 
         { 'foreign.mission_id' => 'self.id' }
     );
     __PACKAGE__->has_many(
-        rewards => 'LacunaWaX::Model::Schema::MissionReward', 
+        fleet_objective => 'LacunaWaX::Model::Schema::MissionFleetObjective', 
+        { 'foreign.mission_id' => 'self.id' }
+    );
+    __PACKAGE__->has_many(
+        reward => 'LacunaWaX::Model::Schema::MissionReward', 
         { 'foreign.mission_id' => 'self.id' }
     );
 }#}}}
-package LacunaWaX::Model::Schema::MissionObjective {#{{{
+package LacunaWaX::Model::Schema::MissionFleetObjective {#{{{
     use v5.14;
     use base 'DBIx::Class::Core';
 
-    __PACKAGE__->table('MissionObjective');
+    __PACKAGE__->table('MissionFleetObjective');
+    __PACKAGE__->add_columns( 
+        id                  => {data_type => 'integer', is_auto_increment => 1, is_nullable => 0, extra => {unsigned => 1}  },
+        mission_id          => {data_type => 'integer', is_auto_increment => 0, is_nullable => 0, extra => {unsigned => 1}  },
+        ship_type           => {data_type => 'varchar', size => 32,             is_nullable => 1,                           },
+        targ_in_zone        => {data_type => 'integer',                         is_nullable => 1,                           },
+        targ_color          => {data_type => 'varchar', size => 32,             is_nullable => 0, default_value => 'any'    },
+        targ_inhabited      => {data_type => 'integer',                         is_nullable => 1,                           },
+        targ_isolationist   => {data_type => 'integer',                         is_nullable => 1,                           },
+        targ_size_min       => {data_type => 'integer',                         is_nullable => 1,                           },
+        targ_size_max       => {data_type => 'integer',                         is_nullable => 1,                           },
+        ### 'star', 'habitable', 'gas_giant',
+        targ_type           => {data_type => 'varchar', size => 32,             is_nullable => 0, default_value => 'habitable'  },
+    );
+    __PACKAGE__->set_primary_key( 'id' ); 
+    __PACKAGE__->belongs_to(
+        mission => 'LacunaWaX::Model::Schema::Mission', 
+        { 'foreign.id' => 'self.mission_id' }
+    );
+}#}}}
+package LacunaWaX::Model::Schema::MissionMaterialObjective {#{{{
+    use v5.14;
+    use base 'DBIx::Class::Core';
+
+    __PACKAGE__->table('MissionMaterialObjective');
     __PACKAGE__->add_columns( 
         id          => {data_type => 'integer', is_auto_increment => 1, is_nullable => 0, extra => {unsigned => 1} },
         mission_id  => {data_type => 'integer', is_auto_increment => 0, is_nullable => 0, extra => {unsigned => 1} },
-        type        => {data_type => 'varchar', size => 32,             is_nullable => 0,  },
-        value       => {data_type => 'varchar', size => 32,             is_nullable => 0,  },
+        type        => {data_type => 'varchar', size => 32,             is_nullable => 1,  },   # 'resource'
+        name        => {data_type => 'varchar', size => 32,             is_nullable => 1,  },   # 'gold'
+        quantity    => {data_type => 'integer',                         is_nullable => 0, default_value => 0 },
+        extra_level => {data_type => 'integer',                         is_nullable => 0, default_value => 0 },
+        berth       => {data_type => 'integer',                         is_nullable => 0, default_value => 0 },
+        cargo       => {data_type => 'integer',                         is_nullable => 0, default_value => 0 },
+        combat      => {data_type => 'integer',                         is_nullable => 0, default_value => 0 },
+        occupants   => {data_type => 'integer',                         is_nullable => 0, default_value => 0 },
+        speed       => {data_type => 'integer',                         is_nullable => 0, default_value => 0 },
+        stealth     => {data_type => 'integer',                         is_nullable => 0, default_value => 0 },
     );
     __PACKAGE__->set_primary_key( 'id' ); 
-    __PACKAGE__->has_one(
+    __PACKAGE__->belongs_to(
         mission => 'LacunaWaX::Model::Schema::Mission', 
         { 'foreign.id' => 'self.mission_id' }
     );
@@ -138,11 +175,19 @@ package LacunaWaX::Model::Schema::MissionReward {#{{{
     __PACKAGE__->add_columns( 
         id          => {data_type => 'integer', is_auto_increment => 1, is_nullable => 0, extra => {unsigned => 1} },
         mission_id  => {data_type => 'integer', is_auto_increment => 0, is_nullable => 0, extra => {unsigned => 1} },
-        type        => {data_type => 'varchar', size => 32,             is_nullable => 0,  },
-        value       => {data_type => 'varchar', size => 32,             is_nullable => 0,  },
+        type        => {data_type => 'varchar', size => 32,             is_nullable => 1,  },   # 'plans'
+        name        => {data_type => 'varchar', size => 32,             is_nullable => 1,  },   # 'Junk Pyramid Sculpture'
+        quantity    => {data_type => 'integer',                         is_nullable => 0, default_value => 0 },
+        extra_level => {data_type => 'integer',                         is_nullable => 0, default_value => 0 },
+        berth       => {data_type => 'integer',                         is_nullable => 0, default_value => 0 },
+        cargo       => {data_type => 'integer',                         is_nullable => 0, default_value => 0 },
+        combat      => {data_type => 'integer',                         is_nullable => 0, default_value => 0 },
+        occupants   => {data_type => 'integer',                         is_nullable => 0, default_value => 0 },
+        speed       => {data_type => 'integer',                         is_nullable => 0, default_value => 0 },
+        stealth     => {data_type => 'integer',                         is_nullable => 0, default_value => 0 },
     );
     __PACKAGE__->set_primary_key( 'id' ); 
-    __PACKAGE__->has_one(
+    __PACKAGE__->belongs_to(
         mission => 'LacunaWaX::Model::Schema::Mission', 
         { 'foreign.id' => 'self.mission_id' }
     );
@@ -312,7 +357,8 @@ package LacunaWaX::Model::Schema {
         BodyTypes
         LotteryPrefs
         Mission
-        MissionObjective
+        MissionFleetObjective
+        MissionMaterialObjective
         MissionReward
         ScheduleAutovote
         ServerAccounts

@@ -111,7 +111,7 @@ package LacunaWaX::MainFrame {
     sub _build_default_height {#{{{
         my $self = shift;
         my( $sw, $sh ) = $self->get_screen_resolution;
-        my $desired = 900;
+        my $desired = 850;
         return( $sh < $desired ) ? $sh - 50 : $desired;
     }#}}}
     sub _build_default_width {#{{{

@@ -1,4 +1,21 @@
 
+=pod
+
+Sample Missions (well, the public repo of all missions)
+https://github.com/plainblack/Lacuna-Mission
+
+The test code may help a bit with it, but they're all json files.
+
+The old mission editor didn't deal with quantity, or berth levels. I had a quick json parser rebuild the missions for me to replace repetitive objectives with a version with the quantity field.
+
+In the server code, insights can be found with bin/add_missions.pl and lib/Lacuna/DB/Result/Mission.pm
+
+Hope that can get you started, I'll be on later today for any questions.
+
+-N
+
+=cut
+
 package LacunaWaX::Dialog::MissionEditor {
     use v5.14;
     use Moose;
@@ -52,7 +69,7 @@ package LacunaWaX::Dialog::MissionEditor {
 
     sub BUILD {
         my $self = shift;
-    
+
         wxTheApp->borders_off();    # Change to borders_on to see borders around sizers
         $self->SetTitle( $self->title );
         $self->SetSize( $self->size );
@@ -66,6 +83,7 @@ package LacunaWaX::Dialog::MissionEditor {
 
         $self->_set_events();
         $self->init_screen();
+        $self->tab_overview->cmbo_name->SetFocus();
         return $self;
     };
     sub _set_events {#{{{
@@ -130,25 +148,33 @@ package LacunaWaX::Dialog::MissionEditor {
     sub reset {#{{{
         my $self = shift;
 
-        ### Clear everything; user wants to start creating a new mission.
+        ### Clear everything on all tabs; user wants to start creating a new 
+        ### mission.
 
         $self->clear_current_mission;
 
-        $self->tab_overview->cmbo_name->SetValue(q{});
-        $self->tab_overview->txt_description->SetValue(q{});
-        $self->tab_overview->txt_net19->SetValue(q{});
-        $self->tab_overview->btn_delete->Enable(0);
+        $self->tab_overview->clear_all;
+        $self->tab_objective->clear_all;
     }#}}}
     sub update_current_mission {#{{{
         my $self = shift;
 
-        ### A new mission has been selected.  Set all of the text boxes with 
-        ### data from that mission.
+        ### A new mission has been selected.  Set all of the inputs on all 
+        ### tabs with data from that mission.  Triggered when 
+        ### $self->current_mission changes.
 
         $self->tab_overview->cmbo_name->SetValue( $self->current_mission->name );
         $self->tab_overview->txt_description->SetValue( $self->current_mission->description );
-        $self->tab_overview->txt_net19->SetValue( $self->current_mission->net19 );
+        $self->tab_overview->txt_net19_head->SetValue( $self->current_mission->net19_head );
+        $self->tab_overview->txt_net19_complete->SetValue( $self->current_mission->net19_complete );
         $self->tab_overview->btn_delete->Enable(1);
+
+        my $mo_rs = $self->current_mission->material_objective( {}, {order_by => {-asc => 'type'}} );
+        while( my $mo_rec = $mo_rs->next ) {
+            $self->tab_objective->add_material_row( $mo_rec );
+        }
+        $self->tab_objective->pnl_main->Layout();
+
     }#}}}
 
     sub OnClose {#{{{
@@ -173,21 +199,65 @@ package LacunaWaX::Dialog::MissionEditor {
         my $dialog  = shift;
         my $event   = shift;
 
+        ### Sanity-check inputs
+        my %reqd = (
+            tab_overview => {
+                cmbo_name => 'Name',
+                txt_description => 'Description',
+                txt_net19_head => 'Network 19 Headline',
+                txt_net19_complete => 'Network 19 Completion',
+            },
+        );
+        while( my($pnl, $reqs) = each %reqd ) {
+            while( my($input, $text) = each %{$reqs} ) {
+                unless( $self->$pnl->$input->GetValue ) {
+                    wxTheApp->poperr( "$reqd{$pnl}->{$input} is required!", "Missing required field");
+                    return;
+                }
+            }
+        }
+
         my $schema = wxTheApp->main_schema;
 
-        ### CHECK
-        ### all 3 of those columns are required, so sanity checking needs to 
-        ### happen first, and the "|| q{}" need to all go away.
-        $schema->resultset('Mission')->find_or_create(
+        ### Get our mission record (or create a new one)
+        my $mission_rec = $schema->resultset('Mission')->find_or_create(
             {
-                name            => $self->tab_overview->cmbo_name->GetValue         || q{},
-                description     => $self->tab_overview->txt_description->GetValue   || q{},
-                net19           => $self->tab_overview->txt_net19->GetValue         || q{},
+                name            => $self->tab_overview->cmbo_name->GetValue,
             },
             { key => 'mission_name' }
         );
-        $self->tab_overview->update_cmbo_name();
+        $mission_rec->description(      $self->tab_overview->txt_description->GetValue      );
+        $mission_rec->net19_head(       $self->tab_overview->txt_net19_head->GetValue       );
+        $mission_rec->net19_complete(   $self->tab_overview->txt_net19_complete->GetValue   );
 
+        ### Clear out all related records.
+        $mission_rec->delete_related('material_objective');
+        $mission_rec->delete_related('fleet_objective');
+        $mission_rec->delete_related('reward');
+
+        ### Add material objectives
+        ### CHECK
+        ### If we have a type and quantity (glyph, 10), make sure we also have 
+        ### a name (bauxite)
+        while( my($uuid, $res_row) = each %{ $self->tab_objective->res_rows } ) {
+            my $type = $res_row->chc_entity_type->GetStringSelection;
+            next if $type eq 'SELECT';
+            $mission_rec->create_related('material_objective', {
+                type        => $type,
+                name        => $res_row->chc_entity_name->GetStringSelection,
+                quantity    => $res_row->spin_quantity->GetValue,
+                extra_level => $res_row->spin_extra_level->GetValue,
+                berth       => $res_row->spin_min_berth->GetValue,
+                cargo       => $res_row->spin_min_cargo->GetValue,
+                combat      => $res_row->spin_min_combat->GetValue,
+                occupants   => $res_row->spin_min_occupants->GetValue,
+                speed       => $res_row->spin_min_speed->GetValue,
+                stealth     => $res_row->spin_min_stealth->GetValue,
+            })
+        }
+
+        $mission_rec->update();
+        $self->tab_overview->update_cmbo_name();
         wxTheApp->popmsg("Mission Saved.");
         return 1;
     }#}}}

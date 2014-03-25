@@ -20,22 +20,28 @@ package LacunaWax::Dialog::MissionEditor::TabOverview {
         lazy_build  => 1,
     );
 
-    has [qw( lbl_instructions lbl_name lbl_description lbl_net19 )] => (
+    has [qw( lbl_instructions lbl_name lbl_description lbl_net19_head lbl_net19_complete )] => (
         is          => 'rw',
         isa         => 'Wx::StaticText',
-        lazy_build  => 1
+        lazy_build  => 1,
     );
 
     has 'cmbo_name' => (
         is          => 'rw',
         isa         => 'Wx::ComboBox',
-        lazy_build  => 1
+        lazy_build  => 1,
     );
 
-    has [qw( txt_description txt_net19 )] => (
+    has [qw( txt_width txt_height )] => (
+        is          => 'rw',
+        isa         => 'Int',
+        lazy_build  => 1,
+    );
+
+    has [qw( txt_description txt_net19_head txt_net19_complete )] => (
         is          => 'rw',
         isa         => 'Wx::TextCtrl',
-        lazy_build  => 1
+        lazy_build  => 1,
     );
 
     ### CHECK
@@ -70,15 +76,16 @@ package LacunaWax::Dialog::MissionEditor::TabOverview {
     sub BUILD {
         my $self = shift;
 
-        $self->cmbo_name();             # mention it to trigger its lazy_build
-        $self->update_cmbo_name();      # now that it exists, put data in it.
+        $self->update_cmbo_name();
 
         $self->szr_data_grid->Add( $self->lbl_name );
         $self->szr_data_grid->Add( $self->cmbo_name );
         $self->szr_data_grid->Add( $self->lbl_description );
         $self->szr_data_grid->Add( $self->txt_description );
-        $self->szr_data_grid->Add( $self->lbl_net19 );
-        $self->szr_data_grid->Add( $self->txt_net19 );
+        $self->szr_data_grid->Add( $self->lbl_net19_head );
+        $self->szr_data_grid->Add( $self->txt_net19_head );
+        $self->szr_data_grid->Add( $self->lbl_net19_complete );
+        $self->szr_data_grid->Add( $self->txt_net19_complete );
 
         $self->szr_button_grid->Add( $self->btn_save );
         $self->szr_button_grid->Add( $self->btn_delete );
@@ -91,6 +98,8 @@ package LacunaWax::Dialog::MissionEditor::TabOverview {
 
         $self->pnl_main->SetSizer( $self->szr_main );
         $self->_set_events;
+
+        ### SetFocus on cmbo_name is happening in our parent MissionEditor.
 
         return $self;
     }
@@ -151,17 +160,30 @@ package LacunaWax::Dialog::MissionEditor::TabOverview {
         $v->SetFont( wxTheApp->get_font('header_4') );
         return $v;
     }#}}}
-    sub _build_lbl_net19 {#{{{
+    sub _build_lbl_net19_complete {#{{{
         my $self = shift;
 
         my $v = Wx::StaticText->new(
             $self->pnl_main, -1, 
-            'Network 19:',
+            "Network 19\nCompletion:",
             wxDefaultPosition, 
             Wx::Size->new(-1,-1)
         );
         $v->SetFont( wxTheApp->get_font('header_4') );
         $v->SetToolTip('Text to be broadcast on Network 19 upon completion of mission');
+        return $v;
+    }#}}}
+    sub _build_lbl_net19_head {#{{{
+        my $self = shift;
+
+        my $v = Wx::StaticText->new(
+            $self->pnl_main, -1, 
+            "Network 19\nHeadline:",
+            wxDefaultPosition, 
+            Wx::Size->new(-1,-1)
+        );
+        $v->SetFont( wxTheApp->get_font('header_4') );
+        $v->SetToolTip('Network 19 headline');
         return $v;
     }#}}}
     sub _build_pnl_main {#{{{
@@ -190,7 +212,7 @@ package LacunaWax::Dialog::MissionEditor::TabOverview {
         my $v = Wx::ComboBox->new(
             $self->pnl_main, -1,
             q{},
-            wxDefaultPosition, Wx::Size->new(300,-1),
+            wxDefaultPosition, Wx::Size->new($self->txt_width,-1),
             [],
             wxCB_SORT
         );
@@ -204,26 +226,54 @@ package LacunaWax::Dialog::MissionEditor::TabOverview {
         my $v = Wx::TextCtrl->new(
             $self->pnl_main, -1,
             q{},
-            wxDefaultPosition, Wx::Size->new(300,150),
+            wxDefaultPosition, Wx::Size->new($self->txt_width,$self->txt_height),
             wxTE_MULTILINE
         );
         $v->SetFont( wxTheApp->get_font('para_text_1') );
         return $v;
     }#}}}
-    sub _build_txt_net19 {#{{{
+    sub _build_txt_net19_complete {#{{{
         my $self = shift;
 
         my $v = Wx::TextCtrl->new(
             $self->pnl_main, -1,
             q{},
-            wxDefaultPosition, Wx::Size->new(300,150),
+            wxDefaultPosition, Wx::Size->new($self->txt_width,$self->txt_height),
             wxTE_MULTILINE
         );
         $v->SetFont( wxTheApp->get_font('para_text_1') );
         $v->SetToolTip('Text to be broadcast on Network 19 upon completion of mission');
         return $v;
     }#}}}
+    sub _build_txt_net19_head {#{{{
+        my $self = shift;
 
+        my $v = Wx::TextCtrl->new(
+            $self->pnl_main, -1,
+            q{},
+            wxDefaultPosition, Wx::Size->new($self->txt_width,$self->txt_height),
+            wxTE_MULTILINE
+        );
+        $v->SetFont( wxTheApp->get_font('para_text_1') );
+        $v->SetToolTip('Network 19 headline');
+        return $v;
+    }#}}}
+    sub _build_txt_width {#{{{
+        return 400;
+    }#}}}
+    sub _build_txt_height {#{{{
+        return 150;
+    }#}}}
+
+    sub clear_all {#{{{
+        my $self = shift;
+        $self->cmbo_name->SetValue(q{});
+        $self->txt_description->SetValue(q{});
+        $self->txt_net19_head->SetValue(q{});
+        $self->txt_net19_complete->SetValue(q{});
+        $self->btn_delete->Enable(0);
+        return 1;
+    }#}}}
     sub update_cmbo_name {#{{{
         my $self = shift;
 
@@ -247,12 +297,10 @@ package LacunaWax::Dialog::MissionEditor::TabOverview {
 
         my $name  = $self->cmbo_name->GetValue;
         my $desc  = $self->txt_description->GetValue;
-        my $net19 = $self->txt_net19->GetValue;
+        my $net19 = $self->txt_net19_head->GetValue;
 
-        if( $name eq $self->new_rec_str ) {
-            $self->parent->reset();
-            return;
-        }
+        $self->parent->reset();
+        return if $name eq $self->new_rec_str;
 
         my $schema  = wxTheApp->main_schema;
         my $rs      = $schema->resultset('Mission')->search({ name => $name });

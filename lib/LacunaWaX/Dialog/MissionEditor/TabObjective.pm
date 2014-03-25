@@ -1,6 +1,9 @@
 
 ### Need to add another grid sizer with SendShipRow objects.  I'll probably 
 ### want to create a SendShipRow class first.
+###
+### BEFORE DOING THAT finish up everything else first, then copy this to 
+### TabReward.pm (which won't need SendShipRow objects).
 
 package LacunaWax::Dialog::MissionEditor::TabObjective {
     use v5.14;
@@ -21,7 +24,7 @@ package LacunaWax::Dialog::MissionEditor::TabObjective {
 
     #################################
 
-    has [qw( btn_add_row )] => (
+    has [qw( btn_add_material_row )] => (
         is          => 'rw',
         isa         => 'Wx::Button',
         lazy_build  => 1
@@ -39,6 +42,12 @@ package LacunaWax::Dialog::MissionEditor::TabObjective {
         lazy_build  => 1,
     );
 
+    has 'swin_main' => (
+        is          => 'rw',
+        isa         => 'Wx::ScrolledWindow',
+        lazy_build  => 1,
+    );
+
     has 'szr_grid_data' => (
         is          => 'rw',
         isa         => 'Wx::FlexGridSizer',
@@ -51,9 +60,15 @@ package LacunaWax::Dialog::MissionEditor::TabObjective {
         lazy_build  => 1
     );
 
-    has 'rows' => (
+    has 'res_rows' => (
         is          => 'rw',
         isa         => 'HashRef[LacunaWaX::Dialog::MissionEditor::ResourceRow]',
+        default     => sub{ {} },
+    );
+
+    has 'fleet_rows' => (
+        is          => 'rw',
+        isa         => 'HashRef[LacunaWaX::Dialog::MissionEditor::FleetRow]',
         default     => sub{ {} },
     );
 
@@ -66,30 +81,25 @@ package LacunaWax::Dialog::MissionEditor::TabObjective {
     sub BUILD {
         my $self = shift;
 
-        ### Start with one objective row showing.  The user can add more if 
-        ### needed.
-        $self->add_row();
-
         $self->szr_main->AddSpacer(20);
         $self->szr_main->Add( $self->lbl_instructions );
         $self->szr_main->Add( $self->szr_grid_data );
         $self->szr_main->Add( 0, 20, 0 );
-        $self->szr_main->Add( $self->btn_add_row );
+        $self->szr_main->Add( $self->btn_add_material_row );
 
-        $self->pnl_main->SetSizer( $self->szr_main );
-
+        $self->swin_main->SetSizer( $self->szr_main );
         $self->_set_events;
         return $self;
     }
     sub _set_events {#{{{
         my $self = shift;
-        EVT_BUTTON(     $self->pnl_main,  $self->btn_add_row->GetId,     sub{$self->OnAddObjective(@_)}    );
+        EVT_BUTTON(     $self->swin_main,  $self->btn_add_material_row->GetId,     sub{$self->OnAddMaterialObjective(@_)}    );
         return 1;
     }#}}}
 
-    sub _build_btn_add_row {#{{{
+    sub _build_btn_add_material_row {#{{{
         my $self = shift;
-        my $v = Wx::Button->new($self->pnl_main, -1, "Add Another Material Objective");
+        my $v = Wx::Button->new($self->swin_main, -1, "Add A Material Objective");
         $v->Enable(1);
         return $v;
     }#}}}
@@ -99,7 +109,7 @@ package LacunaWax::Dialog::MissionEditor::TabObjective {
         my $inst = "OBJECTIVE INSTRUCTIONS GO HERE.";
 
         my $v = Wx::StaticText->new(
-            $self->pnl_main, -1, 
+            $self->swin_main, -1, 
             $inst, 
             wxDefaultPosition, 
             Wx::Size->new(365,25)
@@ -110,7 +120,26 @@ package LacunaWax::Dialog::MissionEditor::TabObjective {
     }#}}}
     sub _build_pnl_main {#{{{
         my $self = shift;
-        my $v = Wx::Panel->new($self->parent->notebook, -1, wxDefaultPosition, wxDefaultSize);
+        my $v = Wx::Panel->new(
+            $self->parent->notebook, -1, 
+            wxDefaultPosition, 
+            wxDefaultSize
+        );
+        #my $v = Wx::Panel->new($self->swin_main, -1, wxDefaultPosition, wxDefaultSize);
+        return $v;
+    }#}}}
+    sub _build_swin_main {#{{{
+        my $self = shift;
+
+        my $v = Wx::ScrolledWindow->new(
+            $self->pnl_main, -1, 
+            wxDefaultPosition, 
+            Wx::Size->new( $self->pnl_main->GetClientSize->width - 20, $self->pnl_main->GetClientSize->height - 50 ),
+            wxTAB_TRAVERSAL
+            |wxALWAYS_SHOW_SB
+        );
+        $v->FitInside();
+        $v->SetScrollRate(10,10);
         return $v;
     }#}}}
     sub _build_szr_grid_data {#{{{
@@ -124,8 +153,9 @@ package LacunaWax::Dialog::MissionEditor::TabObjective {
         return $v;
     }#}}}
 
-    sub add_row {#{{{
+    sub add_material_row {#{{{
         my $self    = shift;
+        my $rec     = shift;        # Optional MissionMaterialObjective record
         my $delbtn  = shift // 1;
 
         ### Create a UUID that'll be used to associate the button with its 
@@ -139,14 +169,15 @@ package LacunaWax::Dialog::MissionEditor::TabObjective {
 
         ### Make a new row, put it in our hashref keyed off that UUID, and add 
         ### it to our grid
-        my $row = LacunaWax::Dialog::MissionEditor::ResourceRow->new(
+        my %args = (
             parent  => $self,
             type    => 'objective',
         );
-        $self->rows->{$txt_uuid} = $row;
+        $args{'record'} = $rec if $rec;
+        my $row = LacunaWax::Dialog::MissionEditor::ResourceRow->new( %args );
+        $self->res_rows->{$txt_uuid} = $row;
         $self->szr_grid_data->Add( $row->pnl_main );
-        
-        ### No delete button for the first row
+
         unless( $delbtn ) {
             $self->szr_grid_data->Add( 0, 0, 0 );
             return 1;
@@ -155,7 +186,7 @@ package LacunaWax::Dialog::MissionEditor::TabObjective {
         ### Create button, name it our UUID, set up its event, add it to our 
         ### grid
         my $butt = Wx::Button->new(
-            $self->pnl_main, -1, 
+            $self->swin_main, -1, 
             'X',
             wxDefaultPosition, Wx::Size->new(30,25),
             0,  # style
@@ -164,16 +195,25 @@ package LacunaWax::Dialog::MissionEditor::TabObjective {
         );
         $butt->SetForegroundColour( Wx::Colour->new(255, 0, 0) );
         $self->szr_grid_data->Add( $butt );
-        EVT_BUTTON( $self->pnl_main, $butt->GetId, sub{$self->OnDelRow(@_, $butt)} );
+        EVT_BUTTON( $self->swin_main, $butt->GetId, sub{$self->OnDelRow(@_, $butt)} );
 
+        $self->swin_main->FitInside();
+        return $row;
+    }#}}}
+    sub clear_all {#{{{
+        my $self = shift;
+
+        $self->szr_grid_data->Clear(1);
+        $self->res_rows( {} );
+        $self->fleet_rows( {} );
         $self->szr_grid_data->Layout();
-        return 1;
+        $self->swin_main->Layout();
     }#}}}
 
-    sub OnAddObjective {#{{{
-        my $self    = shift;
-        $self->add_row();
-        $self->pnl_main->Layout();
+    sub OnAddMaterialObjective {#{{{
+        my $self = shift;
+        $self->add_material_row();
+        $self->swin_main->Layout();
         return 1;
     }#}}}
     sub OnDelRow {#{{{
@@ -218,8 +258,8 @@ To delete a "row":
       associated row (current offset - 1) from the grid.
 
     - Now, using the button's name (the UUID), find the associated ResourceRow 
-      from the $self->rows hashref (keyed off that UUID).  Call that 
-      ResourceRow's clearme() method and delete the entry from $self->rows.
+      from the $self->res_rows hashref (keyed off that UUID).  Call that 
+      ResourceRow's clearme() method and delete the entry from $self->res_rows.
 
 =cut
 
@@ -233,10 +273,10 @@ To delete a "row":
                     $self->szr_grid_data->Remove( $cnt );
                     $self->szr_grid_data->Remove( $cnt - 1 );
                     $button->Destroy;
-                    $self->rows->{ $uuid }->clearme;
-                    delete $self->rows->{ $uuid };
+                    $self->res_rows->{ $uuid }->clearme;
+                    delete $self->res_rows->{ $uuid };
                     $self->szr_grid_data->Layout();
-                    $self->pnl_main->Layout();
+                    $self->swin_main->FitInside();
                     return 1;
                 }
             }
