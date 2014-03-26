@@ -1,9 +1,4 @@
 
-
-### This now works using GridSizer, but I think it should work with GridSizer.  
-### And if it does, a lot of the stupid can be removed from here.
-
-
 package LacunaWax::Dialog::MissionEditor::MaterielRow {
     use v5.14;
     use Moose;

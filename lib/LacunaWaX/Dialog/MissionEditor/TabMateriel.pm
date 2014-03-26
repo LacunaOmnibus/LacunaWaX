@@ -5,7 +5,7 @@
 ### BEFORE DOING THAT finish up everything else first, then copy this to 
 ### TabReward.pm (which won't need SendShipRow objects).
 
-package LacunaWax::Dialog::MissionEditor::TabObjective {
+package LacunaWax::Dialog::MissionEditor::TabMateriel {
     use v5.14;
     use Data::UUID;
     use Moose;

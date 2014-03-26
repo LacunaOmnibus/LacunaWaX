@@ -26,7 +26,7 @@ package LacunaWaX::Dialog::MissionEditor {
     extends 'LacunaWaX::Dialog::NonScrolled';
 
     use LacunaWaX::Dialog::MissionEditor::TabOverview;
-    use LacunaWaX::Dialog::MissionEditor::TabObjective;
+    use LacunaWaX::Dialog::MissionEditor::TabMateriel;
     use LacunaWaX::Dialog::MissionEditor::TabReward;
 
     has [qw(width height)] => (
@@ -69,7 +69,7 @@ package LacunaWaX::Dialog::MissionEditor {
 
     has 'tab_objective' => (
         is          => 'rw', 
-        isa         => 'LacunaWax::Dialog::MissionEditor::TabObjective',
+        isa         => 'LacunaWax::Dialog::MissionEditor::TabMateriel',
         lazy_build  => 1,
     );
 
@@ -154,7 +154,7 @@ package LacunaWaX::Dialog::MissionEditor {
     sub _build_tab_objective {#{{{
         my $self = shift;
 
-        my $v = LacunaWax::Dialog::MissionEditor::TabObjective->new(
+        my $v = LacunaWax::Dialog::MissionEditor::TabMateriel->new(
             parent => $self
         );
         return $v;
