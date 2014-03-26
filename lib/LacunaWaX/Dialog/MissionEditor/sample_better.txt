@@ -1,4 +1,7 @@
 # config-file-type: JSON 1
+# in_zone:
+#   1 == target body must be in current zone
+#   2 == target body must be in any zone other than the current
 {
    "description" : "We're in a bit of a bind. We need to send a Class III Supply Pod to a customer, but the factory is suffering a slow down. If you send the supplies needed, we'll hand over a few of our special Galleons.",
    "max_university_level" : "25",

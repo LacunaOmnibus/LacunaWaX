@@ -116,6 +116,10 @@ package LacunaWaX::Model::Globals::Wx {
         ### 4, as in html).
 
         ### Swiss is variable-width sans-serif (arial).
+        ### para_text_sub is _very_ small, to the point of being slightly hard 
+        ### to read.  Only really good for things like RadioBox labels.  Use it 
+        ### with caution.
+        $self->set_font('para_text_sub',        Wx::Font->new(6,  wxSWISS, wxNORMAL, wxNORMAL, 0)   );
         $self->set_font('para_text_1',          Wx::Font->new(8,  wxSWISS, wxNORMAL, wxNORMAL, 0)   );
         $self->set_font('para_text_2',          Wx::Font->new(10, wxSWISS, wxNORMAL, wxNORMAL, 0)   );
         $self->set_font('para_text_3',          Wx::Font->new(12, wxSWISS, wxNORMAL, wxNORMAL, 0)   );

@@ -220,6 +220,7 @@ COLUMNS
             1, 
             wxRA_SPECIFY_ROWS
         );
+
         $v->SetSize( $v->GetBestSize );
 
         if( my $current_clock = wxTheApp->clock_type ) {

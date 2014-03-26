@@ -521,165 +521,337 @@ called.
 
         ### See the comments in this hash; it's missing a few things.
         my %bldgs = (#{{{
-            Algae => 'Algae Cropper',
-            AlgaePond => 'Algae Pond',
-            AmalgusMeadow => 'Amalgus Meadow',
-            Apple => 'Apple Orchard',
-            Archaeology => 'Archaeology Ministry',
-            AtmosphericEvaporator => 'AtmosphericEvaporator',
+            algae => 'Algae Cropper',
+            algaepond => 'Algae Pond',
+            amalgusmeadow => 'Amalgus Meadow',
+            apple => 'Apple Orchard',
+            archaeology => 'Archaeology Ministry',
+            atmosphericevaporator => 'AtmosphericEvaporator',
             ### The in-game name for beaches 1-9 is "Beach N", not "Beach 0N" 
             ### as below.  Zero-padding added to fix the broken asciibetical 
             ### sorting.
-            'Beach[1]' => 'Beach 01',
-            'Beach[2]' => 'Beach 02',
-            'Beach[3]' => 'Beach 03',
-            'Beach[4]' => 'Beach 04',
-            'Beach[5]' => 'Beach 05',
-            'Beach[6]' => 'Beach 06',
-            'Beach[7]' => 'Beach 07',
-            'Beach[8]' => 'Beach 08',
-            'Beach[9]' => 'Beach 09',
-            'Beach[10]' => 'Beach 10',
-            'Beach[11]' => 'Beach 11',
-            'Beach[12]' => 'Beach 12',
-            'Beach[13]' => 'Beach 13',
-            Bean => 'Amalgus Bean Plantation',
-            Beeldeban => 'Beeldeban Herder',
-            BeeldebanNest => 'Beeldeban Nest',
-            BlackHoleGenerator => 'Black Hole Generator',
-            Bread => 'Bread Bakery',
-            Burger => 'Malcud Burger Packer',
-            Capitol => 'Capitol',
-            Cheese => 'Cheese Maker',
-            Chip => 'Denton Root Chip Fryer',
-            Cider => 'Apple Cider Bottler',
-            CitadelOfKnope => 'Citadel Of Knope',
-            CloakingLab => 'Cloaking Lab',
-            Corn => 'Corn Plantation',
-            CornMeal => 'Corn Meal Grinder',
-            CrashedShipSite => 'Crashed Ship Site',
-            Crater => 'Crater',
-            Dairy => 'Dairy Farm',
-            Denton => 'Denton Root Patch',
-            DentonBrambles => 'Denton Brambles',
-            DeployedBleeder => 'Deployed Bleeder',
-            Development => 'Development Ministry',
-            DistributionCenter => 'Distribution Center',
-            Embassy => 'Embassy',
-            EnergyReserve => 'Energy Reserve',
-            Entertainment => 'Entertainment District',
-            Espionage => 'Espionage Ministry',
-            EssentiaVein => 'Essentia Vein',
-            Fission => 'Fission Reacor',
-            Fissure => 'Fissure',
-            FoodReserve => 'Food Reserve',
-            Fusion => 'Fusion Reactor',
-            GasGiantLab => 'Gas Giant Lab',
-            GasGiantPlatform => 'Gas Giant Platform',
-            GeneticsLab => 'Genetics Lab',
-            Geo => 'Geo Energy Plant',
-            GeoThermalVent => 'Geo Thermal Vent',
-            GratchsGauntlet => q{Gratch's Gauntlet},
-            GreatBallOfJunk => 'Great Ball Of Junk',
-            Grove => 'Grove of Trees',
-            HallsOfVrbansk => 'Halls Of Vrbansk',
-            Hydrocarbon => 'Hydrocarbon Energy Plant',
-            Intelligence => 'Intelligence Ministry',
-            IntelTraining => 'Intel Training',
-            InterDimensionalRift => 'Inter Dimensional Rift',
-            JunkHengeSculpture => 'Junk Henge Sculpture',
-            KalavianRuins => 'Kalavian Ruins',
-            KasternsKeep => 'Kasterns Keep',
-            Lake => 'Lake',
-            Lagoon => 'Lagoon',
-            Lapis => 'Lapis Orchard',
-            LapisForest => 'Lapis Forest',
-            LibraryOfJith => 'Library Of Jith',
-            ### CHECK
-            ### I'm not real clear on how to deal with these.
-            #LostCityOfTyleon => 'Lost City Of Tyleon (A)',
-            #LostCityOfTyleon => 'Lost City Of Tyleon (B)',
-            #LostCityOfTyleon => 'Lost City Of Tyleon (C)',
-            #LostCityOfTyleon => 'Lost City Of Tyleon (D)',
-            #LostCityOfTyleon => 'Lost City Of Tyleon (E)',
-            #LostCityOfTyleon => 'Lost City Of Tyleon (F)',
-            #LostCityOfTyleon => 'Lost City Of Tyleon (G)',
-            #LostCityOfTyleon => 'Lost City Of Tyleon (H)',
-            #LostCityOfTyleon => 'Lost City Of Tyleon (I)',
-            LuxuryHousing => 'Luxury Housing',
-            Malcud => 'Malcud Fungus Farm',
-            MalcudField => 'Malcud Field',
-            MassadsHenge => 'Massads Henge',
-            MayhemTraining => 'Mayhem Training',
-            MercenariesGuild => 'Mercenaries Guild',
-            MetalJunkArches => 'Metal Junk Arches',
-            Mine => 'Mine',
-            MiningMinistry => 'Mining Ministry',
-            MissionCommand => 'Mission Command',
-            MunitionsLab => 'Munitions Lab',
-            NaturalSpring => 'Natural Spring',
-            Network19 => 'Network 19',
-            Observatory => 'Observatory',
-            OracleOfAnid => 'Oracle Of Anid',
-            OreRefinery => 'Ore Refinery',
-            OreStorage => 'Ore Storage',
-            Oversight => 'Oversight Ministry',
-            Pancake => 'Potato Pancake Factory',
-            PantheonOfHagness => 'Pantheon Of Hagness',
-            Park => 'Park',
-            Pie => 'Lapis Pie Bakery',
-            PilotTraining => 'Pilot Training',
-            PlanetaryCommand => 'Planetary Command Center',
-            PoliticsTraining => 'Politics Training',
-            Potato => 'Potato Patch',
-            Propulsion => 'Propulsion System Factory',
-            PyramidJunkSculpture => 'Pyramid Junk Sculpture',
-            Ravine => 'Ravine',
-            RockyOutcrop => 'Rocky Outcropping',
-            Sand => 'Patch of Sand',
-            SAW => 'Shield Against Weapons',
-            Security => 'Security Ministry',
-            Shake => 'Beeldeban Protein Shake Factory',
-            Shipyard => 'Shipyard',
-            Singularity => 'Singularity Energy Plant',
-            Soup => 'Amalgus Bean Soup Cannery',
-            SpaceJunkPark => 'Space Junk Park',
-            SpacePort => 'Space Port',
-            SpaceStationLab => 'Space Station Lab',
-            Stockpile => 'Stockpile',
-            SubspaceSupplyDepot => 'Subspace Supply Depot',
-            ### CHECK
-            ### Again, not sure how to deal with the levels.
-            #SupplyPod => 'Supply Pod',
-            Syrup => 'Algae Syrup Bottler',
-            TempleOfTheDrajilites => 'Temple Of The Drajilites',
-            TerraformingLab => 'Terraforming Lab',
-            TerraformingPlatform => 'Terraforming Platform',
-            TheDillonForge => 'The Dillon Forge',
-            TheftTraining => 'Theft Training',
-            ThemePark => 'Theme Park',
-            Trade => 'Trade Ministry',
-            Transporter => 'Subspace Transporter',
-            University => 'University',
-            Volcano => 'Volcano',
-            WasteDigester => 'Waste Digester',
-            WasteEnergy => 'Waste Energy',
-            WasteExchanger => 'Waste Exchanger',
-            WasteRecycling => 'Waste Recycling',
-            WasteSequestration => 'Waste Sequestration',
-            WasteTreatment => 'Waste Treatment Center',
-            WaterProduction => 'Water Production Plant',
-            WaterPurification => 'Water Purification Plant',
-            WaterReclamation => 'Water Reclamation Facility',
-            WaterStorage => 'Water Storage',
-            Wheat => 'Wheat Farm',
+            beach1 => 'Beach 01',
+            beach2 => 'Beach 02',
+            beach3 => 'Beach 03',
+            beach4 => 'Beach 04',
+            beach5 => 'Beach 05',
+            beach6 => 'Beach 06',
+            beach7 => 'Beach 07',
+            beach8 => 'Beach 08',
+            beach9 => 'Beach 09',
+            beach10 => 'Beach 10',
+            beach11 => 'Beach 11',
+            beach12 => 'Beach 12',
+            beach13 => 'Beach 13',
+            bean => 'Amalgus Bean Plantation',
+            beeldeban => 'Beeldeban Herder',
+            beeldebannest => 'Beeldeban Nest',
+            blackholegenerator => 'Black Hole Generator',
+            bread => 'Bread Bakery',
+            burger => 'Malcud Burger Packer',
+            capitol => 'Capitol',
+            cheese => 'Cheese Maker',
+            chip => 'Denton Root Chip Fryer',
+            cider => 'Apple Cider Bottler',
+            citadelofknope => 'Citadel Of Knope',
+            cloakinglab => 'Cloaking Lab',
+            corn => 'Corn Plantation',
+            cornmeal => 'Corn Meal Grinder',
+            crashedshipsite => 'Crashed Ship Site',
+            crater => 'Crater',
+            dairy => 'Dairy Farm',
+            denton => 'Denton Root Patch',
+            dentonbrambles => 'Denton Brambles',
+            deployedbleeder => 'Deployed Bleeder',
+            development => 'Development Ministry',
+            distributioncenter => 'Distribution Center',
+            embassy => 'Embassy',
+            energyreserve => 'Energy Reserve',
+            entertainment => 'Entertainment District',
+            espionage => 'Espionage Ministry',
+            essentiaVein => 'Essentia Vein',
+            fission => 'Fission Reacor',
+            fissure => 'Fissure',
+            foodreserve => 'Food Reserve',
+            fusion => 'Fusion Reactor',
+            gasgiantlab => 'Gas Giant Lab',
+            gasgiantplatform => 'Gas Giant Platform',
+            geneticslab => 'Genetics Lab',
+            geo => 'Geo Energy Plant',
+            geothermalvent => 'Geo Thermal Vent',
+            gratchsgauntlet => q{Gratch's Gauntlet},
+            greatballofjunk => 'Great Ball Of Junk',
+            grove => 'Grove of Trees',
+            hallsofvrbansk => 'Halls Of Vrbansk',
+            hydrocarbon => 'Hydrocarbon Energy Plant',
+            intelligence => 'Intelligence Ministry',
+            inteltraining => 'Intel Training',
+            interdimensionalrift => 'Inter Dimensional Rift',
+            junkhengesculpture => 'Junk Henge Sculpture',
+            kalavianruins => 'Kalavian Ruins',
+            kasternskeep => 'Kasterns Keep',
+            lake => 'Lake',
+            lagoon => 'Lagoon',
+            lapis => 'Lapis Orchard',
+            lapisforest => 'Lapis Forest',
+            libraryofjith => 'Library Of Jith',
+            lcota => 'Lost City Of Tyleon (A)',
+            lcotb => 'Lost City Of Tyleon (B)',
+            lcotc => 'Lost City Of Tyleon (C)',
+            lcotd => 'Lost City Of Tyleon (D)',
+            lcote => 'Lost City Of Tyleon (E)',
+            lcotf => 'Lost City Of Tyleon (F)',
+            lcotg => 'Lost City Of Tyleon (G)',
+            lcoth => 'Lost City Of Tyleon (H)',
+            lcoti => 'Lost City Of Tyleon (I)',
+            luxuryhousing => 'Luxury Housing',
+            malcud => 'Malcud Fungus Farm',
+            malcudfield => 'Malcud Field',
+            massadshenge => 'Massads Henge',
+            mayhemtraining => 'Mayhem Training',
+            mercenariesguild => 'Mercenaries Guild',
+            metaljunkarches => 'Metal Junk Arches',
+            mine => 'Mine',
+            miningministry => 'Mining Ministry',
+            missioncommand => 'Mission Command',
+            munitionslab => 'Munitions Lab',
+            naturalspring => 'Natural Spring',
+            network19 => 'Network 19',
+            observatory => 'Observatory',
+            oracleofanid => 'Oracle Of Anid',
+            orerefinery => 'Ore Refinery',
+            orestorage => 'Ore Storage',
+            oversight => 'Oversight Ministry',
+            pancake => 'Potato Pancake Factory',
+            pantheonofhagness => 'Pantheon Of Hagness',
+            park => 'Park',
+            pie => 'Lapis Pie Bakery',
+            pilottraining => 'Pilot Training',
+            planetarycommand => 'Planetary Command Center',
+            politicstraining => 'Politics Training',
+            potato => 'Potato Patch',
+            propulsion => 'Propulsion System Factory',
+            pyramidjunksculpture => 'Pyramid Junk Sculpture',
+            ravine => 'Ravine',
+            rockyoutcrop => 'Rocky Outcropping',
+            sand => 'Patch of Sand',
+            saw => 'shield Against Weapons',
+            security => 'Security Ministry',
+            shake => 'Beeldeban Protein Shake Factory',
+            shipyard => 'Shipyard',
+            singularity => 'Singularity Energy Plant',
+            soup => 'Amalgus Bean Soup Cannery',
+            spacejunkpark => 'Space Junk Park',
+            spaceport => 'Space Port',
+            ssla => 'Space Station Lab (A)',
+            sslb => 'Space Station Lab (B)',
+            sslc => 'Space Station Lab (C)',
+            ssld => 'Space Station Lab (D)',
+            stockpile => 'Stockpile',
+            subspacesupplydepot => 'Subspace Supply Depot',
+            ### There are multiple types of supply pod ships, but once they 
+            ### land, there's only one type of supply pod building
+            supplypod => 'Supply Pod',
+            syrup => 'Algae Syrup Bottler',
+            templeofthedrajilites => 'Temple Of The Drajilites',
+            terraforminglab => 'Terraforming Lab',
+            terraformingplatform => 'Terraforming Platform',
+            thedillonforge => 'The Dillon Forge',
+            thefttraining => 'Theft Training',
+            themepark => 'Theme Park',
+            trade => 'Trade Ministry',
+            transporter => 'Subspace Transporter',
+            university => 'University',
+            volcano => 'Volcano',
+            wastedigester => 'Waste Digester',
+            wasteenergy => 'Waste Energy',
+            wasteexchanger => 'Waste Exchanger',
+            wasterecycling => 'Waste Recycling',
+            wastesequestration => 'Waste Sequestration',
+            wastetreatment => 'Waste Treatment Center',
+            waterproduction => 'Water Production Plant',
+            waterpurification => 'Water Purification Plant',
+            waterreclamation => 'Water Reclamation Facility',
+            waterstorage => 'Water Storage',
+            wheat => 'Wheat Farm',
+        );#}}}
+        my %classes = (#{{{
+            algae => 'Lacuna::DB::Result::Building::Food::Algae',
+            algaepond => 'Lacuna::DB::Result::Building::Permanent::AlgaePond',
+            amalgusmeadow => 'Lacuna::DB::Result::Building::Permanent::AmalgusMeadow',
+            apple => 'Lacuna::DB::Result::Building::Food::Apple',
+            archaeology => 'Lacuna::DB::Result::Building::Archaeology',
+            atmosphericevaporator => 'Lacuna::DB::Result::Building::Water::AtmosphericEvaporator',
+            beach1 => 'Lacuna::DB::Result::Building::Permanent::Beach1',
+            beach2 => 'Lacuna::DB::Result::Building::Permanent::Beach2',
+            beach3 => 'Lacuna::DB::Result::Building::Permanent::Beach3',
+            beach4 => 'Lacuna::DB::Result::Building::Permanent::Beach4',
+            beach5 => 'Lacuna::DB::Result::Building::Permanent::Beach5',
+            beach6 => 'Lacuna::DB::Result::Building::Permanent::Beach6',
+            beach7 => 'Lacuna::DB::Result::Building::Permanent::Beach7',
+            beach8 => 'Lacuna::DB::Result::Building::Permanent::Beach8',
+            beach9 => 'Lacuna::DB::Result::Building::Permanent::Beach9',
+            beach10 => 'Lacuna::DB::Result::Building::Permanent::Beach10',
+            beach11 => 'Lacuna::DB::Result::Building::Permanent::Beach11',
+            beach12 => 'Lacuna::DB::Result::Building::Permanent::Beach12',
+            beach13 => 'Lacuna::DB::Result::Building::Permanent::Beach13',
+            bean => 'Lacuna::DB::Result::Building::Food::Bean',
+            beeldeban => 'Lacuna::DB::Result::Building::Food::Beeldeban',
+            beeldebannest => 'Lacuna::DB::Result::Building::Permanent::BeeldebanNest',
+            blackholegenerator => 'Lacuna::DB::Result::Building::Permanent::BlackHoleGenerator',
+            bread => 'Lacuna::DB::Result::Building::Food::Bread',
+            burger => 'Lacuna::DB::Result::Building::Food::Burger',
+            capitol => 'Lacuna::DB::Result::Building::Capitol',
+            cheese => 'Lacuna::DB::Result::Building::Food::Cheese',
+            chip => 'Lacuna::DB::Result::Building::Food::Chip',
+            cider => 'Lacuna::DB::Result::Building::Food::Cider',
+            citadelofknope => 'Lacuna::DB::Result::Building::Permanent::CitadelOfKnope',
+            cloakinglab => 'Lacuna::DB::Result::Building::CloakingLab',
+            corn => 'Lacuna::DB::Result::Building::Food::Corn',
+            cornmeal => 'Lacuna::DB::Result::Building::Food::CornMeal',
+            crashedshipsite => 'Lacuna::DB::Result::Building::Permanent::CrashedShipSite',
+            crater => 'Lacuna::DB::Result::Building::Permanent::Crater',
+            dairy => 'Lacuna::DB::Result::Building::Food::Dairy',
+            denton => 'Lacuna::DB::Result::Building::Food::Root',
+            dentonbrambles => 'Lacuna::DB::Result::Building::Permanent::DentonBrambles',
+            deployedbleeder => 'Lacuna::DB::Result::Building::DeployedBleeder',
+            development => 'Lacuna::DB::Result::Building::Development',
+            distributioncenter => 'Lacuna::DB::Result::Building::DistributionCenter',
+            embassy => 'Lacuna::DB::Result::Building::Embassy',
+            energyreserve => 'Lacuna::DB::Result::Building::Energy::Reserve',
+            entertainment => 'Lacuna::DB::Result::Building::EntertainmentDistrict',
+            espionage => 'Lacuna::DB::Result::Building::Espionage',
+            essentiavein => 'Lacuna::DB::Result::Building::Permanent::EssentiaVein',
+            fission => 'Lacuna::DB::Result::Building::Energy::Fission',
+            fissure => 'Lacuna::DB::Result::Building::Permanent::Fissure',
+            foodreserve => 'Lacuna::DB::Result::Building::Food::Reserve',
+            fusion => 'Lacuna::DB::Result::Building::Energy::Fusion',
+            gasgiantlab => 'Lacuna::DB::Result::Building::GasGiantLab',
+            gasgiantplatform => 'Lacuna::DB::Result::Building::Permanent::GasGiantPlatform',
+            geneticslab => 'Lacuna::DB::Result::Building::GeneticsLab',
+            geo => 'Lacuna::DB::Result::Building::Energy::Geo',
+            geothermalvent => 'Lacuna::DB::Result::Building::Permanent::GeoThermalVent',
+            gratchsgauntlet => 'Lacuna::DB::Result::Building::Permanent::GratchsGauntlet',
+            greatballofjunk => 'Lacuna::DB::Result::Building::Permanent::GreatballOfJunk',
+            grove => 'Lacuna::DB::Result::Building::Permanent::Grove',
+            hallsofvrbansk => 'Lacuna::DB::Result::Building::Permanent::HallsOfVrbansk',
+            hydrocarbon => 'Lacuna::DB::Result::Building::Energy::Hydrocarbon',
+            intelligence => 'Lacuna::DB::Result::Building::Intelligence',
+            inteltraining => 'Lacuna::DB::Result::Building::Inteltraining',
+            interdimensionalrift => 'Lacuna::DB::Result::Building::Permanent::InterDimensionalRift',
+            junkhengesculpture => 'Lacuna::DB::Result::Building::Permanent::JunkHengeSculpture',
+            kalavianruins => 'Lacuna::DB::Result::Building::Permanent::KalavianRuins',
+            kasternskeep => 'Lacuna::DB::Result::Building::Permanent::KasternsKeep',
+            lake => 'Lacuna::DB::Result::Building::Permanent::Lake',
+            lagoon => 'Lacuna::DB::Result::Building::Permanent::Lagoon',
+            lapis => 'Lacuna::DB::Result::Building::Food::Lapis',
+            lapisforest => 'Lacuna::DB::Result::Building::Permanent::LapisForest',
+            libraryofjith => 'Lacuna::DB::Result::Building::Permanent::LibraryOfJith',
+            lcota => 'Lacuna::DB::Result::Building::LCOTa',
+            lcotb => 'Lacuna::DB::Result::Building::LCOTb',
+            lcotc => 'Lacuna::DB::Result::Building::LCOTc',
+            lcotd => 'Lacuna::DB::Result::Building::LCOTd',
+            lcote => 'Lacuna::DB::Result::Building::LCOTe',
+            lcotf => 'Lacuna::DB::Result::Building::LCOTf',
+            lcotg => 'Lacuna::DB::Result::Building::LCOTg',
+            lcoth => 'Lacuna::DB::Result::Building::LCOTh',
+            lcoti => 'Lacuna::DB::Result::Building::LCOTi',
+            luxuryhousing => 'Lacuna::DB::Result::Building::LuxuryHousing',
+            malcud => 'Lacuna::DB::Result::Building::Food::Malcud',
+            malcudfield => 'Lacuna::DB::Result::Building::Permanent::MalcudField',
+            massadshenge => 'Lacuna::DB::Result::Building::Permanent::MassadsHenge',
+            mayhemtraining => 'Lacuna::DB::Result::Building::MayhemTraining',
+            mercenariesguild => 'Lacuna::DB::Result::Building::MercenariesGuild',
+            metaljunkarches => 'Lacuna::DB::Result::Building::Permanent::MetalJunkArches',
+            mine => 'Lacuna::DB::Result::Building::Ore::Mine',
+            miningministry => 'Lacuna::DB::Result::Building::Ore::Ministry',
+            missioncommand => 'Lacuna::DB::Result::Building::MissionCommand',
+            munitionslab => 'Lacuna::DB::Result::Building::MunitionsLab',
+            naturalspring => 'Lacuna::DB::Result::Building::Permanent::NaturalSpring',
+            network19 => 'Lacuna::DB::Result::Building::Network19',
+            observatory => 'Lacuna::DB::Result::Building::Observatory',
+            oracleofanid => 'Lacuna::DB::Result::Building::Permanent::OracleOfAnid',
+            orerefinery => 'Lacuna::DB::Result::Building::Ore::Refinery',
+            orestorage => 'Lacuna::DB::Result::Building::Ore::Storage',
+            oversight => 'Lacuna::DB::Result::Building::Oversight',
+            pancake => 'Lacuna::DB::Result::Building::Food::Pancake',
+            pantheonofhagness => 'Lacuna::DB::Result::Building::Permanent::PantheonOfHagness',
+            park => 'Lacuna::DB::Result::Building::Park',
+            pie => 'Lacuna::DB::Result::Building::Food::Pie',
+            pilottraining => 'Lacuna::DB::Result::Building::PilotTraining',
+            planetarycommand => 'Lacuna::DB::Result::Building::PlanetaryCommand',
+            politicstraining => 'Lacuna::DB::Result::Building::PoliticsTraining',
+            potato => 'Lacuna::DB::Result::Building::Food::Potato',
+            propulsion => 'Lacuna::DB::Result::Building::Propulsion',
+            pyramidjunksculpture => 'Lacuna::DB::Result::Building::Permanent::PyramidJunkSculpture',
+            ravine => 'Lacuna::DB::Result::Building::Permanent::Ravine',
+            rockyoutcrop => 'Lacuna::DB::Result::Building::Permanent::RockyOutcrop',
+            sand => 'Lacuna::DB::Result::Building::Permanent::Sand',
+            saw => 'Lacuna::DB::Result::Building::SAW',
+            security => 'Lacuna::DB::Result::Building::Security',
+            shake => 'Lacuna::DB::Result::Building::Food::Shake',
+            shipyard => 'Lacuna::DB::Result::Building::Shipyard',
+            singularity => 'Lacuna::DB::Result::Building::Energy::Singularity',
+            soup => 'Lacuna::DB::Result::Building::Food::Soup',
+            spacejunkpark => 'Lacuna::DB::Result::Building::Permanent::SpaceJunkPark',
+            spaceport => 'Lacuna::DB::Result::Building::SpacePort',
+            ssla => 'Lacuna::DB::Result::Building::SSLa',
+            sslb => 'Lacuna::DB::Result::Building::SSLb',
+            sslc => 'Lacuna::DB::Result::Building::SSLc',
+            ssld => 'Lacuna::DB::Result::Building::SSLd',
+            stockpile => 'Lacuna::DB::Result::Building::Stockpile',
+            subspacesupplydepot => 'Lacuna::DB::Result::Building::SubspaceSupplyDepot',
+            supplypod => 'Lacuna::DB::Result::Building::SupplyPod',
+            syrup => 'Lacuna::DB::Result::Building::Food::Syrup',
+            templeofthedrajilites => 'Lacuna::DB::Result::Building::Permanent::TempleOfTheDrajilites',
+            terraforminglab => 'Lacuna::DB::Result::Building::TerraformingLab',
+            terraformingplatform => 'Lacuna::DB::Result::Building::Permanent::TerraformingPlatform',
+            thedillonforge => 'Lacuna::DB::Result::Building::Permanent::TheDillonForge',
+            thefttraining => 'Lacuna::DB::Result::Building::TheftTraining',
+            themepark => 'Lacuna::DB::Result::Building::ThemePark',
+            trade => 'Lacuna::DB::Result::Building::Trade',
+            transporter => 'Lacuna::DB::Result::Building::Transporter',
+            university => 'Lacuna::DB::Result::Building::University',
+            volcano => 'Lacuna::DB::Result::Building::Permanent::Volcano',
+            wastedigester => 'Lacuna::DB::Result::Building::Waste::Digester',
+            wasteenergy => 'Lacuna::DB::Result::Building::Energy::Waste',
+            wasteexchanger => 'Lacuna::DB::Result::Building::Waste::Exchanger',
+            wasterecycling => 'Lacuna::DB::Result::Building::Waste::Recycling',
+            wastesequestration => 'Lacuna::DB::Result::Building::Waste::Sequestration',
+            wastetreatment => 'Lacuna::DB::Result::Building::Waste::Treatment',
+            waterproduction => 'Lacuna::DB::Result::Building::Water::Production',
+            waterpurification => 'Lacuna::DB::Result::Building::Water::Purification',
+            waterreclamation => 'Lacuna::DB::Result::Building::Water::Reclamation',
+            waterstorage => 'Lacuna::DB::Result::Building::Water::Storage',
+            wheat => 'Lacuna::DB::Result::Building::Food::Wheat',
         );#}}}
 
-        if( $format eq 'class' ) {
+        if( $format eq 'url' ) {
             return [ sort keys %bldgs ];
         }
-        if( $format eq 'human' ) {
+        elsif( $format eq 'human' ) {
             return [ sort values %bldgs ];
+        }
+        elsif( $format eq 'class' ) {
+            return [ sort values %classes ];
+        }
+        elsif( $format eq 'bldgs_hash' ) {
+            return  { %bldgs };
+        }
+        elsif( $format eq 'classes_hash' ) {
+            return  { %classes };
+        }
+        elsif( $format eq 'human_to_class' ) {
+            ### bldg -- algae => 'Algae Cropper',
+            ### clas -- algae => 'Lacuna::DB::Result::Building::Food::Algae',
+            ###
+            ### This returns
+            ### 'Algae Cropper' => 'Lacuna::DB::Result::Building::Food::Algae',
+            my %ret = ();
+            while( my($u, $h) = each %bldgs ) {
+                $ret{$h} = $classes{$u};
+            }
+            return { %ret };
         }
 
         return { %bldgs };
@@ -939,7 +1111,11 @@ Returns the number of halls needed to get from one level to another.
         ### The old database may contain these tables sans some columns that 
         ### have been added since. Those will be dealt with; only the existing 
         ### columns will be imported.
-        my $imports = [qw( ArchMinPrefs BodyTypes SSAlerts ServerAccounts SitterPasswords )];
+        my $imports = [qw( 
+            ArchMinPrefs BodyTypes 
+            Mission MissionFleetObjective MissionMaterielObjective MissionReward
+            SSAlerts ServerAccounts SitterPasswords
+        )];
 
         ### Connect to the old database.
         my $options = {sqlite_unicode => 1, quote_names => 1};
@@ -1146,14 +1322,31 @@ the second argument to receive a fully accurate (to the second) result.
             'thud' => 'Thud',
         );#}}}
 
-        if( $format eq 'class' ) {
+        if( $format eq 'url' ) {
             return [ sort keys %ships ];
         }
-        if( $format eq 'human' ) {
+        elsif( $format eq 'human' ) {
             return [ sort values %ships ];
+        }
+        elsif( $format eq 'human_to_url' ) {
+            return { reverse %ships };
+        }
+        elsif( $format eq 'ships_hash' ) {
+            return { %ships };
         }
 
         return { %ships };
+    }#}}}
+    sub star_colors {#{{{
+        my $colors = [qw(
+            blue
+            green
+            magenta
+            red
+            white
+            yellow
+        )];
+        return $colors
     }#}}}
     sub str_trim {#{{{
         my $self = shift;
@@ -1173,6 +1366,14 @@ string.
         $str =~ s/^\s+//;
         $str =~ s/\s+$//;
         return $str;
+    }#}}}
+    sub titlecase {#{{{
+        my $self    = shift;
+        my $str     = shift;
+        ### Passed in "foo bar baz bLaRg", returns "Foo Bar Baz Blarg"
+        my @pieces = map{ucfirst lc $_}(split /\s+/, $str);
+        my $ret = join chr(0x20), @pieces;
+        return $ret;
     }#}}}
     sub throb {#{{{
         my $self = shift;
@@ -1216,6 +1417,12 @@ Returns the triangle sum of a given int.
 =cut
 
         return( $int * ($int+1) / 2 ); 
+    }#}}}
+    sub underscore_case {#{{{
+        my $self = shift;
+        my $str  = shift;
+        my @pieces = map{lc $_}split /\s+/, $str;
+        return join '_', @pieces;
     }#}}}
 
 }

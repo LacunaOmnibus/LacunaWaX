@@ -18,7 +18,7 @@ package LacunaWax::Dialog::MissionEditor::TabReward {
 
     #################################
 
-    has [qw( btn_add_material_row )] => (
+    has [qw( btn_add_reward_row )] => (
         is          => 'rw',
         isa         => 'Wx::Button',
         lazy_build  => 1
@@ -78,7 +78,8 @@ package LacunaWax::Dialog::MissionEditor::TabReward {
         $self->szr_main->AddSpacer(20);
         $self->szr_main->Add( $self->lbl_instructions );
         $self->szr_main->Add( $self->szr_grid_data );
-        $self->szr_main->Add( $self->btn_add_material_row );
+        $self->szr_main->AddSpacer(20);
+        $self->szr_main->Add( $self->btn_add_reward_row );
 
         $self->swin_main->SetSizer( $self->szr_main );
         $self->swin_main->Layout();
@@ -87,11 +88,11 @@ package LacunaWax::Dialog::MissionEditor::TabReward {
     }
     sub _set_events {#{{{
         my $self = shift;
-        EVT_BUTTON(     $self->swin_main,  $self->btn_add_material_row->GetId,     sub{$self->OnAddMaterialObjective(@_)}    );
+        EVT_BUTTON(     $self->swin_main,  $self->btn_add_reward_row->GetId,     sub{$self->OnAddMaterialObjective(@_)}    );
         return 1;
     }#}}}
 
-    sub _build_btn_add_material_row {#{{{
+    sub _build_btn_add_reward_row {#{{{
         my $self = shift;
         my $v = Wx::Button->new($self->swin_main, -1, "Add A Reward");
         $v->Enable(1);
@@ -147,7 +148,7 @@ package LacunaWax::Dialog::MissionEditor::TabReward {
         return $v;
     }#}}}
 
-    sub add_material_row {#{{{
+    sub add_reward_row {#{{{
         my $self    = shift;
         my $rec     = shift;        # Optional MissionMaterialObjective record
         my $delbtn  = shift // 1;
@@ -165,7 +166,7 @@ package LacunaWax::Dialog::MissionEditor::TabReward {
         ### it to our grid
         my %args = (
             parent  => $self,
-            type    => 'objective',
+            type    => 'reward',
         );
         $args{'record'} = $rec if $rec;
         my $row = LacunaWax::Dialog::MissionEditor::MaterielRow->new( %args );
@@ -206,7 +207,7 @@ package LacunaWax::Dialog::MissionEditor::TabReward {
 
     sub OnAddMaterialObjective {#{{{
         my $self = shift;
-        $self->add_material_row();
+        $self->add_reward_row();
         $self->swin_main->Layout();
         return 1;
     }#}}}

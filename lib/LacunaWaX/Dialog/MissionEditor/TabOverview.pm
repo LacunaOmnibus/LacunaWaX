@@ -20,7 +20,7 @@ package LacunaWax::Dialog::MissionEditor::TabOverview {
         lazy_build  => 1,
     );
 
-    has [qw( lbl_instructions lbl_name lbl_description lbl_net19_head lbl_net19_complete )] => (
+    has [qw( lbl_instructions lbl_name lbl_max_university lbl_description lbl_net19_head lbl_net19_complete )] => (
         is          => 'rw',
         isa         => 'Wx::StaticText',
         lazy_build  => 1,
@@ -53,6 +53,12 @@ package LacunaWax::Dialog::MissionEditor::TabOverview {
         }
     );
 
+    has [qw( spin_max_university )] => (
+        is          => 'rw',
+        isa         => 'Wx::SpinCtrl',
+        lazy_build  => 1,
+    );
+
     has 'szr_main' => (
         is          => 'rw',
         isa         => 'Wx::Sizer',
@@ -72,6 +78,8 @@ package LacunaWax::Dialog::MissionEditor::TabOverview {
 
         $self->szr_data_grid->Add( $self->lbl_name );
         $self->szr_data_grid->Add( $self->cmbo_name );
+        $self->szr_data_grid->Add( $self->lbl_max_university );
+        $self->szr_data_grid->Add( $self->spin_max_university );
         $self->szr_data_grid->Add( $self->lbl_description );
         $self->szr_data_grid->Add( $self->txt_description );
         $self->szr_data_grid->Add( $self->lbl_net19_head );
@@ -122,6 +130,20 @@ package LacunaWax::Dialog::MissionEditor::TabOverview {
             Wx::Size->new(-1,-1)
         );
         $v->SetFont( wxTheApp->get_font('header_4') );
+        $v->SetToolTip('Name of the mission as it will display in the Mission Command.');
+        return $v;
+    }#}}}
+    sub _build_lbl_max_university {#{{{
+        my $self = shift;
+
+        my $v = Wx::StaticText->new(
+            $self->pnl_main, -1, 
+            'Max University Level:',
+            wxDefaultPosition, 
+            Wx::Size->new(-1,-1)
+        );
+        $v->SetFont( wxTheApp->get_font('header_4') );
+        $v->SetToolTip('This mission will be unavailable to players over this level.');
         return $v;
     }#}}}
     sub _build_lbl_description {#{{{
@@ -134,6 +156,7 @@ package LacunaWax::Dialog::MissionEditor::TabOverview {
             Wx::Size->new(-1,-1)
         );
         $v->SetFont( wxTheApp->get_font('header_4') );
+        $v->SetToolTip('Description of the mission as it will display in the Mission Command.  See Help for formatting pointers.');
         return $v;
     }#}}}
     sub _build_lbl_net19_complete {#{{{
@@ -159,12 +182,25 @@ package LacunaWax::Dialog::MissionEditor::TabOverview {
             Wx::Size->new(-1,-1)
         );
         $v->SetFont( wxTheApp->get_font('header_4') );
-        $v->SetToolTip('Network 19 headline');
+        $v->SetToolTip('Text to be broadcast on Network 19 when mission appears');
         return $v;
     }#}}}
     sub _build_pnl_main {#{{{
         my $self = shift;
         my $v = Wx::Panel->new($self->parent->notebook, -1, wxDefaultPosition, wxDefaultSize);
+        return $v;
+    }#}}}
+    sub _build_spin_max_university {#{{{
+        my $self = shift;
+
+        my $v = Wx::SpinCtrl->new(
+            $self->pnl_main, -1, q{}, 
+            wxDefaultPosition, Wx::Size->new( 50, -1 ),
+            wxSP_ARROW_KEYS|wxSP_WRAP, 
+            0, 30, 30  # min, max, initial
+        );
+        $v->SetToolTip('This mission will be unavailable to players over this level.');
+
         return $v;
     }#}}}
     sub _build_szr_data_grid {#{{{
@@ -198,6 +234,7 @@ package LacunaWax::Dialog::MissionEditor::TabOverview {
             #wxCB_SORT
         );
         $v->SetFont( wxTheApp->get_font('para_text_1') );
+        $v->SetToolTip('Name of the mission as it will display in the Mission Command.');
 
         return $v;
     }#}}}
@@ -210,7 +247,9 @@ package LacunaWax::Dialog::MissionEditor::TabOverview {
             wxDefaultPosition, Wx::Size->new($self->txt_width,$self->txt_height),
             wxTE_MULTILINE
         );
+
         $v->SetFont( wxTheApp->get_font('para_text_1') );
+        $v->SetToolTip('Description of the mission as it will display in the Mission Command.  See Help for formatting pointers.');
         return $v;
     }#}}}
     sub _build_txt_net19_complete {#{{{
@@ -236,7 +275,8 @@ package LacunaWax::Dialog::MissionEditor::TabOverview {
             wxTE_MULTILINE
         );
         $v->SetFont( wxTheApp->get_font('para_text_1') );
-        $v->SetToolTip('Network 19 headline');
+        $v->SetToolTip('Text to be broadcast on Network 19 when mission appears');
+        $v->SetToolTip('');
         return $v;
     }#}}}
     sub _build_txt_width {#{{{
@@ -252,6 +292,7 @@ package LacunaWax::Dialog::MissionEditor::TabOverview {
         $self->txt_description->SetValue(q{});
         $self->txt_net19_head->SetValue(q{});
         $self->txt_net19_complete->SetValue(q{});
+        $self->spin_max_university->SetValue(30);
         return 1;
     }#}}}
     sub update_cmbo_name {#{{{

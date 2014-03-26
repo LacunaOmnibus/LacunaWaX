@@ -1,5 +1,5 @@
 
-package LacunaWax::Dialog::MissionEditor::TabMateriel {
+package LacunaWax::Dialog::MissionEditor::TabFleet {
     use v5.14;
     use Data::UUID;
     use Moose;
@@ -8,7 +8,7 @@ package LacunaWax::Dialog::MissionEditor::TabMateriel {
     use Wx::Event qw(EVT_BUTTON EVT_COMBOBOX);
     use Wx::Perl::TextValidator;
 
-    use LacunaWaX::Dialog::MissionEditor::MaterielRow;
+    use LacunaWaX::Dialog::MissionEditor::FleetRow;
 
     has 'parent' => (
         is          => 'rw',
@@ -18,7 +18,7 @@ package LacunaWax::Dialog::MissionEditor::TabMateriel {
 
     #################################
 
-    has [qw( btn_add_materiel_row )] => (
+    has [qw( btn_add_fleet_row )] => (
         is          => 'rw',
         isa         => 'Wx::Button',
         lazy_build  => 1
@@ -54,9 +54,9 @@ package LacunaWax::Dialog::MissionEditor::TabMateriel {
         lazy_build  => 1
     );
 
-    has 'res_rows' => (
+    has 'fleet_rows' => (
         is          => 'rw',
-        isa         => 'HashRef[LacunaWaX::Dialog::MissionEditor::MaterielRow]',
+        isa         => 'HashRef[LacunaWaX::Dialog::MissionEditor::FleetRow]',
         default     => sub{ {} },
     );
 
@@ -73,7 +73,7 @@ package LacunaWax::Dialog::MissionEditor::TabMateriel {
         $self->szr_main->Add( $self->lbl_instructions );
         $self->szr_main->Add( $self->szr_grid_data );
         $self->szr_main->AddSpacer(20);
-        $self->szr_main->Add( $self->btn_add_materiel_row );
+        $self->szr_main->Add( $self->btn_add_fleet_row );
 
         $self->swin_main->SetSizer( $self->szr_main );
         $self->swin_main->Layout();
@@ -82,20 +82,20 @@ package LacunaWax::Dialog::MissionEditor::TabMateriel {
     }
     sub _set_events {#{{{
         my $self = shift;
-        EVT_BUTTON(     $self->swin_main,  $self->btn_add_materiel_row->GetId,     sub{$self->OnAddMaterialObjective(@_)}    );
+        EVT_BUTTON(     $self->swin_main,  $self->btn_add_fleet_row->GetId,     sub{$self->OnAddObjective(@_)}    );
         return 1;
     }#}}}
 
-    sub _build_btn_add_materiel_row {#{{{
+    sub _build_btn_add_fleet_row {#{{{
         my $self = shift;
-        my $v = Wx::Button->new($self->swin_main, -1, "Add A Material Objective");
+        my $v = Wx::Button->new($self->swin_main, -1, "Add A Fleet Objective");
         $v->Enable(1);
         return $v;
     }#}}}
     sub _build_lbl_instructions {#{{{
         my $self = shift;
 
-        my $inst = "MATERIEL OBJECTIVE INSTRUCTIONS GO HERE.";
+        my $inst = "FLEET OBJECTIVE INSTRUCTIONS GO HERE.";
 
         my $v = Wx::StaticText->new(
             $self->swin_main, -1, 
@@ -133,7 +133,7 @@ package LacunaWax::Dialog::MissionEditor::TabMateriel {
     }#}}}
     sub _build_szr_grid_data {#{{{
         my $self = shift;
-        my $v = Wx::FlexGridSizer->new( 0, 2, 10, 5 );   # r, c, vgap, hgap
+        my $v = Wx::FlexGridSizer->new( 0, 2, 30, 100 );   # r, c, vgap, hgap
         return $v;
     }#}}}
     sub _build_szr_main {#{{{
@@ -142,13 +142,13 @@ package LacunaWax::Dialog::MissionEditor::TabMateriel {
         return $v;
     }#}}}
 
-    sub add_materiel_row {#{{{
+    sub add_fleet_row {#{{{
         my $self    = shift;
         my $rec     = shift;        # Optional MissionMaterialObjective record
         my $delbtn  = shift // 1;
 
         ### Create a UUID that'll be used to associate the button with its 
-        ### MaterielRow object.
+        ### FleetRow object.
         my $bin_uuid = $self->uuid->create();
         my $txt_uuid = $self->uuid->to_string($bin_uuid);
 
@@ -163,8 +163,8 @@ package LacunaWax::Dialog::MissionEditor::TabMateriel {
             type    => 'objective',
         );
         $args{'record'} = $rec if $rec;
-        my $row = LacunaWax::Dialog::MissionEditor::MaterielRow->new( %args );
-        $self->res_rows->{$txt_uuid} = $row;
+        my $row = LacunaWax::Dialog::MissionEditor::FleetRow->new( %args );
+        $self->fleet_rows->{$txt_uuid} = $row;
         $self->szr_grid_data->Add( $row->pnl_main );
 
         unless( $delbtn ) {
@@ -193,14 +193,14 @@ package LacunaWax::Dialog::MissionEditor::TabMateriel {
         my $self = shift;
 
         $self->szr_grid_data->Clear(1);
-        $self->res_rows( {} );
+        $self->fleet_rows( {} );
         $self->szr_grid_data->Layout();
         $self->swin_main->Layout();
     }#}}}
 
-    sub OnAddMaterialObjective {#{{{
+    sub OnAddObjective {#{{{
         my $self = shift;
-        $self->add_materiel_row();
+        $self->add_fleet_row();
         $self->swin_main->Layout();
         return 1;
     }#}}}
@@ -220,20 +220,20 @@ either via its constructor or SetRows(), it doesn't have a true idea of what a
 row is.  Think of it as an array, with each individual element being a single 
 field in the grid.  This means we can't just tell it to "delete row 3".
 
-    +--------------------+---------------+
-    | MaterielRow object | delete button |
-    | MaterielRow object | delete button |
-    | MaterielRow object | delete button |
-    +--------------------+---------------+
+    +-----------------+---------------+
+    | FleetRow object | delete button |
+    | FleetRow object | delete button |
+    | FleetRow object | delete button |
+    +-----------------+---------------+
 
 To delete a "row":
     - We're dealing with two columns, and the delete button is in the second 
       column.
         - So on the third "row", the delete button is occupying offset 5 in 
           the grid.
-    - Also, when we built the MaterielRow and button objects, we created a 
-      UUID.  The MaterielRow are in a hash keyed off that UUID, and the 
-      associated button's name is that UUID.
+    - Also, when we built the FleetRow and button objects, we created a UUID.  
+      The FleetRow are in a hash keyed off that UUID, and the associated 
+      button's name is that UUID.
 
     - This event method is being handed a copy of the delete button clicked 
       (in $button).
@@ -245,9 +245,9 @@ To delete a "row":
     - Remove both the clicked delete button (current offset) and its 
       associated row (current offset - 1) from the grid.
 
-    - Now, using the button's name (the UUID), find the associated MaterielRow 
-      from the $self->res_rows hashref (keyed off that UUID).  Call that 
-      MaterielRow's clearme() method and delete the entry from $self->res_rows.
+    - Now, using the button's name (the UUID), find the associated FleetRow from 
+      the $self->fleet_rows hashref (keyed off that UUID).  Call that FleetRow's 
+      clearme() method and delete the entry from $self->fleet_rows.
 
 =cut
 
@@ -261,8 +261,8 @@ To delete a "row":
                     $self->szr_grid_data->Remove( $cnt );
                     $self->szr_grid_data->Remove( $cnt - 1 );
                     $button->Destroy;
-                    $self->res_rows->{ $uuid }->clearme;
-                    delete $self->res_rows->{ $uuid };
+                    $self->fleet_rows->{ $uuid }->clearme;
+                    delete $self->fleet_rows->{ $uuid };
                     $self->szr_grid_data->Layout();
                     $self->swin_main->FitInside();
                     return 1;

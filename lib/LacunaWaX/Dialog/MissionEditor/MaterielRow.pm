@@ -56,7 +56,8 @@ package LacunaWax::Dialog::MissionEditor::MaterielRow {
     );
 
     has [qw(
-        spin_quantity spin_extra_level
+        spin_quantity
+        spin_level spin_extra_level
         spin_min_berth spin_min_cargo spin_min_combat spin_min_occupants spin_min_speed spin_min_stealth
     )] => (
         is          => 'rw',
@@ -67,6 +68,12 @@ package LacunaWax::Dialog::MissionEditor::MaterielRow {
     has 'szr_grid_data' => (
         is          => 'rw',
         isa         => 'Wx::GridSizer',
+        lazy_build  => 1
+    );
+
+    has 'txt_ship_name' => (
+        is          => 'rw',
+        isa         => 'Wx::TextCtrl',
         lazy_build  => 1
     );
 
@@ -90,7 +97,9 @@ package LacunaWax::Dialog::MissionEditor::MaterielRow {
     }#}}}
     sub _set_events {#{{{
         my $self = shift;
-        EVT_CHOICE(   $self->pnl_main,  $self->chc_entity_type->GetId,    sub{$self->OnChangeType(@_)}   );
+        EVT_CHOICE(   $self->pnl_main,  $self->chc_entity_type->GetId,  sub{$self->OnChangeType(@_)}   );
+        EVT_SPINCTRL( $self->pnl_main,  $self->spin_level->GetId,       sub{$self->OnLevel(@_)}   );
+        EVT_SPINCTRL( $self->pnl_main,  $self->spin_extra_level->GetId, sub{$self->OnExtraLevel(@_)}   );
         return 1;
     }#}}}
 
@@ -138,6 +147,21 @@ package LacunaWax::Dialog::MissionEditor::MaterielRow {
             0, 0, 0  # min, max, initial
         );
         if( $self->record ) { $v->SetValue( $self->record->quantity ); }
+
+        return $v;
+    }#}}}
+    sub _build_spin_level {#{{{
+        my $self = shift;
+
+        my $v = Wx::SpinCtrl->new(
+            $self->pnl_main, -1, q{}, 
+            wxDefaultPosition, Wx::Size->new( $self->ctrl_width, $self->ctrl_height ),
+            wxSP_ARROW_KEYS|wxSP_WRAP, 
+            1, 30, 1  # min, max, initial
+        );
+        $v->SetToolTip("Initial level");
+        if( $self->record ) { $v->SetValue( $self->record->level ); }
+        $v->Hide();
 
         return $v;
     }#}}}
@@ -261,6 +285,20 @@ package LacunaWax::Dialog::MissionEditor::MaterielRow {
 
         return $v;
     }#}}}
+    sub _build_txt_ship_name {#{{{
+        my $self = shift;
+
+        my $v = Wx::TextCtrl->new(
+            $self->pnl_main, -1,
+            q{},
+            wxDefaultPosition, Wx::Size->new($self->ctrl_width,$self->ctrl_height),
+        );
+        $v->SetToolTip('Ship Name (optional)');
+        if( $self->record ) { $v->SetValue( $self->record->ship_name || q{} ) }
+        $v->Hide();
+
+        return $v;
+    }#}}}
     sub _build_pnl_main {#{{{
         my $self = shift;
         #my $v = Wx::Panel->new($self->parent->pnl_main, -1, wxDefaultPosition, wxDefaultSize);
@@ -287,8 +325,7 @@ package LacunaWax::Dialog::MissionEditor::MaterielRow {
     }#}}}
 
     sub initialize_grid_data {#{{{
-        my $self = shift;
-
+        my $self = shift; 
         ### Add the type and quantity controls, which always appear, then add 
         ### spacers into the rest of the cells, which is needed to keep the 
         ### second row from collapsing the first.
@@ -333,6 +370,7 @@ package LacunaWax::Dialog::MissionEditor::MaterielRow {
         ### Hide any inputs that might be showing
         $self->chc_entity_name->Hide();
         $self->spin_extra_level->Hide();
+        $self->txt_ship_name->Hide();
         $self->spin_min_berth->Hide();
         $self->spin_min_cargo->Hide();
         $self->spin_min_combat->Hide();
@@ -383,15 +421,18 @@ package LacunaWax::Dialog::MissionEditor::MaterielRow {
             $self->spin_quantity->SetToolTip("Quantity - maximum is $cmax");
 
             $self->szr_grid_data->Add( $self->chc_entity_name );
+            $self->szr_grid_data->Add( $self->spin_level );
             $self->szr_grid_data->Add( $self->spin_extra_level );
 
             if( $self->has_record ) {
                 $self->chc_entity_name->SetStringSelection( $self->record->name );
                 $self->spin_quantity->SetValue( $self->record->quantity );
+                $self->spin_level->SetValue( $self->record->level );
                 $self->spin_extra_level->SetValue( $self->record->extra_level );
             }
 
             $self->chc_entity_name->Show(1);
+            $self->spin_level->Show(1);
             $self->spin_extra_level->Show(1);
             $self->szr_grid_data->Layout();
             wxTheApp->Yield();
@@ -429,7 +470,7 @@ package LacunaWax::Dialog::MissionEditor::MaterielRow {
 
             ### Finish up row 1
             $self->szr_grid_data->Add( $self->chc_entity_name );
-            $self->szr_grid_data->Add( 0,0,0 );
+            $self->szr_grid_data->Add( $self->txt_ship_name );
             $self->szr_grid_data->Add( 0,0,0 );
             $self->szr_grid_data->Add( 0,0,0 );
 
@@ -454,6 +495,7 @@ package LacunaWax::Dialog::MissionEditor::MaterielRow {
             }
 
             $self->chc_entity_name->Show(1);
+            $self->txt_ship_name->Show(1);
             $self->spin_min_berth->Show(1);
             $self->spin_min_cargo->Show(1);
             $self->spin_min_combat->Show(1);
@@ -466,9 +508,27 @@ package LacunaWax::Dialog::MissionEditor::MaterielRow {
             wxTheApp->Yield();
         }#}}}
 
-        #$self->parent->pnl_main->Layout;
         $self->parent->swin_main->Layout;
         wxTheApp->endthrob() if $do_local_throb;
+        return 1;
+    }#}}}
+    sub OnLevel {#{{{
+        my $self = shift;
+
+
+        if( $self->spin_level->GetValue > 1 ) {
+            $self->spin_extra_level->SetValue( 0 );
+        }
+
+        return 1;
+    }#}}}
+    sub OnExtraLevel {#{{{
+        my $self = shift;
+
+        if( $self->spin_extra_level->GetValue > 0 ) {
+            $self->spin_level->SetValue( 1 );
+        }
+
         return 1;
     }#}}}
 
