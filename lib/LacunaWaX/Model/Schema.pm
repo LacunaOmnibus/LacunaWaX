@@ -99,9 +99,9 @@ package LacunaWaX::Model::Schema::Mission {#{{{
     __PACKAGE__->add_columns( 
         id              => {data_type => 'integer', is_auto_increment => 1, is_nullable => 0, extra => {unsigned => 1} },
         name            => {data_type => 'varchar', size => 32,             is_nullable => 0,  },
-        description     => {data_type => 'text',                            is_nullable => 0,  },
-        net19_head      => {data_type => 'text',                            is_nullable => 0,  },
-        net19_complete  => {data_type => 'text',                            is_nullable => 0,  },
+        description     => {data_type => 'text',                            is_nullable => 1,  },
+        net19_head      => {data_type => 'text',                            is_nullable => 1,  },
+        net19_complete  => {data_type => 'text',                            is_nullable => 1,  },
     );
     __PACKAGE__->set_primary_key( 'id' ); 
     __PACKAGE__->add_unique_constraint( 'mission_name' => [qw(name)] ); 

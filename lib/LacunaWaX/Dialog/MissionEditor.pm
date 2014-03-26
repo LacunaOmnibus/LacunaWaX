@@ -131,10 +131,14 @@ package LacunaWaX::Dialog::MissionEditor {
     }#}}}
     sub _build_notebook {#{{{
         my $self = shift;
+
+        ### Wx on Windows looks somewhat different from Wx on Linux, and needs 
+        ### some more space to be sure everything is visible
+        my($subw, $subh) = ($^O eq 'MSWin32') ? (17, 70) : (10, 50);
         my $v = Wx::Notebook->new(
             $self->dialog, -1, 
             wxDefaultPosition, 
-            Wx::Size->new( $self->width - 10, $self->height - 50 ),
+            Wx::Size->new( $self->width - $subw, $self->height - $subh ),
             0
         );
         return $v;
