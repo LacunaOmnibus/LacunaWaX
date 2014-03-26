@@ -4,7 +4,7 @@
 ### And if it does, a lot of the stupid can be removed from here.
 
 
-package LacunaWax::Dialog::MissionEditor::ResourceRow {
+package LacunaWax::Dialog::MissionEditor::MaterielRow {
     use v5.14;
     use Moose;
     use Try::Tiny;

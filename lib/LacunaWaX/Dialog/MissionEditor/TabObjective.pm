@@ -14,7 +14,7 @@ package LacunaWax::Dialog::MissionEditor::TabObjective {
     use Wx::Event qw(EVT_BUTTON EVT_COMBOBOX);
     use Wx::Perl::TextValidator;
 
-    use LacunaWaX::Dialog::MissionEditor::ResourceRow;
+    use LacunaWaX::Dialog::MissionEditor::MaterielRow;
 
     has 'parent' => (
         is          => 'rw',
@@ -62,7 +62,7 @@ package LacunaWax::Dialog::MissionEditor::TabObjective {
 
     has 'res_rows' => (
         is          => 'rw',
-        isa         => 'HashRef[LacunaWaX::Dialog::MissionEditor::ResourceRow]',
+        isa         => 'HashRef[LacunaWaX::Dialog::MissionEditor::MaterielRow]',
         default     => sub{ {} },
     );
 
@@ -84,10 +84,10 @@ package LacunaWax::Dialog::MissionEditor::TabObjective {
         $self->szr_main->AddSpacer(20);
         $self->szr_main->Add( $self->lbl_instructions );
         $self->szr_main->Add( $self->szr_grid_data );
-        $self->szr_main->Add( 0, 20, 0 );
         $self->szr_main->Add( $self->btn_add_material_row );
 
         $self->swin_main->SetSizer( $self->szr_main );
+        $self->swin_main->Layout();
         $self->_set_events;
         return $self;
     }
@@ -159,7 +159,7 @@ package LacunaWax::Dialog::MissionEditor::TabObjective {
         my $delbtn  = shift // 1;
 
         ### Create a UUID that'll be used to associate the button with its 
-        ### ResourceRow object.
+        ### MaterielRow object.
         my $bin_uuid = $self->uuid->create();
         my $txt_uuid = $self->uuid->to_string($bin_uuid);
 
@@ -174,7 +174,7 @@ package LacunaWax::Dialog::MissionEditor::TabObjective {
             type    => 'objective',
         );
         $args{'record'} = $rec if $rec;
-        my $row = LacunaWax::Dialog::MissionEditor::ResourceRow->new( %args );
+        my $row = LacunaWax::Dialog::MissionEditor::MaterielRow->new( %args );
         $self->res_rows->{$txt_uuid} = $row;
         $self->szr_grid_data->Add( $row->pnl_main );
 
@@ -233,9 +233,9 @@ row is.  Think of it as an array, with each individual element being a single
 field in the grid.  This means we can't just tell it to "delete row 3".
 
     +--------------------+---------------+
-    | ResourceRow object | delete button |
-    | ResourceRow object | delete button |
-    | ResourceRow object | delete button |
+    | MaterielRow object | delete button |
+    | MaterielRow object | delete button |
+    | MaterielRow object | delete button |
     +--------------------+---------------+
 
 To delete a "row":
@@ -243,8 +243,8 @@ To delete a "row":
       column.
         - So on the third "row", the delete button is occupying offset 5 in 
           the grid.
-    - Also, when we built the ResourceRow and button objects, we created a 
-      UUID.  The ResourceRows are in a hash keyed off that UUID, and the 
+    - Also, when we built the MaterielRow and button objects, we created a 
+      UUID.  The MaterielRow are in a hash keyed off that UUID, and the 
       associated button's name is that UUID.
 
     - This event method is being handed a copy of the delete button clicked 
@@ -257,9 +257,9 @@ To delete a "row":
     - Remove both the clicked delete button (current offset) and its 
       associated row (current offset - 1) from the grid.
 
-    - Now, using the button's name (the UUID), find the associated ResourceRow 
+    - Now, using the button's name (the UUID), find the associated MaterielRow 
       from the $self->res_rows hashref (keyed off that UUID).  Call that 
-      ResourceRow's clearme() method and delete the entry from $self->res_rows.
+      MaterielRow's clearme() method and delete the entry from $self->res_rows.
 
 =cut
 

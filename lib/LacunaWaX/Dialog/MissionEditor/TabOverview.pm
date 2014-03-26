@@ -185,12 +185,17 @@ package LacunaWax::Dialog::MissionEditor::TabOverview {
     sub _build_cmbo_name {#{{{
         my $self = shift;
 
+        ### We do not want these to auto-sort.  The "NEW" should always show 
+        ### up first, and with CB_SORT on, it's getting sorted.  The actual 
+        ### mission names will be appended in order since they're being drawn 
+        ### from the database ordered by name, so there's no need to sort here 
+        ### in the wxwindow.
         my $v = Wx::ComboBox->new(
             $self->pnl_main, -1,
             q{},
             wxDefaultPosition, Wx::Size->new($self->txt_width,-1),
             [],
-            wxCB_SORT
+            #wxCB_SORT
         );
         $v->SetFont( wxTheApp->get_font('para_text_1') );
 

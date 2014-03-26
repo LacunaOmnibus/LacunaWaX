@@ -87,7 +87,7 @@ package LacunaWaX::Dialog::MissionEditor {
         $self->SetSize( $self->size );
 
         $self->notebook->AddPage( $self->tab_overview->pnl_main, "Overview" );
-        $self->notebook->AddPage( $self->tab_objective->pnl_main, "Objectives" );
+        $self->notebook->AddPage( $self->tab_objective->pnl_main, "Objectives - Materiel" );
         $self->notebook->AddPage( $self->tab_reward->pnl_main, "Rewards" );
 
         $self->szr_buttons->Add( $self->btn_save );
