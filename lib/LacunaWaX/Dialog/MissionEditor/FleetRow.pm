@@ -131,7 +131,7 @@ package LacunaWax::Dialog::MissionEditor::FleetRow {
             $colors,
         );
         $v->SetFont( wxTheApp->get_font('para_text_1') );
-        $v->SetToolTip("Color of star to target");
+        $v->SetToolTip("Color of star");
         if( $self->record ) { $v->SetStringSelection( $self->record->targ_color ); }
 
         if( $self->chc_target_type->GetStringSelection =~ /star/i ) {
@@ -311,7 +311,7 @@ package LacunaWax::Dialog::MissionEditor::FleetRow {
     sub OnChangeType {#{{{
         my $self = shift;
 
-        my $type = $self->chc_target_type->GetValue;
+        my $type = $self->chc_target_type->GetStringSelection;
         
         if( $type =~ /star/i ) {
             $self->chc_target_color->Enable(1);
