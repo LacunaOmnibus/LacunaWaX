@@ -89,6 +89,7 @@ package LacunaWax::Dialog::MissionEditor::TabOverview {
 
         $self->szr_main->AddSpacer(20);
         $self->szr_main->Add( $self->lbl_instructions );
+        $self->szr_main->AddSpacer(10);
         $self->szr_main->Add( $self->szr_data_grid );
         $self->szr_main->AddSpacer(20);
         $self->szr_main->Add( $self->szr_button_grid );
@@ -109,15 +110,15 @@ package LacunaWax::Dialog::MissionEditor::TabOverview {
     sub _build_lbl_instructions {#{{{
         my $self = shift;
 
-        my $inst = "INSTRUCTIONS GO HERE.";
+        my $inst = "Create missions for use in-game.  See the Help menu for more details.";
 
         my $v = Wx::StaticText->new(
             $self->pnl_main, -1, 
             $inst, 
             wxDefaultPosition, 
-            Wx::Size->new(365,25)
+            Wx::Size->new($self->pnl_main->GetClientSize->width - 20, 40),
         );
-        $v->SetFont( wxTheApp->get_font('para_text_1') );
+        $v->SetFont( wxTheApp->get_font('para_text_2') );
         return $v;
     }#}}}
     sub _build_lbl_name {#{{{

@@ -71,6 +71,7 @@ package LacunaWax::Dialog::MissionEditor::TabMateriel {
 
         $self->szr_main->AddSpacer(20);
         $self->szr_main->Add( $self->lbl_instructions );
+        $self->szr_main->AddSpacer(10);
         $self->szr_main->Add( $self->szr_grid_data );
         $self->szr_main->AddSpacer(20);
         $self->szr_main->Add( $self->btn_add_materiel_row );
@@ -95,16 +96,16 @@ package LacunaWax::Dialog::MissionEditor::TabMateriel {
     sub _build_lbl_instructions {#{{{
         my $self = shift;
 
-        my $inst = "MATERIEL OBJECTIVE INSTRUCTIONS GO HERE.";
+        my $inst = "Mission materiel requirements.  These items will be removed from the user's inventory when they complete the mission.";
 
         my $v = Wx::StaticText->new(
             $self->swin_main, -1, 
             $inst, 
             wxDefaultPosition, 
-            Wx::Size->new(365,25)
+            Wx::Size->new($self->pnl_main->GetClientSize->width - 20, 40),
         );
 
-        $v->SetFont( wxTheApp->get_font('para_text_1') );
+        $v->SetFont( wxTheApp->get_font('para_text_2') );
         return $v;
     }#}}}
     sub _build_pnl_main {#{{{
