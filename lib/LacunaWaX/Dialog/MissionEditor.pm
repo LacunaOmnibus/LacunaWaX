@@ -422,13 +422,16 @@ package LacunaWaX::Dialog::MissionEditor {
         $mission->{'mission_reward'} = $reward_hr;
         wxTheApp->endthrob;
 
-        my $output_name = wxTheApp->underscore_case($rec->name) . ".mission";
+        my $output_name = ( $rec->name =~ /(.*)(,\s*)?part[\s_-]*(\d+)$/i )
+            ? wxTheApp->underscore_case($1) . ".part" . $3
+            : wxTheApp->underscore_case($rec->name) . ".mission";
+
         my $file_browser = Wx::FileDialog->new(
             $self->dialog,
             'Export mission to file',
             $ENV{'HOME'},       # default dir
             $output_name,       # default file
-            q{*.mission},
+            q{},
             wxFD_SAVE|wxFD_OVERWRITE_PROMPT
         );
         if( $file_browser->ShowModal() == wxID_CANCEL ) {
