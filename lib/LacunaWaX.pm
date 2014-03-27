@@ -28,8 +28,7 @@ package LacunaWaX {
         croak "root dir is required" unless defined $args{'root_dir'};
         $self->{'root_dir'} = $args{'root_dir'};
 
-        ### Initialize all attributes that can be.  These used to be our lazy 
-        ### attributes.
+        ### Call build methods for attributes that have them.
         $self->_init_attrs;
 
         $self->SetAppName('LacunaWaX');
