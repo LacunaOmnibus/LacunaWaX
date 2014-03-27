@@ -1,4 +1,9 @@
 
+### CHECK
+### Multiple identical ships to similar targets are being dealt with by 
+### "ship_quantity" right now.  Need to ask Norway if he wants that, or if he 
+### wants to stay with multiple entries as it's working now.
+
 package LacunaWax::Dialog::MissionEditor::FleetRow {
     use v5.14;
     use Moose;
@@ -50,7 +55,7 @@ package LacunaWax::Dialog::MissionEditor::FleetRow {
         lazy_build  => 1,
     );
 
-    has [qw( spin_size_min spin_size_max )] => (
+    has [qw( spin_ship_quantity spin_size_min spin_size_max )] => (
         is          => 'rw',
         isa         => 'Wx::SpinCtrl',
         lazy_build  => 1,
@@ -158,6 +163,20 @@ package LacunaWax::Dialog::MissionEditor::FleetRow {
 
         return $v;
     }#}}}
+    sub _build_spin_ship_quantity {#{{{
+        my $self = shift;
+
+        my $v = Wx::SpinCtrl->new(
+            $self->pnl_main, -1, q{}, 
+            wxDefaultPosition, Wx::Size->new( $self->ctrl_width, $self->ctrl_height ),
+            wxSP_ARROW_KEYS|wxSP_WRAP, 
+            1, 1000, 1  # min, max, initial
+        );
+        $v->SetToolTip("Quantity to send");
+        if( $self->record ) { $v->SetValue( $self->record->ship_quantity ); }
+
+        return $v;
+    }#}}}
     sub _build_spin_size_min {#{{{
         my $self = shift;
 
@@ -260,11 +279,14 @@ package LacunaWax::Dialog::MissionEditor::FleetRow {
         ###     chc_target_type
         ###     spin_size_min
         ###     spin_size_max
+        ###     spin_ship_quantity
         ### Cols, row 2:
         ###     rdo_in_zone
         ###     rdo_inhabited
         ###     rdo_isolationist
-        my $v = Wx::GridSizer->new( 2, 4, 1, 5 );   # r, c, vgap, hgap
+        ###     chc_target_color
+        ###     spacer
+        my $v = Wx::GridSizer->new( 2, 5, 1, 5 );   # r, c, vgap, hgap
 
         return $v;
     }#}}}
@@ -275,11 +297,13 @@ package LacunaWax::Dialog::MissionEditor::FleetRow {
         $self->szr_grid_data->Add( $self->chc_target_type );
         $self->szr_grid_data->Add( $self->spin_size_min );
         $self->szr_grid_data->Add( $self->spin_size_max );
+        $self->szr_grid_data->Add( $self->spin_ship_quantity );
 
         $self->szr_grid_data->Add( $self->rdo_in_zone );
         $self->szr_grid_data->Add( $self->rdo_inhabited );
         $self->szr_grid_data->Add( $self->rdo_isolationist );
         $self->szr_grid_data->Add( $self->chc_target_color );
+        $self->szr_grid_data->Add( 0, 0, 0 );
 
         $self->szr_grid_data->Layout();
     }#}}}

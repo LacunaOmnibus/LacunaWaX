@@ -128,16 +128,14 @@ package LacunaWaX::Model::Schema::MissionFleetObjective {#{{{
         id                  => {data_type => 'integer', is_auto_increment => 1, is_nullable => 0, extra => {unsigned => 1}  },
         mission_id          => {data_type => 'integer', is_auto_increment => 0, is_nullable => 0, extra => {unsigned => 1}  },
         ship_type           => {data_type => 'varchar', size => 32,             is_nullable => 1,                           },
+        ship_quantity       => {data_type => 'integer',                         is_nullable => 0, default_value => 0 },
         targ_in_zone        => {data_type => 'integer',                         is_nullable => 1,                           },
-
         ### 'any', or a specific star color
         targ_color          => {data_type => 'varchar', size => 32,             is_nullable => 0, default_value => 'any'    },
-
         targ_inhabited      => {data_type => 'integer',                         is_nullable => 1,                           },
         targ_isolationist   => {data_type => 'integer',                         is_nullable => 1,                           },
         targ_size_min       => {data_type => 'integer',                         is_nullable => 1,                           },
         targ_size_max       => {data_type => 'integer',                         is_nullable => 1,                           },
-
         ### 'star', 'habitable', 'gas_giant', 'asteroid'
         targ_type           => {data_type => 'varchar', size => 32,             is_nullable => 0, default_value => 'habitable'  },
     );

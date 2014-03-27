@@ -133,18 +133,21 @@ package LacunaWaX::Dialog::MissionEditor {
     sub _build_btn_delete {#{{{
         my $self = shift;
         my $v = Wx::Button->new($self->dialog, -1, "Delete");
+        $v->SetToolTip("Permanently deletes the current mission.  Irreversable.");
         $v->Enable(0);
         return $v;
     }#}}}
     sub _build_btn_export {#{{{
         my $self = shift;
         my $v = Wx::Button->new($self->dialog, -1, "Export");
+        $v->SetToolTip("Exports current mission to a file to be uploaded.");
         $v->Enable(0);
         return $v;
     }#}}}
     sub _build_btn_save {#{{{
         my $self = shift;
         my $v = Wx::Button->new($self->dialog, -1, "Save");
+        $v->SetToolTip("Saves current mission to database so you can finish it later.");
         return $v;
     }#}}}
     sub _build_height {#{{{
@@ -284,6 +287,7 @@ package LacunaWaX::Dialog::MissionEditor {
         my $obj = {};
         my $mat_obj_rs = $rec->search_related($rel, {});
         while(my $m = $mat_obj_rs->next ) {
+            wxTheApp->Yield();
             if( $m->type eq 'essentia' or $m->type eq 'happiness' ) {
                 $obj->{$m->type} = $m->quantity;
             }
@@ -344,9 +348,11 @@ package LacunaWaX::Dialog::MissionEditor {
         my $fleet = [];
         my $fleet_obj_rs = $rec->search_related($rel, {});
         while(my $m = $fleet_obj_rs->next ) {
+            wxTheApp->Yield();
             push @{$fleet}, {
                     ### $m->ship_type is human ('Smuggler Ship').
-                    ship_type   => $ship_urls->{$m->ship_type},
+                    ship_type       => $ship_urls->{$m->ship_type},
+                    ship_quantity   => $m->ship_quantity || 1,
                     target => {
                         color           => $m->targ_color || 'any',
                         in_zone         => $m->targ_in_zone,
@@ -409,24 +415,39 @@ package LacunaWaX::Dialog::MissionEditor {
             ### Ack.  Materiel objectives and fleet movement objectives are 
             ### not separate; the one contains the other.
             $mission_objective_hr->{'fleet_movement'} = $fleet_movement_ar;
+            wxTheApp->Yield();
         }
 
         $mission->{'mission_objective'} = $mission_objective_hr;
         $mission->{'mission_reward'} = $reward_hr;
-
-### CHECK
-### This obviously needs a file browser to chose an output file, etc, but 
-### what's here now appears to be working.
-my $json = JSON->new();
-$json->pretty(1);
-my $encoded = $json->encode($mission);
-open my $f, '>', 'C:\Users\Jon\Desktop/test.json';
-say $f "# config-file-type: JSON 1";
-print $f $encoded;
-close $f;
-say "done";
-
         wxTheApp->endthrob;
+
+        my $output_name = wxTheApp->underscore_case($rec->name) . ".mission";
+        my $file_browser = Wx::FileDialog->new(
+            $self->dialog,
+            'Export mission to file',
+            $ENV{'HOME'},       # default dir
+            $output_name,       # default file
+            q{*.mission},
+            wxFD_SAVE|wxFD_OVERWRITE_PROMPT
+        );
+        if( $file_browser->ShowModal() == wxID_CANCEL ) {
+            return;
+        }
+
+        my $json = JSON->new();
+        $json->pretty(1);
+        my $encoded = $json->encode($mission);
+        my $dest_file = join '/', ($file_browser->GetDirectory, $file_browser->GetFilename);
+        my $fh;
+        try { open $fh, '>', $dest_file; }
+        catch{ wxTheApp->poperr("Unable to open mission file: $_"); return };
+        say $fh "# config-file-type: JSON 1";
+        print $fh $encoded;
+        close $fh;
+
+        wxTheApp->popmsg("Mission saved in $dest_file.");
+
         return 1;
     }#}}}
     sub OnSave {#{{{
@@ -529,6 +550,7 @@ say "done";
 
             $mission_rec->create_related('fleet_objective', {
                 ship_type           => $type,
+                ship_quantity       => $fleet_row->spin_ship_quantity->GetValue,
                 targ_type           => $fleet_row->chc_target_type->GetStringSelection,
                 targ_size_min       => $fleet_row->spin_size_min->GetValue,
                 targ_size_max       => $fleet_row->spin_size_max->GetValue,

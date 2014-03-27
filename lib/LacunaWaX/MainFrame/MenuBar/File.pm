@@ -75,11 +75,6 @@ package LacunaWaX::MainFrame::MenuBar::File {
     sub OnExport {#{{{
         my $self  = shift;
         
-        wxTheApp->popmsg(
-            "I'm about to open a file browser.  Browse to where you want to export the database (your desktop should be fine).",
-            "Export database prep"
-        );
-
         ### Open modal file browser
         my $file_browser = Wx::FileDialog->new(
             $self->parent->frame,
