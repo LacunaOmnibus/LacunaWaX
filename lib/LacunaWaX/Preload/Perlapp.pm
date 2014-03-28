@@ -3,6 +3,11 @@ use warnings;
 
 package LacunaWaX::Preload::Perlapp {
 
+    ### No matter where I put this, the executable cannot find it, so we'll 
+    ### have to just skip auto-installing the CPAN mods.  Maybe look into 
+    ### cpanminus for that.
+    #use CPAN;
+
     ### Needed for Moose
     use Variable::Magic;                            # 15    (RepairPane, at least)
     use B::Hooks::EndOfScope::XS;                   # 14    (RepairPane, at least)

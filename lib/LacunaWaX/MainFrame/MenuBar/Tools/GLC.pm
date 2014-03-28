@@ -3,7 +3,6 @@ package LacunaWaX::MainFrame::MenuBar::Tools::GLC {
     use v5.14;
     use Archive::Zip;
     use Capture::Tiny qw(:all);
-    use CPAN;
     use Data::Dumper;
     use File::Temp;
     use LWP::UserAgent;
@@ -216,10 +215,6 @@ package LacunaWaX::MainFrame::MenuBar::Tools::GLC {
         ### Set determinant gauge range.
         wxTheApp->gauge_range( scalar @{$self->mods_to_install} );
 
-        ### tell CPAN calls to accept any default options instead of blocking 
-        ### for user response
-        $ENV{'PERL_MM_USE_DEFAULT'} = 1;
-
         ### Used by multiple Capture::Tiny::capture() calls below
         my($out,$err,$exit);
 
@@ -235,19 +230,14 @@ package LacunaWaX::MainFrame::MenuBar::Tools::GLC {
                     system("ppm", "install", $m);
                 }
             }
-            if( $exit != 0 ) {
-                ### Either the user hasn't got PPM on their system (non-AS 
-                ### Perl), or the ppm install attempt failed.
-                CPAN::Shell->install($m);
-            }
 
-            ### PPM or CPAN, the mod should be installed.  Make sure.
+            ### The mod should be installed.  Make sure.
             my $test_cmd = qq/perl -M"$m 99999" -e1/;
             ($out,$err,$exit) = capture {
                 my $test_rv = `$test_cmd`;
             };
             if( $err =~ /^Can't locate/ ) {
-                $self->status->say("\tInstallation of $m failed.");
+                $self->status->say("\tInstallation of $m failed.  This only works with ActiveState Perl.  If you have AS Perl, this module is simply not available via PPM, and you'll need to install it yourself with:\n\n>cpan $m");
             }
             else {
                 $self->status->say("\t$m is installed!");
