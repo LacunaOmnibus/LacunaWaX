@@ -56,7 +56,7 @@ package LacunaWaX::MainFrame::MenuBar::Tools::GLC {
         my $self = shift;
 
         EVT_MENU(       $self->parent,                  $self->itm_install_glc->GetId,      sub{ $self->OnInstallGLC()  }   );
-        EVT_MENU(       $self->parent,                  $self->itm_install_mods->GetId,     sub{ $self->OnInstallMods() }   );
+        #EVT_MENU(       $self->parent,                  $self->itm_install_mods->GetId,     sub{ $self->OnInstallMods() }   );
 
         return 1;
     }#}}}
@@ -68,8 +68,12 @@ package LacunaWaX::MainFrame::MenuBar::Tools::GLC {
     }#}}}
     sub _build_itm_install_mods {#{{{
         my $self = shift;
-        my $menu_item = $self->Append( -1, 'Install &Mods', "Install Perl modules needed by GLC" );
-        return $menu_item;
+        ### Fuck it.  Capture::Tiny is simply not playing nicely with the 
+        ### PDK-produced binaries.  After GLC gets installed, the user can run 
+        ### ppm_install.pl themselves.
+        #my $menu_item = $self->Append( -1, 'Install &Mods', "Install Perl modules needed by GLC" );
+        #return $menu_item;
+        return 1;
     }#}}}
     sub _build_mods_to_install {#{{{
         my $self = shift;
@@ -201,22 +205,33 @@ package LacunaWaX::MainFrame::MenuBar::Tools::GLC {
     sub OnInstallMods {#{{{
         my $self = shift;
 
-        my $has_perl = `perl -v`;
-        unless( $has_perl =~ /This is perl 5/ ) {
+=pod
+
+I originally used backticks (my $test = `perl -v`) to see if perl and ppm were 
+installed.  But since the executable is being created as a GUI, there's no 
+shell for backticks to make use of, so that fails in the exe.
+
+Now using system() instead.
+
+=cut
+
+        ### Used by multiple Capture::Tiny::capture() calls below
+        my($out,$err,$exit);
+
+        ( $out, $err, $exit ) = capture{ system("perl", "-e1"); };
+        if( $exit ) {
             wxTheApp->poperr("You don't appear to have Perl installed yet (if you do, it's not in your PATH).  You'll need to go fix that first.");
             return;
         }
 
-        my $has_ppm = `ppm info` || q{};
-        if( $has_ppm !~ /ppm_version =/ ) {
-            $has_ppm = q{};
+        ( $out, $err, $exit ) = capture{ system("ppm", "help"); };
+        if( $exit ) {
+            wxTheApp->poperr("You have Perl installed and in your PATH, but it's not ActiveState Perl, so I can't help you.");
+            return;
         }
 
         ### Set determinant gauge range.
         wxTheApp->gauge_range( scalar @{$self->mods_to_install} );
-
-        ### Used by multiple Capture::Tiny::capture() calls below
-        my($out,$err,$exit);
 
         $self->status->show;
         $self->status->say("This is going to take a little while.  This window will close automatically when all installations are complete.\nA single individual install may take a minute or two, so be patient.");
@@ -225,23 +240,15 @@ package LacunaWaX::MainFrame::MenuBar::Tools::GLC {
         for my $m( sort @{ $self->mods_to_install } ) {
             $self->status->say("Installing $m...");
             $exit = 1;
-            if( $has_ppm ) {
-                ($out,$err,$exit) = capture {
-                    system("ppm", "install", $m);
-                }
-            }
-
-            ### The mod should be installed.  Make sure.
-            my $test_cmd = qq/perl -M"$m 99999" -e1/;
             ($out,$err,$exit) = capture {
-                my $test_rv = `$test_cmd`;
-            };
-            if( $err =~ /^Can't locate/ ) {
-                $self->status->say("\tInstallation of $m failed.  This only works with ActiveState Perl.  If you have AS Perl, this module is simply not available via PPM, and you'll need to install it yourself with:\n\n>cpan $m");
+                system("ppm", "install", $m);
             }
-            else {
-                $self->status->say("\t$m is installed!");
-            }
+            ### An install error code of 1 means it failed, but that could be 
+            ### because it's already installed.  Don't bomb out on that.
+
+            ### The mod should be installed.  But attempting "perl -M$m -e1" 
+            ### is blowing up Capture::Tiny when run from an executable, so we 
+            ### can't really check to see if it's been installed.
 
             $cnt++;
             wxTheApp->gauge_value($cnt);
@@ -249,7 +256,7 @@ package LacunaWaX::MainFrame::MenuBar::Tools::GLC {
         }
         $self->status->say_recsep;
         $self->status->say('Module Installation Complete!');
-        sleep 5;
+        sleep 2;
         $self->status->close;
         wxTheApp->gauge_value(0);
 

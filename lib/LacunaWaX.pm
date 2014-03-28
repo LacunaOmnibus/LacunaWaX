@@ -16,7 +16,6 @@ package LacunaWaX {
     $Wx::App::VERSION   = "2.1";
     our $VERSION        = '2.1';
 
-#    use LacunaWaX::Preload::Perlapp;
     use LacunaWaX::MainFrame;
     use LacunaWaX::Model::Globals;
     use LacunaWaX::Model::Globals::Wx;
