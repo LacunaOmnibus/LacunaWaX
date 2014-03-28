@@ -186,14 +186,16 @@ package LacunaWaX::MainFrame::MenuBar::Tools::GLC {
         }
 
         ### Create lacuna.yml
-        my $user_info = {
-            server_uri          => wxTheApp->game_client->protocol . '://' . wxTheApp->game_client->url,
-            api_key             => 'anonymous',
-            empire_name         => wxTheApp->game_client->empire_name,
-            empire_password     => wxTheApp->game_client->empire_pass,
-            session_persistent  => 1,
+        open my $f, '>', "$dest/examples/lacuna.yml" or do {
+            wxTheApp->poperr("Unable to open lacuna.yml: $!");
+            return;
         };
-        DumpFile("$dest/examples/lacuna.yml", $user_info);
+        say $f '---';
+        say $f "api_key: anonymous";
+        say $f "empire_name: " . wxTheApp->game_client->empire_name;
+        say $f "empire_password: " . wxTheApp->game_client->empire_pass;
+        say $f "server_uri: " . wxTheApp->game_client->protocol . '://' . wxTheApp->game_client->url;
+        say $f "session_persistent: 1";
 
         wxTheApp->popmsg(
             "GLC has been downloaded to $dest and configured for your empire.",
