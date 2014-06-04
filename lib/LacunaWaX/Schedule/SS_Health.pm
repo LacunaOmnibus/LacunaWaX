@@ -170,18 +170,20 @@ package LacunaWaX::Schedule::SS_Health {
 
         return 0 unless $self->has_alerts;
 
+        my $sn = $self->station->name;
+        my $si = $self->station->id;
+
         my $body = "
 While performing a routine checkup of your station, I 
 found a problem that could be dangerous to its long 
 term health and happiness.
 
 Please look into this immediately.
-            
-The problem I found was:
+
+The problem I found was on {Planet $si $sn}:
 --------------------------------------------------
 ";
 
-        #foreach my $a( $self->all_alerts ) {
         foreach my $a( @{$self->alerts} ) {
             $self->logger->info( "PROBLEM - $a" );    # SS name has already been mentioned in the log
             $body .= "$a\n";
@@ -197,7 +199,7 @@ Dr. Flurble J. Notaqwak
 
         $self->inbox->send_message(
             $self->game_client->empire_name,        # to
-            'SS ALERT: ' . $self->station->name,    # subject
+            "SS ALERT: $sn",                        # subject
             $body,                                  # 3 guesses
         );
 
