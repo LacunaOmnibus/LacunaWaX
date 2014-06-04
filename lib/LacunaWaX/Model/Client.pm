@@ -284,6 +284,14 @@ package LacunaWaX::Model::Client {
         $self->app->get_cache()->remove($key);
         return 1;
     }#}}}
+    sub clear_glyphs_cache {#{{{
+        my $self = shift;
+        my $pid  = shift;
+
+        my $key = $self->make_key('BODIES', 'GLYPHS', $pid);
+        $self->app->get_cache()->remove($key);
+        return 1;
+    }#}}}
 
     sub make_key {## no critic qw(RequireArgUnpacking) {{{
         my $self = shift;
