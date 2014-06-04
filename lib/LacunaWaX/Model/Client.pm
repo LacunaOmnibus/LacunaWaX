@@ -276,6 +276,15 @@ package LacunaWaX::Model::Client {
         return 1;
     }#}}}
 
+    sub clear_body_status_cache {#{{{
+        my $self = shift;
+        my $pid  = shift;
+
+        my $key = $self->make_key('BODIES', 'STATUS', $pid);
+        $self->app->get_cache()->remove($key);
+        return 1;
+    }#}}}
+
     sub make_key {## no critic qw(RequireArgUnpacking) {{{
         my $self = shift;
         return join q{:}, @_;
@@ -727,14 +736,6 @@ planet.
 
         return $bs || {};   # always return a hashref
     }#}}}
-    sub clear_body_status_cache {
-        my $self = shift;
-        my $pid  = shift;
-
-        my $key = $self->make_key('BODIES', 'STATUS', $pid);
-        $self->app->get_cache()->remove($key);
-        return 1;
-    }
     sub get_building {#{{{
         my $self  = shift;
         my $pid   = shift;
