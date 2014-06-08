@@ -137,6 +137,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane::PropRow {
         my $self    = shift;
         my $params  = shift;
 
+
         wxTheApp->borders_off();    # Change to borders_on to see borders around sizers
         return $self->_make_header if $self->is_header;
         return $self->_make_footer if $self->is_footer;
@@ -552,13 +553,6 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane::PropRow {
 #            my $rv = $sitter_parl->cast_vote($prop->{'id'}, 0);  # to force 'no' votes
             alarm 0;
 
-            ### For testing.  Comment out the call to cast_vote above and just 
-            ### return this.
-#            my $rv = {
-#                proposition => { my_vote => 1 },
-#                passed => 0,
-#            };
-
             return $rv;
         }
         catch {
@@ -654,6 +648,11 @@ sitters.
             }
             last SITTER if $prop_has_passed;
         }
+
+        ### The vote we just pushed may have been a seizure or influence 
+        ### building upgrade, meaning that it may have affected the station's 
+        ### influence.  Clear the cached status for the station.
+        wxTheApp->game_client->clear_body_status_cache( $self->planet_id );
 
         unless( $prop_has_passed ) {
             ### We skipped attempting to vote for members who'd already been 

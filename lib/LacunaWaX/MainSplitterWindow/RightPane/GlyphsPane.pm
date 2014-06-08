@@ -68,8 +68,8 @@ package LacunaWaX::MainSplitterWindow::RightPane::GlyphsPane {
     has 'btn_auto_search'       => (is => 'rw', isa => 'Wx::Button',    lazy_build => 1);
     has 'btn_build_all_halls'   => (is => 'rw', isa => 'Wx::Button',    lazy_build => 1);
     has 'halls_btn_sizer'       => (is => 'rw', isa => 'Wx::BoxSizer',  lazy_build => 1, documentation => 'horizontal');
-    has 'glyph_pusher_box'      => (is => 'rw', isa => 'Wx::BoxSizer',  lazy_build => 1);
     has 'header_sizer'          => (is => 'rw', isa => 'Wx::BoxSizer',  lazy_build => 1, documentation => 'vertcal');
+    has 'lbl_auto_search'       => (is => 'rw', isa => 'Wx::StaticText',        lazy_build => 1);
     has 'lbl_glyph_home'        => (is => 'rw', isa => 'Wx::StaticText',        lazy_build => 1);
     has 'lbl_pusher_ship'       => (is => 'rw', isa => 'Wx::StaticText',        lazy_build => 1);
     has 'lbl_reserve_glyphs'    => (is => 'rw', isa => 'Wx::StaticText',        lazy_build => 1);
@@ -81,6 +81,10 @@ package LacunaWaX::MainSplitterWindow::RightPane::GlyphsPane {
 
     has 'recipe_box'    => (is => 'rw', isa => 'Wx::BoxSizer',  lazy_build => 1);
     has 'recipe_forms'  => (is => 'rw', isa => 'ArrayRef',      lazy_build => 1);
+
+    has 'glyph_pusher_box_sizer'          => (is => 'rw', isa => 'Wx::BoxSizer',  lazy_build => 1);
+    has 'dest_and_ship_sizer'       => (is => 'rw', isa => 'Wx::BoxSizer',  lazy_build => 1, documentation => 'horizontal');
+    has 'res_glyphs_sizer'          => (is => 'rw', isa => 'Wx::BoxSizer',  lazy_build => 1, documentation => 'horizontal');
 
     sub BUILD {
         my $self = shift;
@@ -98,9 +102,39 @@ package LacunaWaX::MainSplitterWindow::RightPane::GlyphsPane {
         $self->content_sizer->Add($self->list_sizer, 0, 0, 0);
         $self->content_sizer->AddSpacer(20);
 
-        $self->content_sizer->Add($self->glyph_pusher_box, 0, 0, 0);
-        $self->content_sizer->AddSpacer(20);
 
+
+=pod
+
+The sizers below with "_box" in their names used to be StaticBoxSizers, so 
+they each had StaticBox items associated with them:
+
+ +--- This is the static box ----+
+ |                               |
+ |                               |
+ |                               |
+ |                               |
+ |                               |
+ +-------------------------------+
+
+So the static box was pretty and separated things and included a nice title.
+
+However, the static boxes were causing a segfault.  The pane would show up 
+just fine the first time Glyphs was clicked on, but the next time (either when 
+attempting to re-display this pane or attempting to click on any other 
+planet's Glyphs pane), LW would crash with a segfault.
+
+I fiddled with the boxes a little bit, because I think the pane looks better 
+with them there.  But I wasn't able to figure out exactly what was happening, 
+and it doesn't look awful without them there, and I'm at the point of "can't 
+be arsed anymore".
+
+So now those /.*_box_.*/ sizers are just sizers.
+
+=cut
+
+        $self->content_sizer->Add($self->glyph_pusher_box_sizer, 0, 0, 0);
+        $self->content_sizer->AddSpacer(40);
         $self->content_sizer->Add($self->auto_search_box, 0, 0, 0);
         $self->content_sizer->AddSpacer(20);
 
@@ -120,24 +154,30 @@ package LacunaWaX::MainSplitterWindow::RightPane::GlyphsPane {
             $self->recipe_box->Add($form->main_sizer, 0, 0, 0);
             wxTheApp->Yield;
         }
+
         $self->content_sizer->Add($self->recipe_box, 0, 0, 0);
         $self->refocus_window_name( 'lbl_planet_name' );
 
         wxTheApp->endthrob();
         return $self;
     }
+
     sub _build_auto_search_box {#{{{
         my $self = shift;
 
-        my $box = Wx::StaticBox->new(
-            $self->parent, -1, 
-            'ArchMin Should Auto Search For', 
-            wxDefaultPosition, 
-            #wxDefaultSize, 
-            Wx::Size->new(-1, 40)
-        );
-        my $sizer = Wx::StaticBoxSizer->new($box, wxHORIZONTAL);
+        #my $box = Wx::StaticBox->new(
+        #    $self->parent, -1, 
+        #    'ArchMin Should Auto Search For', 
+        #    wxDefaultPosition, 
+        #    #wxDefaultSize, 
+        #    Wx::Size->new(-1, 40)
+        #);
+        #my $sizer = Wx::StaticBoxSizer->new($box, wxHORIZONTAL);
 
+        my $sizer = wxTheApp->build_sizer($self->parent, wxHORIZONTAL, 'Auto search');
+
+        $sizer->Add($self->lbl_auto_search, 0, 0, 0);
+        $sizer->AddSpacer(10);
         $sizer->Add($self->chc_auto_search, 0, 0, 0);
         $sizer->AddSpacer(10);
         $sizer->Add($self->btn_auto_search, 0, 0, 0);
@@ -235,36 +275,38 @@ package LacunaWaX::MainSplitterWindow::RightPane::GlyphsPane {
         $v->SetFont( wxTheApp->get_font('para_text_1') );
         return $v;
     }#}}}
-    sub _build_glyph_pusher_box {#{{{
+
+    sub _build_dest_and_ship_sizer {#{{{
+        my $self = shift;
+        return wxTheApp->build_sizer($self->parent, wxHORIZONTAL, 'Dest and ships');
+    }#}}}
+    sub _build_res_glyphs_sizer {#{{{
+        my $self = shift;
+        return wxTheApp->build_sizer($self->parent, wxHORIZONTAL, 'res glyphs');
+    }#}}}
+    sub _build_glyph_pusher_box_sizer {#{{{
         my $self = shift;
 
-        my $dest_and_ship_sizer = wxTheApp->build_sizer($self->parent, wxHORIZONTAL, 'Dest and Ship');
-        $dest_and_ship_sizer->Add($self->lbl_glyph_home, 0, 0, 0);
-        $dest_and_ship_sizer->Add($self->chc_glyph_home, 0, 0, 0);
-        $dest_and_ship_sizer->AddSpacer(15);
-        $dest_and_ship_sizer->Add($self->lbl_pusher_ship, 0, 0, 0);
-        $dest_and_ship_sizer->Add($self->txt_pusher_ship, 0, 0, 0);
+        $self->dest_and_ship_sizer->Add($self->lbl_glyph_home, 0, 0, 0);
+        $self->dest_and_ship_sizer->Add($self->chc_glyph_home, 0, 0, 0);
+        $self->dest_and_ship_sizer->AddSpacer(15);
+        $self->dest_and_ship_sizer->Add($self->lbl_pusher_ship, 0, 0, 0);
+        $self->dest_and_ship_sizer->Add($self->txt_pusher_ship, 0, 0, 0);
 
+        $self->res_glyphs_sizer->Add($self->lbl_reserve_glyphs, 0, 0, 0);
+        $self->res_glyphs_sizer->Add($self->txt_reserve_glyphs, 0, 0, 0);
+        $self->res_glyphs_sizer->AddSpacer(20);
+        $self->res_glyphs_sizer->Add($self->btn_push_glyphs, 0, 0, 0);
 
-        my $res_glyphs_sizer = wxTheApp->build_sizer($self->parent, wxHORIZONTAL, 'Reserve Glyphs');
-        $res_glyphs_sizer->Add($self->lbl_reserve_glyphs, 0, 0, 0);
-        $res_glyphs_sizer->Add($self->txt_reserve_glyphs, 0, 0, 0);
-        $res_glyphs_sizer->AddSpacer(20);
-        $res_glyphs_sizer->Add($self->btn_push_glyphs, 0, 0, 0);
-
-
-        my $box = Wx::StaticBox->new(
-            $self->parent, -1, 
-            'Push Collected Glyphs', 
-            wxDefaultPosition, 
-            Wx::Size->new(-1, 40),
-        );
-        my $sizer = Wx::StaticBoxSizer->new($box, wxVERTICAL);
-        $sizer->Add($dest_and_ship_sizer, 0, 0, 0);
-        $sizer->Add($res_glyphs_sizer, 0, 0, 0);
+        #my $sizer = wxTheApp->build_sizer($self->parent, wxHORIZONTAL, 'Dest and ships', 1);
+        my $sizer = wxTheApp->build_sizer($self->parent, wxVERTICAL, 'Dest and ships');
+        $sizer->Add($self->dest_and_ship_sizer, 0, 0, 0);
+        $sizer->AddSpacer(20);
+        $sizer->Add($self->res_glyphs_sizer, 0, 0, 0);
 
         return $sizer;
     }#}}}
+
     sub _build_halls_btn_sizer {#{{{
         my $self = shift;
         return wxTheApp->build_sizer($self->parent, wxHORIZONTAL, 'All Halls');
@@ -272,6 +314,17 @@ package LacunaWaX::MainSplitterWindow::RightPane::GlyphsPane {
     sub _build_header_sizer {#{{{
         my $self = shift;
         return wxTheApp->build_sizer($self->parent, wxVERTICAL, 'Header');
+    }#}}}
+    sub _build_lbl_auto_search {#{{{
+        my $self = shift;
+        my $lbl_glyph_home = Wx::StaticText->new(
+            $self->parent, -1, 
+            "ArchMin Auto Search: ",
+            wxDefaultPosition, 
+            Wx::Size->new(100, 30)
+        );
+        $lbl_glyph_home->SetFont( wxTheApp->get_font('para_text_1') );
+        return $lbl_glyph_home;
     }#}}}
     sub _build_lbl_glyph_home {#{{{
         my $self = shift;
@@ -371,6 +424,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::GlyphsPane {
         $v->SetFont( wxTheApp->get_font('header_1') );
         return $v;
     }#}}}  
+
     sub _build_list_sizer {#{{{
         my $self = shift;
         return wxTheApp->build_sizer($self->parent, wxVERTICAL, 'Glyphs List');
@@ -400,13 +454,15 @@ package LacunaWaX::MainSplitterWindow::RightPane::GlyphsPane {
     sub _build_recipe_box {#{{{
         my $self = shift;
 
-        my $box = Wx::StaticBox->new(
-            $self->parent, -1, 
-            'Cook Glyph Recipes', 
-            wxDefaultPosition, 
-            wxDefaultSize, 
-        );
-        return Wx::StaticBoxSizer->new($box, wxVERTICAL);
+        #my $box = Wx::StaticBox->new(
+        #    $self->parent, -1, 
+        #    'Cook Glyph Recipes', 
+        #    wxDefaultPosition, 
+        #    wxDefaultSize, 
+        #);
+        #return Wx::StaticBoxSizer->new($box, wxVERTICAL);
+
+        my $sizer = wxTheApp->build_sizer($self->parent, wxVERTICAL, 'Recipe Box');
     }#}}}
     sub _build_txt_pusher_ship {#{{{
         my $self = shift;
@@ -690,7 +746,10 @@ The problem here is:
             $self->dialog_status->hide;
             $self->dialog_status->erase;
         }
-        wxTheApp->popmsg("Created $total_built Halls of Vrbansk $plan_plural.", 'Success!');
+
+        wxTheApp->game_client->clear_glyphs_cache( $self->planet_id );
+
+        wxTheApp->popmsg("Created $total_built Halls of Vrbansk $plan_plural.  Re-display the glyphs screen to see updated counts.", 'Success!');
         return 1;
     }#}}}
     sub OnMouseEnterGlyphsList {#{{{

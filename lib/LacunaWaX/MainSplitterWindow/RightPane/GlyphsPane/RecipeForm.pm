@@ -332,6 +332,10 @@ arg is not necessary there.
             }
         }#}}}
 
+        ### Clear the glyphs cache since we just used some up.
+        wxTheApp->game_client->clear_glyphs_cache( $self->ancestor->planet_id );
+        $response .= "  Refresh the Glyphs screen to see updated counts.";
+
         wxTheApp->Yield;   # allow throbber to update if it's on
         wxTheApp->endthrob();
         wxTheApp->popmsg($response, "Success!");
