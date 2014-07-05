@@ -279,6 +279,29 @@ package LacunaWaX::Model::Client {
         return 1;
     }#}}}
 
+    sub isa_planet {#{{{
+        my $self        = shift;
+        my $id_or_name  = shift;
+
+        defined $self->planets->{$id_or_name}   and return 1;
+
+        my %id_to_name = reverse %{$self->planets};
+        defined $id_to_name{$id_or_name}        and return 1;
+
+        return 0;
+    }#}}}
+    sub isa_station {#{{{
+        my $self        = shift;
+        my $id_or_name  = shift;
+
+        defined $self->stations->{$id_or_name}   and return 1;
+
+        my %id_to_name = reverse %{$self->stations};
+        defined $id_to_name{$id_or_name}        and return 1;
+
+        return 0;
+    }#}}}
+
     sub clear_body_status_cache {#{{{
         my $self = shift;
         my $pid  = shift;
@@ -363,7 +386,7 @@ current empire.
 
 =cut
 
-        return $self->planets->{$pname} // q{};
+        return $self->planets->{$pname} // $self->stations->{$pname} // q{};
     }#}}}
     sub station_id {#{{{
         my $self  = shift;
@@ -383,8 +406,10 @@ If the given id is not found, returns undef.
 
 =cut
 
-        my %id_to_name = reverse %{$self->planets};
-        return $id_to_name{$pid} // undef;
+        ### Including stations in this check for BC
+        my %pid_to_name = reverse %{$self->planets};
+        my %sid_to_name = reverse %{$self->stations};
+        return $pid_to_name{$pid} // $sid_to_name{$pid} // undef;
     }#}}}
     sub station_name {#{{{
         my $self  = shift;
