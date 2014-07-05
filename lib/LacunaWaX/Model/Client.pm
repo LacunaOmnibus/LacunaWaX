@@ -952,7 +952,8 @@ necessary, call ping() instead.
         my $empire = $self->client->empire;
         $self->app->Yield if $self->app;
         my $status = try {
-            $empire->get_status;
+            my $s = $empire->get_status;
+            return $s;
         }
         catch {
             return;
