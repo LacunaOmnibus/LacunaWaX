@@ -88,6 +88,9 @@ package LacunaWaX::Model::Client {
     has 'planets' => ( is => 'rw', isa => 'HashRef', lazy => 1, default => sub {{}},
         documentation => q{ name => id },
     );
+    has 'stations' => ( is => 'rw', isa => 'HashRef', lazy => 1, default => sub {{}},
+        documentation => q{ name => id },
+    );
 
     has 'sitter_clients' => ( is => 'rw', isa => 'HashRef', lazy => 1, default => sub {{}},
         documentation => q{
@@ -362,6 +365,12 @@ current empire.
 
         return $self->planets->{$pname} // q{};
     }#}}}
+    sub station_id {#{{{
+        my $self  = shift;
+        my $sname = shift;
+
+        return $self->stations->{$sname} // q{};
+    }#}}}
     sub planet_name {#{{{
         my $self  = shift;
         my $pid   = shift || return;
@@ -376,6 +385,13 @@ If the given id is not found, returns undef.
 
         my %id_to_name = reverse %{$self->planets};
         return $id_to_name{$pid} // undef;
+    }#}}}
+    sub station_name {#{{{
+        my $self  = shift;
+        my $sid   = shift || return;
+
+        my %id_to_name = reverse %{$self->stations};
+        return $id_to_name{$sid} // undef;
     }#}}}
     sub relog {#{{{
         my $self    = shift;
@@ -964,6 +980,7 @@ necessary, call ping() instead.
         $self->pingtime( DateTime->now );
         $self->app->Yield if $self->app;
         $self->planets({ reverse %{$status->{'empire'}{'planets'}} });
+        $self->stations({ reverse %{$status->{'empire'}{'space_stations'}} });
         $self->app->Yield if $self->app;
         return 1;
     }#}}}
