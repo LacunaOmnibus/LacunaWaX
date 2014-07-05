@@ -1,8 +1,9 @@
 
 ### CHECK
 ### Multiple identical ships to similar targets are being dealt with by 
-### "ship_quantity" right now.  Need to ask Norway if he wants that, or if he 
-### wants to stay with multiple entries as it's working now.
+### "ship_quantity" right now.  I've asked Norway if he wants that, or if he 
+### wants to stay with a distinct entry per ship as missions are working now 
+### in-game.
 
 package LacunaWax::Dialog::MissionEditor::FleetRow {
     use v5.14;

@@ -11,10 +11,11 @@ package LacunaWaX {
     use Wx::Event qw(EVT_MOVE EVT_CLOSE);
 
     use base 'Wx::App';
-    $Wx::App::VERSION   = "2.04";
-    our $VERSION        = '2.04';
+    ### MAJOR.odd  == beta
+    ### MAJOR.even == release
+    $Wx::App::VERSION   = "2.1";
+    our $VERSION        = '2.1';
 
-    use LacunaWaX::Preload::Perlapp;
     use LacunaWaX::MainFrame;
     use LacunaWaX::Model::Globals;
     use LacunaWaX::Model::Globals::Wx;

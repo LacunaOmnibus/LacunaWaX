@@ -43,28 +43,40 @@ After selecting the directory, the most recent version of GLC will be downloaded
 unzipped, extracted, and your config file will be created.
 <p>
 
-<h2>Install Mods</h2>
-The scripts included in the GLC package require a number of other Perl modules be 
-installed.  Selecting Tools... Install Mods will attempt to install them for you.
-<p>
-
-Re-installing modules you've already got installed won't hurt anything.  You don't have to 
-tell this tool where you installed Perl, or give it any other information.  Just select it 
-and it will do its best to install the required modules for you.
-<p>
-
-<h2>Testing the Setup</h2>
-After installing GLC and the required modules, you should be able to open a CMD window and 
-move to the GLC examples directory, where the scripts are stored:
+<h2>Install Modules</h2>
+After installing GLC, you'll need to install some Perl modules ("libraries") that GLC 
+needs to run.  GLC comes with a script that should install these for you.  Open a CMD 
+window to the directory where you installed GLC:
 <ul>
     <li>
         Start... Run... type "CMD.exe"
     </li>
     <li>
         In the black window that pops up, type:<br>
-        <code>cd C:\Lacuna\tsee\examples</code><br>
+        <code>cd C:\Lacuna\tsee</code><br>
         (if you installed GLC somewhere else, you're on your own to figure out how to get 
         there).
+    </li>
+    <li>
+        To install the modules, type:<br>
+        <code>perl ppm_install.pl</code>
+    </li>
+    <li>
+        That will take a bit of time to run, and install the modules for you.
+    </li>
+    <li>
+        When the modules have installed, leave your CMD window open to test your setup in 
+        the next step.
+    </li>
+</ul>
+
+<h2>Testing the Setup</h2>
+After installing GLC and the required modules, you should be able to open a CMD window and 
+move to the GLC examples directory, where the scripts are stored:
+<ul>
+    <li>
+        In your CMD window, change into the examples directory:<br>
+        <code>cd examples</code>
     </li>
     <li>
         Test by running the build_report script.  Make sure that you've got at least one 
@@ -80,7 +92,7 @@ move to the GLC examples directory, where the scripts are stored:
         <code>RPC Error (1010): Slow down YOURNAME! No more than 60 requests per minute.  
         </code><br>
         That's fine.  The point of this exercise was to test that your setup works.  If 
-        you see that error, you're in good shape..
+        you see that error, you're in good shape.
     </li>
 </ul>
 
