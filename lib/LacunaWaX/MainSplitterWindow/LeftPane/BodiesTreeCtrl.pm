@@ -190,6 +190,7 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
         my $self = shift;
         my $b64_planets     = encode_base64(join q{:}, ('planets'));
         my $b64_stations    = encode_base64(join q{:}, ('stations'));
+        my $b64_voting      = encode_base64(join q{:}, ('voting'));
         my $tree_data = {
             node    => 'Root',
             childs  => [
@@ -200,6 +201,10 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
                 { 
                     node => 'Stations',
                     data => $b64_stations,
+                },
+                { 
+                    node => 'Voting',
+                    data => $b64_voting,
                 },
             ],
         };
@@ -248,14 +253,18 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
     sub bold_planet_names {#{{{
         my $self = shift;
 
-        ### Bolds the "Planets" and "Stations" leaves themselves.  The actual 
-        ### named planets and stations sub-leaves stay un-bolded.
+        ### Bolds the "Planets" and "Stations" branches themselves.  The 
+        ### actual named planets and stations sub-leaves stay un-bolded.
 
         my($planets_id, $cookie) = $self->treeview->treectrl->GetFirstChild($self->root_item_id);
         $self->treectrl->SetItemFont( $planets_id, wxTheApp->get_font('bold_para_text_1') );
 
         my $stations_id;
         ($stations_id, $cookie) = $self->treeview->treectrl->GetNextChild($self->root_item_id, $cookie);
+        $self->treectrl->SetItemFont( $stations_id, wxTheApp->get_font('bold_para_text_1') );
+
+        my $voting_id;
+        ($voting_id, $cookie) = $self->treeview->treectrl->GetNextChild($self->root_item_id, $cookie);
         $self->treectrl->SetItemFont( $stations_id, wxTheApp->get_font('bold_para_text_1') );
     }#}}}
     sub fill_tree {#{{{
@@ -266,6 +275,7 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
         my $schema      = wxTheApp->main_schema;
         my $planets     = [];
         my $stations    = [];
+        my $voting      = [];
         foreach my $pname( sort{lc $a cmp lc $b} keys %{wxTheApp->game_client->planets} ) {#{{{
 
             my $pid = wxTheApp->game_client->planet_id($pname);
@@ -331,7 +341,7 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
                 node    => q{},
                 childs  => [],
             };
-            push @{$stations}, $empty_node;
+            push @{$voting}, $empty_node;
         }
 
         my $model_data = $self->treeview->model->data;

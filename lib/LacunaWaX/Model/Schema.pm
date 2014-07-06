@@ -160,11 +160,12 @@ package LacunaWaX::Model::Schema::SitterPasswords {#{{{
 
     __PACKAGE__->table('SitterPasswords');
     __PACKAGE__->add_columns( 
-        id          => {data_type => 'integer', is_auto_increment => 1, is_nullable => 0, extra => {unsigned => 1} },
-        server_id   => {data_type => 'integer',                         is_nullable => 0, extra => {unsigned => 1} },
-        player_id   => {data_type => 'integer',                         is_nullable => 0, extra => {unsigned => 1} },
-        player_name => {data_type => 'varchar', size => 64,             is_nullable => 1 },
-        sitter      => {data_type => 'varchar', size => 64,             is_nullable => 1 },
+        id              => {data_type => 'integer', is_auto_increment => 1, is_nullable => 0, extra => {unsigned => 1} },
+        server_id       => {data_type => 'integer',                         is_nullable => 0, extra => {unsigned => 1} },
+        player_id       => {data_type => 'integer',                         is_nullable => 0, extra => {unsigned => 1} },
+        player_name     => {data_type => 'varchar', size => 64,             is_nullable => 1 },
+        embassy_planet  => {data_type => 'varchar', size => 64,             is_nullable => 1 }, # name of the planet
+        sitter          => {data_type => 'varchar', size => 64,             is_nullable => 1 },
     );
     __PACKAGE__->set_primary_key( 'id' ); 
     __PACKAGE__->add_unique_constraint( 'one_player_per_server' => [qw(server_id player_id)] ); 
