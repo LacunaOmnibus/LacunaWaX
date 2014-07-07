@@ -20,7 +20,7 @@ package LacunaWaX::Dialog::Calculator {
 
     has 'sorted_planets'  => (is => 'rw', isa => 'ArrayRef[Str]', default => sub{ [] },
         documentation => q{
-            Curry cache; used for the planets dropdowns.  There are two dropdowns; both contain 
+            Cache; used for the planets dropdowns.  There are two dropdowns; both contain 
             sorted planet names.
         }
     );

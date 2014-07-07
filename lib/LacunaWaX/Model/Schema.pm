@@ -28,6 +28,19 @@ package LacunaWaX::Model::Schema::AppPrefsKeystore {#{{{
     __PACKAGE__->set_primary_key( 'id' ); 
 
 }#}}}
+package LacunaWaX::Model::Schema::EmpirePrefsKeystore {#{{{
+    use v5.14;
+    use base 'DBIx::Class::Core';
+
+    __PACKAGE__->table('EmpirePrefsKeystore');
+    __PACKAGE__->add_columns( 
+        id      => {data_type => 'integer', is_auto_increment => 1, is_nullable => 0, extra => {unsigned => 1}  },
+        name    => {data_type => 'varchar', size => 64,             is_nullable => 0, default_value => "unset"  },
+        value   => {data_type => 'varchar', size => 64,             is_nullable => 1                            },
+    );
+    __PACKAGE__->set_primary_key( 'id' ); 
+
+}#}}}
 package LacunaWaX::Model::Schema::ArchMinPrefs {#{{{
     use v5.14;
     use base 'DBIx::Class::Core';
@@ -255,6 +268,7 @@ package LacunaWaX::Model::Schema {
         AppPrefsKeystore
         ArchMinPrefs
         BodyTypes
+        EmpirePrefsKeystore
         LotteryPrefs
         ScheduleAutovote
         ServerAccounts

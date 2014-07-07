@@ -12,6 +12,7 @@ package LacunaWaX::MainSplitterWindow::RightPane {
     use LacunaWaX::MainSplitterWindow::RightPane::DefaultPane;
     use LacunaWaX::MainSplitterWindow::RightPane::GlyphsPane;
     use LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane;
+    use LacunaWaX::MainSplitterWindow::RightPane::NewPropositionsPane;
     use LacunaWaX::MainSplitterWindow::RightPane::RearrangerPane;
     use LacunaWaX::MainSplitterWindow::RightPane::RepairPane;
     use LacunaWaX::MainSplitterWindow::RightPane::SpiesPane;

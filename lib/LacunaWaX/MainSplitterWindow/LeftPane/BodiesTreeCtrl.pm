@@ -170,6 +170,14 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
                     $planet,
                 );
             },
+            voting => sub {
+                my $planet  = shift;
+                wxTheApp->right_pane->show_right_pane(
+                    'LacunaWaX::MainSplitterWindow::RightPane::NewPropositionsPane',
+                    $planet,
+                );
+            },
+
         };
         return $dispatch;
     }#}}}
