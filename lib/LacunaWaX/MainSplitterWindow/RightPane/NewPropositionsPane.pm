@@ -38,27 +38,6 @@ package LacunaWaX::MainSplitterWindow::RightPane::NewPropositionsPane {
     has 'embassy'  => (
         is          => 'rw', 
         isa         => 'Games::Lacuna::Client::Buildings::Embassy',
-    );
-
-    has 'flg_embassy_planet_validated'  => (
-        is          => 'rw', 
-        isa         => 'Bool',
-        default     => 0
-    );
-
-    has 'lbl_embassy_planet' => (
-        is          => 'rw',
-        isa         => 'Wx::StaticText',
-        lazy_build  => 1
-    );
-    has 'chc_embassy_planet' => (
-        is          => 'rw', 
-        isa         => 'Wx::Choice',
-        lazy_build  => 1,
-    );
-    has 'btn_embassy_planet' => (
-        is          => 'rw', 
-        isa         => 'Wx::Button',
         lazy_build  => 1,
     );
 
@@ -88,7 +67,6 @@ package LacunaWaX::MainSplitterWindow::RightPane::NewPropositionsPane {
     );
 
     has 'szr_header'               => (is => 'rw', isa => 'Wx::Sizer',         lazy_build => 1, documentation => 'vertical'     );
-    has 'szr_embassy_planet'       => (is => 'rw', isa => 'Wx::Sizer',         lazy_build => 1, documentation => 'vertical'     );
     has 'szr_props'                => (is => 'rw', isa => 'Wx::Sizer',                          documentation => 'vertical'     );
     has 'szr_close_status'         => (is => 'rw', isa => 'Wx::Sizer',         lazy_build => 1, documentation => 'horizontal'   );
 
@@ -107,94 +85,23 @@ package LacunaWaX::MainSplitterWindow::RightPane::NewPropositionsPane {
         $self->szr_header->AddSpacer(5);
         $self->szr_header->Add($self->lbl_instructions_box, 0, 0, 0);
 
-        $self->szr_embassy_planet->Add($self->lbl_embassy_planet, 0, 0, 0);
-        $self->szr_embassy_planet->Add($self->chc_embassy_planet, 0, 0, 0);
-        $self->szr_embassy_planet->Add($self->btn_embassy_planet, 0, 0, 0);
-
-    ### *SIGH*.
-    ### TheTower says that the user's Embassy ID now gets handed back in the 
-    ### empire status blob, so all this setting of an embassy is not necessary 
-    ### anymore.  Figures.
-    ###
-    ### But that does mean that I won't have to fiddle the sitter manager 
-    ### dialog.
-
-    ### Create sizer with drop-down containing "None" (default) and list of 
-    ### planets.  "Pick which planet has your embassy.  If you have more than 
-    ### one embassy, pick any planet with an embassy; it doesn't matter 
-    ### which".
-    ###
-    ### If there's an ID stored, ensure that planet has an embassy.  If 
-    ### there's an ID but no embassy at that ID, produce popup error.
-    ###
-    ### If there's an ID stored and an embassy is on that planet, set 
-    ### flg_embassy_planet_validated to true.
-    ###
-    ### If flg_embassy_planet_validated is false, stop here.
-    ###
-    ### ALMOST DONE TO HERE
-    ###     When the user first sets their embassy planet, we'll need to 
-    ###     either call a "show current votes" method, or (easier), just tell 
-    ###     the user in the "your planet has been saved" popup that they're 
-    ###     going to need to re-display this screen to actually see votes.
-    ###
-    ###
-    ### From here on, display votes pretty much the same way that the current 
-    ### PropPane does now.
+        $self->szr_close_status->Add($self->lbl_close_status, 0, 0, 0);
+        $self->szr_close_status->AddSpacer(10);
+        $self->szr_close_status->Add($self->chk_close_status, 0, 0, 0);
 
 
-        #$self->szr_close_status->Add($self->lbl_close_status, 0, 0, 0);
-        #$self->szr_close_status->AddSpacer(10);
-        #$self->szr_close_status->Add($self->chk_close_status, 0, 0, 0);
+
 
         #$self->szr_props( $self->create_szr_props() );
 
         $self->content_sizer->Add($self->szr_header, 0, 0, 0);
-        $self->content_sizer->Add($self->szr_embassy_planet, 0, 0, 0);
-        #$self->content_sizer->Add($self->szr_close_status, 0, 0, 0);
+        $self->content_sizer->Add($self->szr_close_status, 0, 0, 0);
         #$self->content_sizer->AddSpacer(20);
         #$self->content_sizer->Add($self->szr_props, 0, 0, 0);
 
         $self->_set_events();
         return $self;
     }
-    sub _build_chc_embassy_planet {#{{{
-        my $self = shift;
-
-        my %planets_by_id = reverse %{wxTheApp->game_client->planets};
-        my @sorted_planets = ( 'No Embassy', sort values %planets_by_id );
-
-        ### Get the embassy planet from a previous run if available
-        my $schema = wxTheApp->main_schema;
-        my $emb_planet_rec = $schema->resultset('EmpirePrefsKeystore')->search({ 'name' => 'EmbassyPlanetID' })->single;
-        if( $emb_planet_rec and my $pid = $emb_planet_rec->value ) {
-            if( wxTheApp->game_client->planet_name($pid) ) {
-                $self->planet_id( $pid );
-                $self->planet_name( wxTheApp->game_client->planet_name($pid) );
-            }
-        }
-
-        my $v = Wx::Choice->new(
-            $self->parent, -1, 
-            wxDefaultPosition, 
-            Wx::Size->new(140, 30), 
-            ['', @sorted_planets],
-        );
-        $v->SetFont( wxTheApp->get_font('para_text_1') );
-
-        if( $self->planet_name ) {
-            if( $self->validate_embassy_on_planet($self->planet_id) ) {
-                $self->flg_embassy_planet_validated( 1 );
-                $v->SetStringSelection( $self->planet_name );
-            }
-            else {
-                wxTheApp->poperr("You used to have an embassy planet set, but there's no embassy on that planet anymore.\n\nChoose which planet your embassy is on now, please.");
-                $self->planet_name(q{});
-                $self->planet_id(0);
-            }
-        }
-        return $v;
-    }#}}}
     sub _build_chk_close_status {#{{{
         my $self = shift;
         my $v = Wx::CheckBox->new(
@@ -206,10 +113,11 @@ package LacunaWaX::MainSplitterWindow::RightPane::NewPropositionsPane {
         $v->SetFont( wxTheApp->get_font('para_text_2') );
         return $v;
     }#}}}
-    sub _build_parl {#{{{
+    sub _build_embassy {#{{{
         my $self = shift;
-        my $parl = try {
-            wxTheApp->game_client->get_building($self->planet_id, 'Parliament');
+
+        my $emb = try {
+            wxTheApp->game_client->get_prime_embassy();
         }
         catch {
             #my $msg = (ref $_) ? $_->text : $_;
@@ -218,12 +126,12 @@ package LacunaWaX::MainSplitterWindow::RightPane::NewPropositionsPane {
             return;
         };
 
-        return( $parl and ref $parl eq 'Games::Lacuna::Client::Buildings::Parliament' ) ? $parl : undef;
+        return( $emb and ref $emb eq 'Games::Lacuna::Client::Buildings::Embassy' ) ? $emb : undef;
     }#}}}
     sub _build_props {#{{{
         my $self = shift;
         my $props = [];
-        return $props unless $self->parl_exists_here;
+        return $props unless $self->embassy_exists_here;
 
         $props = try {
             my $rv = $self->parl->view_propositions();
@@ -238,34 +146,10 @@ package LacunaWaX::MainSplitterWindow::RightPane::NewPropositionsPane {
 
         return $props;
     }#}}}
-    sub _build_btn_embassy_planet {#{{{
-        my $self = shift;
-        my $v = Wx::Button->new(
-            $self->parent, -1, 
-            "Set Embassy Planet",
-            wxDefaultPosition, 
-            Wx::Size->new(140, 30)
-        );
-        return $v;
-    }#}}}
     sub _build_lbl_close_status {#{{{
         my $self = shift;
 
         my $text = "Close the sitter status window automatically?";
-
-        my $v = Wx::StaticText->new(
-            $self->parent, -1, 
-            $text,
-            wxDefaultPosition, 
-            Wx::Size->new(-1, -1)
-        );
-        $v->SetFont( wxTheApp->get_font('para_text_2') );
-        return $v;
-    }#}}}
-    sub _build_lbl_embassy_planet {#{{{
-        my $self = shift;
-
-        my $text = "Choose any planet with an embassy on it: ";
 
         my $v = Wx::StaticText->new(
             $self->parent, -1, 
@@ -322,17 +206,13 @@ package LacunaWaX::MainSplitterWindow::RightPane::NewPropositionsPane {
         my $self = shift;
         return wxTheApp->build_sizer($self->parent, wxVERTICAL, 'Header');
     }#}}}
-    sub _build_szr_embassy_planet {#{{{
-        my $self = shift;
-        return wxTheApp->build_sizer($self->parent, wxHORIZONTAL, 'Embassy Planet');
-    }#}}}
     sub _build_szr_close_status {#{{{
         my $self = shift;
         return wxTheApp->build_sizer($self->parent, wxHORIZONTAL, 'Close Status Window?', 0);
     }#}}}
     sub _set_events {
         my $self = shift;
-        EVT_BUTTON( $self->parent, $self->btn_embassy_planet->GetId, sub{$self->OnSaveEmbassyPlanet(@_)});
+        #EVT_BUTTON( $self->parent, $self->btn_embassy_planet->GetId, sub{$self->OnSaveEmbassyPlanet(@_)});
     }
 
     sub create_szr_props {#{{{
@@ -378,15 +258,14 @@ package LacunaWaX::MainSplitterWindow::RightPane::NewPropositionsPane {
 
         return $szr_props;
     }#}}}
-    sub parl_exists_here {#{{{
+    sub embassy_exists_here {#{{{
         my $self = shift;
 
-        ### Calls parl's lazy builder if needed, which returns undef if no parl
-        my $v = $self->parl;
+        ### Calls embassy's lazy builder if needed, which returns undef if no 
+        ### embassy
+        my $v = $self->embassy;
 
-        ### Yeah, we could just test if $v is undef.  Calling the auto-generated 
-        ### has_parl() is just more Moosey.
-        return unless $self->has_parl;
+        return unless $self->has_embassy;
         return 1;
     };#}}}
     sub validate_embassy_on_planet {#{{{
@@ -410,33 +289,6 @@ package LacunaWaX::MainSplitterWindow::RightPane::NewPropositionsPane {
         foreach my $row( @{$self->rows} ) {
             $row->OnClose if $row->can('OnClose');
         }
-        return 1;
-    }#}}}
-    sub OnSaveEmbassyPlanet {#{{{
-        my $self    = shift;
-        my $dialog  = shift;    # Wx::ScrolledWindow
-        my $event   = shift;    # CommandEvent
-
-        my $pname = $self->chc_embassy_planet->GetStringSelection;
-        my $pid   = wxTheApp->game_client->planet_id($pname);
-
-        unless( $self->validate_embassy_on_planet($pid) ) {
-            wxTheApp->poperr( "No embassy was found on your chosen planet!" );
-            return;
-        }
-
-        $self->planet_id( $pid );
-        $self->planet_name( $pname );
-
-        my $schema = wxTheApp->main_schema;
-        my $rec = $schema->resultset('EmpirePrefsKeystore')->find_or_create({
-            name => 'EmbassyPlanetID',
-        });
-        $rec->value( $self->planet_id );
-        $rec->update;
-
-        wxTheApp->popmsg('Embassy planet saved');
-
         return 1;
     }#}}}
 

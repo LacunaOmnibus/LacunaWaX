@@ -1037,7 +1037,6 @@ game, this returns all glyphs, including those we have zero of.
         }
 
         my $code_to_cache = sub {
-            #my $glyphs_on_planet = $self->call($am, 'get_glyph_summary')->{'glyphs'};
             my $glyphs_on_planet = $am->get_glyph_summary->{'glyphs'};
 
             ### List all possible ores, turn into hash   ( orename => 0 )
@@ -1189,6 +1188,42 @@ ship can attain.
         }
         return $min_speed;
     }#}}}
+    sub get_prime_embassy {#{{{
+        my $self    = shift;
+        my $force   = shift;
+
+=head2 get_prime_embassy
+
+Returns the Games::Lacuna::Client::Buildings::Embassy object representing the 
+current empire's main embassy (whose ID is now returned by empire_status).
+
+If the current empire does not have a primary_embassy_id, returns undef.
+
+=cut
+
+        ### I'm not sure if an embassy-less empire will have a false value for 
+        ### primary_embassy_id or if the key will simply not exist.  This 
+        ### covers both cases.
+        my $emp_status = $self->get_empire_status();
+        my $emp_id = $emp_status->{'primary_embassy_id'} // 0;
+        return unless $emp_id;
+
+        my $emb;
+        if( $self->use_gui ) {
+            my $chi  = $self->app->get_cache;
+            my $key  = $self->make_key('EMPIRE', 'PRIMARY_EMBASSY_ID');
+            $chi->remove($key) if $force;
+            $emb = $chi->compute($key, '1 hour', sub {
+                $self->client->building( [id => $emp_id] );
+            });
+        }
+        else {
+            $self->client->building( [id => $emp_id] );
+        }
+
+        return $emb;
+
+    }#}}}
     sub get_ships {#{{{
         my $self   = shift;
         my $sp     = shift;
@@ -1233,7 +1268,6 @@ by GLC's view_all_ships.  The filter for get_ships() differs in that:
             $self->app->Yield if $self->app;
         }
         else {
-            #$ships = $self->call($sp, 'view_all_ships', [ {no_paging => 1} ])->{'ships'};
             $ships = $sp->view_all_ships({no_paging => 1})->{'ships'};
         }
 
