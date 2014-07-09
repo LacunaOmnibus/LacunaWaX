@@ -31,10 +31,6 @@ package LacunaWaX::MainSplitterWindow::RightPane::NewPropositionsPane {
 
     #########################################
 
-    ### Name and ID of the planet with the embassy
-    has 'planet_name'   => (is => 'rw', isa => 'Str');
-    has 'planet_id'     => (is => 'rw', isa => 'Int');
-
     has 'embassy'  => (
         is          => 'rw', 
         isa         => 'Games::Lacuna::Client::Buildings::Embassy',
@@ -89,15 +85,12 @@ package LacunaWaX::MainSplitterWindow::RightPane::NewPropositionsPane {
         $self->szr_close_status->AddSpacer(10);
         $self->szr_close_status->Add($self->chk_close_status, 0, 0, 0);
 
-
-
-
-        #$self->szr_props( $self->create_szr_props() );
+        $self->szr_props( $self->create_szr_props() );
 
         $self->content_sizer->Add($self->szr_header, 0, 0, 0);
         $self->content_sizer->Add($self->szr_close_status, 0, 0, 0);
-        #$self->content_sizer->AddSpacer(20);
-        #$self->content_sizer->Add($self->szr_props, 0, 0, 0);
+        $self->content_sizer->AddSpacer(20);
+        $self->content_sizer->Add($self->szr_props, 0, 0, 0);
 
         $self->_set_events();
         return $self;
@@ -118,6 +111,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::NewPropositionsPane {
 
         my $emb = try {
             wxTheApp->game_client->get_prime_embassy();
+            #my $e = wxTheApp->game_client->get_prime_embassy( 1 );
         }
         catch {
             #my $msg = (ref $_) ? $_->text : $_;
@@ -134,7 +128,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::NewPropositionsPane {
         return $props unless $self->embassy_exists_here;
 
         $props = try {
-            my $rv = $self->parl->view_propositions();
+            my $rv = $self->embassy->view_propositions();
             return $rv->{'propositions'} // $props;
         }
         catch {
@@ -194,14 +188,6 @@ package LacunaWaX::MainSplitterWindow::RightPane::NewPropositionsPane {
         $v->SetFont( wxTheApp->get_font('header_1') );
         return $v;
     }#}}}
-    sub _build_planet_id {#{{{
-        my $self = shift;
-        return wxTheApp->game_client->planet_id( $self->planet_name );
-    }#}}}
-    sub _build_planet_name {#{{{
-        my $self = shift;
-        return wxTheApp->game_client->planet_name( $self->planet_id );
-    }#}}}
     sub _build_szr_header {#{{{
         my $self = shift;
         return wxTheApp->build_sizer($self->parent, wxVERTICAL, 'Header');
@@ -210,10 +196,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::NewPropositionsPane {
         my $self = shift;
         return wxTheApp->build_sizer($self->parent, wxHORIZONTAL, 'Close Status Window?', 0);
     }#}}}
-    sub _set_events {
-        my $self = shift;
-        #EVT_BUTTON( $self->parent, $self->btn_embassy_planet->GetId, sub{$self->OnSaveEmbassyPlanet(@_)});
-    }
+    sub _set_events { }
 
     sub create_szr_props {#{{{
         my $self = shift;
@@ -223,7 +206,6 @@ package LacunaWaX::MainSplitterWindow::RightPane::NewPropositionsPane {
         my $header = LacunaWaX::MainSplitterWindow::RightPane::NewPropositionsPane::PropRow->new(
             ancestor    => $self,
             parent      => $self->parent,
-            planet_id   => $self->planet_id,
             is_header   => 1,
         );
         $szr_props->Add($header->main_sizer, 0, 0, 0);
@@ -232,8 +214,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::NewPropositionsPane {
             my $row = LacunaWaX::MainSplitterWindow::RightPane::NewPropositionsPane::PropRow->new(
                 ancestor    => $self,
                 parent      => $self->parent,
-                planet_id   => $self->planet_id,
-                parl        => $self->parl,
+                embassy     => $self->embassy,
                 prop        => $prop,
             );
             push @{$self->rows}, $row;
@@ -249,7 +230,6 @@ package LacunaWaX::MainSplitterWindow::RightPane::NewPropositionsPane {
                 app         => wxTheApp,
                 ancestor    => $self,
                 parent      => $self->parent,
-                planet_id   => $self->planet_id,
                 rows        => $self->rows,
                 is_footer   => 1,
             );

@@ -1204,8 +1204,7 @@ If the current empire does not have a primary_embassy_id, returns undef.
         ### I'm not sure if an embassy-less empire will have a false value for 
         ### primary_embassy_id or if the key will simply not exist.  This 
         ### covers both cases.
-        my $emp_status = $self->get_empire_status();
-        my $emp_id = $emp_status->{'primary_embassy_id'} // 0;
+        my $emp_id = $self->empire_status->{'empire'}{'primary_embassy_id'} // 0;
         return unless $emp_id;
 
         my $emb;
@@ -1214,7 +1213,10 @@ If the current empire does not have a primary_embassy_id, returns undef.
             my $key  = $self->make_key('EMPIRE', 'PRIMARY_EMBASSY_ID');
             $chi->remove($key) if $force;
             $emb = $chi->compute($key, '1 hour', sub {
-                $self->client->building( [id => $emp_id] );
+                $self->client->building(
+                    id => $emp_id,
+                    type => 'Embassy',
+                );
             });
         }
         else {
@@ -1222,7 +1224,6 @@ If the current empire does not have a primary_embassy_id, returns undef.
         }
 
         return $emb;
-
     }#}}}
     sub get_ships {#{{{
         my $self   = shift;

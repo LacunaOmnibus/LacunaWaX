@@ -15,9 +15,9 @@ our @ISA = qw(Games::Lacuna::Client::Buildings);
 sub api_methods {
   return {
     view                   => { default_args => [qw(session_id building_id)] },
+    get_alliance_status    => { default_args => [qw(session_id building_id)] },
     create_alliance        => { default_args => [qw(session_id building_id)] },
     dissolve_alliance      => { default_args => [qw(session_id building_id)] },
-    get_alliance_status    => { default_args => [qw(session_id building_id)] },
     send_invite            => { default_args => [qw(session_id building_id)] },
     withdraw_invite        => { default_args => [qw(session_id building_id)] },
     accept_invite          => { default_args => [qw(session_id building_id)] },
@@ -31,6 +31,31 @@ sub api_methods {
     view_stash             => { default_args => [qw(session_id building_id)] },
     donate_to_stash        => { default_args => [qw(session_id building_id)] },
     exchange_with_stash    => { default_args => [qw(session_id building_id)] },
+
+    ### JDB new SS changes
+    view_laws                                       => { default_args => [qw(session_id building_id)] },
+    view_propositions                               => { default_args => [qw(session_id building_id)] },
+    cast_vote                                       => { default_args => [qw(session_id building_id)] },
+    propose_writ                                    => { default_args => [qw(session_id building_id)] },
+    propose_repeal_law                              => { default_args => [qw(session_id building_id)] },
+    get_stars_in_jurisdiction                       => { default_args => [qw(session_id building_id)] },
+    get_bodies_for_stars_in_jurisdiction            => { default_args => [qw(session_id building_id)] },
+    get_mining_platforms_for_stars_in_jurisdiction  => { default_args => [qw(session_id building_id)] },
+    get_excavators_for_stars_in_jurisdiction        => { default_args => [qw(session_id building_id)] },
+    propose_focus_influence_on_star                 => { default_args => [qw(session_id building_id)] },
+    propose_rename_star                             => { default_args => [qw(session_id building_id)] },
+    propose_broadcast_on_network19                  => { default_args => [qw(session_id building_id)] },
+    propose_induct_member                           => { default_args => [qw(session_id building_id)] },
+    propose_expel_member                            => { default_args => [qw(session_id building_id)] },
+    propose_elect_new_leader                        => { default_args => [qw(session_id building_id)] },
+    propose_rename_asteroid                         => { default_args => [qw(session_id building_id)] },
+    propose_rename_uninhabited                      => { default_args => [qw(session_id building_id)] },
+    propose_members_only_mining_rights              => { default_args => [qw(session_id building_id)] },
+    propose_evict_mining_platform                   => { default_args => [qw(session_id building_id)] },
+    propose_members_only_colonization               => { default_args => [qw(session_id building_id)] },
+    propose_neutralize_bhg                          => { default_args => [qw(session_id building_id)] },
+    propose_transfer_station_ownership              => { default_args => [qw(session_id building_id)] },
+    propose_fire_bfg                                => { default_args => [qw(session_id building_id)] },
 
   };
 }
