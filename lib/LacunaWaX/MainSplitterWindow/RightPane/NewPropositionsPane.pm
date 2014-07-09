@@ -1,4 +1,35 @@
 
+
+
+
+=pod
+
+Reading chat scrollback on PT.
+
+Tower is saying that cast_vote requires a body_id, rather than a building_id.  
+The empire_status gives us the building_id of the embassy, but we need a 
+body_id too (or instead?) to cast votes.
+
+Icy says we can use the body_id of the player's homeworld; this gets returned 
+in empire_status.
+
+He's implying that the embassy doesn't need to actually be on that homeworld.  
+I'm in exactly that situation, so can test.
+
+I haven't tried any of this yet.
+
+=cut
+
+
+
+
+
+
+
+
+
+
+
 =head2 CHILD WINDOWS
 
 Each prop displayed in the NewPropositionsPane is its own PropRow object.  Each of 
