@@ -5,7 +5,6 @@ package LacunaWaX::MainSplitterWindow::RightPane::SitterManager {
     use Try::Tiny;
     use Wx qw(:everything);
     use Wx::Event qw(EVT_BUTTON EVT_CLOSE);
-    #extends 'LacunaWaX::Dialog::Scrolled';
     with 'LacunaWaX::Roles::MainSplitterWindow::RightPane';
 
     use LacunaWaX::MainSplitterWindow::RightPane::SitterManager::SitterRow;
@@ -222,14 +221,6 @@ package LacunaWaX::MainSplitterWindow::RightPane::SitterManager {
         ### Calling SetFocus on that txt_name control isn't just convenient (and 
         ### it is), it also removes that artifact.
 
-        return 1;
-    }#}}}
-    sub OnClose {#{{{
-        my $self    = shift;
-        my $dialog  = shift;    # Wx::MainSplitterWindow::RightPane (NOT Wx::ScrolledWindow here!)
-        my $event   = shift;    # Wx::CommandEvent
-        $self->Destroy;
-        $event->Skip();
         return 1;
     }#}}}
 
