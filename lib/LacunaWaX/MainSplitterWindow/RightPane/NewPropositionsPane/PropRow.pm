@@ -515,7 +515,8 @@ package LacunaWaX::MainSplitterWindow::RightPane::NewPropositionsPane::PropRow {
             wxTheApp->game_client->relog($sitter_rec->player_name, $sitter_rec->sitter);
         }
         catch {
-            my $msg = (ref $_) ? $_->text : $_;
+            #my $msg = (ref $_) ? $_->text : $_;
+            my $msg = (ref $_) ? $_->message : $_;
             $self->dialog_status_say("*** I was unable to login for $player - they may be totally out of RPCs. ***");
             $self->ancestor->over_rpc->{$player}++;
             return;
@@ -523,7 +524,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::NewPropositionsPane::PropRow {
         if($self->stop_voting) { $self->stop_voting(0); $self->btn_sitters_yes->Enable(1); $self->dialog_status_say_recsep(); return; }
 
 
-        ### Get Parl using sitter's client
+        ### Get Embassy using sitter's client
         $self->dialog_status_say("Getting embassy using ${player}'s client...");
         my $sitter_embassy = try {
             $sitter_client->building( id => $self->embassy->{'building_id'}, type => 'embassy' );
@@ -546,8 +547,13 @@ package LacunaWaX::MainSplitterWindow::RightPane::NewPropositionsPane::PropRow {
             ### SITTERVOTE
             ### That 'tag' comment exists so this chunk of code is easy to 
             ### find, please do not delete it.
-            my $rv = $sitter_embassy->cast_vote($prop->{'id'}, 1);
-#            my $rv = $sitter_embassy->cast_vote($prop->{'id'}, 0);  # to force 'no' votes
+            my $rv = $sitter_embassy->cast_vote( 
+                $sitter_client->home_planet_id,
+                $prop->{'id'},
+                ### If you need to force 'no' votes, change this to a 0.
+                ### BUT THEN CHANGE IT BACK AGAIN DON'T FORGET DUMMY.
+                1
+            );
             alarm 0;
 
             return $rv;

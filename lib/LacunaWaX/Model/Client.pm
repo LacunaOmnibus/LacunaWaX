@@ -359,34 +359,30 @@ Although ping does need to hit the server, you don't need to wrap it in a
 try/catch; ping is doing that itself to ensure it can return only either true or 
 false and never die.
 
+Don't attempt to use $self->globals->logger in here; it fails to make a second
+db connection when you're trying to make a second game connection (eg for sitter
+voting).
+
 =cut
 
-        my $logger = $self->globals->logger;
-        $logger->component('Client');
-        $logger->debug('ping() called');
         $self->app->Yield if $self->app;
         if( $self->pingtime ) {
-            $logger->debug('pingtime already set');
             my $now = DateTime->now();
             my $dur = $now - $self->pingtime;
             if( $dur->seconds < (15 * 60) ) {
-                $logger->debug("pingtime indicates last ping call is still good.");
                 return 1;
             }
-            $logger->debug('pingtime has expired (' . $dur->seconds . ')');
-        }
-        else {
-            $logger->debug("No pingtime set; this is this server's first ping.");
         }
 
         $self->app->Yield if $self->app;
 
         my $rv = try {
-            $self->get_empire_status
+            $self->get_empire_status;
         }
         catch {
             return;
         };
+
         return $rv;
     }#}}}
     sub planet_id {#{{{
@@ -492,6 +488,7 @@ doing so returns much more quickly than having to recreate them.
             allow_sleep => $self->allow_sleep,
             rpc_sleep   => $self->rpc_sleep,
         );
+        $lc->ping();
         $self->sitter_clients->{$key} = $lc;
 
         return $lc;
