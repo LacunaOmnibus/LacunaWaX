@@ -54,65 +54,6 @@ package LacunaWaX::Model::Schema::ArchMinPrefs {#{{{
     }#}}}
 
 }#}}}
-
-
-
-=pod
-Old tables getting ready to go away
-package LacunaWaX::Model::Schema::BodyTypes {#{{{
-    use v5.14;
-    use base 'DBIx::Class::Core';
-
-    __PACKAGE__->table('BodyTypes');
-    __PACKAGE__->add_columns( 
-        id              => {data_type => 'integer', is_auto_increment => 1, is_nullable => 0, extra => {unsigned => 1}  },
-        body_id         => {data_type => 'integer',                         is_nullable => 0, extra => {unsigned => 1}  },
-        server_id       => {data_type => 'integer',                         is_nullable => 0, extra => {unsigned => 1}  },
-        type_general    => {data_type => 'varchar', size => 16,             is_nullable => 1                            },
-    );
-    __PACKAGE__->set_primary_key( 'id' ); 
-    __PACKAGE__->add_unique_constraint( 'one_per_server' => [qw(body_id server_id)] ); 
-
-    sub sqlt_deploy_hook {#{{{
-        my $self  = shift;
-        my $table = shift;
-        $table->add_index(name => 'BodyTypes_body_id', fields => ['body_id']);
-        $table->add_index(name => 'BodyTypes_type_general', fields => ['type_general']);
-        return 1;
-    }#}}}
-    
-}#}}}
-package LacunaWaX::Model::Schema::EmpirePrefsKeystore {#{{{
-    use v5.14;
-    use base 'DBIx::Class::Core';
-
-    __PACKAGE__->table('EmpirePrefsKeystore');
-    __PACKAGE__->add_columns( 
-        id      => {data_type => 'integer', is_auto_increment => 1, is_nullable => 0, extra => {unsigned => 1}  },
-        name    => {data_type => 'varchar', size => 64,             is_nullable => 0, default_value => "unset"  },
-        value   => {data_type => 'varchar', size => 64,             is_nullable => 1                            },
-    );
-    __PACKAGE__->set_primary_key( 'id' ); 
-
-}#}}}
-package LacunaWaX::Model::Schema::LotteryPrefs {#{{{
-    use v5.14;
-    use base 'DBIx::Class::Core';
-
-    __PACKAGE__->table('LotteryPrefs');
-    __PACKAGE__->add_columns( 
-        id          => {data_type => 'integer', is_auto_increment => 1, is_nullable => 0, extra => {unsigned => 1} },
-        server_id   => {data_type => 'integer',                         is_nullable => 0, extra => {unsigned => 1} },
-        body_id     => {data_type => 'integer',                         is_nullable => 0, extra => {unsigned => 1} },
-        count       => {data_type => 'integer',                         is_nullable => 0, default_value => 1, },
-    );
-    __PACKAGE__->set_primary_key( 'id' ); 
-    __PACKAGE__->add_unique_constraint( 'LotteryPrefs_body' => [qw(body_id server_id)] ); 
-}#}}}
-=cut
-
-
-
 package LacunaWaX::Model::Schema::ScheduleAutovote {#{{{
     use v5.14;
     use base 'DBIx::Class::Core';
@@ -272,12 +213,9 @@ package LacunaWaX::Model::Schema {
 
     our $VERSION = '0.1';
 
-        #LotteryPrefs
-        #EmpirePrefsKeystore
     __PACKAGE__->load_classes(qw/
         AppPrefsKeystore
         ArchMinPrefs
-        BodyTypes
         ScheduleAutovote
         ServerAccounts
         Servers
