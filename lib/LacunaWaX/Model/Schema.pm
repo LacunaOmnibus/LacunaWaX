@@ -57,6 +57,8 @@ package LacunaWaX::Model::Schema::ArchMinPrefs {#{{{
 
 
 
+=pod
+Old tables getting ready to go away
 package LacunaWaX::Model::Schema::BodyTypes {#{{{
     use v5.14;
     use base 'DBIx::Class::Core';
@@ -80,8 +82,6 @@ package LacunaWaX::Model::Schema::BodyTypes {#{{{
     }#}}}
     
 }#}}}
-=pod
-Old tables getting ready to go away
 package LacunaWaX::Model::Schema::EmpirePrefsKeystore {#{{{
     use v5.14;
     use base 'DBIx::Class::Core';
