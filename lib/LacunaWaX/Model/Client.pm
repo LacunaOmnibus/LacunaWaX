@@ -30,6 +30,20 @@ package LacunaWaX::Model::Client {
 
     has 'empire_status'   => (is => 'rw', isa => 'HashRef');
 
+    ### These both get returned in empire->get_status(), so will be set the 
+    ### first time that's called.
+    has 'prime_embassy_id' => (
+        is           => 'rw',
+        isa          => 'Int',
+        documentation => q{
+            Some users won't have an embassy yet.  This will be 0 in that case.
+        }
+    );
+    has 'home_planet_id' => (
+        is           => 'rw',
+        isa          => 'Int',
+    );
+
     has 'use_gui' => (
         is          => 'rw',
         isa         => 'Int',
@@ -1001,6 +1015,9 @@ necessary, call ping() instead.
         ref $status eq 'HASH' or return;
         $self->empire_status($status);
 
+        $self->prime_embassy_id( $self->empire_status->{'empire'}{'primary_embassy_id'} // 0 );
+        $self->home_planet_id( $self->empire_status->{'empire'}{'home_planet_id'} );
+
         $self->app->Yield if $self->app;
         $self->pingtime( DateTime->now );
         $self->app->Yield if $self->app;
@@ -1204,7 +1221,7 @@ If the current empire does not have a primary_embassy_id, returns undef.
         ### I'm not sure if an embassy-less empire will have a false value for 
         ### primary_embassy_id or if the key will simply not exist.  This 
         ### covers both cases.
-        my $emp_id = $self->empire_status->{'empire'}{'primary_embassy_id'} // 0;
+        my $emp_id = $self->prime_embassy_id;
         return unless $emp_id;
 
         my $emb;

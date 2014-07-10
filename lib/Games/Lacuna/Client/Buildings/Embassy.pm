@@ -35,7 +35,7 @@ sub api_methods {
     ### JDB new SS changes
     view_laws                                       => { default_args => [qw(session_id building_id)] },
     view_propositions                               => { default_args => [qw(session_id building_id)] },
-    cast_vote                                       => { default_args => [qw(session_id building_id)] },
+    cast_vote                                       => { default_args => [qw(session_id)] },
     propose_writ                                    => { default_args => [qw(session_id building_id)] },
     propose_repeal_law                              => { default_args => [qw(session_id building_id)] },
     get_stars_in_jurisdiction                       => { default_args => [qw(session_id building_id)] },

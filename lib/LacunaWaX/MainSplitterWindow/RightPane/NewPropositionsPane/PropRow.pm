@@ -543,7 +543,6 @@ package LacunaWaX::MainSplitterWindow::RightPane::NewPropositionsPane::PropRow {
             local $SIG{ALRM} = sub { croak "voting stall"; };
             alarm 5;
 
-
             ### SITTERVOTE
             ### That 'tag' comment exists so this chunk of code is easy to 
             ### find, please do not delete it.
@@ -783,7 +782,11 @@ sitters.
 
         wxTheApp->throb;
         my $rv = try {
-            $self->embassy->cast_vote($self->prop->{'id'}, $vote);
+            $self->embassy->cast_vote(
+                wxTheApp->game_client->home_planet_id,
+                $self->prop->{'id'}, 
+                $vote
+            );
         }
         catch {
             my $msg = (ref $_) ? $_->text : $_;

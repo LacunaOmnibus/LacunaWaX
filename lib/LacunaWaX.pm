@@ -672,7 +672,6 @@ Returns true/false on success/fail.
                     use_gui     => 1,   # Allows use of the cache
             );
             $self->game_client( $game_client );
-
             $self->Yield;
             my $rv = $self->game_client->ping;
             return unless $rv;  # no $rv means bad creds.
