@@ -25,8 +25,11 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane::PropRow {
     #########################################
 
     has 'main_sizer'    => (is => 'rw', isa => 'Wx::BoxSizer',  lazy_build => 1, documentation => 'vertical');
-    has 'planet_id'     => (is => 'rw', isa => 'Int', required => 1);
-    has 'parl'          => (is => 'rw', isa => 'Maybe[Games::Lacuna::Client::Buildings::Parliament]',   lazy_build => 1);
+    has 'embassy'       => (
+        is          => 'rw',
+        isa         => 'Maybe[Games::Lacuna::Client::Buildings::Embassy]',
+        lazy_build  => 1
+    );
     has 'ally_members'  => (is => 'rw', isa => 'Maybe[HashRef]', lazy_build => 1);
 
     has 'prop' => (is => 'rw', isa => 'Maybe[HashRef]', 
@@ -35,7 +38,6 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane::PropRow {
             anything but a blank row or a header.
         }
     );
-
 
     has 'stop_voting' => (is => 'rw', isa => 'Int', lazy => 1, default => 0,
         documentation => q{
@@ -63,12 +65,6 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane::PropRow {
         }
     );
 
-    has 'foo' => (
-        is              => 'rw',
-        isa             => 'Str',
-        default         => 'bar',
-        lazy            => 1,
-    );
     has 'is_footer' => (
         is              => 'rw',
         isa             => 'Int',
@@ -137,7 +133,6 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane::PropRow {
         my $self    = shift;
         my $params  = shift;
 
-
         wxTheApp->borders_off();    # Change to borders_on to see borders around sizers
         return $self->_make_header if $self->is_header;
         return $self->_make_footer if $self->is_footer;
@@ -200,6 +195,21 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane::PropRow {
         );
         $v->hide;
         return $v;
+    }#}}}
+    sub _build_embassy {#{{{
+        my $self = shift;
+
+        my $emb = try {
+            wxTheApp->game_client->get_prime_embassy();
+        }
+        catch {
+            #my $msg = (ref $_) ? $_->text : $_;
+            my $msg = (ref $_) ? $_->message : $_;
+            wxTheApp->poperr($msg);
+            return;
+        };
+
+        return( $emb and ref $emb eq 'Games::Lacuna::Client::Buildings::Embassy' ) ? $emb : undef;
     }#}}}
     sub _build_lbl_name {#{{{
         my $self = shift;
@@ -380,18 +390,6 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane::PropRow {
             : 'None';
         return $text;
     }#}}}
-    sub _build_parl {#{{{
-        my $self = shift;
-        my $parl = try {
-            wxTheApp->game_client->get_building($self->ancestor->planet_id, 'Parliament');
-        }
-        catch {
-            wxTheApp->poperr($_->text);
-            return;
-        };
-
-        return( $parl and ref $parl eq 'Games::Lacuna::Client::Buildings::Parliament' ) ? $parl : undef;
-    }#}}}
     sub _set_events {#{{{
         my $self = shift;
 
@@ -517,7 +515,8 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane::PropRow {
             wxTheApp->game_client->relog($sitter_rec->player_name, $sitter_rec->sitter);
         }
         catch {
-            my $msg = (ref $_) ? $_->text : $_;
+            #my $msg = (ref $_) ? $_->text : $_;
+            my $msg = (ref $_) ? $_->message : $_;
             $self->dialog_status_say("*** I was unable to login for $player - they may be totally out of RPCs. ***");
             $self->ancestor->over_rpc->{$player}++;
             return;
@@ -525,13 +524,13 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane::PropRow {
         if($self->stop_voting) { $self->stop_voting(0); $self->btn_sitters_yes->Enable(1); $self->dialog_status_say_recsep(); return; }
 
 
-        ### Get Parl using sitter's client
-        $self->dialog_status_say("Getting parliament using ${player}'s client...");
-        my $sitter_parl = try {
-            $sitter_client->building( id => $self->parl->{'building_id'}, type => 'parliament' );
+        ### Get Embassy using sitter's client
+        $self->dialog_status_say("Getting embassy using ${player}'s client...");
+        my $sitter_embassy = try {
+            $sitter_client->building( id => $self->embassy->{'building_id'}, type => 'embassy' );
         }
         catch {
-            $self->dialog_status_say("*** I was unable to find parliament for $player because:\n\t$_\n");
+            $self->dialog_status_say("*** I was unable to find embassy for $player because:\n\t$_\n");
             return;
         } or do{ $self->dialog_status_say_recsep(); return; };
         if($self->stop_voting) { $self->stop_voting(0); $self->btn_sitters_yes->Enable(1); $self->dialog_status_say_recsep(); return; }
@@ -545,12 +544,16 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane::PropRow {
             local $SIG{ALRM} = sub { croak "voting stall"; };
             alarm 5;
 
-
             ### SITTERVOTE
             ### That 'tag' comment exists so this chunk of code is easy to 
             ### find, please do not delete it.
-            my $rv = $sitter_parl->cast_vote($prop->{'id'}, 1);
-#            my $rv = $sitter_parl->cast_vote($prop->{'id'}, 0);  # to force 'no' votes
+            my $rv = $sitter_embassy->cast_vote( 
+                $sitter_client->home_planet_id,
+                $prop->{'id'},
+                ### If you need to force 'no' votes, change this to a 0.
+                ### BUT THEN CHANGE IT BACK AGAIN DON'T FORGET DUMMY.
+                1
+            );
             alarm 0;
 
             return $rv;
@@ -649,11 +652,6 @@ sitters.
             last SITTER if $prop_has_passed;
         }
 
-        ### The vote we just pushed may have been a seizure or influence 
-        ### building upgrade, meaning that it may have affected the station's 
-        ### influence.  Clear the cached status for the station.
-        wxTheApp->game_client->clear_body_status_cache( $self->planet_id );
-
         unless( $prop_has_passed ) {
             ### We skipped attempting to vote for members who'd already been 
             ### recorded as having voted on a different prop.  They /probably/ 
@@ -750,8 +748,8 @@ sitters.
         my $event   = shift;    # Wx::CommandEvent
         my $vote    = shift;    # 1 or 0
 
-        unless($self->parl) {
-            wxTheApp->poperr("We seem not to have a parliament building; no voting is possible.", "Error");
+        unless($self->embassy) {
+            wxTheApp->poperr("We seem not to have a embassy building; no voting is possible.", "Error");
             return;
         }
 
@@ -783,14 +781,18 @@ sitters.
         my $event   = shift;    # Wx::CommandEvent
         my $vote    = shift;    # 1 or 0
 
-        unless($self->parl) {
-            wxTheApp->poperr("We seem not to have a parliament building; no voting is possible.", "Error");
+        unless($self->embassy) {
+            wxTheApp->poperr("We seem not to have a embassy building; no voting is possible.", "Error");
             return;
         }
 
         wxTheApp->throb;
         my $rv = try {
-            $self->parl->cast_vote($self->prop->{'id'}, $vote);
+            $self->embassy->cast_vote(
+                wxTheApp->game_client->home_planet_id,
+                $self->prop->{'id'}, 
+                $vote
+            );
         }
         catch {
             my $msg = (ref $_) ? $_->text : $_;
@@ -827,8 +829,8 @@ sitters.
         my $event   = shift;    # Wx::CommandEvent
         my $vote    = shift;    # 1 or 0
 
-        unless($self->parl) {
-            wxTheApp->poperr("We seem not to have a parliament building; no voting is possible.", "Error");
+        unless($self->embassy) {
+            wxTheApp->poperr("We seem not to have a embassy building; no voting is possible.", "Error");
             return;
         }
         unless($vote) {

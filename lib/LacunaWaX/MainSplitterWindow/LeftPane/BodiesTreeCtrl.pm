@@ -173,7 +173,7 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
             voting => sub {
                 my $planet  = shift;
                 wxTheApp->right_pane->show_right_pane(
-                    'LacunaWaX::MainSplitterWindow::RightPane::NewPropositionsPane',
+                    'LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane',
                     $planet,
                 );
             },
@@ -198,7 +198,7 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
         my $self = shift;
         my $b64_planets     = encode_base64(join q{:}, ('planets'));
         my $b64_stations    = encode_base64(join q{:}, ('stations'));
-        my $b64_voting      = encode_base64(join q{:}, ('voting'));
+        my $b64_alliance    = encode_base64(join q{:}, ('alliance'));
         my $tree_data = {
             node    => 'Root',
             childs  => [
@@ -211,8 +211,8 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
                     data => $b64_stations,
                 },
                 { 
-                    node => 'Voting',
-                    data => $b64_voting,
+                    node => 'Alliance',
+                    data => $b64_alliance,
                 },
             ],
         };
@@ -283,7 +283,7 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
         my $schema      = wxTheApp->main_schema;
         my $planets     = [];
         my $stations    = [];
-        my $voting      = [];
+        my $alliance    = [];
         foreach my $pname( sort{lc $a cmp lc $b} keys %{wxTheApp->game_client->planets} ) {#{{{
 
             my $pid = wxTheApp->game_client->planet_id($pname);
@@ -321,7 +321,6 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
             ### Station only
             my $b64_bfg         = encode_base64(join q{:}, ('bfg', $sid));
             my $b64_inc         = encode_base64(join q{:}, ('incoming', $sid));
-            my $b64_props       = encode_base64(join q{:}, ('propositions', $sid));
             my $b64_sshealth    = encode_base64(join q{:}, ('sshealth', $sid));
 
             ### IMPORTANT!
@@ -336,25 +335,39 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
             push @{ $station_node->{'childs'} }, { node => 'Fire the BFG',   data => $b64_bfg };
             push @{ $station_node->{'childs'} }, { node => 'Health Alerts',  data => $b64_sshealth };
             push @{ $station_node->{'childs'} }, { node => 'Incoming',       data => $b64_inc };
-            push @{ $station_node->{'childs'} }, { node => 'Propositions',   data => $b64_props };
             push @{ $station_node->{'childs'} }, { node => 'Rearrange',      data => $b64_rearrange };
 
             push @{$stations}, $station_node;
         }#}}}
+        {### Alliance #{{{
 
-        for(1..2) {
-            ### Add some empty nodes at the bottom, or the last item will be 
-            ### obscured by the bottom of the frame.
-            my $empty_node = {
-                node    => q{},
+            my $b64_voting   = encode_base64('voting');
+
+            my $voting_node = {
+                node    => 'Voting',
+                data    => $b64_voting,
                 childs  => [],
             };
-            push @{$voting}, $empty_node;
-        }
+
+            push @{$alliance}, $voting_node;
+
+
+            ### Add some empty nodes at the bottom, or the last item will be 
+            ### obscured by the bottom of the frame.
+            for(1..2) {
+                my $empty_node = {
+                    node    => q{},
+                    childs  => [],
+                };
+                push @{$alliance}, $empty_node;
+            }
+
+        }#}}}
 
         my $model_data = $self->treeview->model->data;
-        $model_data->{'childs'}[0]{'childs'} = $planets; # {'childs'}[0] is the leaf labeled 'Planets'
+        $model_data->{'childs'}[0]{'childs'} = $planets;
         $model_data->{'childs'}[1]{'childs'} = $stations;
+        $model_data->{'childs'}[2]{'childs'} = $alliance;
         $self->treeview->model->data( $model_data );
         $self->treeview->reload();
 
@@ -364,14 +377,6 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
         $self->treeview->treectrl->Expand( $self->planets_item_id );
         $self->bold_planet_names();
         $self->expand_state('collapsed');
-
-        ### CHECK do I still need to do this?
-        ### On Ubuntu, if the tree is taller than the height of the window, 
-        ### the last item in the tree is partially obscured by the status bar, 
-        ### even after scrolling all the way down.
-        ### Appending an empty item at the very end fixes this.
-        #my $blank_id = $self->treectrl->AppendItem( $self->planets_item_id, q{}, -1, -1 );
-        #$self->treectrl->Expand($self->planets_item_id);
 
         return 1;
     }#}}}

@@ -18,6 +18,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane {
     use Moose;
     use Try::Tiny;
     use Wx qw(:everything);
+    use Wx::Event qw(EVT_BUTTON EVT_CHOICE);
     with 'LacunaWaX::Roles::MainSplitterWindow::RightPane';
 
     use LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane::PropRow;
@@ -30,11 +31,13 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane {
 
     #########################################
 
-    has 'planet_name'   => (is => 'rw', isa => 'Str', required => 1);
-    has 'planet_id'     => (is => 'rw', isa => 'Int', lazy_build => 1);
+    has 'embassy'  => (
+        is          => 'rw', 
+        isa         => 'Games::Lacuna::Client::Buildings::Embassy',
+        lazy_build  => 1,
+    );
 
-    has 'parl'  => (is => 'rw', isa => 'Maybe[Games::Lacuna::Client::Buildings::Parliament]',   lazy_build => 1);
-    has 'props' => (is => 'rw', isa => 'ArrayRef',                                              lazy_build => 1);
+    has 'props' => (is => 'rw', isa => 'ArrayRef',  lazy_build => 1);
 
     has 'rows' => (is => 'rw', isa => 'ArrayRef', lazy => 1, default => sub{ [] });
 
@@ -63,7 +66,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane {
     has 'szr_props'                => (is => 'rw', isa => 'Wx::Sizer',                          documentation => 'vertical'     );
     has 'szr_close_status'         => (is => 'rw', isa => 'Wx::Sizer',         lazy_build => 1, documentation => 'horizontal'   );
 
-    has 'lbl_planet_name'           => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1);
+    has 'lbl_header'                => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1);
     has 'lbl_instructions_box'      => (is => 'rw', isa => 'Wx::BoxSizer',      lazy_build => 1);
     has 'lbl_instructions'          => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1);
     has 'lbl_close_status'          => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1);
@@ -72,11 +75,9 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane {
     sub BUILD {
         my $self = shift;
 
-        return unless $self->parl_exists_here;
-
         wxTheApp->borders_off();    # Change to borders_on to see borders around sizers
 
-        $self->szr_header->Add($self->lbl_planet_name, 0, 0, 0);
+        $self->szr_header->Add($self->lbl_header, 0, 0, 0);
         $self->szr_header->AddSpacer(5);
         $self->szr_header->Add($self->lbl_instructions_box, 0, 0, 0);
 
@@ -94,30 +95,45 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane {
         $self->_set_events();
         return $self;
     }
-    sub _build_parl {#{{{
+    sub _build_chk_close_status {#{{{
         my $self = shift;
-        my $parl = try {
-            wxTheApp->game_client->get_building($self->planet_id, 'Parliament');
+        my $v = Wx::CheckBox->new(
+            $self->parent, -1, 
+            'Yes',
+            wxDefaultPosition, 
+            Wx::Size->new(-1,-1), 
+        );
+        $v->SetFont( wxTheApp->get_font('para_text_2') );
+        return $v;
+    }#}}}
+    sub _build_embassy {#{{{
+        my $self = shift;
+
+        my $emb = try {
+            wxTheApp->game_client->get_prime_embassy();
+            #my $e = wxTheApp->game_client->get_prime_embassy( 1 );
         }
         catch {
-            my $msg = (ref $_) ? $_->text : $_;
+            #my $msg = (ref $_) ? $_->text : $_;
+            my $msg = (ref $_) ? $_->message : $_;
             wxTheApp->poperr($msg);
             return;
         };
 
-        return( $parl and ref $parl eq 'Games::Lacuna::Client::Buildings::Parliament' ) ? $parl : undef;
+        return( $emb and ref $emb eq 'Games::Lacuna::Client::Buildings::Embassy' ) ? $emb : undef;
     }#}}}
     sub _build_props {#{{{
         my $self = shift;
         my $props = [];
-        return $props unless $self->parl_exists_here;
+        return $props unless $self->embassy_exists_here;
 
         $props = try {
-            my $rv = $self->parl->view_propositions();
+            my $rv = $self->embassy->view_propositions();
             return $rv->{'propositions'} // $props;
         }
         catch {
-            my $msg = (ref $_) ? $_->text : $_;
+            #my $msg = (ref $_) ? $_->text : $_;
+            my $msg = (ref $_) ? $_->message : $_;
             wxTheApp->poperr($msg);
             return $props;
         };
@@ -162,29 +178,14 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane {
         $sizer->Add($self->lbl_instructions, 0, 0, 0);
         return $sizer;
     }#}}}
-    sub _build_lbl_planet_name {#{{{
+    sub _build_lbl_header {#{{{
         my $self = shift;
         my $v = Wx::StaticText->new(
             $self->parent, -1, 
-            "Propositions on " . $self->planet_name, wxDefaultPosition, 
+            "Proposition Voting", wxDefaultPosition, 
             Wx::Size->new(-1, 40)
         );
         $v->SetFont( wxTheApp->get_font('header_1') );
-        return $v;
-    }#}}}
-    sub _build_planet_id {#{{{
-        my $self = shift;
-        return wxTheApp->game_client->planet_id( $self->planet_name );
-    }#}}}
-    sub _build_chk_close_status {#{{{
-        my $self = shift;
-        my $v = Wx::CheckBox->new(
-            $self->parent, -1, 
-            'Yes',
-            wxDefaultPosition, 
-            Wx::Size->new(-1,-1), 
-        );
-        $v->SetFont( wxTheApp->get_font('para_text_2') );
         return $v;
     }#}}}
     sub _build_szr_header {#{{{
@@ -205,7 +206,6 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane {
         my $header = LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane::PropRow->new(
             ancestor    => $self,
             parent      => $self->parent,
-            planet_id   => $self->planet_id,
             is_header   => 1,
         );
         $szr_props->Add($header->main_sizer, 0, 0, 0);
@@ -214,8 +214,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane {
             my $row = LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane::PropRow->new(
                 ancestor    => $self,
                 parent      => $self->parent,
-                planet_id   => $self->planet_id,
-                parl        => $self->parl,
+                embassy     => $self->embassy,
                 prop        => $prop,
             );
             push @{$self->rows}, $row;
@@ -231,7 +230,6 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane {
                 app         => wxTheApp,
                 ancestor    => $self,
                 parent      => $self->parent,
-                planet_id   => $self->planet_id,
                 rows        => $self->rows,
                 is_footer   => 1,
             );
@@ -240,17 +238,30 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane {
 
         return $szr_props;
     }#}}}
-    sub parl_exists_here {#{{{
+    sub embassy_exists_here {#{{{
         my $self = shift;
 
-        ### Calls parl's lazy builder if needed, which returns undef if no parl
-        my $v = $self->parl;
+        ### Calls embassy's lazy builder if needed, which returns undef if no 
+        ### embassy
+        my $v = $self->embassy;
 
-        ### Yeah, we could just test if $v is undef.  Calling the auto-generated 
-        ### has_parl() is just more Moosey.
-        return unless $self->has_parl;
+        return unless $self->has_embassy;
         return 1;
     };#}}}
+    sub validate_embassy_on_planet {#{{{
+        my $self = shift;
+        my $pid  = shift;
+
+        my $retval = try {
+            my $emb = wxTheApp->game_client->get_building($pid, 'Embassy');
+            $self->embassy( $emb );
+        }
+        catch {
+            return;
+        };
+
+        return $retval;
+    }#}}}
 
     sub OnClose {#{{{
         my $self    = shift;
