@@ -17,7 +17,6 @@ package LacunaWaX::MainFrame::MenuBar::Tools {
     has 'itm_glc'       => (is => 'rw', isa => 'LacunaWaX::MainFrame::MenuBar::Tools::GLC', lazy_build => 1);
     has 'itm_logview'   => (is => 'rw', isa => 'Wx::MenuItem',  lazy_build => 1);
     has 'itm_mail'      => (is => 'rw', isa => 'Wx::MenuItem',  lazy_build => 1);
-    has 'itm_sitter'    => (is => 'rw', isa => 'Wx::MenuItem',  lazy_build => 1);
 
     sub FOREIGNBUILDARGS {#{{{
         return; # Wx::Menu->new() takes no arguments
@@ -28,7 +27,6 @@ package LacunaWaX::MainFrame::MenuBar::Tools {
         $self->Append           ( $self->itm_calc      );
         $self->Append           ( $self->itm_logview   );
         $self->Append           ( $self->itm_mail      );
-        $self->Append           ( $self->itm_sitter    );
 
         (wxTheApp->server) ? $self->show_connected : $self->show_not_connected;
 
@@ -87,7 +85,6 @@ package LacunaWaX::MainFrame::MenuBar::Tools {
         EVT_MENU($self->parent,  $self->itm_calc->GetId,        sub{$self->OnCalculator(@_)});
         EVT_MENU($self->parent,  $self->itm_logview->GetId,     sub{$self->OnLogViewer(@_)});
         EVT_MENU($self->parent,  $self->itm_mail->GetId,        sub{$self->OnMail(@_)});
-        EVT_MENU($self->parent,  $self->itm_sitter->GetId,      sub{$self->OnSitterManager(@_)});
         return 1;
     }#}}}
 
@@ -101,7 +98,6 @@ package LacunaWaX::MainFrame::MenuBar::Tools {
         $self->Enable($self->itm_calc->GetId, 1);
         $self->Enable($self->itm_glc->itm_install_glc->GetId, 1);
         $self->Enable($self->itm_mail->GetId, 1);
-        $self->Enable($self->itm_sitter->GetId, 1);
         return 1;
     }#}}}
     sub show_not_connected {#{{{
@@ -109,7 +105,6 @@ package LacunaWaX::MainFrame::MenuBar::Tools {
         $self->Enable($self->itm_calc->GetId, 0);
         $self->Enable($self->itm_glc->itm_install_glc->GetId, 0);
         $self->Enable($self->itm_mail->GetId, 0);
-        $self->Enable($self->itm_sitter->GetId, 0);
         return 1;
     }#}}}
 

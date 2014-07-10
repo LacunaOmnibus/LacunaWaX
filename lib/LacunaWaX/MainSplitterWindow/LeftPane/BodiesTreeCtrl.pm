@@ -158,9 +158,14 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
                     'LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane',
                     $planet,
                     { 
-                        required_buildings  => {'Parliament' => undef}, 
                         nothrob             => 1,
                     } 
+                );
+            },
+            sitters => sub {
+                my $planet  = shift;
+                wxTheApp->right_pane->show_right_pane(
+                    'LacunaWaX::MainSplitterWindow::RightPane::SitterManager',
                 );
             },
             sshealth => sub {
@@ -196,23 +201,20 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
     }#}}}
     sub _build_treemodel {#{{{
         my $self = shift;
-        my $b64_planets     = encode_base64(join q{:}, ('planets'));
-        my $b64_stations    = encode_base64(join q{:}, ('stations'));
-        my $b64_alliance    = encode_base64(join q{:}, ('alliance'));
         my $tree_data = {
             node    => 'Root',
             childs  => [
                 { 
                     node => 'Planets',
-                    data => $b64_planets,
+                    data => encode_base64(join q{:}, ('planets')),
                 },
                 { 
                     node => 'Stations',
-                    data => $b64_stations,
+                    data => encode_base64(join q{:}, ('stations')),
                 },
                 { 
                     node => 'Alliance',
-                    data => $b64_alliance,
+                    data => encode_base64(join q{:}, ('alliance')),
                 },
             ],
         };
@@ -271,9 +273,9 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
         ($stations_id, $cookie) = $self->treeview->treectrl->GetNextChild($self->root_item_id, $cookie);
         $self->treectrl->SetItemFont( $stations_id, wxTheApp->get_font('bold_para_text_1') );
 
-        my $voting_id;
-        ($voting_id, $cookie) = $self->treeview->treectrl->GetNextChild($self->root_item_id, $cookie);
-        $self->treectrl->SetItemFont( $stations_id, wxTheApp->get_font('bold_para_text_1') );
+        my $alliance_id;
+        ($alliance_id, $cookie) = $self->treeview->treectrl->GetNextChild($self->root_item_id, $cookie);
+        $self->treectrl->SetItemFont( $alliance_id, wxTheApp->get_font('bold_para_text_1') );
     }#}}}
     sub fill_tree {#{{{
         my $self = shift;
@@ -339,19 +341,23 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
 
             push @{$stations}, $station_node;
         }#}}}
-        {### Alliance #{{{
-
-            my $b64_voting   = encode_base64('voting');
-
-            my $voting_node = {
-                node    => 'Voting',
-                data    => $b64_voting,
+        {### Alliance  #{{{
+            my $sitters_node = {
+                node    => 'Sitters',
+                data    => encode_base64('sitters'),
                 childs  => [],
             };
 
+            my $voting_node = {
+                node    => 'Voting',
+                data    => encode_base64('voting'),
+                childs  => [],
+            };
+
+            push @{$alliance}, $sitters_node;
             push @{$alliance}, $voting_node;
-
-
+        }#}}}
+        {### Bottom padding #{{{
             ### Add some empty nodes at the bottom, or the last item will be 
             ### obscured by the bottom of the frame.
             for(1..2) {
@@ -361,8 +367,7 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
                 };
                 push @{$alliance}, $empty_node;
             }
-
-        }#}}}
+        }### #}}}
 
         my $model_data = $self->treeview->model->data;
         $model_data->{'childs'}[0]{'childs'} = $planets;
