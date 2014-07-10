@@ -108,27 +108,6 @@ package LacunaWaX::Model::DefaultData {
         }
         return 1;
     }#}}}
-    sub add_stations {#{{{
-        my $self    = shift;
-        my $schema  = shift;
-
-        unless( ref $schema eq 'LacunaWaX::Model::Schema' ) {
-            croak "Incorrect schema passed to add_servers."
-        }
-
-        foreach my $sid(@{ $self->stations }) {
-            my $row = $schema->resultset('BodyTypes')->find_or_create(
-                {
-                    body_id      => $sid,
-                    server_id    => 1,
-                },
-                { key => 'one_per_server' }
-            );
-            $row->type_general('space station');
-            $row->update;
-        }
-        return 1;
-    }#}}}
 
     no Moose;
     __PACKAGE__->meta->make_immutable; 

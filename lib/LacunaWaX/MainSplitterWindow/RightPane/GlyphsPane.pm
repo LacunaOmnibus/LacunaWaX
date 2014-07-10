@@ -238,12 +238,6 @@ So now those /.*_box_.*/ sizers are just sizers.
         my %planets_by_id = reverse %{wxTheApp->game_client->planets};
 
         my $schema = wxTheApp->main_schema;
-        foreach my $id( keys %planets_by_id ) {
-            ### Get SSs out of the dropdown
-            if( my $rec = $schema->resultset('BodyTypes')->find({body_id => $id, type_general => 'space station'}) ) {
-                delete $planets_by_id{$id};
-            }
-        }
         my @sorted_planets = sort values %planets_by_id;
 
         my $selection_ss = 0;

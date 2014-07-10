@@ -49,7 +49,6 @@ $app_schema->deploy;
 
 my $d = LacunaWaX::Model::DefaultData->new();
 $d->add_servers($app_schema);
-$d->add_stations($app_schema);
 
 say "Databases have been deployed.";
 

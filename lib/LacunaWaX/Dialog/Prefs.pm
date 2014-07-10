@@ -8,19 +8,11 @@ package LacunaWaX::Dialog::Prefs {
 
     extends 'LacunaWaX::Dialog::NonScrolled';
 
-    use LacunaWaX::Dialog::Prefs::TabAutovote;
     use LacunaWaX::Dialog::Prefs::TabGeneral;
     use LacunaWaX::Dialog::Prefs::TabServer;
 
     has 'notebook_size' => (is => 'rw', isa => 'Wx::Size',      lazy_build => 1                 );
     has 'notebook'      => (is => 'rw', isa => 'Wx::Notebook',  lazy_build => 1                 );
-
-    has 'tab_autovote' => (
-        is              => 'rw', 
-        isa             => 'Maybe[LacunaWax::Dialog::Prefs::TabAutovote]', 
-        lazy_build      => 1,
-        documentation   => q{Will be undef unless we're connected to a server.}
-    );
 
     has 'tab_general' => (
         is          => 'rw', 
@@ -43,7 +35,6 @@ package LacunaWaX::Dialog::Prefs {
         $self->make_non_resizable;
 
         $self->notebook->AddPage($self->tab_server->pnl_main, "Server");
-        $self->notebook->AddPage($self->tab_autovote->pnl_main, "AutoVote") if $self->tab_autovote;
         $self->notebook->AddPage($self->tab_general->pnl_main, "General");
 
         $self->main_sizer->AddSpacer(5);
@@ -65,14 +56,6 @@ package LacunaWaX::Dialog::Prefs {
             $self->GetClientSize->height - 10
         );
         return $s;
-    }#}}}
-    sub _build_tab_autovote {#{{{
-        my $self = shift;
-
-        if( wxTheApp->server ) {
-            my $av = LacunaWax::Dialog::Prefs::TabAutovote->new( parent => $self );
-            return $av;
-        }
     }#}}}
     sub _build_tab_server {#{{{
         my $self = shift;
@@ -144,16 +127,6 @@ package LacunaWaX::Dialog::Prefs {
         ### Update protocol for the server.
         $server_rec->protocol( $proto );
         $server_rec->update;
-
-        ### Update autovote prefs
-        if( $self->tab_autovote ) {
-            my $who = lc $self->tab_autovote->rdo_autovote->GetStringSelection();
-            my $rec = $schema->resultset('ScheduleAutovote')->find_or_create({
-                server_id  => wxTheApp->server->id
-            });
-            $rec->proposed_by($who);
-            $rec->update;
-        }
 
         ### Enable/Disable connection widgets.
         ### Menu item, two Connect buttons (on the Intro page).

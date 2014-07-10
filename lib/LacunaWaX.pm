@@ -738,9 +738,6 @@ Returns the number of halls needed to get from one level to another.
             ArchMinPrefs => [qw(
                 server_id body_id glyph_home_id pusher_ship_name auto_search_for 
             )],
-            BodyTypes => [qw(
-                body_id server_id type_general 
-            )],
             ServerAccounts => [qw(
                 server_id username password default_for_server 
             )],
@@ -752,7 +749,7 @@ Returns the number of halls needed to get from one level to another.
         ### The old database may contain these tables sans some columns that 
         ### have been added since. Those will be dealt with; only the existing 
         ### columns will be imported.
-        my $imports = [qw( ArchMinPrefs BodyTypes SSAlerts ServerAccounts SitterPasswords )];
+        my $imports = [qw( ArchMinPrefs SSAlerts ServerAccounts SitterPasswords )];
 
         ### Connect to the old database.
         my $options = {sqlite_unicode => 1, quote_names => 1};

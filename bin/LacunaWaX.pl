@@ -21,7 +21,6 @@ BEGIN {
 }
 use LacunaWaX;
 use LacunaWaX::Util;
-use LacunaWaX::Model::DefaultData;
 
 my $root_dir = LacunaWaX::Util::find_root();
 my $app_db   = "$root_dir/user/lacuna_app.sqlite";

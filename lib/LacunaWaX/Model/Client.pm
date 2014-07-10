@@ -750,9 +750,6 @@ If you want just a subset, send an arrayref of the types you're interested in:
 Queries the server for status of the body with ID $pid.  Returns just the body 
 status (rather than including the extra junk that GLC's get_status returns.)
 
-Also records in the BodyTypes table whether the body is a Space Station or a 
-planet.
-
 =cut
 
         my $body = $self->get_body($pid);
@@ -762,23 +759,6 @@ planet.
             my $cbs = $body->get_status;   # cached body status
             ref $cbs eq 'HASH' and defined $cbs->{'body'} or return;
             $cbs = $cbs->{'body'};
-
-            if( defined $cbs->{'empire'} and $cbs->{'empire'}{'alignment'} eq 'self' ) { # this is my planet
-                my $schema = $self->globals->main_schema;
-
-                my $body_type_rec = $schema->resultset('BodyTypes')->find_or_create({ 
-                    body_id   => $cbs->{'id'}, 
-                    server_id => $self->server_id
-                });
-                if( $cbs->{'type'} eq 'space station' ) {
-                    $body_type_rec->type_general('space station');
-                }
-                else {
-                    $body_type_rec->type_general('planet');
-                }
-                $body_type_rec->update;
-            }
-
             return $cbs;
         };
 
