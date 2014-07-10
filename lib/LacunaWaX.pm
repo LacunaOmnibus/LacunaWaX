@@ -16,6 +16,7 @@ package LacunaWaX {
 
     use LacunaWaX::Preload::Perlapp;
     use LacunaWaX::MainFrame;
+    use LacunaWaX::Model::Dates;
     use LacunaWaX::Model::Globals;
     use LacunaWaX::Model::Globals::Wx;
     use LacunaWaX::Servers;

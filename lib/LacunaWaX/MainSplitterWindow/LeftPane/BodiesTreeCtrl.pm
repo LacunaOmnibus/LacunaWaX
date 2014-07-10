@@ -96,11 +96,19 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
 
         my $dispatch = {
             planets => sub{ $self->toggle_expansion_state() },
+
+            alliance => sub {
+                wxTheApp->right_pane->show_right_pane(
+                    'LacunaWaX::MainSplitterWindow::RightPane::AllianceSummaryPane'
+                );
+            },
+
             default => sub {
                 wxTheApp->right_pane->show_right_pane(
                     'LacunaWaX::MainSplitterWindow::RightPane::DefaultPane'
                 );
             },
+
             rearrange => sub {
                 my $planet  = shift;
                 wxTheApp->right_pane->show_right_pane(
@@ -246,20 +254,6 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
         return 1;
     }#}}}
 
-    sub bold_planet_names_orig {#{{{
-        my $self = shift;
-
-        my( $planet_id, $cookie ) = $self->treeview->treectrl->GetFirstChild( $self->planets_item_id );
-        my $cnt = 1;
-        $self->treectrl->SetItemFont( $planet_id, wxTheApp->get_font('bold_para_text_1') );
-
-        while( $planet_id = $self->treeview->treectrl->GetNextSibling($planet_id) ) {
-            last unless $planet_id->IsOk;
-            $cnt++;
-            $self->treectrl->SetItemFont( $planet_id, wxTheApp->get_font('bold_para_text_1') );
-        }
-        return $cnt;
-    }#}}}
     sub bold_planet_names {#{{{
         my $self = shift;
 

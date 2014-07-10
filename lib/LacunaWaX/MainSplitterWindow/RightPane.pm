@@ -8,6 +8,7 @@ package LacunaWaX::MainSplitterWindow::RightPane {
     use Wx qw(:everything);
     use Wx::Event qw(EVT_BUTTON EVT_SPINCTRL EVT_CLOSE);
 
+    use LacunaWaX::MainSplitterWindow::RightPane::AllianceSummaryPane;
     use LacunaWaX::MainSplitterWindow::RightPane::BFGPane;
     use LacunaWaX::MainSplitterWindow::RightPane::DefaultPane;
     use LacunaWaX::MainSplitterWindow::RightPane::GlyphsPane;

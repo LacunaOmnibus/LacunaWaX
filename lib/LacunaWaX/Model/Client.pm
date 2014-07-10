@@ -605,6 +605,36 @@ where rate is a ship's listed speed.
     sub get_alliance_profile {#{{{
         my $self = shift;
 
+=head2 get_alliance_profile
+
+Returns the current user's alliance profile as a hashref.
+
+ $hr = {
+  status => { standard status junk... },
+
+  profile => {
+   id           => 12345,
+   name         => 'alliance name',
+   description  => 'alliance desc',
+   date_created => 'dd mm yyyy hh:mm:ss +0000',
+   leader_id    => 1234,
+   influence    => <Float.  Right now, SMA's is 9295.16.  Not sure what this means.>
+
+   members => [
+    { name => 'member empire one', id => 12345 },
+    { etc }
+   ],
+
+   space_stations => [
+    { name => 'station name', x => 123, y => 456, id => 7890 },
+    { etc },
+   ]
+
+  }
+ }
+
+=cut
+
         ### Find the current user's alliance ID.  Return undef right away if 
         ### they're not in one.
         my $alliance_id = $self->get_alliance_id() or return;
