@@ -336,6 +336,7 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
             push @{$stations}, $station_node;
         }#}}}
         {### Alliance  #{{{
+
             my $sitters_node = {
                 node    => 'Sitters',
                 data    => encode_base64('sitters'),
