@@ -219,7 +219,7 @@ package LacunaWaX::MainFrame::IntroPanel {
         ### Ubuntu.  Focusing it allows us to just slap the spacebar to 
         ### connect to the first server listed (which should be US1).
         my $first_id = (sort{$a<=>$b}(keys %{$self->buttons}))[0];
-        $self->buttons->{$first_id}->SetFocus;
+        $self->buttons->{$first_id}->SetFocus if $first_id;
 
         return 1;
     }#}}}
