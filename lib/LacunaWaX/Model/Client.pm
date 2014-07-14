@@ -116,6 +116,7 @@ package LacunaWaX::Model::Client {
 
     sub BUILD {
         my $self = shift;
+
         return $self;
     }
     sub AUTOLOAD {## no critic qw(RequireArgUnpacking ProhibitAutoloading) {{{
