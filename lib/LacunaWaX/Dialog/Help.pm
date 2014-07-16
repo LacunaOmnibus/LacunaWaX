@@ -9,11 +9,6 @@ package LacunaWaX::Dialog::Help {
     use File::Util;
     use HTML::Scrubber;
     use HTML::TreeBuilder::XPath;
-    use Lucy::Analysis::PolyAnalyzer;
-    use Lucy::Index::Indexer;
-    use Lucy::Plan::Schema;
-    use Lucy::Plan::FullTextType;
-    use Lucy::Search::IndexSearcher;
     use Moose;
     use Template;
     use Try::Tiny;
@@ -37,18 +32,14 @@ package LacunaWaX::Dialog::Help {
 
     has 'nav_img_h'     => (is => 'rw', isa => 'Int',  lazy => 1, default => 32     );
     has 'nav_img_w'     => (is => 'rw', isa => 'Int',  lazy => 1, default => 32     );
-    has 'search_box_h'  => (is => 'rw', isa => 'Int',  lazy => 1, default => 32     );
-    has 'search_box_w'  => (is => 'rw', isa => 'Int',  lazy => 1, default => 150    );
     has 'home_spacer_w' => (is => 'rw', isa => 'Int',  lazy => 1, default => 10     );
 
     has 'bmp_home'          => (is => 'rw', isa => 'Wx::BitmapButton',  lazy_build => 1);
     has 'bmp_left'          => (is => 'rw', isa => 'Wx::BitmapButton',  lazy_build => 1);
     has 'bmp_right'         => (is => 'rw', isa => 'Wx::BitmapButton',  lazy_build => 1);
-    has 'bmp_search'        => (is => 'rw', isa => 'Wx::BitmapButton',  lazy_build => 1);
     has 'htm_window'        => (is => 'rw', isa => 'Wx::HtmlWindow',    lazy_build => 1);
     has 'szr_html'          => (is => 'rw', isa => 'Wx::Sizer',         lazy_build => 1, documentation => q{vertical});
     has 'szr_navbar'        => (is => 'rw', isa => 'Wx::Sizer',         lazy_build => 1, documentation => q{horizontal});
-    has 'txt_search'        => (is => 'rw', isa => 'Wx::TextCtrl',      lazy_build => 1, documentation => q{horizontal});
 
     ### Doesn't follow the Hungarian notation convention used for the other 
     ### WxWindows on purpose, to set it apart from the other controls.    
@@ -60,8 +51,6 @@ package LacunaWaX::Dialog::Help {
         $self->Show(0);
 
         wxTheApp->borders_off();    # Change to borders_on to see borders around sizers
-
-        $self->make_search_index;
 
         $self->SetTitle( $self->title );
         $self->make_navbar();
@@ -128,20 +117,6 @@ package LacunaWaX::Dialog::Help {
             wxBU_AUTODRAW 
         );
     }#}}}
-    sub _build_bmp_search {#{{{
-        my $self = shift;
-        my $img = wxTheApp->get_image('app/search.png');
-        $img->Rescale($self->nav_img_w - 10, $self->nav_img_h - 10);    # see build_bmp_left
-        my $bmp = Wx::Bitmap->new($img);
-        my $v = Wx::BitmapButton->new(
-            $self->dialog, -1, 
-            $bmp,
-            wxDefaultPosition,
-            Wx::Size->new($self->nav_img_w, $self->nav_img_h),
-            wxBU_AUTODRAW 
-        );
-        return $v;
-    }#}}}
     sub _build_history {#{{{
         my $self = shift;
         return [$self->index_file];
@@ -196,28 +171,14 @@ package LacunaWaX::Dialog::Help {
         );
         return $tt;
     }#}}}
-    sub _build_txt_search {#{{{
-        my $self = shift;
-        my $v = Wx::TextCtrl->new(
-            $self->dialog, -1, 
-            q{},
-            wxDefaultPosition, 
-            Wx::Size->new($self->search_box_w, $self->search_box_h),
-            wxTE_PROCESS_ENTER
-        );
-        $v->SetToolTip("Type search terms and hit <enter> or click the search button");
-        return $v;
-    }#}}}
     sub _set_events {#{{{
         my $self = shift;
         EVT_CLOSE(              $self,                              sub{$self->OnClose(@_)}         );
         EVT_BUTTON(             $self,  $self->bmp_home->GetId,     sub{$self->OnHomeNav(@_)}       );
         EVT_BUTTON(             $self,  $self->bmp_left->GetId,     sub{$self->OnLeftNav(@_)}       );
         EVT_BUTTON(             $self,  $self->bmp_right->GetId,    sub{$self->OnRightNav(@_)}      );
-        EVT_BUTTON(             $self,  $self->bmp_search->GetId,   sub{$self->OnSearchNav(@_)}     );
         EVT_HTML_LINK_CLICKED(  $self,  $self->htm_window->GetId,   sub{$self->OnLinkClicked(@_)}   );
         EVT_SIZE(               $self,                              sub{$self->OnResize(@_)}        );
-        EVT_TEXT_ENTER(         $self,  $self->txt_search->GetId,   sub{$self->OnSearchNav(@_)}     );
         return 1;
     }#}}}
 
@@ -306,7 +267,6 @@ package LacunaWaX::Dialog::Help {
             dir_sep     => File::Util->SL,
             html_dir    => wxTheApp->globals->dir_html,
             user_dir    => wxTheApp->globals->dir_user,
-            lucy_index  => wxTheApp->globals->dir_html_idx,
         };
 
         my $output  = q{};
@@ -314,52 +274,12 @@ package LacunaWaX::Dialog::Help {
         $self->htm_window->SetPage($output);
         return 1;
     }#}}}
-    sub make_search_index {#{{{
-        my $self = shift;
-
-        return if -e wxTheApp->globals->dir_html_idx;
-        my $docs = $self->get_docs;
-
-        # Create a Schema which defines index fields.
-        my $schema = Lucy::Plan::Schema->new;
-        my $polyanalyzer = Lucy::Analysis::PolyAnalyzer->new(
-            language => 'en',
-        );
-        my $type = Lucy::Plan::FullTextType->new(
-            analyzer => $polyanalyzer,
-        );
-        $schema->spec_field( name => 'content',     type => $type );
-        $schema->spec_field( name => 'filename',    type => $type );
-        $schema->spec_field( name => 'summary',     type => $type );
-        $schema->spec_field( name => 'title',       type => $type );
-        
-        # Create the index and add documents.
-        my $indexer = Lucy::Index::Indexer->new(
-            schema => $schema,  
-            index  => wxTheApp->globals->dir_html_idx,
-            create => 1,
-            truncate => 1,  # if index already exists with content, trash them before adding more.
-        );
-
-        while ( my ( $filename, $hr ) = each %{$docs} ) {
-            my $basename = basename($filename);
-            $indexer->add_doc({
-                filename    => $basename,
-                content     => $hr->{'content'},
-                summary     => $hr->{'summary'},
-                title       => $hr->{'title'},
-            });
-        }
-        $indexer->commit;
-        return 1;
-    }#}}}
     sub make_navbar {#{{{
         my $self = shift;
 
         my $spacer_width = $self->GetClientSize->width;
-        $spacer_width -= $self->nav_img_w * 4;  # left, right, home, search buttons
+        $spacer_width -= $self->nav_img_w * 4;  # left, right, home buttons
         $spacer_width -= $self->home_spacer_w;
-        $spacer_width -= $self->search_box_w;
         $spacer_width -= 10;                    # right margin
 
         $spacer_width < 10 and $spacer_width = 10;
@@ -374,10 +294,7 @@ package LacunaWaX::Dialog::Help {
         $self->szr_navbar->Add($self->home_spacer_w, 0, 0);
         $self->szr_navbar->Add($self->bmp_home, 0, 0, 0);
         $self->szr_navbar->Add($spacer_width, 0, 0);
-        $self->szr_navbar->Add($self->txt_search, 0, 0, 0);
-        $self->szr_navbar->Add($self->bmp_search, 0, 0, 0);
 
-        $self->txt_search->SetFocus;
         return 1;
     }#}}}
 
@@ -484,39 +401,6 @@ package LacunaWaX::Dialog::Help {
         $self->history_idx( $self->history_idx + 1 );
         $self->prev_click_href( $page );
         $self->load_html_file( $page );
-        return 1;
-    }#}}}
-    sub OnSearchNav {#{{{
-        my $self    = shift;    # LacunaWaX::Dialog::Help
-        my $dialog  = shift;    # LacunaWaX::Dialog::Help
-        my $event   = shift;    # Wx::CommandEvent
-
-        my $term = $self->txt_search->GetValue;
-        unless($term) {
-            wxTheApp->popmsg("Searching for nothing isn't going to return many results.");
-            return;
-        }
-
-        ### Search results do not get recorded in history.
-
-        my $searcher = wxTheApp->globals->lucy_searcher;
-        my $hits = $searcher->hits( query => $term );
-        my $vars = {
-            term => $term,
-        };
-        while ( my $hit = $hits->next ) {
-            my $hr = {
-                content     => $hit->{'content'},
-                filename    => $hit->{'filename'},
-                summary     => $hit->{'summary'},
-                title       => $hit->{'title'},
-            };
-            push @{$vars->{'hits'}}, $hr;
-        }
-
-        my $output = q{};
-        $self->tt->process('hitlist.tmpl', $vars, \$output);
-        $self->htm_window->SetPage($output);
         return 1;
     }#}}}
 

@@ -13,7 +13,6 @@ This has no caching at all.
 package LacunaWaX::Model::Globals {
     use v5.14;
     use Log::Dispatch;
-    use Lucy::Search::IndexSearcher;
     use Moose;
     use Path::Tiny;
 
@@ -132,13 +131,6 @@ package LacunaWaX::Model::Globals {
         default => 0,
     );
 
-    ### Lucy
-    has 'lucy_searcher' => (
-        is          => 'rw', 
-        isa         => 'Lucy::Search::IndexSearcher',
-        lazy_build  => 1,
-    );
-
     sub BUILD {
         my $self = shift;
         return $self;
@@ -254,12 +246,6 @@ package LacunaWaX::Model::Globals {
 
         return $l;
     };#}}}
-    sub _build_lucy_searcher {#{{{
-        my $self = shift;
-
-        my $lucy = Lucy::Search::IndexSearcher->new( index => $self->dir_html_idx );
-        return $lucy;
-    }#}}}
 
     sub get_new_logger {#{{{
         my $self = shift;
