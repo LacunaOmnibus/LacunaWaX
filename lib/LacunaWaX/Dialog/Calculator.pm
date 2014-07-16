@@ -415,11 +415,16 @@ package LacunaWaX::Dialog::Calculator {
         my $self = shift;
 
         unless( scalar @{$self->sorted_planets} ) {
-            my %planets_by_id = reverse %{wxTheApp->game_client->planets};
+            my %planets_by_id   = reverse %{wxTheApp->game_client->planets};
             my $schema = wxTheApp->main_schema;
             foreach my $id( keys %planets_by_id ) {
+                my $name = $planets_by_id{$id};
+
                 ### Get SSs out of the dropdown
-                if( my $rec = $schema->resultset('BodyTypes')->find({body_id => $id, type_general => 'space station'}) ) {
+                if( 
+                    my $rec = $schema->resultset('BodyTypes')->find({body_id => $id, type_general => 'space station'}) 
+                    or $name =~ /^(S|Z)ASS/
+                ) {
                     delete $planets_by_id{$id};
                 }
             }
