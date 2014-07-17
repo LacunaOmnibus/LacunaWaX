@@ -352,22 +352,12 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
             push @{$alliance}, $sitters_node;
             push @{$alliance}, $voting_node;
         }#}}}
-        {### Bottom padding #{{{
-            ### Add some empty nodes at the bottom, or the last item will be 
-            ### obscured by the bottom of the frame.
-            for(1..2) {
-                my $empty_node = {
-                    node    => q{},
-                    childs  => [],
-                };
-                push @{$alliance}, $empty_node;
-            }
-        }### #}}}
 
         my $model_data = $self->treeview->model->data;
         $model_data->{'childs'}[0]{'childs'} = $planets;
         $model_data->{'childs'}[1]{'childs'} = $stations;
         $model_data->{'childs'}[2]{'childs'} = $alliance;
+        $model_data->{'childs'}[3]{'childs'} = [];
         $self->treeview->model->data( $model_data );
         $self->treeview->reload();
 

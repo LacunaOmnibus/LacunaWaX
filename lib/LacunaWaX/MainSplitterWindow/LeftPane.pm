@@ -46,9 +46,7 @@ package LacunaWaX::MainSplitterWindow::LeftPane {
     sub _build_bodies_tree {#{{{
         my $self = shift;
 
-        $self->bodies_tree( 
-            LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl->new( parent => $self->main_panel )
-        );
+        return LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl->new( parent => $self->main_panel )
     }#}}}
     sub _build_main_panel {#{{{
         my $self = shift;
@@ -56,7 +54,7 @@ package LacunaWaX::MainSplitterWindow::LeftPane {
     }#}}}
     sub _build_main_sizer {#{{{
         my $self = shift;
-        return Wx::BoxSizer->new(wxHORIZONTAL);
+        return Wx::BoxSizer->new(wxVERTICAL);
     }#}}}
     sub _set_events { }
 
