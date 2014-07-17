@@ -426,7 +426,7 @@ else {
                     $self->player_rec->player_name($name);
                     $self->player_rec->sitter($pass);
                     $self->player_rec->update();
-                    $self->btn_save->SetLabel('Update Sitter');
+                    $self->btn_save->SetLabel('Update');
                 }
                 else { # WTF?
                     wxTheApp->poperr("Player record creation should not have failed, but it did.", "WTF?");
