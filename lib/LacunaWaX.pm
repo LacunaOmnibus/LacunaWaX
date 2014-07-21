@@ -83,6 +83,9 @@ package LacunaWaX {
         ###
         ### The point being that any code in here should relate only to the 
         ### Wx::App, not to the LacunaWaX.
+
+
+        ### Etnmarchand start here
         unless( $self->{'image_handlers_initialized'} ) {
             ### This workaround attempt is for Etn.  I don't know what's 
             ### causing his problem, and can't debug since I don't have access 
@@ -100,6 +103,8 @@ package LacunaWaX {
 
             $self->{'image_handlers_initialized'} = 1;
         }
+
+
         return 1;
     }#}}}
 
