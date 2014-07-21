@@ -45,6 +45,12 @@ package LacunaWaX {
     sub _init_attrs {#{{{
         my $self = shift;
 
+        ### Etn is getting "Adding duplicate image handler" errors, and then a 
+        ### segfault (he's on an older Mac).  I don't know if 
+        ### InitAllImageHandlers is being called in here twice for him, but 
+        ### think that's a possibility.  This is to prevent that.
+        $self->{'image_handlers_initialized'} = 0;
+
         ### Do not change the order of the attributes without testing.
         ### db_file might depend on the existence of globals, etc.
         my @build_attrs = (
@@ -77,7 +83,23 @@ package LacunaWaX {
         ###
         ### The point being that any code in here should relate only to the 
         ### Wx::App, not to the LacunaWaX.
-        Wx::InitAllImageHandlers();
+        unless( $self->{'image_handlers_initialized'} ) {
+            ### This workaround attempt is for Etn.  I don't know what's 
+            ### causing his problem, and can't debug since I don't have access 
+            ### to a mac.
+            ###
+            ### If you continue to have the same problem, comment out this 
+            ### next line (add a # to the front of the line)...
+            Wx::InitAllImageHandlers();
+
+            ### ...and uncomment this line (remove the # from the front)
+            #Wx::InitAllImageHandlers() unless $^O eq 'darwin';
+
+            ### There's absolutely zero guarantee that will do anything, but 
+            ### it's worth a try.
+
+            $self->{'image_handlers_initialized'} = 1;
+        }
         return 1;
     }#}}}
 
