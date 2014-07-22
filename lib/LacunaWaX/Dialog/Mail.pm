@@ -527,7 +527,7 @@ package LacunaWaX::Dialog::Mail {
             wxTE_READONLY
         );
     }#}}}
-    sub _set_events {#{{{
+    sub _set_events {
         my $self = shift;
         EVT_BUTTON(     $self, $self->btn_clear_inbox->GetId,   sub{$self->OnClearMail(@_)} );
         EVT_BUTTON(     $self, $self->btn_clear_to->GetId,      sub{$self->OnClearTo(@_)} );
@@ -536,7 +536,7 @@ package LacunaWaX::Dialog::Mail {
         EVT_CHOICE(     $self, $self->chc_ally->GetId,          sub{$self->OnAllyChoice(@_)} );
         EVT_CLOSE(      $self,                                  sub{$self->OnClose(@_)});
         return 1;
-    }#}}}
+    }
 
     sub clear_mail_form {#{{{
         my $self = shift;
@@ -698,59 +698,6 @@ already used 'bless'.
         $status->say_recsep;
         $status->say("Mail clearing complete.");
 
-        return 1;
-    }#}}}
-    sub OnClearMailOrig {#{{{
-        my $self            = shift;
-        my $dialog          = shift;
-        my $event           = shift;
-        my $tags_to_trash   = [];
-
-		my $del_string = q{};
-        if( my $str = $self->txt_subject->GetValue ) {
-            $del_string = $str;
-        }
-
-        foreach my $checkbox( $self->chk_alert, $self->chk_attacks, $self->chk_corr, $self->chk_excav, $self->chk_fissure, $self->chk_parl, $self->chk_probe ) {
-            push @{$tags_to_trash}, $checkbox->GetLabel if $checkbox->GetValue;
-        }
-		
-        unless( @{$tags_to_trash} or $del_string ) {
-            wxTheApp->poperr(
-                "I should remove nothing?  You got it.",
-                "No checkboxes checked",
-            );
-            $self->btn_clear_inbox->SetFocus;
-            return;
-        }
-
-        my $status = LacunaWaX::Dialog::Status->new(
-            parent => $self->dialog,
-            title  => 'Clear Mail',
-        );
-        $status->show;
-
-        my $trash_these = $self->_get_trash_messages($del_string, $tags_to_trash, $status);
-		
-        $status->say("Deleting selected messages");
-        my $rv = try {
-            $self->inbox->trash_messages($trash_these);
-        }
-        catch {
-            my $msg = (ref $_) ? $_->text : $_;
-            wxTheApp->poperr("Unable to delete messages: $msg");
-            return;
-        } or return;
-        my $trashed     = scalar @{$rv->{'success'}} || 0;
-        my $not_trashed = scalar @{$rv->{'failure'}} || 0;
-
-        my $t_pl  = ($trashed == 1) ? q{ was} : q{s were};
-        my $nt_pl = ($not_trashed == 1) ? q{} : q{s};
-        my $msg  = "$trashed message${t_pl} moved to the trash.";
-           $msg .= "\n\n$not_trashed message${nt_pl} could not be moved to the trash." if $not_trashed;
-        $status->say($msg);
-        $status->say_recsep;
-        $status->say("Mail clearing complete.");
         return 1;
     }#}}}
     sub OnClearTo {#{{{

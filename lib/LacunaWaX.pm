@@ -11,8 +11,8 @@ package LacunaWaX {
     use Wx::Event qw(EVT_MOVE EVT_CLOSE);
 
     use base 'Wx::App';
-    $Wx::App::VERSION   = "2.04";
-    our $VERSION        = '2.04';
+    $Wx::App::VERSION   = "3.00";
+    our $VERSION        = '3.00';
 
     use LacunaWaX::Preload::Perlapp;
     use LacunaWaX::MainFrame;
