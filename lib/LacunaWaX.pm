@@ -87,10 +87,6 @@ package LacunaWaX {
 
         ### Etnmarchand start here
         unless( $self->{'image_handlers_initialized'} ) {
-            ### This workaround attempt is for Etn.  I don't know what's 
-            ### causing his problem, and can't debug since I don't have access 
-            ### to a mac.
-            ###
             ### If you continue to have the same problem, comment out this 
             ### next line (add a # to the front of the line)...
             Wx::InitAllImageHandlers();
@@ -98,9 +94,12 @@ package LacunaWaX {
             ### ...and uncomment this line (remove the # from the front)
             #Wx::InitAllImageHandlers() unless $^O eq 'darwin';
 
+
+
             ### There's absolutely zero guarantee that will do anything, but 
             ### it's worth a try.
 
+            ### Leave this alone.
             $self->{'image_handlers_initialized'} = 1;
         }
 
