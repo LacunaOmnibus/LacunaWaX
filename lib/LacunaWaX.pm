@@ -47,6 +47,9 @@ package LacunaWaX {
     sub _init_attrs {#{{{
         my $self = shift;
 
+        ### Keep image handlers from being initialized more than once.
+        $self->{'image_handlers_initialized'} = 0;
+
         ### Do not change the order of the attributes without testing.
         ### db_file might depend on the existence of globals, etc.
         my @build_attrs = (
@@ -79,7 +82,10 @@ package LacunaWaX {
         ###
         ### The point being that any code in here should relate only to the 
         ### Wx::App, not to the LacunaWaX.
-        Wx::InitAllImageHandlers();
+        unless( $self->{'image_handlers_initialized'} ) {
+            Wx::InitAllImageHandlers();
+            $self->{'image_handlers_initialized'} = 1;
+        }
         return 1;
     }#}}}
 

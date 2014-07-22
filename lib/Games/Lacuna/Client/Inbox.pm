@@ -17,6 +17,7 @@ sub api_methods {
       map {
         ($_ => { default_args => [qw(session_id)] })
       }
+        ### JDB added trash_messages_where
       qw(
         view_inbox
         view_archived
@@ -25,6 +26,7 @@ sub api_methods {
         read_message
         archive_messages
         trash_messages
+        trash_messages_where
         send_message
       )
     ),

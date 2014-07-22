@@ -576,6 +576,15 @@ where rate is a ship's listed speed.
     sub get_alliance_id {#{{{
         my $self = shift;
 
+        ### The alliance_id is now coming back as part of the empire_status, 
+        ### which we've already got.  So no caching or other gyrations needed 
+        ### anymore; just return the thing.
+
+        return $self->empire_status->{'alliance_id'};
+    }#}}}
+    sub get_alliance_id_orig {#{{{
+        my $self = shift;
+
         ### Returns the ID of the current empire's alliance, or the empty string 
         ### if the user is not in an alliance.
 

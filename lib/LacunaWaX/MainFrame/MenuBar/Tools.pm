@@ -126,19 +126,11 @@ package LacunaWaX::MainFrame::MenuBar::Tools {
     sub OnMail {#{{{
         my $self = shift;
 
-        my $status = LacunaWaX::Dialog::Status->new(
-            parent => $self,
-            title  => 'Relax',
-        );
-        $status->show;
-        $status->say('The mail tool takes a few seconds to load; be patient, please.');
-
         my $tlc         = wxTheApp->get_top_left_corner;
         my $self_origin = Wx::Point->new( $tlc->x + 30, $tlc->y + 30 );
         my $mail        = LacunaWaX::Dialog::Mail->new( position => $self_origin );
         $mail->Show(1);
 
-        $status->close();
         return 1;
     }#}}}
     sub OnSitterManager {#{{{

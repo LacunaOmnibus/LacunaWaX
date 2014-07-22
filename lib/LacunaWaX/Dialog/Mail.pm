@@ -22,35 +22,39 @@ package LacunaWaX::Dialog::Mail {
     has 'chk_attacks'       => (is => 'rw', isa => 'Wx::CheckBox',      lazy_build => 1);
     has 'chk_corr'          => (is => 'rw', isa => 'Wx::CheckBox',      lazy_build => 1);
     has 'chk_excav'         => (is => 'rw', isa => 'Wx::CheckBox',      lazy_build => 1);
+    has 'chk_fissure'       => (is => 'rw', isa => 'Wx::CheckBox',      lazy_build => 1);
+    has 'chk_intelligence'  => (is => 'rw', isa => 'Wx::CheckBox',      lazy_build => 1);
     has 'chk_parl'          => (is => 'rw', isa => 'Wx::CheckBox',      lazy_build => 1);
     has 'chk_probe'         => (is => 'rw', isa => 'Wx::CheckBox',      lazy_build => 1);
-    has 'chk_read'          => (is => 'rw', isa => 'Wx::CheckBox',      lazy_build => 1);
+    has 'chk_spies'         => (is => 'rw', isa => 'Wx::CheckBox',      lazy_build => 1);
     has 'lbl_ally'          => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1);
     has 'lbl_body'          => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1);
+    has 'lbl_clear_subject' => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1);
     has 'lbl_btn_send'      => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1, documentation => 'blank string');
     has 'lbl_hdr_clear'     => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1);
     has 'lbl_hdr_page'      => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1);
     has 'lbl_hdr_send'      => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1);
-    has 'lbl_instructions'  => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1);
-    has 'lbl_subject'       => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1);
+    has 'lbl_send_subject'  => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1);
     has 'lbl_to'            => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1);
-    has 'szr_ally'          => (is => 'rw', isa => 'Wx::Sizer',         lazy_build => 1, documentation => 'horizontal');
-    has 'szr_body'          => (is => 'rw', isa => 'Wx::Sizer',         lazy_build => 1, documentation => 'horizontal');
-    has 'szr_btn_send'      => (is => 'rw', isa => 'Wx::Sizer',         lazy_build => 1, documentation => 'horizontal');
-    has 'szr_clear'         => (is => 'rw', isa => 'Wx::Sizer',         lazy_build => 1, documentation => 'vertical'    );
-    has 'szr_cust'			=> (is => 'rw', isa => 'Wx::Sizer',         lazy_build => 1, documentation => 'horizontal'  );	
-    has 'szr_check_outer'   => (is => 'rw', isa => 'Wx::Sizer',         lazy_build => 1, documentation => 'vertical'  );
-    has 'szr_check_1'       => (is => 'rw', isa => 'Wx::Sizer',         lazy_build => 1, documentation => 'horizontal'  );
-    has 'szr_check_2'       => (is => 'rw', isa => 'Wx::Sizer',         lazy_build => 1, documentation => 'horizontal'  );
-    has 'szr_header'        => (is => 'rw', isa => 'Wx::Sizer',         lazy_build => 1, documentation => 'vertical'    );
-    has 'szr_instructions'  => (is => 'rw', isa => 'Wx::Sizer',         lazy_build => 1);
-    has 'szr_send'          => (is => 'rw', isa => 'Wx::Sizer',         lazy_build => 1);
-    has 'szr_subject'       => (is => 'rw', isa => 'Wx::Sizer',         lazy_build => 1, documentation => 'horizontal');
-    has 'szr_to'            => (is => 'rw', isa => 'Wx::Sizer',         lazy_build => 1, documentation => 'horizontal');
-    has 'txt_cust'          => (is => 'rw', isa => 'Wx::TextCtrl',      lazy_build => 1);
-    has 'txt_to'            => (is => 'rw', isa => 'Wx::TextCtrl',      lazy_build => 1);
-    has 'txt_subject'       => (is => 'rw', isa => 'Wx::TextCtrl',      lazy_build => 1);
-    has 'txt_body'          => (is => 'rw', isa => 'Wx::TextCtrl',      lazy_build => 1);
+
+    has 'szr_ally'                  => (is => 'rw', isa => 'Wx::Sizer',         lazy_build => 1, documentation => 'horizontal');
+    has 'szr_body'                  => (is => 'rw', isa => 'Wx::Sizer',         lazy_build => 1, documentation => 'horizontal');
+    has 'szr_btn_send'              => (is => 'rw', isa => 'Wx::Sizer',         lazy_build => 1, documentation => 'horizontal');
+    has 'szr_clear'                 => (is => 'rw', isa => 'Wx::Sizer',         lazy_build => 1, documentation => 'vertical'    );
+    has 'szr_subj'                  => (is => 'rw', isa => 'Wx::Sizer',         lazy_build => 1, documentation => 'horizontal'  );	
+    has 'szr_subj_and_clear_button' => (is => 'rw', isa => 'Wx::Sizer',         lazy_build => 1, documentation => 'horizontal'  );	
+    has 'szr_check_outer'           => (is => 'rw', isa => 'Wx::Sizer',         lazy_build => 1, documentation => 'vertical'  );
+    has 'szr_check_1'               => (is => 'rw', isa => 'Wx::Sizer',         lazy_build => 1, documentation => 'horizontal'  );
+    has 'szr_check_2'               => (is => 'rw', isa => 'Wx::Sizer',         lazy_build => 1, documentation => 'horizontal'  );
+    has 'szr_header'                => (is => 'rw', isa => 'Wx::Sizer',         lazy_build => 1, documentation => 'vertical'    );
+    has 'szr_instructions'          => (is => 'rw', isa => 'Wx::Sizer',         lazy_build => 1);
+    has 'szr_send'                  => (is => 'rw', isa => 'Wx::Sizer',         lazy_build => 1);
+    has 'szr_subject'               => (is => 'rw', isa => 'Wx::Sizer',         lazy_build => 1, documentation => 'horizontal');
+    has 'szr_to'                    => (is => 'rw', isa => 'Wx::Sizer',         lazy_build => 1, documentation => 'horizontal');
+    has 'txt_clear_subject'         => (is => 'rw', isa => 'Wx::TextCtrl',      lazy_build => 1);
+    has 'txt_to'                    => (is => 'rw', isa => 'Wx::TextCtrl',      lazy_build => 1);
+    has 'txt_subject'               => (is => 'rw', isa => 'Wx::TextCtrl',      lazy_build => 1);
+    has 'txt_body'                  => (is => 'rw', isa => 'Wx::TextCtrl',      lazy_build => 1);
 
     sub BUILD {
         my $self = shift;
@@ -64,6 +68,7 @@ package LacunaWaX::Dialog::Mail {
         $self->szr_header->Add($self->lbl_hdr_page, 0, 0, 0);
 
         ### clear mail checkboxes
+        ### Line 1
         $self->szr_check_1->Add($self->chk_alert, 0, 0, 0);
         $self->szr_check_1->AddSpacer(2);
         $self->szr_check_1->Add($self->chk_attacks, 0, 0, 0);
@@ -71,28 +76,37 @@ package LacunaWaX::Dialog::Mail {
         $self->szr_check_1->Add($self->chk_corr, 0, 0, 0);
         $self->szr_check_1->AddSpacer(2);
         $self->szr_check_1->Add($self->chk_excav, 0, 0, 0);
-
+        ### Line 2
+        $self->szr_check_2->Add($self->chk_fissure, 0, 0, 0);
+        $self->szr_check_2->AddSpacer(2);
+        $self->szr_check_2->Add($self->chk_intelligence, 0, 0, 0);
+        $self->szr_check_2->AddSpacer(2);
         $self->szr_check_2->Add($self->chk_parl, 0, 0, 0);
         $self->szr_check_2->AddSpacer(2);
         $self->szr_check_2->Add($self->chk_probe, 0, 0, 0);
-        $self->szr_check_2->AddSpacer(20);
-        $self->szr_check_2->Add($self->chk_read, 0, 0, 0);		
-
+        $self->szr_check_2->AddSpacer(2);
+        $self->szr_check_2->Add($self->chk_spies, 0, 0, 0);
+        ### Combine
         $self->szr_check_outer->Add($self->szr_check_1, 0, 0, 0);		
         $self->szr_check_outer->Add($self->szr_check_2, 0, 0, 0);		
 		
-        ### clear mail block
+        ### custom subject entry and clear messages button
+        ### subject and label
+        $self->szr_subj->AddSpacer(5);
+        $self->szr_subj->Add($self->lbl_clear_subject, 0, 0, 0);		
+        $self->szr_subj->AddSpacer(5);
+        $self->szr_subj->Add($self->txt_clear_subject, 0, 0, 0);		
+        ### Add button
+        $self->szr_subj_and_clear_button->Add($self->szr_subj, 0, 0, 0);		
+        $self->szr_subj_and_clear_button->AddSpacer(20);
+        $self->szr_subj_and_clear_button->Add($self->btn_clear_inbox, 0, 0, 0);		
+
+        ### Entire clear mail block
         $self->szr_clear->Add($self->lbl_hdr_clear, 0, 0, 0);
         $self->szr_clear->AddSpacer(5);
         $self->szr_clear->Add($self->szr_check_outer, 0, 0, 0);
-		
-		### custom text entry	
         $self->szr_clear->AddSpacer(5);
-        $self->szr_clear->Add($self->szr_cust, 0, 0, 0);
-        $self->szr_cust->AddSpacer(5);
-        $self->szr_cust->Add($self->btn_clear_inbox, 0, 0, 0);		
-        $self->szr_cust->AddSpacer(20);
-        $self->szr_cust->Add($self->txt_cust, 0, 0, 0);		
+        $self->szr_clear->Add($self->szr_subj_and_clear_button, 0, 0, 0);
 		
         ### send mail form sizers
         $self->szr_ally->Add($self->lbl_ally, 0, 0, 0);
@@ -101,7 +115,7 @@ package LacunaWaX::Dialog::Mail {
         $self->szr_to->Add($self->txt_to, 0, 0, 0);
         $self->szr_to->AddSpacer(2);
         $self->szr_to->Add($self->btn_clear_to, 0, 0, 0);
-        $self->szr_subject->Add($self->lbl_subject, 0, 0, 0);
+        $self->szr_subject->Add($self->lbl_send_subject, 0, 0, 0);
         $self->szr_subject->Add($self->txt_subject, 0, 0, 0);
         $self->szr_body->Add($self->lbl_body, 0, 0, 0);
         $self->szr_body->Add($self->txt_body, 0, 0, 0);
@@ -127,7 +141,6 @@ package LacunaWaX::Dialog::Mail {
         $self->main_sizer->Add($self->szr_clear, 0, 0, 0);	
         $self->main_sizer->AddSpacer(20);
         $self->main_sizer->Add($self->szr_send, 0, 0, 0);
-
 		
         $self->btn_clear_inbox->SetFocus;
         $self->_set_events();
@@ -211,7 +224,7 @@ package LacunaWaX::Dialog::Mail {
         my $self = shift;
         return Wx::CheckBox->new(
             $self->dialog, -1, 
-            'Corresp.',
+            'Correspondence',   # don't abbreviate this you ninny.
             wxDefaultPosition, 
             Wx::Size->new(-1,-1), 
         );
@@ -221,6 +234,24 @@ package LacunaWaX::Dialog::Mail {
         return Wx::CheckBox->new(
             $self->dialog, -1, 
             'Excavator',
+            wxDefaultPosition, 
+            Wx::Size->new(-1,-1), 
+        );
+    }#}}}
+    sub _build_chk_fissure {#{{{
+        my $self = shift;
+        return Wx::CheckBox->new(
+            $self->dialog, -1, 
+            'Fissure',
+            wxDefaultPosition, 
+            Wx::Size->new(-1,-1), 
+        );
+    }#}}}
+    sub _build_chk_intelligence {#{{{
+        my $self = shift;
+        return Wx::CheckBox->new(
+            $self->dialog, -1, 
+            'Intelligence',
             wxDefaultPosition, 
             Wx::Size->new(-1,-1), 
         );
@@ -243,6 +274,15 @@ package LacunaWaX::Dialog::Mail {
             Wx::Size->new(-1,-1), 
         );
     }#}}}
+    sub _build_chk_spies {#{{{
+        my $self = shift;
+        return Wx::CheckBox->new(
+            $self->dialog, -1, 
+            'Spies',
+            wxDefaultPosition, 
+            Wx::Size->new(-1,-1), 
+        );
+    }#}}}
     sub _build_chk_cust {#{{{
         my $self = shift;
         return Wx::CheckBox->new(
@@ -261,17 +301,6 @@ package LacunaWaX::Dialog::Mail {
             Wx::Size->new(-1,-1), 
         );
         $v->SetValue(0);
-        return $v;
-    }#}}}
-    sub _build_txt_cust {#{{{
-        my $self = shift;
-        my $v = Wx::TextCtrl->new(
-            $self->dialog, -1, 
-            q{},
-            wxDefaultPosition, 
-            Wx::Size->new(200, $self->addy_height)
-        );
-        $v->SetToolTip("Optional - type a subject here; all mails with that exact subject will be deleted regardless of tag.");
         return $v;
     }#}}}
     sub _build_inbox {#{{{
@@ -321,20 +350,15 @@ package LacunaWaX::Dialog::Mail {
         $y->SetFont( wxTheApp->get_font('bold_para_text_1') );
         return $y;
     }#}}}
-    sub _build_lbl_instructions {#{{{
+    sub _build_lbl_clear_subject {#{{{
         my $self = shift;
-
-        my $text = "This clears your mail and needs more instructions.  Lorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum ";
-        my $size = Wx::Size->new(-1, -1);
-
         my $y = Wx::StaticText->new(
             $self->dialog, -1, 
-            $text,
-            wxDefaultPosition, $size
+            "Containing subject: ",
+            wxDefaultPosition, 
+            Wx::Size->new(70, $self->addy_height)
         );
-        $y->Wrap( $self->size->GetWidth - 35 ); # - 35 accounts for the vertical scrollbar
         $y->SetFont( wxTheApp->get_font('bold_para_text_1') );
-
         return $y;
     }#}}}
     sub _build_lbl_hdr_clear {#{{{
@@ -373,7 +397,7 @@ package LacunaWaX::Dialog::Mail {
         );
         return $v;
     }#}}}
-    sub _build_lbl_subject {#{{{
+    sub _build_lbl_send_subject {#{{{
         my $self = shift;
         my $y = Wx::StaticText->new(
             $self->dialog, -1, 
@@ -417,9 +441,13 @@ package LacunaWaX::Dialog::Mail {
         my $self = shift;
         return wxTheApp->build_sizer($self->dialog, wxVERTICAL, 'Clear Sizer');
     }#}}}
-    sub _build_szr_cust {#{{{
+    sub _build_szr_subj {#{{{
         my $self = shift;
-        return wxTheApp->build_sizer($self->dialog, wxHORIZONTAL, 'Custom Text Sizer');
+        return wxTheApp->build_sizer($self->dialog, wxHORIZONTAL, 'Subject');
+    }#}}}	
+    sub _build_szr_subj_and_clear_button {#{{{
+        my $self = shift;
+        return wxTheApp->build_sizer($self->dialog, wxVERTICAL, 'Custom Text Sizer');
     }#}}}	
     sub _build_szr_check_outer {#{{{
         my $self = shift;
@@ -469,6 +497,17 @@ package LacunaWaX::Dialog::Mail {
             wxTE_MULTILINE
         );
     }#}}}
+    sub _build_txt_clear_subject {#{{{
+        my $self = shift;
+        my $v = Wx::TextCtrl->new(
+            $self->dialog, -1, 
+            q{},
+            wxDefaultPosition, 
+            Wx::Size->new(200, $self->addy_height)
+        );
+        $v->SetToolTip("Optional.  Mail matching this subject in the selected tags will be deleted.  See Help for details.");
+        return $v;
+    }#}}}
     sub _build_txt_subject {#{{{
         my $self = shift;
         return Wx::TextCtrl->new(
@@ -488,104 +527,6 @@ package LacunaWaX::Dialog::Mail {
             wxTE_READONLY
         );
     }#}}}
-    sub _get_trash_messages {#{{{
-        my $self            = shift;
-		my $del_string      = shift;
-        my $tags_to_trash   = shift;
-        my $status          = shift;
-        my $trash_these     = [];
-
-        ### If $del_string is non-empty, we'll delete all mails whose subject 
-        ### exactly matches that string.  Otherwise, we'll delete mails whose 
-        ### tag is in the arrayref $tags_to_trash.
-
-        my $created_own_status = 0;
-        unless( $status ) {
-            $created_own_status = 1;
-            $status = LacunaWaX::Dialog::Status->new(
-                parent => $self->dialog,
-                title  => 'Clear Mail',
-            );
-            $status->show;
-        }
-
-        ### We always have to get the first page of messages, which will tell 
-        ### us how many messages (and therefore pages) there are in total.
-        $status->say("Reading page 1");
-
-        my $inbox_args = { page_number => 1 };
-        $inbox_args->{'tags'} = $tags_to_trash unless $del_string;
-
-        ### If we were handed a $del_string, we'll be getting all messages, 
-        ### not just ones with our selected tags.  In that case, we'll need to 
-        ### individually check each message's tags.
-        my %tags_to_trash_hash = map{ $_ => 1 }@{$tags_to_trash};
-
-        my $contents = try {
-            $self->inbox->view_inbox( $inbox_args );
-        }
-        catch {
-            my $msg = (ref $_) ? $_->text : $_;
-            wxTheApp->poperr("Unable to get page 1: $msg");
-            return;
-        } or return;
-
-        my $msg_count   = $contents->{'message_count'};
-        my $msgs        = $contents->{'messages'};
-        foreach my $m(@{$msgs}) {
-            next if $self->chk_read->GetValue and not $m->{'has_read'};
-
-            if( $del_string and $del_string eq $m->{'subject'} ) {
-                push @{$trash_these}, $m->{'id'};
-            }
-            ### If any of the message's tags match any of the tags we were 
-            ### told to dump, the message is trash.
-            my @matching_tags = grep{ $tags_to_trash_hash{$_} }@{$m->{'tags'}};
-            push(@{$trash_these}, $m) if scalar @matching_tags;
-        }
-
-        ### Get subsequent pages if necessary.
-        my $max_page = int($msg_count / 25);
-        $max_page++ if $msg_count % 25;
-        for my $page(2..$max_page) {    # already got page 1
-            $status->say("Reading page $page");
-            $inbox_args->{'page_number'} = $page;
-            my $contents = try {
-                $self->inbox->view_inbox( $inbox_args );
-            }
-            catch {
-                my $msg = (ref $_) ? $_->text : $_;
-                wxTheApp->poperr("Unable to get page $page: $msg");
-                return;
-            } or return;
-            my $msgs = $contents->{'messages'};
-            my $found_count = 0;
-            foreach my $m(@{$msgs}) {
-                next if $self->chk_read->GetValue and not $m->{'has_read'};
-                if ($del_string eq $m->{'subject'}) {
-                    push @{$trash_these}, $m->{'id'};
-                }
-                my @matching_tags = grep{ $tags_to_trash_hash{$_} }@{$m->{'tags'}};
-                push(@{$trash_these}, $m) if scalar @matching_tags;
-            }
-            if( $max_page >= 60 ) {
-                ### Or we'll hit the RPC limit when there are more than 60 
-                ### pages, which does happen periodically.  Only bother 
-                ### with the sleep if there are that many pages.
-                ###
-                ### TBD
-                ### What should happen is that I should just clear all 
-                ### messages every 55 pages or so.
-                sleep 1;
-            }
-        }
-
-        if( $created_own_status ) {
-            $status->close();
-        }
-
-        return $trash_these;
-    }#}}}
     sub _set_events {#{{{
         my $self = shift;
         EVT_BUTTON(     $self, $self->btn_clear_inbox->GetId,   sub{$self->OnClearMail(@_)} );
@@ -600,7 +541,7 @@ package LacunaWaX::Dialog::Mail {
     sub clear_mail_form {#{{{
         my $self = shift;
         $self->txt_to->SetValue(q{});
-        $self->txt_subject->SetValue(q{});
+        $self->txt_clear_subject->SetValue(q{});
         $self->txt_body->SetValue(q{});
         return 1;
     }#}}}
@@ -703,12 +644,74 @@ already used 'bless'.
         my $event           = shift;
         my $tags_to_trash   = [];
 
+		my $subject_to_trash = q{};
+        if( my $str = $self->txt_clear_subject->GetValue ) {
+            $subject_to_trash = $str;
+        }
+
+        foreach my $checkbox(
+            $self->chk_alert,
+            $self->chk_attacks,
+            $self->chk_corr,
+            $self->chk_excav,
+            $self->chk_fissure,
+            $self->chk_intelligence,
+            $self->chk_parl,
+            $self->chk_probe,
+            $self->chk_spies,
+        ) {
+            push @{$tags_to_trash}, $checkbox->GetLabel if $checkbox->GetValue;
+        }
+		
+        unless( @{$tags_to_trash} or $subject_to_trash ) {
+            wxTheApp->poperr(
+                "I should remove nothing?  You got it.",
+                "No checkboxes checked",
+            );
+            $self->btn_clear_inbox->SetFocus;
+            return;
+        }
+
+        my $status = LacunaWaX::Dialog::Status->new(
+            parent => $self->dialog,
+            title  => 'Clear Mail',
+        );
+        $status->show;
+
+        my $rv = try {
+            $self->inbox->trash_messages_where( {
+                tags    => $tags_to_trash,
+                subject => $subject_to_trash,
+            });
+        }
+        catch {
+            my $msg = (ref $_) ? $_->text : $_;
+            wxTheApp->poperr("Unable to delete messages: $msg");
+            return;
+        } or return;
+
+        my $trashed = scalar @{$rv->{'deleted'}} || 0;
+        my $t_pl    = ($trashed == 1) ? q{ was} : q{s were};
+        my $msg     = "$trashed message${t_pl} moved to the trash.";
+
+        $status->say($msg);
+        $status->say_recsep;
+        $status->say("Mail clearing complete.");
+
+        return 1;
+    }#}}}
+    sub OnClearMailOrig {#{{{
+        my $self            = shift;
+        my $dialog          = shift;
+        my $event           = shift;
+        my $tags_to_trash   = [];
+
 		my $del_string = q{};
-        if( my $str = $self->txt_cust->GetValue ) {
+        if( my $str = $self->txt_subject->GetValue ) {
             $del_string = $str;
         }
 
-        foreach my $checkbox( $self->chk_alert, $self->chk_attacks, $self->chk_corr, $self->chk_excav, $self->chk_parl, $self->chk_probe ) {
+        foreach my $checkbox( $self->chk_alert, $self->chk_attacks, $self->chk_corr, $self->chk_excav, $self->chk_fissure, $self->chk_parl, $self->chk_probe ) {
             push @{$tags_to_trash}, $checkbox->GetLabel if $checkbox->GetValue;
         }
 		
