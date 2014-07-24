@@ -1362,6 +1362,75 @@ hashref of the counts of each ship type.
         }
         return $ship_counts;
     }#}}}
+    sub get_ship_types {#{{{
+        my $self = shift;
+
+=head2 get_ship_types
+
+Returns a hashref of all of the shiptypes in game.
+
+ type => 'Human Name'
+
+eg
+
+ placebo6 => 'Placebo VI'
+
+=cut
+
+        return {#{{{
+            "stake" => 'Stake',
+            "thud" => 'Thud',
+            "sweeper" => 'Sweeper',
+            "supply_pod" => 'Supply Pod',
+            "supply_pod2" => 'Supply Pod II',
+            "supply_pod3" => 'Supply Pod III',
+            "supply_pod4" => 'Supply Pod IV',
+            "placebo" => 'Placebo',
+            "placebo2" => 'Placebo II',
+            "placebo3" => 'Placebo III',
+            "placebo4" => 'Placebo IV',
+            "placebo5" => 'Placebo V',
+            "placebo6" => 'Placebo VI',
+            "probe" => 'Probe',
+            "colony_ship" => 'Colony Ship',
+            "short_range_colony_ship" => 'Short Range Colony Ship',
+            "spy_pod" => 'Spy Pod',
+            "cargo_ship" => 'Cargo Ship',
+            "space_station" => 'Space Station',
+            "smuggler_ship" => 'Smuggler Ship',
+            "mining_platform_ship" => 'Mining Platform Ship',
+            "terraforming_platform_ship" => 'Terraforming Platform Ship',
+            "gas_giant_settlement_ship" => 'Gas Giant Settlement Ship',
+            "scow" => 'Scow',
+            "scow_fast" => 'Scow Fast',
+            "scow_large" => 'Scow Large',
+            "scow_mega" => 'Scow Mega',
+            "bleeder" => 'Bleeder',
+            "dory" => 'Dory',
+            "barge" => 'Barge',
+            "galleon" => 'Galleon',
+            "hulk" => 'Hulk',
+            "hulk_fast" => 'Hulk Fast',
+            "hulk_huge" => 'Hulk huge',
+            "fissure_sealer" => 'Fissure sealer',
+            "freighter" => 'Freighter',
+            "snark" => 'Snark',
+            "snark2" => 'Snark II',
+            "snark3" => 'Snark III',
+            "drone" => 'Drone',
+            "fighter" => 'Fighter',
+            "spy_shuttle" => 'Spy Shuttle',
+            "observatory_seeker" => 'Observatory Seeker',
+            "security_ministry_seeker" => 'Security Ministry Seeker',
+            "spaceport_seeker" => 'Spaceport Seeker',
+            "excavator" => 'Excavator',
+            "detonator" => 'Detonator',
+            "surveyor" => 'Surveyor',
+            "scanner" => 'Scanner',
+        }#}}}
+
+        
+    }#}}}
     sub get_spies {#{{{
         my $self   = shift;
         my $pid    = shift;

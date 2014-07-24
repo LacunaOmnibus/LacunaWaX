@@ -231,6 +231,7 @@ So now those /.*_box_.*/ sizers are just sizers.
         $v->SetSelection($selection_ss);
         $v->SetFont( wxTheApp->get_font('para_text_1') );
         return $v;
+
     }#}}}
     sub _build_chc_glyph_home {#{{{
         my $self = shift;

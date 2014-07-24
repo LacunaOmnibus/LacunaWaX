@@ -136,6 +136,14 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
                     $planet,
                 );
             },
+            ships_build => sub {
+                my $planet  = shift;
+                wxTheApp->right_pane->show_right_pane(
+                    'LacunaWaX::MainSplitterWindow::RightPane::BuildShips',
+                    $planet,
+                    { required_buildings => {'Shipyard' => undef} } 
+                );
+            },
             spies => sub {
                 my $planet  = shift;
                 wxTheApp->right_pane->show_right_pane(
@@ -280,6 +288,7 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
         my $planets     = [];
         my $stations    = [];
         my $alliance    = [];
+
         foreach my $pname( sort{lc $a cmp lc $b} keys %{wxTheApp->game_client->planets} ) {#{{{
 
             my $pid = wxTheApp->game_client->planet_id($pname);
@@ -292,14 +301,16 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
             ### Both Planet and Station
             my $b64_rearrange   = encode_base64(join q{:}, ('rearrange', $pid));
             ### Planet only
-            my $b64_glyphs      = encode_base64(join q{:}, ('glyphs', $pid));
-            my $b64_repair      = encode_base64(join q{:}, ('repair', $pid));
-            my $b64_spies       = encode_base64(join q{:}, ('spies', $pid));
+            my $b64_glyphs      = encode_base64(join q{:}, ('glyphs',       $pid));
+            my $b64_repair      = encode_base64(join q{:}, ('repair',       $pid));
+            my $b64_ships_build = encode_base64(join q{:}, ('ships_build',  $pid));
+            my $b64_spies       = encode_base64(join q{:}, ('spies',        $pid));
 
-            push @{ $planet_node->{'childs'} }, { node => 'Glyphs',     data => $b64_glyphs };
-            push @{ $planet_node->{'childs'} }, { node => 'Rearrange',  data => $b64_rearrange };
-            push @{ $planet_node->{'childs'} }, { node => 'Repair',     data => $b64_repair };
-            push @{ $planet_node->{'childs'} }, { node => 'Spies',      data => $b64_spies };
+            push @{ $planet_node->{'childs'} }, { node => 'Build Ships',    data => $b64_ships_build };
+            push @{ $planet_node->{'childs'} }, { node => 'Glyphs',         data => $b64_glyphs };
+            push @{ $planet_node->{'childs'} }, { node => 'Rearrange',      data => $b64_rearrange };
+            push @{ $planet_node->{'childs'} }, { node => 'Repair',         data => $b64_repair };
+            push @{ $planet_node->{'childs'} }, { node => 'Spies',          data => $b64_spies };
 
             push @{$planets}, $planet_node;
         }#}}}
