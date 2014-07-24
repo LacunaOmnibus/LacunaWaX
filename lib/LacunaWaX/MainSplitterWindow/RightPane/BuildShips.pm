@@ -1,11 +1,14 @@
 
+### This doesn't actually build anything yet, and the layout is fugly, but 
+### what's there works.
+
 package LacunaWaX::MainSplitterWindow::RightPane::BuildShips {
     use v5.14;
     use Data::Dumper;
     use Moose;
     use Try::Tiny;
     use Wx qw(:everything);
-    use Wx::Event qw(EVT_BUTTON EVT_CHOICE EVT_CLOSE);
+    use Wx::Event qw(EVT_BUTTON EVT_CHECKBOX EVT_CHOICE EVT_CLOSE);
     with 'LacunaWaX::Roles::MainSplitterWindow::RightPane';
 
     has 'parent' => (
@@ -100,19 +103,26 @@ package LacunaWaX::MainSplitterWindow::RightPane::BuildShips {
     );
 
 
-    has 'chc_min_level'     => (is => 'rw', isa => 'Wx::Choice',        lazy_build => 1);
-    has 'chc_shiptype'      => (is => 'rw', isa => 'Wx::Choice',        lazy_build => 1);
-    has 'lbl_header'        => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1);
-    has 'lbl_instructions'  => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1);
-    has 'lbl_min_level'     => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1);
-    has 'lbl_num_to_build'  => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1);
-    has 'lbl_shiptype'      => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1);
-    has 'spn_num_to_build'  => (is => 'rw', isa => 'Wx::SpinCtrl',      lazy_build => 1);
-    has 'szr_instructions'  => (is => 'rw', isa => 'Wx::Sizer',         lazy_build => 1                                 );
-    has 'szr_min_level'     => (is => 'rw', isa => 'Wx::Sizer',         lazy_build => 1                                 );
-    has 'szr_num_to_build'  => (is => 'rw', isa => 'Wx::Sizer',         lazy_build => 1                                 );
-    has 'szr_shiptype'      => (is => 'rw', isa => 'Wx::Sizer',         lazy_build => 1                                 );
-    has 'szr_header'        => (is => 'rw', isa => 'Wx::Sizer',         lazy_build => 1, documentation => 'vertical'    );
+    has 'chc_min_level'         => (is => 'rw', isa => 'Wx::Choice',        lazy_build => 1);
+    has 'chc_shiptype'          => (is => 'rw', isa => 'Wx::Choice',        lazy_build => 1);
+    has 'chk_tag_colonization'  => (is => 'rw', isa => 'Wx::CheckBox',      lazy_build => 1);
+    has 'chk_tag_exploration'   => (is => 'rw', isa => 'Wx::CheckBox',      lazy_build => 1);
+    has 'chk_tag_intelligence'  => (is => 'rw', isa => 'Wx::CheckBox',      lazy_build => 1);
+    has 'chk_tag_mining'        => (is => 'rw', isa => 'Wx::CheckBox',      lazy_build => 1);
+    has 'chk_tag_trade'         => (is => 'rw', isa => 'Wx::CheckBox',      lazy_build => 1);
+    has 'chk_tag_war'           => (is => 'rw', isa => 'Wx::CheckBox',      lazy_build => 1);
+    has 'lbl_header'            => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1);
+    has 'lbl_instructions'      => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1);
+    has 'lbl_min_level'         => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1);
+    has 'lbl_num_to_build'      => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1);
+    has 'lbl_shiptype'          => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1);
+    has 'spn_num_to_build'      => (is => 'rw', isa => 'Wx::SpinCtrl',      lazy_build => 1);
+    has 'szr_header'            => (is => 'rw', isa => 'Wx::Sizer',         lazy_build => 1, documentation => 'vertical'    );
+    has 'szr_instructions'      => (is => 'rw', isa => 'Wx::Sizer',         lazy_build => 1                                 );
+    has 'szr_min_level'         => (is => 'rw', isa => 'Wx::Sizer',         lazy_build => 1                                 );
+    has 'szr_num_to_build'      => (is => 'rw', isa => 'Wx::Sizer',         lazy_build => 1                                 );
+    has 'szr_shiptype'          => (is => 'rw', isa => 'Wx::Sizer',         lazy_build => 1                                 );
+    has 'szr_tags'              => (is => 'rw', isa => 'Wx::Sizer',         lazy_build => 1                                 );
 
     sub BUILD {
         my $self = shift;
@@ -124,6 +134,19 @@ package LacunaWaX::MainSplitterWindow::RightPane::BuildShips {
         $self->szr_header->AddSpacer(10);
         $self->szr_header->Add($self->szr_instructions, 0, 0, 0);
         $self->szr_header->AddSpacer(10);
+
+        my $tag_space = 10;
+        $self->szr_tags->Add($self->chk_tag_colonization, 0, 0, 0);
+        $self->szr_tags->AddSpacer($tag_space);
+        $self->szr_tags->Add($self->chk_tag_exploration, 0, 0, 0);
+        $self->szr_tags->AddSpacer($tag_space);
+        $self->szr_tags->Add($self->chk_tag_intelligence, 0, 0, 0);
+        $self->szr_tags->AddSpacer($tag_space);
+        $self->szr_tags->Add($self->chk_tag_mining, 0, 0, 0);
+        $self->szr_tags->AddSpacer($tag_space);
+        $self->szr_tags->Add($self->chk_tag_trade, 0, 0, 0);
+        $self->szr_tags->AddSpacer($tag_space);
+        $self->szr_tags->Add($self->chk_tag_war, 0, 0, 0);
 
         $self->szr_min_level->Add($self->lbl_min_level, 0, 0, 0);
         $self->szr_min_level->Add($self->chc_min_level, 0, 0, 0);
@@ -138,6 +161,8 @@ package LacunaWaX::MainSplitterWindow::RightPane::BuildShips {
         $self->content_sizer->Add($self->szr_header, 0, 0, 0);
         $self->content_sizer->AddSpacer(15);
         $self->content_sizer->Add($self->szr_min_level, 0, 0, 0);
+        $self->content_sizer->AddSpacer(15);
+        $self->content_sizer->Add($self->szr_tags, 0, 0, 0);
         $self->content_sizer->AddSpacer(15);
         $self->content_sizer->Add($self->szr_shiptype, 0, 0, 0);
         $self->content_sizer->AddSpacer(15);
@@ -176,7 +201,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::BuildShips {
         my $v = Wx::Choice->new(
             $self->parent, -1, 
             wxDefaultPosition, 
-            Wx::Size->new(50, 31), 
+            Wx::Size->new(50, 25), 
             ["Choose a level", 0..30],
         );
         $v->SetStringSelection('0');
@@ -194,6 +219,96 @@ package LacunaWaX::MainSplitterWindow::RightPane::BuildShips {
         );
         $v->Enable(0);
         $v->SetFont( wxTheApp->get_font('para_text_1') );
+        return $v;
+    }#}}}
+    sub _build_chk_tag_colonization {#{{{
+        my $self = shift;
+        my $v = Wx::CheckBox->new(
+            $self->parent, -1, 
+            'Colonization',
+            wxDefaultPosition, 
+            Wx::Size->new(-1,-1), 
+        );
+
+        $v->SetFont( wxTheApp->get_font('para_text_2') );
+        $v->SetValue( 1 );
+        $v->Enable(0);
+
+        return $v;
+    }#}}}
+    sub _build_chk_tag_exploration {#{{{
+        my $self = shift;
+        my $v = Wx::CheckBox->new(
+            $self->parent, -1, 
+            'Exploration',
+            wxDefaultPosition, 
+            Wx::Size->new(-1,-1), 
+        );
+
+        $v->SetFont( wxTheApp->get_font('para_text_2') );
+        $v->SetValue( 1 );
+        $v->Enable(0);
+
+        return $v;
+    }#}}}
+    sub _build_chk_tag_intelligence {#{{{
+        my $self = shift;
+        my $v = Wx::CheckBox->new(
+            $self->parent, -1, 
+            'Intelligence',
+            wxDefaultPosition, 
+            Wx::Size->new(-1,-1), 
+        );
+
+        $v->SetFont( wxTheApp->get_font('para_text_2') );
+        $v->SetValue( 1 );
+        $v->Enable(0);
+
+        return $v;
+    }#}}}
+    sub _build_chk_tag_mining {#{{{
+        my $self = shift;
+        my $v = Wx::CheckBox->new(
+            $self->parent, -1, 
+            'Mining',
+            wxDefaultPosition, 
+            Wx::Size->new(-1,-1), 
+        );
+
+        $v->SetFont( wxTheApp->get_font('para_text_2') );
+        $v->SetValue( 1 );
+        $v->Enable(0);
+
+        return $v;
+    }#}}}
+    sub _build_chk_tag_trade {#{{{
+        my $self = shift;
+        my $v = Wx::CheckBox->new(
+            $self->parent, -1, 
+            'Trade',
+            wxDefaultPosition, 
+            Wx::Size->new(-1,-1), 
+        );
+
+        $v->SetFont( wxTheApp->get_font('para_text_2') );
+        $v->SetValue( 1 );
+        $v->Enable(0);
+
+        return $v;
+    }#}}}
+    sub _build_chk_tag_war {#{{{
+        my $self = shift;
+        my $v = Wx::CheckBox->new(
+            $self->parent, -1, 
+            'War',
+            wxDefaultPosition, 
+            Wx::Size->new(-1,-1), 
+        );
+
+        $v->SetFont( wxTheApp->get_font('para_text_2') );
+        $v->SetValue( 1 );
+        $v->Enable(0);
+
         return $v;
     }#}}}
     sub _build_lbl_header {#{{{
@@ -248,7 +363,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::BuildShips {
             $self->parent, -1, 
             $text,
             wxDefaultPosition,
-            Wx::Size->new(270, 25),
+            Wx::Size->new(170, 25),
         );
         $y->SetFont( wxTheApp->get_font('para_text_1') );
 
@@ -263,11 +378,15 @@ package LacunaWaX::MainSplitterWindow::RightPane::BuildShips {
             $self->parent, -1, 
             $text,
             wxDefaultPosition,
-            Wx::Size->new(150, -1),
+            Wx::Size->new(120, 25),
         );
         $y->SetFont( wxTheApp->get_font('para_text_1') );
 
         return $y;
+    }#}}}
+    sub _build_planet_id {#{{{
+        my $self = shift;
+        return wxTheApp->game_client->planet_id( $self->planet_name );
     }#}}}
     sub _build_spn_num_to_build {#{{{
         my $self = shift;
@@ -307,13 +426,20 @@ package LacunaWaX::MainSplitterWindow::RightPane::BuildShips {
         my $v = wxTheApp->build_sizer($self->parent, wxHORIZONTAL, 'Ship Type');
         return $v;
     }#}}}
-    sub _build_planet_id {#{{{
+    sub _build_szr_tags {#{{{
         my $self = shift;
-        return wxTheApp->game_client->planet_id( $self->planet_name );
+        my $v = wxTheApp->build_sizer($self->parent, wxHORIZONTAL, 'Tags');
+        return $v;
     }#}}}
     sub _set_events {#{{{
         my $self = shift;
-        EVT_CHOICE( $self->parent, $self->chc_min_level->GetId,   sub{$self->OnChooseLevel(@_)} );
+        EVT_CHOICE(     $self->parent, $self->chc_min_level->GetId,         sub{$self->OnChooseLevel(@_)} );
+        EVT_CHECKBOX(   $self->parent, $self->chk_tag_colonization->GetId,  sub{$self->OnTagCheck(@_)} );
+        EVT_CHECKBOX(   $self->parent, $self->chk_tag_exploration->GetId,   sub{$self->OnTagCheck(@_)} );
+        EVT_CHECKBOX(   $self->parent, $self->chk_tag_intelligence->GetId,  sub{$self->OnTagCheck(@_)} );
+        EVT_CHECKBOX(   $self->parent, $self->chk_tag_mining->GetId,        sub{$self->OnTagCheck(@_)} );
+        EVT_CHECKBOX(   $self->parent, $self->chk_tag_trade->GetId,         sub{$self->OnTagCheck(@_)} );
+        EVT_CHECKBOX(   $self->parent, $self->chk_tag_war->GetId,           sub{$self->OnTagCheck(@_)} );
         return 1;
     }#}}}
 
@@ -324,16 +450,41 @@ package LacunaWaX::MainSplitterWindow::RightPane::BuildShips {
         ### planet.
         ### Called after the user first choses a minimum shipyard level.
 
+        ### Create hashref of currently 'on' (user-chosen) tags
+        my $tags_hr = {};
+        grep{ $tags_hr->{$_} = 1 }$self->get_tags;
+
+        $self->chc_shiptype->Clear();
         foreach my $name( sort keys %{$self->buildable_ships} ) {
             my $hr = $self->buildable_ships->{$name};
-            $self->chc_shiptype->Append( $hr->{'type_human'}, $hr );
+            my $tags_match = grep( $tags_hr->{$_}, @{$hr->{'tags'}} );
+            $self->chc_shiptype->Append( $hr->{'type_human'}, $hr ) if $tags_match;
         };
         $self->chc_shiptype->Update;
 
         $self->chc_shiptype->Enable(1);
         $self->spn_num_to_build->Enable(1);
+        $self->chk_tag_colonization->Enable(1);
+        $self->chk_tag_exploration->Enable(1);
+        $self->chk_tag_intelligence->Enable(1);
+        $self->chk_tag_mining->Enable(1);
+        $self->chk_tag_trade->Enable(1);
+        $self->chk_tag_war->Enable(1);
 
         return 1;
+    }#}}}
+    sub get_tags {#{{{
+        my $self = shift;
+
+        my @tags = ();
+        foreach my $tag( qw(colonization exploration intelligence mining trade war) ) {
+            my $box = "chk_tag_" . $tag;
+            if( $self->$box->IsChecked ) {
+                push @tags, ucfirst $tag;
+            }
+        }
+
+        return @tags;
     }#}}}
 
     sub OnChooseLevel {#{{{
@@ -371,6 +522,15 @@ package LacunaWaX::MainSplitterWindow::RightPane::BuildShips {
             }
             $self->assign_shiptypes();
         }
+
+        return 1;
+    }#}}}
+    sub OnTagCheck {#{{{
+        my $self        = shift;
+        my $dialog      = shift;    # Wx::ScrolledWindow
+        my $event       = shift;    # Wx::CommandEvent
+
+        $self->assign_shiptypes();
 
         return 1;
     }#}}}
