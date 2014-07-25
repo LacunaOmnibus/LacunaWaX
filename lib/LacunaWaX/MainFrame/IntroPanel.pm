@@ -67,7 +67,7 @@ package LacunaWaX::MainFrame::IntroPanel {
 
         ### Bottom
         $self->bottom_panel_sizer->AddStretchSpacer(1);
-        foreach my $srvr_id(keys %{$self->buttons}) {
+        foreach my $srvr_id(sort{$a<=>$b}keys %{$self->buttons}) {
             $self->bottom_panel_sizer->Add( $self->buttons->{$srvr_id}, 0, wxALIGN_CENTER_VERTICAL|wxALIGN_CENTER_HORIZONTAL, 0);
         }
 

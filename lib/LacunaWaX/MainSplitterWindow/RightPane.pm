@@ -41,6 +41,13 @@ package LacunaWaX::MainSplitterWindow::RightPane {
 
     has 'prev_panel' => (is => 'rw', isa => 'Object', predicate => 'has_prev_panel');
 
+    has 'ship_builds' => (
+        is          => 'rw',
+        isa         => 'HashRef',
+        lazy        => 1,
+        default     => sub{ {} },
+    );
+
     sub BUILD {
         my $self = shift;
         $self->show_right_pane( 'LacunaWaX::MainSplitterWindow::RightPane::DefaultPane' );

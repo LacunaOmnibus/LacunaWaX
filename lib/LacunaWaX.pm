@@ -964,6 +964,34 @@ Returns the triangle sum of a given int.
         return( $int * ($int+1) / 2 ); 
     }#}}}
 
+    {   # TLE date string formatter#{{{
+
+=head2 parse_tletime
+
+ my $str = '01 31 2010 13:09:05 +0600';  # TLE datetime string
+
+ ### Parse the string
+ my $dt = LacunaWaX->parse_tletime($str);
+
+ ### $dt is now just a regular DateTime object.
+ say $dt->ymd;
+
+=cut
+
+        use DateTime::Format::Builder
+            (
+                parsers => {
+                    parse_tletime => [
+                        {
+                            regex => qr/^(\d\d) (\d\d) (\d{4}) (\d\d):(\d\d):(\d\d) \+\d{4}$/,
+                            params => [qw( month day year hour minute second )],
+                        },
+                    ],
+                }
+            );
+
+    }#}}}
+
 }
 
 1;
