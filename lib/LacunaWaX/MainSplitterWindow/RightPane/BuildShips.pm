@@ -1,5 +1,16 @@
 
-### See CHECK for where I left off.
+=pod
+
+Once a large build has started, the build's planet and end time are maintained 
+by the ship_builds hashref in LacunaWaX.pm.
+
+The *_app methods in here are dealing with those accesses.
+
+Also, if builds are started on multiple planets, whichever planet's build will 
+take the longest is the one that sets the caption.  That "longest planet" is 
+also maintained in LacunaWaX.pm (ship_build_caption_setter).
+
+=cut
 
 package LacunaWaX::MainSplitterWindow::RightPane::BuildShips {
     use v5.14;
@@ -10,16 +21,6 @@ package LacunaWaX::MainSplitterWindow::RightPane::BuildShips {
     use Wx qw(:everything);
     use Wx::Event qw(EVT_BUTTON EVT_CHECKBOX EVT_CHOICE EVT_CLOSE EVT_TIMER);
     with 'LacunaWaX::Roles::MainSplitterWindow::RightPane';
-
-    has 'ancestor' => (
-        is          => 'rw',
-        isa         => 'LacunaWaX::MainSplitterWindow::RightPane',
-        required    => 1,
-        documentation => q{
-            this is one of the rare times we do need an ancestor; it's keeping track
-            of whether we've got a build happening or not.
-        }
-    );
 
     has 'parent' => (
         is          => 'rw',
@@ -53,12 +54,19 @@ package LacunaWaX::MainSplitterWindow::RightPane::BuildShips {
         isa         => 'Int',
         default     => 0,
         lazy        => 1,
+        documentation => q{
+            This is the number of ships we've added to the queue so far.
+        }
     );
     has 'build_max' => (
         is          => 'rw',
         isa         => 'Int',
         default     => 0,
         lazy        => 1,
+        documentation => q{
+            This is the total number of ships the user wants to build.
+            Could be in the thousands.
+        }
     );
     has 'build_type' => (
         is          => 'rw',
@@ -112,6 +120,13 @@ package LacunaWaX::MainSplitterWindow::RightPane::BuildShips {
         isa         => 'Int',
         default     => 0,
         lazy        => 1,
+        documentation => q{
+            Number of docks available on the planet right now.  Updated as ships
+            are added to the queue.
+            CAUTION - If the user goes and scuttles ships, or manually adds 
+            ships to the queue, or does anything else ship-count-related 
+            through another interface, this count will be off.
+        }
     );
 
     has 'max_w' => (
@@ -133,6 +148,11 @@ package LacunaWaX::MainSplitterWindow::RightPane::BuildShips {
         is          => 'rw',
         isa         => 'Games::Lacuna::Client::Buildings::SpacePort',
         lazy_build  => 1,
+        documentation => q{
+            One of the spaceports on the planet.  Used to initially figure out  
+            the number of docks available, so it doesn't matter which 
+            spaceport.
+        }
     );
 
     has 'tags' => (
@@ -146,14 +166,15 @@ package LacunaWaX::MainSplitterWindow::RightPane::BuildShips {
         }
     );
 
-    has 'timer' => (
+    has 'build_timer' => (
         is          => 'rw', 
         isa         => 'Wx::Timer',
         lazy_build  => 1,
-        handles => {
-            start_ticking => 'Start',
-            stop_ticking  => 'Stop',
-        }
+    );
+    has 'caption_timer' => (
+        is          => 'rw', 
+        isa         => 'Wx::Timer',
+        lazy_build  => 1,
     );
 
     has 'usable_shipyards' => (
@@ -196,14 +217,12 @@ package LacunaWaX::MainSplitterWindow::RightPane::BuildShips {
 
     sub BUILD {
         my $self = shift;
-    
+
         wxTheApp->borders_off();    # Change to borders_on to see borders around sizers
         #wxTheApp->borders_on();    # Change to borders_on to see borders around sizers
 
         $self->szr_instructions->Add($self->lbl_instructions, 0, 0, 0);
-        if( $self->ancestor_has_build ) {
-            $self->update_instructions_for_build;
-        }
+        $self->update_gui_for_build;
 
         $self->szr_header->Add($self->lbl_header, 0, 0, 0);
         $self->szr_header->AddSpacer(10);
@@ -228,6 +247,19 @@ package LacunaWaX::MainSplitterWindow::RightPane::BuildShips {
 
         $self->szr_min_level->Add($self->lbl_min_level, 0, 0, 0);
         $self->szr_min_level->Add($self->chc_min_level, 0, 0, 0);
+
+        if( my $epoch = $self->check_build_on_app ) {
+            ### We've already got a build working on this planet, so disable 
+            ### everything and tell the user when to return.
+            $self->chc_min_level->Enable(0);
+            my $end_dt = DateTime->from_epoch( epoch => $epoch );
+            $self->lbl_instructions->SetLabel(
+                "You have a build working on this planet right now.  It will be complete "
+                . "at " . $end_dt->ymd . " " . $end_dt->hms . " GMT.  Refresh this pane "
+                . "at that time."
+            );
+            $self->lbl_instructions->Wrap( $self->max_w );
+        }
 
         $self->szr_shiptype->Add($self->lbl_shiptype, 0, 0, 0);
         $self->szr_shiptype->Add($self->chc_shiptype, 0, 0, 0);
@@ -307,10 +339,6 @@ package LacunaWaX::MainSplitterWindow::RightPane::BuildShips {
         );
         $v->SetStringSelection('0');
         $v->SetFont( wxTheApp->get_font('para_text_1') );
-
-        if( $self->ancestor_has_build ) {
-            $v->Enable(0);
-        }
 
         return $v;
     }#}}}
@@ -431,15 +459,23 @@ package LacunaWaX::MainSplitterWindow::RightPane::BuildShips {
     sub _build_lbl_instructions {#{{{
         my $self = shift;
 
-        my $text = "This is where we build ships.";
-        my $size = Wx::Size->new(-1, -1);
+        my $text = "
+Here, you can queue up as many of a single type of ship to be built as you like.  As many as can be built in one shot will be added to the queue.  After those finish building, a new batch will be added to the queue automatically.
+
+Choose the minimum level shipyard first - any shipyard under that level will not be used to build ships.
+
+Then choose your shiptype and total number to be built and begin.  Then, you may leave this panel and continue to use LacunaWaX for whatever you need it to do, including setting up ship build queues at other planets at the same time. 
+
+Closing LacunaWaX all the way will stop any more ships from being added to the queue.
+            ";
 
         my $y = Wx::StaticText->new(
             $self->parent, -1, 
             $text,
-            wxDefaultPosition, $size
+            wxDefaultPosition,
+            Wx::Size->new($self->max_w, -1),
         );
-        $y->Wrap( $self->parent->GetSize->GetWidth - 100 ); # Subtract to account for the vertical scrollbar
+        $y->Wrap( $self->max_w );
         $y->SetFont( wxTheApp->get_font('para_text_1') );
 
         return $y;
@@ -455,7 +491,6 @@ package LacunaWaX::MainSplitterWindow::RightPane::BuildShips {
             wxDefaultPosition,
             Wx::Size->new(270, 25),
         );
-        #$y->Wrap( $self->parent->GetSize->GetWidth - 100 ); # Subtract to account for the vertical scrollbar
         $y->SetFont( wxTheApp->get_font('para_text_1') );
 
         return $y;
@@ -567,7 +602,13 @@ package LacunaWaX::MainSplitterWindow::RightPane::BuildShips {
         my $v = wxTheApp->build_sizer($self->parent, wxHORIZONTAL, 'Tags');
         return $v;
     }#}}}
-    sub _build_timer {#{{{
+    sub _build_build_timer {#{{{
+        my $self = shift;
+        my $t = Wx::Timer->new();
+        $t->SetOwner( $self->parent );
+        return $t;
+    }#}}}
+    sub _build_caption_timer {#{{{
         my $self = shift;
         my $t = Wx::Timer->new();
         $t->SetOwner( $self->parent );
@@ -583,21 +624,27 @@ package LacunaWaX::MainSplitterWindow::RightPane::BuildShips {
         EVT_CHECKBOX(   $self->parent, $self->chk_tag_trade->GetId,         sub{$self->OnTagCheck(@_)} );
         EVT_CHECKBOX(   $self->parent, $self->chk_tag_war->GetId,           sub{$self->OnTagCheck(@_)} );
         EVT_CHOICE(     $self->parent, $self->chc_min_level->GetId,         sub{$self->OnChooseLevel(@_)} );
-        EVT_TIMER(      $self->parent, $self->timer->GetId,                 sub{$self->OnBuildTimer(@_)} );
+        EVT_TIMER(      $self->parent, $self->build_timer->GetId,           sub{$self->OnBuildTimer(@_)} );
+        EVT_TIMER(      $self->parent, $self->caption_timer->GetId,         sub{$self->OnCaptionTimer(@_)} );
         return 1;
     }#}}}
 
-    sub add_build_on_ancestor {#{{{
+    sub add_build_to_app {#{{{
         my $self = shift;
-        $self->ancestor->ship_builds->{ $self->planet_name } = 1;
+        my $end  = shift;   # epoch seconds
+        wxTheApp->ship_builds->{ $self->planet_name } = $end;
     }#}}}
-    sub end_build_on_ancestor {#{{{
+    sub end_build_on_app {#{{{
         my $self = shift;
-        $self->ancestor->ship_builds->{ $self->planet_name } = 0;
+        wxTheApp->ship_builds->{ $self->planet_name } = 0;
     }#}}}
-    sub ancestor_has_build {#{{{
+    sub check_build_on_app {#{{{
         my $self = shift;
-        return $self->ancestor->ship_builds->{ $self->planet_name } // 0;
+
+        return unless defined wxTheApp->ship_builds->{ $self->planet_name };
+        return unless wxTheApp->ship_builds->{ $self->planet_name };
+        return unless( time < wxTheApp->ship_builds->{$self->planet_name} );
+        return wxTheApp->ship_builds->{$self->planet_name};
     }#}}}
     sub assign_shiptypes {#{{{
         my $self = shift;
@@ -690,16 +737,41 @@ package LacunaWaX::MainSplitterWindow::RightPane::BuildShips {
 
         return 1;
     }#}}}
-    sub update_instructions_for_build {#{{{
+    sub update_gui_for_build {#{{{
         my $self = shift;
-        $self->lbl_instructions->SetLabel("BUILD PROCESS WORKING RIGHT NOW");
-        $self->lbl_instructions->SetForegroundColour( Wx::Colour->new(255, 0, 0) );
+
+=head2 update_gui_for_build
+
+Figures out if we should be setting the caption or not.  In the case of builds 
+working on multiple planets, the planet with the longest build time will set 
+the caption.
+
+No arguments are required; this does all the calculations.
+
+=cut
+
+        if( my $this_planet_end_time = $self->check_build_on_app ) {
+            my $this_planet_time_left = $this_planet_end_time - time();
+
+            my $caption = wxTheApp->caption();
+            my $other_planet_time_left = 0;
+            if( $caption =~ /Current build on (.*) will complete in (\d+) seconds/ ) {
+                $other_planet_time_left  = $2;
+            }
+
+            if( $this_planet_time_left > $other_planet_time_left ) {
+                wxTheApp->caption("Current build on " . $self->planet_name . " will complete in $this_planet_time_left seconds.");
+                wxTheApp->ship_build_caption_setter( $self->planet_name );
+                $self->caption_timer->Start( 1000, wxTIMER_CONTINUOUS );
+            }
+        }
+
     }#}}}
-    sub update_instructions_for_build_end {#{{{
+    sub update_gui_for_end {#{{{
         my $self = shift;
-        ### CHECK - need to variableize the label string.
-        $self->lbl_instructions->SetLabel("This is where we build shipss.");
-        $self->lbl_instructions->SetForegroundColour( Wx::Colour->new(0, 0, 0) );
+        if( wxTheApp->ship_build_caption_setter eq $self->planet_name ) {
+            wxTheApp->caption_reset();
+        }
     }#}}}
     sub wrap_summary {#{{{
         my $self = shift;
@@ -733,21 +805,26 @@ package LacunaWaX::MainSplitterWindow::RightPane::BuildShips {
             return;
         }
 
-        $self->update_instructions_for_build;
-        $self->add_build_on_ancestor();
         $self->build_type(  $data->{'type'} );
         $self->build_max(   $num            );
 
-        ### Set the timer for 10ms to start our first batch of builds.
-        $self->timer->Start( 10, wxTIMER_ONE_SHOT );
+        ### Set the build timer for 10ms to start our first batch of builds.
+        $self->build_timer->Start( 10, wxTIMER_ONE_SHOT );
 
         return 1;
     }#}}}
     sub OnBuildTimer {#{{{
-        my $self = shift;
-        my $bar  = shift;   # Wx::StatusBar
-        my $evt  = shift;   # Wx::TimerEvent
+        my $self    = shift;
+        my $widget  = shift;
+        my $evt     = shift;   # Wx::TimerEvent
 
+        unless( $self->build_max ) {
+            ### We've been called again after the final build was submitted, 
+            ### which means we're now finished all builds.  Update the GUI.
+            $self->end_build_on_app();
+            $self->update_gui_for_end;
+            return;
+        }
 
         my $orig_alarm_seconds = my $alarm_seconds = 99999999999999;
         SHIPYARD:
@@ -763,44 +840,67 @@ package LacunaWaX::MainSplitterWindow::RightPane::BuildShips {
             my $num_to_build = $hr->{'level'};
             my $left_to_build = $self->build_max - $self->build_complete_num;
             $num_to_build = $left_to_build if $num_to_build > $left_to_build;
-$num_to_build = 1;
+### CHECK - this is just for testing; submits a single build at a time
+#$num_to_build = 1;
             if( not $num_to_build or $num_to_build > $self->docks_available ) {
-                $self->end_build_on_ancestor();
                 $self->chc_min_level->Enable(1);
-                $self->update_instructions_for_build_end();
                 return;
             }
 
             ### Add to queue, update counts.
             my $rv = $sy->build_ship( $self->build_type, $num_to_build );
+            $self->add_build_to_app( time() + $rv->{'building'}{'work'}{'seconds_remaining'} );
+            $self->update_gui_for_build;
             $self->build_complete_num( $self->build_complete_num + $num_to_build );
             $self->docks_available( $self->docks_available - $num_to_build );
 
             my $seconds     = $rv->{'building'}{'work'}{'seconds_remaining'};
             $alarm_seconds  = $seconds if $seconds < $alarm_seconds;
-say "-$seconds- -$alarm_seconds-";
         }
 
         ### All shipyards were busy, so we're not going to do anything.
         if( $alarm_seconds == $orig_alarm_seconds ) {
+            wxTheApp->popmsg("All shipyards are busy right now, so I'm not going to do anything.");
             return;
         }
 
-        if( $self->build_complete_num < $self->build_max ) {
-say "-" . $self->build_complete_num . "-";
-say "-" . $self->build_max . "-";
-
-            my $ms = ($alarm_seconds + 5) * 1000;    # 5 buffer seconds
-            $self->timer->Start( $ms, wxTIMER_ONE_SHOT );
+        if( $self->build_max <= $self->build_complete_num ) {
+            ### We just submitted the final build.  Reset our counts.
+            $self->build_complete_num( 0 );
+            $self->build_max( 0 );
         }
-        else {
-            ### We're done.
-say "Done, at end.";
-    ### CHECK
-    ### some part of this is segfaulting, not sure which yet.
-            $self->end_build_on_ancestor();
-            $self->update_instructions_for_build_end();
-            $self->chc_min_level->Enable(1);
+
+        ### Set the build_timer to re-enter this method.  If we've already 
+        ### submitted that final build, our counts are reset, and the re-entry 
+        ### will detect that and update the GUI to let the user know we're 
+        ### finished.
+        my $ms = ($alarm_seconds + 2) * 1000;    # 2 buffer seconds
+        $self->build_timer->Start( $ms, wxTIMER_ONE_SHOT );
+
+        return 1;
+    }#}}}
+    sub OnCaptionTimer {#{{{
+        my $self    = shift;
+        my $widget  = shift;
+        my $evt     = shift;   # Wx::TimerEvent
+        my $pname   = $self->planet_name;
+
+        if( wxTheApp->ship_build_caption_setter ne $pname ) {
+            ### Some other planet has started a build that's longer than this 
+            ### planet's build, which means that we lose control of the timer.
+            $self->caption_timer->Stop;
+            return;
+        }
+
+        my $caption = wxTheApp->caption();
+        if( $caption =~ /Current build on $pname will complete in (\d+) seconds/ ) {
+            my $s = $1 - 1;
+            if( $s < 0 ) {
+                wxTheApp->caption_reset();
+            }
+            else {
+                wxTheApp->caption("Current build on $pname will complete in $s seconds");
+            }
         }
 
         return 1;

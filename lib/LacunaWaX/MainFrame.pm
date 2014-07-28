@@ -312,7 +312,7 @@ package LacunaWaX::MainFrame {
             $self->Layout();
             wxTheApp->Yield();
 
-            wxTheApp->caption("Connected to " . $server->name . " as " . wxTheApp->account->username);
+            wxTheApp->caption_reset();
             wxTheApp->endthrob();
         }
         else {

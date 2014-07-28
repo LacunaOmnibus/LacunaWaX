@@ -142,6 +142,7 @@ package LacunaWaX::MainFrame::StatusBar {
         my $self = shift;
         my $new_text = shift;
         my $old_text = $self->status_bar->GetStatusText( $self->rect_caption );
+        return $old_text unless $new_text;
         $self->caption($new_text);
         $self->status_bar->SetStatusText( $new_text, $self->rect_caption );
         return $old_text;

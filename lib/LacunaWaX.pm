@@ -60,6 +60,7 @@ package LacunaWaX {
             'display_x', 'display_y',
             'servers' ,
             'main_frame',
+            'ship_builds', 'ship_build_caption_setter',
         );
         foreach my $attr(@build_attrs) {
             my $meth = "_build_$attr";
@@ -179,6 +180,39 @@ package LacunaWaX {
         $self->{'server'} = $arg if $arg;
         return $self->{'server'};
     }#}}}
+    sub ship_builds {#{{{
+        my $self        = shift;
+        my $pname       = shift;
+        my $end_time    = shift || 0;
+
+=head2 ship_builds
+
+Hashref to keep track of current ship builds per planet.  Managed by 
+BuildShips.pm.
+
+ planet_name => end_time (of the current build, in epoch seconds) 
+
+=cut
+
+        $self->{'ship_builds'} //= {};
+        $self->{'ship_builds'}->{$pname} = $end_time if $pname;
+        return $self->{'ship_builds'};
+    }#}}}
+    sub ship_build_caption_setter {#{{{
+        my $self        = shift;
+        my $pname       = shift;
+
+=head2 ship_build_caption_setter
+
+If the user sets up multiple planets to build ships, whichever planet has the 
+longest build time will be the one to set the caption.  This keeps track of 
+which planet that is (although the calculations must be done elsewhere).
+
+=cut
+
+        $self->{'ship_build_caption_setter'} = $pname if $pname;
+        return $self->{'ship_build_caption_setter'};
+    }#}}}
     sub time_zone {#{{{
         my $self = shift;
         my $arg  = shift;
@@ -292,6 +326,16 @@ package LacunaWaX {
     sub _build_servers {#{{{
         my $self = shift;
         return LacunaWaX::Servers->new( schema => $self->main_schema );
+    }#}}}
+    sub _build_ship_builds {#{{{
+        my $self = shift;
+        ### This is actually assigned by the accessor.  This method exists for 
+        ### consistency.
+        return {};
+    }#}}}
+    sub _build_ship_build_caption_setter {#{{{
+        my $self = shift;
+        return q{};
     }#}}}
     sub _build_time_zone {#{{{
         my $self = shift;
@@ -523,14 +567,26 @@ Sets the main frame caption text and returns the previously-set text
 
  my $old_caption = $app->caption('New Text');
 
-Really just a convenience method to keep you from having to call
+If no new text is passed in, simply returns the current caption string.
 
- my $old_caption = $self->main_frame->status_bar->change_caption('New Text');
 
 =cut
 
         my $old_text = $self->main_frame->status_bar->change_caption($msg);
         return $old_text;
+    }#}}}
+    sub caption_reset {#{{{
+        my $self = shift;
+
+=head2 caption_reset
+
+Resets the main caption back to the default setting, specifying connected 
+empire name and server name.  Allows other panels to easily fiddle the caption 
+as needed and then reset it back when finished.
+
+=cut
+
+        $self->caption("Connected to " . $self->server->name . " as " . $self->account->username);
     }#}}}
     sub cartesian_distance {#{{{
         my $self = shift;
