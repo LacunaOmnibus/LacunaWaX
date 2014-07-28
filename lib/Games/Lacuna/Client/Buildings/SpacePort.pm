@@ -31,6 +31,8 @@ sub api_methods {
     prepare_fetch_spies     => { default_args => [qw(session_id)] },
     fetch_spies             => { default_args => [qw(session_id)] },
     view_battle_logs        => { default_args => [qw(session_id building_id)] },
+    ### JDB
+    mass_scuttle_ship       => { default_args => [qw(session_id building_id)] },
   };
 }
 

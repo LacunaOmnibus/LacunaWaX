@@ -614,7 +614,7 @@ Closing LacunaWaX all the way will stop any more ships from being added to the q
         $t->SetOwner( $self->parent );
         return $t;
     }#}}}
-    sub _set_events {#{{{
+    sub _set_events {
         my $self = shift;
         EVT_BUTTON(     $self->parent, $self->btn_build->GetId,             sub{$self->OnBuild(@_)} );
         EVT_CHECKBOX(   $self->parent, $self->chk_tag_colonization->GetId,  sub{$self->OnTagCheck(@_)} );
@@ -627,7 +627,7 @@ Closing LacunaWaX all the way will stop any more ships from being added to the q
         EVT_TIMER(      $self->parent, $self->build_timer->GetId,           sub{$self->OnBuildTimer(@_)} );
         EVT_TIMER(      $self->parent, $self->caption_timer->GetId,         sub{$self->OnCaptionTimer(@_)} );
         return 1;
-    }#}}}
+    }
 
     sub add_build_to_app {#{{{
         my $self = shift;
@@ -729,11 +729,12 @@ Closing LacunaWaX all the way will stop any more ships from being added to the q
                 $show_shiptype .= $dots;
                 $text .= sprintf("%-30s %05d\n", $show_shiptype, $v->{'docked_ships'}{$shiptype});
             }
+
         }
 
         $self->lbl_summary->SetLabel($text);
         $self->wrap_summary;
-        $self->szr_summary->SetItemMinSize( $self->lbl_summary, $self->max_w, -1 ); # 130
+        $self->szr_summary->SetItemMinSize( $self->lbl_summary, $self->max_w, -1 );
 
         return 1;
     }#}}}

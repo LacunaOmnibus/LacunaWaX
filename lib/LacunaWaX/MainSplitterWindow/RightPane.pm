@@ -16,6 +16,7 @@ package LacunaWaX::MainSplitterWindow::RightPane {
     use LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane;
     use LacunaWaX::MainSplitterWindow::RightPane::RearrangerPane;
     use LacunaWaX::MainSplitterWindow::RightPane::RepairPane;
+    use LacunaWaX::MainSplitterWindow::RightPane::ScuttleShips;
     use LacunaWaX::MainSplitterWindow::RightPane::SitterManager;
     use LacunaWaX::MainSplitterWindow::RightPane::SpiesPane;
     use LacunaWaX::MainSplitterWindow::RightPane::SSIncoming;
