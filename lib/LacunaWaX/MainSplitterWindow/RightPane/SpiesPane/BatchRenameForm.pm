@@ -209,10 +209,10 @@ package LacunaWaX::MainSplitterWindow::RightPane::SpiesPane::BatchRenameForm {
 
             my $new_name;
             if( $fix eq 'Prefix' ) {
-                $new_name = $cnt . " $base_name";
+                $new_name = sprintf ("%02d %s", $cnt, $base_name);
             }
             elsif( $fix eq 'Suffix' ) {
-                $new_name = "$base_name " . $cnt;
+                $new_name = sprintf ("%s %02d", $base_name, $cnt);
             }
             else {
                 $new_name = $base_name;
