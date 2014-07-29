@@ -718,8 +718,7 @@ Closing LacunaWaX all the way will stop any more ships from being added to the q
         my($id, $hr) = each %{$self->all_shipyards};
         values %{$self->all_shipyards}; # reset the iterator
         if( $id ) {
-            my $v = $self->spaceport->view();
-
+            my $v = wxTheApp->game_client->get_spaceport_view( $self->planet_name, $self->spaceport );
             $self->docks_available( $v->{'docks_available'} );
 
             $text = "Docks: $v->{'docks_available'} available of $v->{'max_ships'} total.\n\nCurrent Ships\n=============\n";
@@ -729,7 +728,6 @@ Closing LacunaWaX all the way will stop any more ships from being added to the q
                 $show_shiptype .= $dots;
                 $text .= sprintf("%-30s %05d\n", $show_shiptype, $v->{'docked_ships'}{$shiptype});
             }
-
         }
 
         $self->lbl_summary->SetLabel($text);
@@ -854,6 +852,7 @@ No arguments are required; this does all the calculations.
             $self->update_gui_for_build;
             $self->build_complete_num( $self->build_complete_num + $num_to_build );
             $self->docks_available( $self->docks_available - $num_to_build );
+            wxTheApp->game_client->clear_spaceport_view_cache();
 
             my $seconds     = $rv->{'building'}{'work'}{'seconds_remaining'};
             $alarm_seconds  = $seconds if $seconds < $alarm_seconds;
@@ -944,7 +943,8 @@ No arguments are required; this does all the calculations.
         ### won't change.
         unless( $self->has_buildable_ships ) {
             wxTheApp->Yield();
-            my( $id, $hashref ) = each %{$self->usable_shipyards};
+
+            my( $id, $hashref ) = each %{$self->usable_shipyards}; keys %{$self->usable_shipyards};
             my $sy = wxTheApp->game_client->get_building_object( $self->planet_id, $hashref );
             my $rv = $sy->get_buildable;
             foreach my $type( keys %{$rv->{'buildable'}} ) {
@@ -953,6 +953,7 @@ No arguments are required; this does all the calculations.
                 $hr->{'type'} = $type;
                 $self->buildable_ships->{$type} = $hr if $hr->{'can'};
             }
+
             $self->assign_shiptypes();
         }
 

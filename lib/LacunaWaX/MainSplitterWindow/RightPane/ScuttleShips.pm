@@ -273,7 +273,8 @@ package LacunaWaX::MainSplitterWindow::RightPane::ScuttleShips {
 
         my $summary_text = 'You appear not to have any shipyards on this planet.';
 
-        my $v = $self->spaceport->view();
+        #my $v = $self->spaceport->view();
+        my $v = wxTheApp->game_client->get_spaceport_view( $self->planet_name, $self->spaceport );
         foreach my $shiptype( sort keys %{$v->{'docked_ships'}} ) {
             wxTheApp->Yield();
 
@@ -320,6 +321,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::ScuttleShips {
         }
 
         wxTheApp->throb();
+
         my $paging          = {page_number => 1, items_per_page => $num};
         my $filter          = {type => $shiptype, task => 'Docked'};
         my $v               = $self->spaceport->view_all_ships( $paging, $filter );
@@ -340,9 +342,12 @@ package LacunaWaX::MainSplitterWindow::RightPane::ScuttleShips {
         wxTheApp->Yield();
 
         $self->spaceport->mass_scuttle_ship( $scuttle_these_ids );
+        wxTheApp->game_client->clear_spaceport_view_cache();
         wxTheApp->Yield();
+
         $self->assign_shiptypes;
         wxTheApp->Yield();
+
         wxTheApp->endthrob();
 
         return 1;

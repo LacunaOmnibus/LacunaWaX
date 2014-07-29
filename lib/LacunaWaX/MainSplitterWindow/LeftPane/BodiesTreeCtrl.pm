@@ -316,10 +316,10 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
             my $b64_spies           = encode_base64(join q{:}, ('spies',            $pid));
 
             push @{ $planet_node->{'childs'} }, { node => 'Build Ships',    data => $b64_ships_build };
-            push @{ $planet_node->{'childs'} }, { node => 'Scuttle Ships',  data => $b64_ships_scuttle };
             push @{ $planet_node->{'childs'} }, { node => 'Glyphs',         data => $b64_glyphs };
             push @{ $planet_node->{'childs'} }, { node => 'Rearrange',      data => $b64_rearrange };
             push @{ $planet_node->{'childs'} }, { node => 'Repair',         data => $b64_repair };
+            push @{ $planet_node->{'childs'} }, { node => 'Scuttle Ships',  data => $b64_ships_scuttle };
             push @{ $planet_node->{'childs'} }, { node => 'Spies',          data => $b64_spies };
 
             push @{$planets}, $planet_node;

@@ -333,6 +333,14 @@ package LacunaWaX::Model::Client {
         $self->app->get_cache()->remove($key);
         return 1;
     }#}}}
+    sub clear_spaceport_view_cache {#{{{
+        my $self    = shift;
+        my $pname   = shift;
+
+        my $chi  = $self->app->get_cache;
+        my $key = $self->make_key('BODIES', 'VIEWS','SPACEPORT', $pname);
+        $chi->remove($key);
+    }#}}}
 
     sub make_key {## no critic qw(RequireArgUnpacking) {{{
         my $self = shift;
@@ -1361,6 +1369,38 @@ hashref of the counts of each ship type.
             $self->app->Yield if $self->app;
         }
         return $ship_counts;
+    }#}}}
+    sub get_spaceport_view {#{{{
+        my $self    = shift;
+        my $pname   = shift;
+        my $sp      = shift;
+        my $force   = shift || 0;
+
+=head2 get_spaceport_view
+
+Calls and caches a call to a spaceport's view() method.  What's important here 
+is the planet name, not which specific spaceport called the view() method, 
+since all spaceports will return the same information from a view() call.
+
+Unless $force is provided as a true value, attempts to return the view() data 
+from the cache.
+
+ $v = $client->get_spaceport_view( "my_planet_name", $spaceport_object );
+
+If you do something that changes the number of ships in port (build, scuttle, 
+send, etc), you should call clear_spaceport_view_cache() immediately, so the 
+next call to get_spaceport_view() returns fresh data.
+
+=cut
+
+        my $chi  = $self->app->get_cache;
+        my $key  = $self->make_key('BODIES', 'VIEWS','SPACEPORT', $pname);
+        $chi->remove($key) if $force;
+        my $view = $chi->compute($key, '1 hour', sub {
+            $sp->view();
+        });
+
+        return $view;
     }#}}}
     sub get_ship_types {#{{{
         my $self = shift;
