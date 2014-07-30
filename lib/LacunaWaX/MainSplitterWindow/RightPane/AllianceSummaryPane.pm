@@ -168,8 +168,10 @@ package LacunaWaX::MainSplitterWindow::RightPane::AllianceSummaryPane {
         $text .= "Holding " . (scalar @{$self->stations}) . " space stations, with " . $self->influence . " influence.\n\n";
 
         $text .= "Current Members:\n";
+        my $cnt = 0;
         foreach my $m( sort {lc $a cmp lc $b}@{$self->members} ) {
-            $text .= "\t$m\n";
+            $cnt++;
+            $text .= sprintf "\t%02d) %s\n", $cnt, $m;
         }
 
         return $text;
