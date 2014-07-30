@@ -1,2 +1,0 @@
-lib/LacunaWaX/MainSplitterWindow/RightPane/RearrangerPane.pm:135:        return LacunaWaX::MainSplitterWindow::RightPane::RearrangerPane::SavedBuilding->new(
-lib/LacunaWaX/MainSplitterWindow/RightPane/RearrangerPane.pm:256:            LacunaWaX::MainSplitterWindow::RightPane::RearrangerPane::SavedBuilding->new(
