@@ -99,7 +99,9 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
 
             alliance => sub {
                 wxTheApp->right_pane->show_right_pane(
-                    'LacunaWaX::MainSplitterWindow::RightPane::AllianceSummaryPane'
+                    'LacunaWaX::MainSplitterWindow::RightPane::AllianceSummaryPane',
+                    undef,  # planet_name
+                    { alliance_required => 1 },
                 );
             },
 
@@ -126,7 +128,8 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
                 wxTheApp->right_pane->show_right_pane(
                     'LacunaWaX::MainSplitterWindow::RightPane::GlyphsPane',
                     $planet,
-                    { required_buildings  => {'Archaeology Ministry' => undef}, }
+                    #{ required_buildings  => {'Archaeology Ministry' => undef}, }
+                    { required_buildings  => {'Flurblty Foo' => undef}, }
                 );
             },
             repair => sub {
@@ -204,6 +207,7 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
                 wxTheApp->right_pane->show_right_pane(
                     'LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane',
                     $planet,
+                    { alliance_required => 1 },
                 );
             },
 

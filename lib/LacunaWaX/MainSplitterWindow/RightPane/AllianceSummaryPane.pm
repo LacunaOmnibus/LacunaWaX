@@ -25,9 +25,25 @@ package LacunaWaX::MainSplitterWindow::RightPane::AllianceSummaryPane {
 
     #########################################
 
-    has 'text'          => (is => 'rw', isa => 'Str',       lazy_build => 1   );
+    has 'profile' => (
+        is          => 'rw',
+        isa         => 'HashRef',
+        lazy_build  => 1,
+        documentation => q{
+            This is just the {'profile'} key out of Client.pm's get_alliance_profile 
+            (which returns the entire server retval).
+        }
+    );
 
-    has 'profile'       => (is => 'rw', isa => 'HashRef',   lazy_build => 1   );
+    has 'text' => (
+        is          => 'rw',
+        isa         => 'Str',
+        lazy_build  => 1,
+        documentation => q{
+            The text displayed on-screen.  It's just one big blob of text.
+        }
+    );
+
     has 'create_date'   => (is => 'rw', isa => 'DateTime',  lazy_build => 1   );
     has 'description'   => (is => 'rw', isa => 'Str',       lazy_build => 1   );
     has 'id'            => (is => 'rw', isa => 'Int',       lazy_build => 1   );
@@ -101,7 +117,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::AllianceSummaryPane {
     }#}}}
     sub _build_description {#{{{
         my $self = shift;
-        return $self->profile->{'description'};
+        return $self->profile->{'description'} // "You are not in an alliance";
     }#}}}
     sub _build_id {#{{{
         my $self = shift;
@@ -130,13 +146,12 @@ package LacunaWaX::MainSplitterWindow::RightPane::AllianceSummaryPane {
     }#}}}
     sub _build_name {#{{{
         my $self = shift;
-
-        return $self->profile->{'name'};
+        return $self->profile->{'name'} // "You are not in an alliance";
     }#}}}
     sub _build_profile {#{{{
         my $self = shift;
-        my $p = wxTheApp->game_client->get_alliance_profile;
-        return $p->{'profile'};
+        my $p = wxTheApp->game_client->get_alliance_profile();
+        return $p->{'profile'} // {};
     }#}}}
     sub _build_stations {#{{{
         my $self = shift;

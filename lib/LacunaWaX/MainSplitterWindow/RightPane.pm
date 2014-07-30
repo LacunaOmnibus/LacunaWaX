@@ -1,8 +1,9 @@
 
 package LacunaWaX::MainSplitterWindow::RightPane {
     use v5.14;
-    use Moose;
+    use Data::Dumper;
     use English qw( -no_match_vars );
+    use Moose;
     use Time::HiRes qw(usleep);
     use Try::Tiny;
     use Wx qw(:everything);
@@ -131,12 +132,16 @@ Displays one of the RightPane/*.pm panels in the splitter window's right pane.
            planet (eg DefaultPane.pm)
 
 - $args  - hashref of additional arguments.
+            - 'alliance_required'
+                Boolean.  If true, the user must be in an alliance.  If 
+                they're not, they'll get a poperr and then the default pane 
+                will display.
             - 'required_buildings'
-                Hashref.  Names of buildings that must exist on this body to be 
-                able to display the panel (eg 'Archaeology Ministry' to display 
-                glyphs, etc.).  The values will be the minimum level required of 
-                the building, undef if no minimum level (eg 'Parliament' => 25 
-                for BFG)
+                Hashref.  Names of buildings that must exist on this body to 
+                be able to display the panel (eg 'Archaeology Ministry' to 
+                display glyphs, etc.).  The values will be the minimum level 
+                required of the building, undef if no minimum level (eg 
+                'Parliament' => 25 for BFG)
             - 'nothrob'
                 Flag.  If true, the throbber is not turned on.
 
@@ -149,6 +154,10 @@ Displays one of the RightPane/*.pm panels in the splitter window's right pane.
         $self->clear_pane;
         $self->main_panel->Show(0);
         wxTheApp->Yield;
+
+        if( defined $args->{'alliance_required'} and $args->{'alliance_required'} ) {
+            $self->_validate_user_has_alliance() or return;
+        }
 
         if( defined $args->{'required_buildings'} ) {
             foreach my $bldg_name( keys %{$args->{'required_buildings'}} ) {
@@ -225,6 +234,15 @@ Displays one of the RightPane/*.pm panels in the splitter window's right pane.
 
         return 1;
     }#}}}
+    sub _show_intro_panel {#{{{
+        my $self = shift;
+
+        $self->parent->right_pane->show_right_pane(
+            'LacunaWaX::MainSplitterWindow::RightPane::DefaultPane'
+        );
+
+        return 1;
+    }#}}}
     sub _validate_required_building {#{{{
         my $self        = shift;
         my $pname       = shift;
@@ -261,6 +279,15 @@ Displays one of the RightPane/*.pm panels in the splitter window's right pane.
         }
 
         return $bldg;
+    }#}}}
+    sub _validate_user_has_alliance {#{{{
+        my $self = shift;
+        unless( wxTheApp->game_client->alliance_id ) {
+            wxTheApp->poperr( "This requires you to be in an alliance, but you're not." );
+            $self->_show_intro_panel();
+            return;
+        }
+        return 1;
     }#}}}
 
     no Moose;

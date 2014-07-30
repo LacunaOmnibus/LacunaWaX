@@ -30,8 +30,12 @@ package LacunaWaX::Model::Client {
 
     has 'empire_status'   => (is => 'rw', isa => 'HashRef');
 
-    ### These both get returned in empire->get_status(), so will be set the 
-    ### first time that's called.
+    ### These get returned in empire->get_status(), so will be set the first 
+    ### time that's called.
+    has 'alliance_id' => (
+        is           => 'rw',
+        isa          => 'Int',
+    );
     has 'prime_embassy_id' => (
         is           => 'rw',
         isa          => 'Int',
@@ -581,47 +585,9 @@ where rate is a ship's listed speed.
     }#}}}
 
 ### These require hitting the game server, so try/catch as needed.
-    sub get_alliance_id {#{{{
-        my $self = shift;
-
-        ### The alliance_id is now coming back as part of the empire_status, 
-        ### which we've already got.  So no caching or other gyrations needed 
-        ### anymore; just return the thing.
-
-        return $self->empire_status->{'alliance_id'};
-    }#}}}
-    sub get_alliance_id_orig {#{{{
-        my $self = shift;
-
-        ### Returns the ID of the current empire's alliance, or the empty string 
-        ### if the user is not in an alliance.
-
-        my $alliance_id;
-        if( $self->use_gui ) {
-            my $chi  = $self->app->get_cache;
-            my $key  = $self->make_key('ALLIANCE_ID');
-            $alliance_id = $chi->compute($key, '1 hour', sub {
-                my $emp = $self->client->empire;
-                my $my_emp_id = $self->empire_status->{'empire'}{'id'};
-                my $profile = $emp->view_public_profile($my_emp_id);
-                my $alliance_id = (defined $profile->{'profile'}{'alliance'} and defined $profile->{'profile'}{'alliance'}{id})
-                    ? $profile->{'profile'}{'alliance'}{'id'} : q{};
-
-                return $alliance_id;
-            });
-        }
-        else {
-            my $emp = $self->client->empire;
-            my $my_emp_id = $self->empire_status->{'empire'}{'id'};
-            my $profile = $emp->view_public_profile($my_emp_id);
-            $alliance_id = (defined $profile->{'profile'}{'alliance'} and defined $profile->{'profile'}{'alliance'}{id})
-                ? $profile->{'profile'}{'alliance'}{'id'} : q{};
-        }
-
-        return $alliance_id;
-    }#}}}
     sub get_alliance_profile {#{{{
-        my $self = shift;
+        my $self    = shift;
+        my $profile = {};
 
 =head2 get_alliance_profile
 
@@ -655,29 +621,29 @@ Returns the current user's alliance profile as a hashref.
 
         ### Find the current user's alliance ID.  Return undef right away if 
         ### they're not in one.
-        my $alliance_id = $self->get_alliance_id() or return;
-        unless($alliance_id) {
-            croak "You are not in an alliance.";
+        unless( $self->alliance_id ) {
+            return $profile;
         }
+
 
         ### ...get the alliance object for that ID...
         my $alliance;
         my $alliance_profile;
         if( $self->use_gui ) {
             my $chi  = $self->app->get_cache;
-            my $a_key  = join q{:}, ('ALLIANCE', $alliance_id);
+            my $a_key  = join q{:}, ('ALLIANCE', $self->alliance_id);
             $alliance = $chi->compute($a_key, '1 hour', sub {
-                $self->alliance( id => $alliance_id );
+                $self->alliance( id => $self->alliance_id );
             });
 
-            my $ap_key = join q{:}, ('ALLIANCE_PROFILE', $alliance_id);
+            my $ap_key = join q{:}, ('ALLIANCE_PROFILE', $self->alliance_id);
             $alliance_profile = $chi->compute($ap_key, '1 hour', sub {
-                $alliance->view_profile($alliance_id);
+                $alliance->view_profile($self->alliance_id);
             });
         }
         else {
-            $alliance = $self->alliance( id => $alliance_id );
-            $alliance_profile = $alliance->view_profile($alliance_id);
+            $alliance = $self->alliance( id => $self->alliance_id );
+            $alliance_profile = $alliance->view_profile($self->alliance_id);
         }
 
         return $alliance_profile;
@@ -1016,32 +982,32 @@ Returns a hashref containing 'status' (sigh) and 'building', which is what you w
         return $view;
     }#}}}
     sub get_empire_status {#{{{
-        my $self   = shift;
+        my $self = shift;
 
 =head2 get_empire_status
 
 Queries the server for status, and therefore planet listing, of the current 
 empire.
 
-This method I<always> re-queries the server.  To avoid that when not 
-necessary, call ping() instead.
-
 =cut
+
+        my $chi  = $self->app->get_cache;
+        my $key = $self->make_key('EMPIRE', 'STATUS');
 
         $self->app->Yield if $self->app;
         my $empire = $self->client->empire;
         $self->app->Yield if $self->app;
-        my $status = try {
-            $empire->get_status;
-        }
-        catch {
-            return;
-        };
-        ref $status eq 'HASH' or return;
+
+        my $status = $chi->compute($key, '1 hour', sub { $empire->get_status });
+        ref $status eq 'HASH' or return {};
+
         $self->empire_status($status);
 
-        $self->prime_embassy_id( $self->empire_status->{'empire'}{'primary_embassy_id'} // 0 );
+        $self->alliance_id( $self->empire_status->{'empire'}{'alliance_id'} // 0 );
+### CHECK - for testing; to pretend you're not in an alliance
+#$self->alliance_id( 0 );
         $self->home_planet_id( $self->empire_status->{'empire'}{'home_planet_id'} );
+        $self->prime_embassy_id( $self->empire_status->{'empire'}{'primary_embassy_id'} // 0 );
 
         $self->app->Yield if $self->app;
         $self->pingtime( DateTime->now );
