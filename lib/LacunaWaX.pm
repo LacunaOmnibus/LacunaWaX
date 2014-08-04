@@ -498,7 +498,6 @@ which planet that is (although the calculations must be done elsewhere).
         my $self = shift;
         my $event = shift;
         $self->Destroy();
-#        Wx::wxTheApp()->ExitMainLoop();
     }
 
 ### Utilities
