@@ -112,7 +112,15 @@ package LacunaWaX::MainSplitterWindow::RightPane::AllianceSummaryPane {
     sub _build_create_date {#{{{
         my $self = shift;
 
-        my $dt = LacunaWaX::Model::Dates->parse_lacuna( $self->profile->{'date_created'} );
+        my $dt;
+        $dt = try {
+            LacunaWaX::Model::Dates->parse_lacuna( $self->profile->{'date_created'} );
+        }
+        catch {
+            wxTheApp->poperr("Got a weird date string from the server; the alliance create date will show up as today, but that's wrong.");
+            $dt = DateTime->now();
+            
+        };
         return $dt;
     }#}}}
     sub _build_description {#{{{

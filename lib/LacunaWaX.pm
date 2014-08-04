@@ -11,8 +11,8 @@ package LacunaWaX {
     use Wx::Event qw(EVT_MOVE EVT_CLOSE);
 
     use base 'Wx::App';
-    $Wx::App::VERSION   = "3.00";
-    our $VERSION        = '3.00';
+    $Wx::App::VERSION   = "3.0a";
+    our $VERSION        = '3.0a';
 
     use LacunaWaX::Preload::Perlapp;
     use LacunaWaX::MainFrame;
@@ -494,6 +494,12 @@ which planet that is (although the calculations must be done elsewhere).
         $event->Skip();
         return;
     }#}}}
+    sub OnExit {
+        my $self = shift;
+        my $event = shift;
+        $self->Destroy();
+#        Wx::wxTheApp()->ExitMainLoop();
+    }
 
 ### Utilities
     sub api_ship_name {#{{{
@@ -1018,34 +1024,6 @@ Returns the triangle sum of a given int.
 =cut
 
         return( $int * ($int+1) / 2 ); 
-    }#}}}
-
-    {   # TLE date string formatter#{{{
-
-=head2 parse_tletime
-
- my $str = '01 31 2010 13:09:05 +0600';  # TLE datetime string
-
- ### Parse the string
- my $dt = LacunaWaX->parse_tletime($str);
-
- ### $dt is now just a regular DateTime object.
- say $dt->ymd;
-
-=cut
-
-        use DateTime::Format::Builder
-            (
-                parsers => {
-                    parse_tletime => [
-                        {
-                            regex => qr/^(\d\d) (\d\d) (\d{4}) (\d\d):(\d\d):(\d\d) \+\d{4}$/,
-                            params => [qw( month day year hour minute second )],
-                        },
-                    ],
-                }
-            );
-
     }#}}}
 
 }

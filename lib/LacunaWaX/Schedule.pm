@@ -21,9 +21,7 @@ package LacunaWaX::Schedule {
     use Try::Tiny;
 
     use LacunaWaX::Schedule::Archmin;
-    use LacunaWaX::Schedule::Autovote;
     use LacunaWaX::Schedule::Lottery;
-    use LacunaWaX::Schedule::Spies;
     use LacunaWaX::Schedule::SS_Health;
 
     has 'globals'       => (is => 'rw', isa => 'LacunaWaX::Model::Globals',     required    => 1);
@@ -40,7 +38,7 @@ package LacunaWaX::Schedule {
         return $self;
     }
 
-    around qw(archmin autovote lottery spies ss_health) => sub {#{{{
+    around qw(archmin lottery ss_health) => sub {#{{{
         my $orig = shift;
         my $self = shift;
 
@@ -81,30 +79,12 @@ package LacunaWaX::Schedule {
 
         return($searches, $pushes);
     }#}}}
-    sub autovote {#{{{
-        my $self = shift;
-
-        my $av  = LacunaWaX::Schedule::Autovote->new( globals => $self->globals );
-        my $cnt = $av->vote_all_servers;
-        $av->logger->info("--- Autovote Run Complete ---");
-
-        return $cnt;
-    }#}}}
     sub lottery {#{{{
         my $self = shift;
 
         my $lottery = LacunaWaX::Schedule::Lottery->new( globals => $self->globals );
         my $cnt     = $lottery->play_all_servers;
         $lottery->logger->info("--- Lottery Run Complete ---");
-
-        return $cnt;
-    }#}}}
-    sub spies {#{{{
-        my $self = shift;
-
-        my $spies = LacunaWaX::Schedule::Spies->new( globals => $self->globals );
-        my $cnt   = $spies->train_all_servers;
-        $spies->logger->info("--- Spy Training Run Complete ---");
 
         return $cnt;
     }#}}}

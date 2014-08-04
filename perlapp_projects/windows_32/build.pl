@@ -144,9 +144,12 @@ say "Building Archmin executable...";
     }
 
 };
-die "Building Schedule_archmin.exe failed!" if $exit;
+if( $exit ) {
+    say "Building Schedule_archmin.exe failed!";
+    say "Got error -$err-";
+    exit;
+}
 =pod
-=cut
 ### }#}}}
 ### Autovote {#{{{
 say "Building Autovote executable...";
@@ -161,9 +164,8 @@ say "Building Autovote executable...";
 
 };
 die "Building Schedule_autovote failed!" if $exit;
-=pod
-=cut
 ### }#}}}
+=cut
 ### SS Health {#{{{
 say "Building SS Health executable...";
 ($out,$err,$exit) = capture {
