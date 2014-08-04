@@ -3,6 +3,7 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
     use v5.14;
     use utf8;
     use open qw(:std :utf8);
+    use English qw( -no_match_vars );
     use Data::Dumper;
     use Moose;
     use MIME::Base64;
@@ -360,7 +361,7 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
 
             push @{$stations}, $station_node;
         }#}}}
-        {### Alliance  #{{{
+        {   ### Alliance  #{{{
 
             my $sitters_node = {
                 node    => 'Sitters',
@@ -382,7 +383,12 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
         $model_data->{'childs'}[0]{'childs'} = $planets;
         $model_data->{'childs'}[1]{'childs'} = $stations;
         $model_data->{'childs'}[2]{'childs'} = $alliance;
-        $model_data->{'childs'}[3]{'childs'} = [];
+
+        ### Add an extra node at the bottom to keep the last node from being 
+        ### covered by the bottom frame when everything is expanded.  Not 
+        ### needed on Windows.
+        $model_data->{'childs'}[3]{'childs'} = [] unless $OSNAME eq 'MSWin32';
+
         $self->treeview->model->data( $model_data );
         $self->treeview->reload();
 

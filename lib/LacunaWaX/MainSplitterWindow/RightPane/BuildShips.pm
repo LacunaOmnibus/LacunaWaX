@@ -132,7 +132,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::BuildShips {
     has 'max_w' => (
         is          => 'rw',
         isa         => 'Int',
-        default     => 600,
+        default     => 550,
         documentation => q{
             max width for various controls.
         }
@@ -718,11 +718,14 @@ Closing LacunaWaX all the way will stop any more ships from being added to the q
         my($id, $hr) = each %{$self->all_shipyards};
         values %{$self->all_shipyards}; # reset the iterator
         if( $id ) {
+            wxTheApp->Yield();
             my $v = wxTheApp->game_client->get_spaceport_view( $self->planet_name, $self->spaceport );
+            wxTheApp->Yield();
             $self->docks_available( $v->{'docks_available'} );
 
             $text = "Docks: $v->{'docks_available'} available of $v->{'max_ships'} total.\n\nCurrent Ships\n=============\n";
             foreach my $shiptype( sort keys %{$v->{'docked_ships'}} ) {
+                wxTheApp->Yield();
                 my $show_shiptype = $shiptype . q{ };
                 my $dots = '.' x(30 - (length($show_shiptype)));
                 $show_shiptype .= $dots;
@@ -731,8 +734,11 @@ Closing LacunaWaX all the way will stop any more ships from being added to the q
         }
 
         $self->lbl_summary->SetLabel($text);
+        wxTheApp->Yield();
         $self->wrap_summary;
+        wxTheApp->Yield();
         $self->szr_summary->SetItemMinSize( $self->lbl_summary, $self->max_w, -1 );
+        wxTheApp->Yield();
 
         return 1;
     }#}}}
@@ -852,7 +858,7 @@ No arguments are required; this does all the calculations.
             $self->update_gui_for_build;
             $self->build_complete_num( $self->build_complete_num + $num_to_build );
             $self->docks_available( $self->docks_available - $num_to_build );
-            wxTheApp->game_client->clear_spaceport_view_cache();
+            wxTheApp->game_client->clear_spaceport_view_cache( $self->planet_name );
 
             my $seconds     = $rv->{'building'}{'work'}{'seconds_remaining'};
             $alarm_seconds  = $seconds if $seconds < $alarm_seconds;
@@ -919,12 +925,15 @@ No arguments are required; this does all the calculations.
         ### choice, which is better than making them wait for the pane to show 
         ### up at all.
 
+        wxTheApp->throb();
+
         $self->set_summary_text();
 
         my $reqd_level = $self->chc_min_level->GetStringSelection;
-        return if $reqd_level =~ /Choose a level/;
-
-        wxTheApp->throb();
+        if( $reqd_level =~ /Choose a level/ ) {
+            wxTheApp->endthrob();
+            return;
+        }
         
         ### Keep just the yards matching the user's requirement.
         $self->clear_usable_shipyards();
@@ -960,6 +969,7 @@ No arguments are required; this does all the calculations.
         ### Now that everything's recalced, be sure the summary text is shown.  
         ### The first time the user choses a level, it won't be yet.
         $self->lbl_summary->Show(1);
+        $self->parent->Layout();
 
         wxTheApp->endthrob();
         return 1;

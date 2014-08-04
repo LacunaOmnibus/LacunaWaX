@@ -342,7 +342,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::ScuttleShips {
         wxTheApp->Yield();
 
         $self->spaceport->mass_scuttle_ship( $scuttle_these_ids );
-        wxTheApp->game_client->clear_spaceport_view_cache();
+        wxTheApp->game_client->clear_spaceport_view_cache( $self->planet_name );
         wxTheApp->Yield();
 
         $self->assign_shiptypes;

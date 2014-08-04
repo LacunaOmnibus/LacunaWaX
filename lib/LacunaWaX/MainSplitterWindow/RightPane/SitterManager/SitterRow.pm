@@ -37,6 +37,44 @@ package LacunaWaX::MainSplitterWindow::RightPane::SitterManager::SitterRow {
         }
     );
 
+    has 'pass' => (
+        is          => 'rw',
+        isa         => 'Str',
+        lazy        => 1,
+        default     => q{},
+        documentation => q{
+            The current password.
+        }
+    );
+
+    has 'txt_sitter_pass' => (
+        is          => 'rw',
+        isa         => 'Wx::TextCtrl',
+        lazy_build  => 1,
+        documentation => q{
+            To toggle between showing the obscured password box and the 
+            plaintext one, simply creating a single text input and changing 
+            its window style works fine on Linux, but does not work at all on 
+            Windows.
+
+            So we're now using two separate text inputs, one set as password 
+            style and one set as plaintext style.
+
+            Clicking the style-toggle button (the little eyeball) swaps the 
+            two text boxes back and forth rather than attempting to change the 
+            style.
+        }
+    );
+
+    has 'txt_sitter_text' => (
+        is          => 'rw',
+        isa         => 'Wx::TextCtrl',
+        lazy_build  => 1,
+        documentation => q{
+            See docu for txt_sitter_pass, above.
+        }
+    );
+
     has 'input_width'   => (is => 'rw', isa => 'Int', lazy => 1, default => 150);
     has 'input_height'  => (is => 'rw', isa => 'Int', lazy => 1, default => 25);
     has 'button_width'  => (is => 'rw', isa => 'Int', lazy => 1, default => 80);
@@ -45,12 +83,11 @@ package LacunaWaX::MainSplitterWindow::RightPane::SitterManager::SitterRow {
     has 'name_header'   => (is => 'rw', isa => 'Wx::StaticText');
     has 'pass_header'   => (is => 'rw', isa => 'Wx::StaticText');
 
-    has 'txt_name'      => (is => 'rw', isa => 'Wx::TextCtrl',     lazy_build => 1);
-    has 'txt_sitter'    => (is => 'rw', isa => 'Wx::TextCtrl',     lazy_build => 1);
-    has 'btn_save'      => (is => 'rw', isa => 'Wx::Button',       lazy_build => 1);
-    has 'btn_delete'    => (is => 'rw', isa => 'Wx::Button',       lazy_build => 1);
-    has 'btn_test'      => (is => 'rw', isa => 'Wx::Button',       lazy_build => 1);
-    has 'btn_view'      => (is => 'rw', isa => 'Wx::Button',       lazy_build => 1);
+    has 'txt_name'          => (is => 'rw', isa => 'Wx::TextCtrl',     lazy_build => 1);
+    has 'btn_save'          => (is => 'rw', isa => 'Wx::Button',       lazy_build => 1);
+    has 'btn_delete'        => (is => 'rw', isa => 'Wx::Button',       lazy_build => 1);
+    has 'btn_test'          => (is => 'rw', isa => 'Wx::Button',       lazy_build => 1);
+    has 'btn_view'          => (is => 'rw', isa => 'Wx::Button',       lazy_build => 1);
 
 =pod
 
@@ -110,8 +147,12 @@ still needs to be called on header rows.
             return;
         }#}}}
 
+        ### Force this to be created, but don't place it yet.  It starts out 
+        ### hidden.
+        $self->txt_sitter_text;
+
         $self->row_panel_sizer->Add($self->txt_name, 0, 0, 0);
-        $self->row_panel_sizer->Add($self->txt_sitter, 0, 0, 0);
+        $self->row_panel_sizer->Add($self->txt_sitter_pass, 0, 0, 0);
         $self->row_panel_sizer->Add($self->btn_save, 0, 0, 0);
         $self->row_panel_sizer->Add($self->btn_test, 0, 0, 0);
         $self->row_panel_sizer->Add($self->btn_view, 0, 0, 0);
@@ -155,7 +196,7 @@ still needs to be called on header rows.
             Wx::Size->new($self->input_width,$self->input_height),
         );
     }#}}}
-    sub _build_txt_sitter {#{{{
+    sub _build_txt_sitter_pass {#{{{
         my $self = shift;
 
         my $sitter = ($self->player_rec) ? $self->player_rec->sitter : q{};
@@ -166,6 +207,21 @@ still needs to be called on header rows.
             Wx::Size->new($self->input_width,$self->input_height),
             wxTE_PASSWORD
         );
+        $txt->Show(1);
+
+        return $txt;
+    }#}}}
+    sub _build_txt_sitter_text {#{{{
+        my $self = shift;
+
+        my $sitter = ($self->player_rec) ? $self->player_rec->sitter : q{};
+        my $txt = Wx::TextCtrl->new(
+            $self->row_panel, -1, 
+            $sitter, 
+            wxDefaultPosition, 
+            Wx::Size->new($self->input_width,$self->input_height),
+        );
+        $txt->Show(0);
 
         return $txt;
     }#}}}
@@ -207,7 +263,8 @@ still needs to be called on header rows.
             wxDefaultPosition,
             Wx::Size->new($self->button_width,$self->button_height),
         );
-        my $vis = ( $self->txt_name->GetLineText(0) and $self->txt_sitter->GetLineText(0) ) ? 1 : 0;
+    ### CHECK
+        my $vis = ( $self->txt_name->GetLineText(0) and $self->get_sitter_pass ) ? 1 : 0;
         $v->Enable($vis);
         return $v;
     }#}}}
@@ -238,12 +295,13 @@ still needs to be called on header rows.
             ### header row, they have not already been built, and we don't 
             ### want them built, so don't set up events (and therefore create 
             ### these widgets) for the header row.  Dummy.
-            EVT_TEXT(   $self->row_panel, $self->txt_name->GetId,      sub{$self->OnTextChange(@_)} );
-            EVT_TEXT(   $self->row_panel, $self->txt_sitter->GetId,    sub{$self->OnTextChange(@_)} );
-            EVT_BUTTON( $self->row_panel, $self->btn_save->GetId,      sub{$self->OnSave(@_)} );
-            EVT_BUTTON( $self->row_panel, $self->btn_test->GetId,      sub{$self->OnTest(@_)} );
-            EVT_BUTTON( $self->row_panel, $self->btn_view->GetId,      sub{$self->OnToggleView(@_)} );
-            EVT_BUTTON( $self->row_panel, $self->btn_delete->GetId,    sub{$self->OnDelete(@_)} );
+            EVT_TEXT(   $self->row_panel, $self->txt_name->GetId,           sub{$self->OnTextChange(@_)} );
+            EVT_TEXT(   $self->row_panel, $self->txt_sitter_pass->GetId,    sub{$self->OnTextChange(@_)} );
+            EVT_TEXT(   $self->row_panel, $self->txt_sitter_text->GetId,    sub{$self->OnTextChange(@_)} );
+            EVT_BUTTON( $self->row_panel, $self->btn_save->GetId,           sub{$self->OnSave(@_)} );
+            EVT_BUTTON( $self->row_panel, $self->btn_test->GetId,           sub{$self->OnTest(@_)} );
+            EVT_BUTTON( $self->row_panel, $self->btn_view->GetId,           sub{$self->OnToggleView(@_)} );
+            EVT_BUTTON( $self->row_panel, $self->btn_delete->GetId,         sub{$self->OnDelete(@_)} );
         }
         return 1;
     }#}}}
@@ -262,6 +320,43 @@ still needs to be called on header rows.
         };
 
         return $hr->{'empires'}[0]{'id'} // undef;
+    }#}}}
+    sub get_sitter_pass {#{{{
+        my $self = shift;
+
+=head2 get_sitter_pass
+
+Whichever sitter password box is currently displayed (the password one or the 
+plaintext one), this syncs the two boxes and returns the text in whichever box 
+is currently being shown.
+
+=cut
+
+        my $pass = q{};
+
+        if( $self->txt_sitter_pass->IsShown ) {
+            $self->pass( $self->txt_sitter_pass->GetLabel() );
+        }
+        else {
+            $self->pass( $self->txt_sitter_text->GetLabel() );
+        }
+
+        return $self->pass;
+    }#}}}
+    sub set_sitter_pass {#{{{
+        my $self = shift;
+        my $pass = shift || q{};
+
+=head2 set_sitter_pass
+
+Sets the contents of both sitter password boxes.  Doesn't care which one is 
+currently shown.
+
+=cut
+
+        $self->txt_sitter_text->SetLabel($pass);
+        $self->txt_sitter_pass->SetLabel($pass);
+        return 1;
     }#}}}
     sub hide {#{{{
         my $self = shift;
@@ -368,7 +463,10 @@ else {
         my $self    = shift;
         my $parent  = shift;    # Wx::ScrolledWindow
         my $event   = shift;    # Wx::CommandEvent
-        my $vis = ( $self->txt_name->GetLineText(0) and $self->txt_sitter->GetLineText(0) ) ? 1 : 0;
+        my $internal = shift;
+
+        my $pass = $self->get_sitter_pass();
+        my $vis = ( $self->txt_name->GetLineText(0) and $pass ) ? 1 : 0;
         $self->btn_test->Enable($vis);
         return 1;
     }#}}}
@@ -378,7 +476,7 @@ else {
         my $event   = shift;    # Wx::CommandEvent
 
         my $name    = $self->txt_name->GetLineText(0);
-        my $pass    = $self->txt_sitter->GetLineText(0);
+        my $pass    = $self->get_sitter_pass();
 
         if( $self->player_rec ) {
             if( my $player_id = $self->test_sitter_gui($name, $pass) ) {
@@ -448,7 +546,7 @@ else {
         my $event   = shift;    # Wx::CommandEvent
 
         my $name    = $self->txt_name->GetLineText(0);
-        my $pass    = $self->txt_sitter->GetLineText(0);
+        my $pass    = $self->get_sitter_pass();
 
         if( $self->test_sitter_gui($name, $pass) ) {
             wxTheApp->popmsg("Credentials are valid.", "Success!");
@@ -460,13 +558,28 @@ else {
         my $parent  = shift;    # Wx::ScrolledWindow
         my $event   = shift;    # Wx::CommandEvent
 
-        my $current_style = $self->txt_sitter->GetWindowStyleFlag();
-        if( $current_style & wxTE_PASSWORD ) {
-            $self->txt_sitter->SetWindowStyle(0);
+        ### Get the password as contained in whichever of the two text boxes 
+        ### is currently being displayed.
+        my $pass = $self->get_sitter_pass();
+
+        ### Set that password as the label in the control not being displayed, 
+        ### then swap the visibility of the two controls.  Also update the 
+        ### now-visible window's tab order.
+        if( $self->txt_sitter_pass->IsShown ) {
+            $self->txt_sitter_text->SetLabel($pass);
+            $self->row_panel_sizer->Replace( $self->txt_sitter_pass, $self->txt_sitter_text ); 
+            $self->txt_sitter_pass->Show(0);
+            $self->txt_sitter_text->Show(1);
+            $self->txt_sitter_text->MoveAfterInTabOrder( $self->txt_name );
         }
         else {
-            $self->txt_sitter->SetWindowStyle(wxTE_PASSWORD);
+            $self->txt_sitter_pass->SetLabel($pass);
+            $self->row_panel_sizer->Replace( $self->txt_sitter_text, $self->txt_sitter_pass ); 
+            $self->txt_sitter_pass->Show(1);
+            $self->txt_sitter_text->Show(0);
+            $self->txt_sitter_pass->MoveAfterInTabOrder( $self->txt_name );
         }
+        $self->row_panel_sizer->Layout();
 
         return 1;
     }#}}}
@@ -481,7 +594,7 @@ else {
         $self->player_rec->delete;
         $self->player_rec( undef );
         $self->txt_name->SetValue(q{});
-        $self->txt_sitter->SetValue(q{});
+        $self->set_sitter_pass(q{});
         $self->btn_save->SetLabel('Add Sitter');
         $self->btn_delete->Enable(0);
 

@@ -41,15 +41,14 @@ This takes a few seconds; please be patient...  ";
     ### This deploy bit is here for the benefit of people running from source.
     unless(-e $app_db ) {
         my $app_schema = $globals->main_schema;
-say "deploying app";
+        say "deploying app";
         $app_schema->deploy;
         my $d = LacunaWaX::Model::DefaultData->new();
         $d->add_servers($app_schema);
-        $d->add_stations($app_schema);
     }
     unless(-e $log_db ) {
         my $log_schema = $globals->logs_schema;
-say "deploying log";
+        say "deploying log";
         $log_schema->deploy;
     }
 
