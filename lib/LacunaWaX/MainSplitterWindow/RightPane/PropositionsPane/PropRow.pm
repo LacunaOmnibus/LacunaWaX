@@ -203,8 +203,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane::PropRow {
             wxTheApp->game_client->get_prime_embassy();
         }
         catch {
-            #my $msg = (ref $_) ? $_->text : $_;
-            my $msg = (ref $_) ? $_->message : $_;
+            my $msg = (ref $_) ? $_->text : $_;
             wxTheApp->poperr($msg);
             return;
         };
@@ -515,8 +514,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane::PropRow {
             wxTheApp->game_client->relog($sitter_rec->player_name, $sitter_rec->sitter);
         }
         catch {
-            #my $msg = (ref $_) ? $_->text : $_;
-            my $msg = (ref $_) ? $_->message : $_;
+            my $msg = (ref $_) ? $_->text : $_;
             $self->dialog_status_say("*** I was unable to login for $player - they may be totally out of RPCs. ***");
             $self->ancestor->over_rpc->{$player}++;
             return;
@@ -544,6 +542,8 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane::PropRow {
             local $SIG{ALRM} = sub { croak "voting stall"; };
             alarm 5;
 
+            $sitter_client->get_empire_status();
+
             ### SITTERVOTE
             ### That 'tag' comment exists so this chunk of code is easy to 
             ### find, please do not delete it.
@@ -561,6 +561,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane::PropRow {
         catch {
             alarm 0;
             my $msg = (ref $_) ? $_->text : $_;
+
 
             if( $msg =~ m/you have already voted/i ) {
                 $self->dialog_status_say("$player has already voted on this prop.");
