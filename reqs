@@ -1,0 +1,41 @@
+
+YAML
+Moose
+Variable::Magic
+Alien::wxWidgets
+	but first, use synaptic or whatever to install
+		gcc
+		g++
+		wxwidgets 2.8
+		wx2.8-headers
+		libgtk-2.0-dev
+Wx
+B::Hooks::EndOfScope::XS
+Params::Validate::XS
+DateTime
+SQL::Translator
+JSON::RPC::Common
+JSON::RPC::LWP
+CHI
+IO::All
+Class::XSAccessor
+Exception::Class
+Browser::Open
+Path::Tiny
+File::Slurp
+File::Util
+HTML::Scrubber
+	This should be removed from Wax - not being used anymore
+HTML::TreeBuilder::XPath
+	same think I think
+Template
+    this does include some user prompts during a cpan install
+Regexp::Common
+Archive::Zip
+Wx::Perl::TreeView
+Number::Format
+Log::Dispatch
+Log::Dispatch::DBI
+    Prereq is DBD::CSV, which includes user prompts during cpan install
+DBIx::Class
+DateTime::Format::RFC3339
