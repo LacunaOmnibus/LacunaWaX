@@ -23,6 +23,7 @@ package LacunaWaX::MainFrame {
             CreateStatusBar     => "CreateStatusBar",
             Destroy             => "Destroy",
             GetSize             => "GetSize",
+            GetTitle            => "GetTitle",
             GetStatusBar        => "GetStatusBar",
             Layout              => "Layout",
             SetMenuBar          => "SetMenuBar",
@@ -31,6 +32,7 @@ package LacunaWaX::MainFrame {
             SetSizer            => "SetSizer",
             SetTitle            => "SetTitle",
             Show                => "Show",
+            Update              => "Update",
         },
     );
 

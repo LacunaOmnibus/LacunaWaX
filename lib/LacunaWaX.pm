@@ -35,6 +35,8 @@ package LacunaWaX {
         $self->SetAppName('LacunaWaX');
         $self->SetTopWindow( $self->main_frame->frame );
         $self->main_frame->SetIcon( $self->icon_image );
+        $self->main_frame->Update();        # Make the icon actually show up
+
         $self->main_frame->Show(1);
 
         $self->logger->debug('Starting application');
@@ -273,6 +275,8 @@ package LacunaWaX {
 
         my $icon = Wx::Icon->new();
         $icon->CopyFromBitmap($bmp);
+
+        #say $icon->IsOk;
 
         return $icon;
     }#}}}
