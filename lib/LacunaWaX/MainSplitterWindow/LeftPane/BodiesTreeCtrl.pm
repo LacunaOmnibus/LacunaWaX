@@ -129,8 +129,7 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
                 wxTheApp->right_pane->show_right_pane(
                     'LacunaWaX::MainSplitterWindow::RightPane::GlyphsPane',
                     $planet,
-                    #{ required_buildings  => {'Archaeology Ministry' => undef}, }
-                    { required_buildings  => {'Flurblty Foo' => undef}, }
+                    { required_buildings  => {'Archaeology Ministry' => undef}, }
                 );
             },
             repair => sub {
