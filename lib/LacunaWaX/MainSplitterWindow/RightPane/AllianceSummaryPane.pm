@@ -30,7 +30,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::AllianceSummaryPane {
         isa         => 'HashRef',
         lazy_build  => 1,
         documentation => q{
-            This is just the {'profile'} key out of Client.pm's get_alliance_profile 
+            This is just the {'profile'} key out of Client.pm's get_alliance_profile
             (which returns the entire server retval).
         }
     );
@@ -86,9 +86,9 @@ package LacunaWaX::MainSplitterWindow::RightPane::AllianceSummaryPane {
         my $self = shift;
 
         my $v = Wx::StaticText->new(
-            $self->parent, -1, 
+            $self->parent, -1,
             $self->name,
-            wxDefaultPosition, 
+            wxDefaultPosition,
             Wx::Size->new(-1, 30)
         );
         $v->SetFont( wxTheApp->get_font('header_1') );
@@ -97,12 +97,12 @@ package LacunaWaX::MainSplitterWindow::RightPane::AllianceSummaryPane {
     sub _build_lbl_text {#{{{
         my $self = shift;
         my $v = Wx::StaticText->new(
-            $self->parent, -1, 
-            $self->text, 
-            wxDefaultPosition, 
-            ### If you start changing the height on this, check the result on 
-            ### both a station and on a planet.  Station text is bigger.  
-            ### Also, stations with warning text ("OMG we haven't seize our 
+            $self->parent, -1,
+            $self->text,
+            wxDefaultPosition,
+            ### If you start changing the height on this, check the result on
+            ### both a station and on a planet.  Station text is bigger.
+            ### Also, stations with warning text ("OMG we haven't seize our
             ### own star!") will need even more height here.
             Wx::Size->new(400,-1)
         );
@@ -119,7 +119,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::AllianceSummaryPane {
         catch {
             wxTheApp->poperr("Got a weird date string from the server; the alliance create date will show up as today, but that's wrong.");
             $dt = DateTime->now();
-            
+
         };
         return $dt;
     }#}}}
@@ -168,7 +168,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::AllianceSummaryPane {
     }#}}}
     sub _build_text {#{{{
         my $self  = shift;
-        
+
         my $text = $self->description . "\n\n";
 
         $text .= "Led by " . $self->leader . ".\n";

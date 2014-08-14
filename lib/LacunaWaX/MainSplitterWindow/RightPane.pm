@@ -11,6 +11,7 @@ package LacunaWaX::MainSplitterWindow::RightPane {
 
     use LacunaWaX::MainSplitterWindow::RightPane::AllianceSummaryPane;
     use LacunaWaX::MainSplitterWindow::RightPane::BFGPane;
+    use LacunaWaX::MainSplitterWindow::RightPane::BodiesSummaryPane;
     use LacunaWaX::MainSplitterWindow::RightPane::BuildShips;
     use LacunaWaX::MainSplitterWindow::RightPane::DefaultPane;
     use LacunaWaX::MainSplitterWindow::RightPane::GlyphsPane;
@@ -75,7 +76,7 @@ package LacunaWaX::MainSplitterWindow::RightPane {
 
 =head2 clear_pane
 
-Resets the right pane back to 
+Resets the right pane back to
 
     main_panel
 
@@ -89,14 +90,14 @@ With no children.
         else {
             $self->main_panel(
                 Wx::ScrolledWindow->new(
-                    $self->parent->splitter_window, -1, 
+                    $self->parent->splitter_window, -1,
                     wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL
                 )
             );
-            ### I'm unclear whether the arguments are doing anything at all.  
-            ### Scrolling looks the same with the rate set at 10 as it does at 
+            ### I'm unclear whether the arguments are doing anything at all.
+            ### Scrolling looks the same with the rate set at 10 as it does at
             ### 1000.
-            ### The method does definitely need to be called to create the 
+            ### The method does definitely need to be called to create the
             ### scrollbars though.
             $self->main_panel->SetScrollRate(10,10);
         }
@@ -128,19 +129,19 @@ Displays one of the RightPane/*.pm panels in the splitter window's right pane.
 - $class - fully-qualified name of class to display
 
 - $pname - name of the planet for which we're displaying the pane.
-           Optional, provided the pane in question doesn't actually describe a 
+           Optional, provided the pane in question doesn't actually describe a
            planet (eg DefaultPane.pm)
 
 - $args  - hashref of additional arguments.
             - 'alliance_required'
-                Boolean.  If true, the user must be in an alliance.  If 
-                they're not, they'll get a poperr and then the default pane 
+                Boolean.  If true, the user must be in an alliance.  If
+                they're not, they'll get a poperr and then the default pane
                 will display.
             - 'required_buildings'
-                Hashref.  Names of buildings that must exist on this body to 
-                be able to display the panel (eg 'Archaeology Ministry' to 
-                display glyphs, etc.).  The values will be the minimum level 
-                required of the building, undef if no minimum level (eg 
+                Hashref.  Names of buildings that must exist on this body to
+                be able to display the panel (eg 'Archaeology Ministry' to
+                display glyphs, etc.).  The values will be the minimum level
+                required of the building, undef if no minimum level (eg
                 'Parliament' => 25 for BFG)
             - 'nothrob'
                 Flag.  If true, the throbber is not turned on.
@@ -162,8 +163,8 @@ Displays one of the RightPane/*.pm panels in the splitter window's right pane.
         if( defined $args->{'required_buildings'} ) {
             foreach my $bldg_name( keys %{$args->{'required_buildings'}} ) {
                 $self->_validate_required_building(
-                    $pname, 
-                    $bldg_name, 
+                    $pname,
+                    $bldg_name,
                     $args->{'required_buildings'}{$bldg_name}   # the required bldg lvl
                 ) or return;
             }
@@ -173,6 +174,7 @@ Displays one of the RightPane/*.pm panels in the splitter window's right pane.
             parent      => $self->main_panel,
             ancestor    => $self,
             planet_name => $pname,
+            %{ $args },
         );
         if( $panel ) {
             if( $self->has_prev_panel and $self->prev_panel->can('OnSwitch') ) {
@@ -254,7 +256,7 @@ Displays one of the RightPane/*.pm panels in the splitter window's right pane.
 
         my $bldg = $self->_planet_has_building($pid, $bldg_name);
         unless($bldg) {
-            $error = "This pane requires that a $bldg_name exist on this body, and there isn't one."; 
+            $error = "This pane requires that a $bldg_name exist on this body, and there isn't one.";
         }
 
         if( $bldg and $bldg_lvl ) {
@@ -291,7 +293,7 @@ Displays one of the RightPane/*.pm panels in the splitter window's right pane.
     }#}}}
 
     no Moose;
-    __PACKAGE__->meta->make_immutable; 
+    __PACKAGE__->meta->make_immutable;
 }
 
 1;
@@ -304,49 +306,49 @@ __END__
 
 =head3 Create your new panel module under RightPane/
 
-For the most part, just follow the existing examples.  But there are some 
+For the most part, just follow the existing examples.  But there are some
 pseudo-events to be aware of.
 
 =over 4
 
 =item * OnClose
 
-Optional.  If it exists, RightPane.pm will call your new panel's OnClose 
-method when the RightPane is itself closed (during RightPane's own OnClose 
+Optional.  If it exists, RightPane.pm will call your new panel's OnClose
+method when the RightPane is itself closed (during RightPane's own OnClose
 method, which is a true, not a pseudo, event.)
 
-This RightPane OnClose event is triggered when the entire right panel is 
+This RightPane OnClose event is triggered when the entire right panel is
 closed.  This basically means "when the program is closed".
 
 =item * OnSwitch
 
-Optional.  If it exists, RightPane.pm will call your new panel's OnSwitch 
+Optional.  If it exists, RightPane.pm will call your new panel's OnSwitch
 method when the user attempts to open a different right panel:
 
- - User opens the Glyphs panel by clicking the appropriate leaf in the left 
+ - User opens the Glyphs panel by clicking the appropriate leaf in the left
    tree
  - User then opens the Rearrange panel by clicking its leaf.
 
-Upon clicking the Rearrange panel, the user is "switching" from the Glyphs 
-panel to the Rearrange panel, and the Glyphs panel's OnSwitch will therefore 
+Upon clicking the Rearrange panel, the user is "switching" from the Glyphs
+panel to the Rearrange panel, and the Glyphs panel's OnSwitch will therefore
 be called.
 
-This is a good place to clean up any Status windows your panel may have 
+This is a good place to clean up any Status windows your panel may have
 created.
 
 =item * OnDialogStatusClose
 
-Optional.  If your panel needs to open a Dialog::Status window at some point, 
-that status dialog will call your panel's OnDialogStatusClose method when (if) 
-that status dialog gets closed. 
+Optional.  If your panel needs to open a Dialog::Status window at some point,
+that status dialog will call your panel's OnDialogStatusClose method when (if)
+that status dialog gets closed.
 
 =back
 
 =head3 Update the tree in the left pane
 
-To update the TreeCtrl to include a pointer to your new pane (that the user 
-can click on), first add the leaf itself (in fill_tree; follow existing 
-examples).  Next, add a handler for when that leaf is clicked (in OnTreeClick; 
+To update the TreeCtrl to include a pointer to your new pane (that the user
+can click on), first add the leaf itself (in fill_tree; follow existing
+examples).  Next, add a handler for when that leaf is clicked (in OnTreeClick;
 again, follow existing examples).
 
 =cut

@@ -16,6 +16,7 @@ package LacunaWaX {
 
     use LacunaWaX::Preload::Perlapp;
     use LacunaWaX::MainFrame;
+    use LacunaWaX::Model::Colours;
     use LacunaWaX::Model::Dates;
     use LacunaWaX::Model::DefaultData;
     use LacunaWaX::Model::Globals;
@@ -30,7 +31,7 @@ package LacunaWaX {
         croak "root dir is required" unless defined $args{'root_dir'};
         $self->{'root_dir'} = $args{'root_dir'};
 
-        ### Initialize all attributes that can be.  These used to be our lazy 
+        ### Initialize all attributes that can be.  These used to be our lazy
         ### attributes.
         $self->_init_attrs;
 
@@ -60,7 +61,8 @@ package LacunaWaX {
             'display_x', 'display_y',
             'servers' ,
             'main_frame',
-            'ship_builds', 'ship_build_caption_setter',
+
+            'ship_builds', 'ship_build_caption_setter', 'colours',
         );
         foreach my $attr(@build_attrs) {
             my $meth = "_build_$attr";
@@ -77,11 +79,11 @@ package LacunaWaX {
     }#}}}
     sub OnInit {#{{{
         my $self = shift;
-        ### This gets called by the Wx::App (our parent) constructor.  This 
-        ### means that $self is not yet a LacunaWaX object; new() has not run 
+        ### This gets called by the Wx::App (our parent) constructor.  This
+        ### means that $self is not yet a LacunaWaX object; new() has not run
         ### yet.
         ###
-        ### The point being that any code in here should relate only to the 
+        ### The point being that any code in here should relate only to the
         ### Wx::App, not to the LacunaWaX.
         unless( $self->{'image_handlers_initialized'} ) {
             Wx::InitAllImageHandlers();
@@ -90,7 +92,7 @@ package LacunaWaX {
         return 1;
     }#}}}
 
-### Accessors
+### Accessors - each MUST include a mutator
     sub account {#{{{
         my $self = shift;
         my $arg  = shift;
@@ -107,6 +109,12 @@ package LacunaWaX {
         }
         $self->{'clock_type'} = $type if $type;
         return $self->{'clock_type'};
+    }#}}}
+    sub colours {#{{{
+        my $self = shift;
+        my $arg  = shift;
+        $self->{'colours'} = $arg if $arg;
+        return $self->{'colours'};
     }#}}}
     sub db_file {#{{{
         my $self = shift;
@@ -187,10 +195,10 @@ package LacunaWaX {
 
 =head2 ship_builds
 
-Hashref to keep track of current ship builds per planet.  Managed by 
+Hashref to keep track of current ship builds per planet.  Managed by
 BuildShips.pm.
 
- planet_name => end_time (of the current build, in epoch seconds) 
+ planet_name => end_time (of the current build, in epoch seconds)
 
 =cut
 
@@ -204,8 +212,8 @@ BuildShips.pm.
 
 =head2 ship_build_caption_setter
 
-If the user sets up multiple planets to build ships, whichever planet has the 
-longest build time will be the one to set the caption.  This keeps track of 
+If the user sets up multiple planets to build ships, whichever planet has the
+longest build time will be the one to set the caption.  This keeps track of
 which planet that is (although the calculations must be done elsewhere).
 
 =cut
@@ -217,8 +225,8 @@ which planet that is (although the calculations must be done elsewhere).
         my $self = shift;
         my $arg  = shift;
 
-        ### Accepts a DateTime::TimeZone:: object, or just a time_zone name 
-        ### ('local', 'America/New_York', etc), or no arg for a simple 
+        ### Accepts a DateTime::TimeZone:: object, or just a time_zone name
+        ### ('local', 'America/New_York', etc), or no arg for a simple
         ### accessor.
 
         my $tz;
@@ -256,6 +264,11 @@ which planet that is (although the calculations must be done elsewhere).
 
         return $clock_type;
     }#}}}
+    sub _build_colours {#{{{
+        my $self = shift;
+        my $c = LacunaWaX::Model::Colours->new();
+        return $c;
+    }#}}}
     sub _build_db_file {#{{{
         my $self = shift;
         my $file = $self->root_dir . '/user/lacuna_app.sqlite';
@@ -282,13 +295,9 @@ which planet that is (although the calculations must be done elsewhere).
     sub _build_icon_image {#{{{
         my $self = shift;
 
-        my $png = join q{/}, ($self->globals->dir_ico, qq{frai_256.png});
-        my $img = Wx::Image->new($png, wxBITMAP_TYPE_PNG);
-        $img->Rescale(32,32);
-        my $bmp = Wx::Bitmap->new($img);
-
-        my $icon = Wx::Icon->new();
-        $icon->CopyFromBitmap($bmp);
+        my $icon    = Wx::Icon->new();
+        my $png     = join q{/}, ($self->globals->dir_ico, qq{frai_256.png});
+        $icon->LoadFile( $png, wxBITMAP_TYPE_PNG );
 
         return $icon;
     }#}}}
@@ -305,12 +314,12 @@ which planet that is (although the calculations must be done elsewhere).
         if( my $db_x = $schema->resultset('AppPrefsKeystore')->find({ name => 'MainWindowX' }) ) {
             if( my $db_y = $schema->resultset('AppPrefsKeystore')->find({ name => 'MainWindowY' }) ) {
                 my( $x, $y ) = ($db_x->value, $db_y->value );
-                if( 
+                if(
                         $x >= 0 and $x < $self->display_x
                     and $y >= 0 and $y < $self->display_y
                 ) {
-                    ### Attempting to fix the hidden window problem.  Only try  
-                    ### to set the MainFrame's position if the recorded X and 
+                    ### Attempting to fix the hidden window problem.  Only try
+                    ### to set the MainFrame's position if the recorded X and
                     ### Y are inside the bounds of the current display.
                     $args->{'position'} = Wx::Point->new($x, $y);
                 }
@@ -318,7 +327,7 @@ which planet that is (although the calculations must be done elsewhere).
         }
 
 
-        ### position arg is optional.  Window will be centered on display if 
+        ### position arg is optional.  Window will be centered on display if
         ### position is not sent.
         my $mf = LacunaWaX::MainFrame->new( $args );
         return $mf;
@@ -329,7 +338,7 @@ which planet that is (although the calculations must be done elsewhere).
     }#}}}
     sub _build_ship_builds {#{{{
         my $self = shift;
-        ### This is actually assigned by the accessor.  This method exists for 
+        ### This is actually assigned by the accessor.  This method exists for
         ### consistency.
         return {};
     }#}}}
@@ -480,7 +489,7 @@ which planet that is (although the calculations must be done elsewhere).
         $self->logger->debug('Closing application');
 
         ### Set the current app version
-        ### TBD doing this here is somewhat questionable; see UPGRADING in the 
+        ### TBD doing this here is somewhat questionable; see UPGRADING in the
         ### dev notes file.
         if( my $app_version = $schema->resultset('AppPrefsKeystore')->find_or_create({ name => 'AppVersion' }) ) {
             $app_version->value( $LacunaWaX::VERSION );
@@ -507,7 +516,7 @@ which planet that is (although the calculations must be done elsewhere).
 
 =head2 api_ship_name
 
-Given a human-friendly ship name as returned by human_ship_name, this turns it 
+Given a human-friendly ship name as returned by human_ship_name, this turns it
 back into an API-friendly name (eg "Snark 3" => "snark3").
 
 =cut
@@ -522,10 +531,10 @@ back into an API-friendly name (eg "Snark 3" => "snark3").
 
 =head2 build_img_list_glyphs
 
-Returns a Wx::ImageList of glyphs.  ImageList contains one image per glyph 
+Returns a Wx::ImageList of glyphs.  ImageList contains one image per glyph
 type, ordered alpha by glyph name.
 
-Does I<not> return a singleton; a new ImageList is created each time this is 
+Does I<not> return a singleton; a new ImageList is created each time this is
 called.
 
 =cut
@@ -585,8 +594,8 @@ If no new text is passed in, simply returns the current caption string.
 
 =head2 caption_reset
 
-Resets the main caption back to the default setting, specifying connected 
-empire name and server name.  Allows other panels to easily fiddle the caption 
+Resets the main caption back to the default setting, specifying connected
+empire name and server name.  Allows other panels to easily fiddle the caption
 as needed and then reset it back when finished.
 
 =cut
@@ -609,7 +618,7 @@ Returns the distance between two points.
     $target_x, $target_y,
  );
 
-Caution; the number returned is likely to be big and floaty.  Don't try to 
+Caution; the number returned is likely to be big and floaty.  Don't try to
 perform arithmetic on it without Math::BigFloat.
 
 =cut
@@ -664,7 +673,7 @@ Returns true if the database passed in contains the correct tables and columns.
 
 =cut
 
-        ### Ensure the tables we're going to try to import exist in the old 
+        ### Ensure the tables we're going to try to import exist in the old
         ### database
         my %checked_tables = ();
         map{ $checked_tables{$_} = 0 }(keys %{$tables} );
@@ -706,7 +715,7 @@ Returns true if the database passed in contains the correct tables and columns.
 
 =pod
 
-Attempts to connect to the server in $self->server.  "Connect" means "send a 
+Attempts to connect to the server in $self->server.  "Connect" means "send a
 ping in the form of an "empire get_status call".
 
 
@@ -722,7 +731,7 @@ Returns true/false on success/fail.
             $self->logger->debug("No server set up yet; cannot connect.");
             return;
         }
-        if( 
+        if(
             my $server_account = $schema->resultset('ServerAccounts')->search({
                 server_id => $self->server->id,
                 default_for_server => 1
@@ -780,7 +789,7 @@ Returns true/false on success/fail.
 
 Returns the number of halls needed to get from one level to another.
 
- say "It will take " 
+ say "It will take "
     . $client->halls_to_level(4, 10)
     . " halls to go from level 4 to level 10."; # 21
 
@@ -792,31 +801,31 @@ Returns the number of halls needed to get from one level to another.
         my $self    = shift;
         my $db_file = shift;
 
-        ### Attempts to import the important (there's a linguistic joke hiding 
-        ### in there somewhere) stuff from a previous LW database into the 
+        ### Attempts to import the important (there's a linguistic joke hiding
+        ### in there somewhere) stuff from a previous LW database into the
         ### current one.
         ###
-        ### The previous and current databases may not be in exactly the same 
-        ### format.  That's OK as long as the previous database contains the 
+        ### The previous and current databases may not be in exactly the same
+        ### format.  That's OK as long as the previous database contains the
         ### tables and column listed in $sanity.
 
-        ### These tables and columns must exist in any database we attempt to 
-        ### import.  They've existed in LW long enough that any database that 
+        ### These tables and columns must exist in any database we attempt to
+        ### import.  They've existed in LW long enough that any database that
         ### does not have these is simply not an LW database.
         my $sanity = {
             ArchMinPrefs => [qw(
-                server_id body_id glyph_home_id pusher_ship_name auto_search_for 
+                server_id body_id glyph_home_id pusher_ship_name auto_search_for
             )],
             ServerAccounts => [qw(
-                server_id username password default_for_server 
+                server_id username password default_for_server
             )],
         };
 
-        ### These are the tables we're going to try to import.  If any of them  
+        ### These are the tables we're going to try to import.  If any of them
         ### don't exist in the old database, they'll just be skipped.
         ###
-        ### The old database may contain these tables sans some columns that 
-        ### have been added since. Those will be dealt with; only the existing 
+        ### The old database may contain these tables sans some columns that
+        ### have been added since. Those will be dealt with; only the existing
         ### columns will be imported.
         my $imports = [qw( ArchMinPrefs SSAlerts ServerAccounts SitterPasswords )];
 
@@ -855,7 +864,7 @@ Returns the number of halls needed to get from one level to another.
             push @ques_arr, '?' for @cols;
             my $ques        = join ',', @ques_arr;
 
-            ### Do that first record that we pulled off the $sel_sth before 
+            ### Do that first record that we pulled off the $sel_sth before
             ### looping the rest of the way through it.
             my $ins_stmt = "INSERT OR IGNORE INTO $table_name ($comma_cols) VALUES ($ques)";
             my $ins_sth = $new_dbh->prepare( $ins_stmt ) or die "no prepare";
@@ -867,7 +876,7 @@ Returns the number of halls needed to get from one level to another.
             while( my $rec = $sel_sth->fetchrow_hashref ) {
                 my @vals = ();
                 map{ push @vals, $rec->{$_} }@cols;
-                try { $ins_sth->execute(@vals) or die; } 
+                try { $ins_sth->execute(@vals) or die; }
                     catch { die "loop exe failed"; };
             }
             $new_dbh->commit;
@@ -915,7 +924,7 @@ So don't do this:
   ### GONNNNNG!  THAT IS WRONG!
  }
 
-That code will never hit the else block, even if the user choses 'No', since the 
+That code will never hit the else block, even if the user choses 'No', since the
 'No' response is true.  This could be A Bad Thing.
 
 
@@ -950,8 +959,8 @@ Instead, you need something like this...
 
 =head2 secs_to_human
 
-Returns a nice string in English describing a number of seconds.  By default, 
-returns a rounded short string with two time elements.  Pass a true value as 
+Returns a nice string in English describing a number of seconds.  By default,
+returns a rounded short string with two time elements.  Pass a true value as
 the second argument to receive a fully accurate (to the second) result.
 
  $secs = 3603243;
@@ -969,7 +978,7 @@ the second argument to receive a fully accurate (to the second) result.
 
 =head2 str_trim
 
-Basic string trimmer - removes whitespace from front and back of the given 
+Basic string trimmer - removes whitespace from front and back of the given
 string.
 
  my $old = '   foo   ';
@@ -993,7 +1002,7 @@ string.
 
 =head2 travel_time
 
-Returns the time (in seconds) to cover a given distance given a rate of speed, 
+Returns the time (in seconds) to cover a given distance given a rate of speed,
 where rate is a ship's listed speed.
 
  my $dist = $client->cartesian_distance(
@@ -1014,7 +1023,7 @@ where rate is a ship's listed speed.
         my $self = shift;
         my $int  = shift;
 
-=head2 triangle 
+=head2 triangle
 
 Returns the triangle sum of a given int.
 
@@ -1022,7 +1031,7 @@ Returns the triangle sum of a given int.
 
 =cut
 
-        return( $int * ($int+1) / 2 ); 
+        return( $int * ($int+1) / 2 );
     }#}}}
 
 }

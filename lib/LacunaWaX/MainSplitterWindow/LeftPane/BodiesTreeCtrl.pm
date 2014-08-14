@@ -25,7 +25,7 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
     #########################################
 
     has 'planets_item_id' => (
-        is              => 'rw', 
+        is              => 'rw',
         isa             => 'Wx::TreeItemId',
         lazy_build      => 1,
         documentation   => q{
@@ -46,7 +46,7 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
         is              => 'rw',
         isa             => 'Str',
         lazy            => 1,
-        default         => 'collapsed', 
+        default         => 'collapsed',
         documentation   => q{
             Starts out 'collapsed', the other option is 'expanded'.  Used to keep track of what we should
             do (expand or collapse) on a double-click on the visible root item.
@@ -96,7 +96,21 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
         my $self    = shift;
 
         my $dispatch = {
-            planets => sub{ $self->toggle_expansion_state() },
+            planets => sub {
+                wxTheApp->right_pane->show_right_pane(
+                    'LacunaWaX::MainSplitterWindow::RightPane::BodiesSummaryPane',
+                    undef,  # planet_name
+                    { type => 'planet' },
+                );
+            },
+
+            stations => sub {
+                wxTheApp->right_pane->show_right_pane(
+                    'LacunaWaX::MainSplitterWindow::RightPane::BodiesSummaryPane',
+                    undef,  # planet_name
+                    { type => 'station' },
+                );
+            },
 
             alliance => sub {
                 wxTheApp->right_pane->show_right_pane(
@@ -144,7 +158,7 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
                 wxTheApp->right_pane->show_right_pane(
                     'LacunaWaX::MainSplitterWindow::RightPane::BuildShips',
                     $planet,
-                    { required_buildings => {'Shipyard' => undef} } 
+                    { required_buildings => {'Shipyard' => undef} }
                 );
             },
             ships_scuttle => sub {
@@ -152,7 +166,7 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
                 wxTheApp->right_pane->show_right_pane(
                     'LacunaWaX::MainSplitterWindow::RightPane::ScuttleShips',
                     $planet,
-                    { required_buildings => {'Space Port' => undef} } 
+                    { required_buildings => {'Space Port' => undef} }
                 );
             },
             spies => sub {
@@ -160,7 +174,7 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
                 wxTheApp->right_pane->show_right_pane(
                     'LacunaWaX::MainSplitterWindow::RightPane::SpiesPane',
                     $planet,
-                    { required_buildings => {'Intelligence Ministry' => undef} } 
+                    { required_buildings => {'Intelligence Ministry' => undef} }
                 );
             },
             bfg => sub {
@@ -168,7 +182,7 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
                 wxTheApp->right_pane->show_right_pane(
                     'LacunaWaX::MainSplitterWindow::RightPane::BFGPane',
                     $planet,
-                    { required_buildings => {'Parliament' => 25} } 
+                    { required_buildings => {'Parliament' => 25} }
                 );
             },
             incoming => sub {
@@ -176,7 +190,7 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
                 wxTheApp->right_pane->show_right_pane(
                     'LacunaWaX::MainSplitterWindow::RightPane::SSIncoming',
                     $planet,
-                    { required_buildings => {'Police' => undef} } 
+                    { required_buildings => {'Police' => undef} }
                 );
             },
             propositions => sub {
@@ -184,9 +198,9 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
                 wxTheApp->right_pane->show_right_pane(
                     'LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane',
                     $planet,
-                    { 
+                    {
                         nothrob             => 1,
-                    } 
+                    }
                 );
             },
             sitters => sub {
@@ -217,7 +231,7 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
     sub _build_treectrl {#{{{
         my $self = shift;
         my $v = Wx::TreeCtrl->new(
-            $self->parent, -1, wxDefaultPosition, wxDefaultSize, 
+            $self->parent, -1, wxDefaultPosition, wxDefaultSize,
             wxTR_DEFAULT_STYLE
             |wxTR_HAS_BUTTONS
             |wxTR_LINES_AT_ROOT
@@ -232,15 +246,15 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
         my $tree_data = {
             node    => 'Root',
             childs  => [
-                { 
+                {
                     node => 'Planets',
                     data => encode_base64(join q{:}, ('planets')),
                 },
-                { 
+                {
                     node => 'Stations',
                     data => encode_base64(join q{:}, ('stations')),
                 },
-                { 
+                {
                     node => 'Alliance',
                     data => encode_base64(join q{:}, ('alliance')),
                 },
@@ -277,7 +291,7 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
     sub bold_planet_names {#{{{
         my $self = shift;
 
-        ### Bolds the "Planets" and "Stations" branches themselves.  The 
+        ### Bolds the "Planets" and "Stations" branches themselves.  The
         ### actual named planets and stations sub-leaves stay un-bolded.
 
         my($planets_id, $cookie) = $self->treeview->treectrl->GetFirstChild($self->root_item_id);
@@ -345,13 +359,13 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
             my $b64_sshealth    = encode_base64(join q{:}, ('sshealth', $sid));
 
             ### IMPORTANT!
-            ### SummaryPane::fix_tree_for_stations() is expecting the 
+            ### SummaryPane::fix_tree_for_stations() is expecting the
             ### first child of a SS leaf to be "Fire the BFG".
             ###
             ### I'm no longer sure if that's true with the new station stuff.
             ###
-            ### If you change the first child, or even just change the 
-            ### label on that BFG leaf, be sure to update 
+            ### If you change the first child, or even just change the
+            ### label on that BFG leaf, be sure to update
             ### fix_tree_for_stations as well.
             push @{ $station_node->{'childs'} }, { node => 'Fire the BFG',   data => $b64_bfg };
             push @{ $station_node->{'childs'} }, { node => 'Health Alerts',  data => $b64_sshealth };
@@ -383,8 +397,8 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
         $model_data->{'childs'}[1]{'childs'} = $stations;
         $model_data->{'childs'}[2]{'childs'} = $alliance;
 
-        ### Add an extra node at the bottom to keep the last node from being 
-        ### covered by the bottom frame when everything is expanded.  Not 
+        ### Add an extra node at the bottom to keep the last node from being
+        ### covered by the bottom frame when everything is expanded.  Not
         ### needed on Windows.
         $model_data->{'childs'}[3]{'childs'} = [] unless $OSNAME eq 'MSWin32';
 
@@ -403,20 +417,33 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
     sub toggle_expansion_state {#{{{
         my $self = shift;
 
+
+        ### This used to appear in the dispatch table (see _build_dispatch)
+        ### like so:
+        ###     planets => sub{ $self->toggle_expansion_state() },
+        ###
+        ### Originally, "Planets" was the only leaf on the left.  Now however,
+        ### we have multiple leaves, and the Planet one is the only one that
+        ### expands this way.
+        ###
+        ### The more I look at this, the more I'm thinking that toggling the
+        ### expansion this way isn't helping anybody, so I'm removing it.
+
+
         ### Collapsing and expanding provides a bit of animation.
         ###
-        ### Hiding the tree before doing anything, then showing it afterwards, 
-        ### removes that animation, but it makes the state toggle happen much 
+        ### Hiding the tree before doing anything, then showing it afterwards,
+        ### removes that animation, but it makes the state toggle happen much
         ### more quickly.
-        ### 
-        ### The animation is vaguely pretty, but it's also clunky-looking and 
-        ### slow.  Hiding it toggles the state almost instantly and looks more 
+        ###
+        ### The animation is vaguely pretty, but it's also clunky-looking and
+        ### slow.  Hiding it toggles the state almost instantly and looks more
         ### solid.
 
         $self->treectrl->Show(0);
         if( $self->expand_state eq 'collapsed' ) {
             $self->treectrl->ExpandAllChildren( $self->planets_item_id );
-            ### Expanding everything auto-scrolls us to the bottom, and 
+            ### Expanding everything auto-scrolls us to the bottom, and
             ### nobody wants that.  Rescroll back up to the top.
             $self->treectrl->ScrollTo( $self->planets_item_id );
             $self->expand_state('expanded');
@@ -427,7 +454,7 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
 
             COLLAPSE:
             while( 1 ) {
-                ($child, $cookie) = $self->treectrl->GetNextChild($self->planets_item_id, $cookie); 
+                ($child, $cookie) = $self->treectrl->GetNextChild($self->planets_item_id, $cookie);
                 last COLLAPSE unless $child->IsOk;
                 $self->treectrl->CollapseAllChildren( $child );
             }
@@ -475,7 +502,7 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
             my ($action, $pid, @args)   = split /:/, decode_base64($hr->{'data'} || q{});
             my $planet                  = wxTheApp->game_client->planet_name($pid);
 
-            $action ||= q{};    
+            $action ||= q{};
             if( defined $self->dispatch->{$action} ) {
                 &{ $self->dispatch->{$action} }($planet);
             }
@@ -492,8 +519,8 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
         my $control = shift;    # Wx::TreeCtrl
         my $event   = shift;    # Wx::MouseEvent
 
-        ### Set focus on the treectrl when the mouse enters to allow 
-        ### scrollwheel events to affect the tree rather than whatever they'd 
+        ### Set focus on the treectrl when the mouse enters to allow
+        ### scrollwheel events to affect the tree rather than whatever they'd
         ### been affecting previously.
         unless( wxTheApp->main_frame->splitter->left_pane->has_focus ) {
             $control->SetFocus;
@@ -505,7 +532,7 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
     }#}}}
 
     no Moose;
-    __PACKAGE__->meta->make_immutable; 
+    __PACKAGE__->meta->make_immutable;
 }
 
 1;
