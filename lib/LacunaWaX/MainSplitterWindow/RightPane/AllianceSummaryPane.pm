@@ -5,22 +5,17 @@ package LacunaWaX::MainSplitterWindow::RightPane::AllianceSummaryPane {
     use open qw(:std :utf8);
     use Data::Dumper;
     use DateTime;
-    use LacunaWaX::Model::Dates;
     use Moose;
     use Try::Tiny;
     use Wx qw(:everything);
+    use Wx::Event qw(EVT_SIZE);
     with 'LacunaWaX::Roles::MainSplitterWindow::RightPane';
-
-    has 'ancestor' => (
-        is          => 'rw',
-        isa         => 'LacunaWaX::MainSplitterWindow::RightPane',
-        required    => 1,
-    );
 
     has 'parent' => (
         is          => 'rw',
         isa         => 'Wx::ScrolledWindow',
         required    => 1,
+        weak_ref    => 1,
     );
 
     #########################################
@@ -184,11 +179,39 @@ package LacunaWaX::MainSplitterWindow::RightPane::AllianceSummaryPane {
 
         return $text;
     }#}}}
-    sub _set_events {}
+    sub _set_events {
+        my $self = shift;
+        EVT_SIZE( $self->parent, sub{$self->OnResize(@_)} );
+    }
 
     sub create_date_full {#{{{
         my $self = shift;
         return $self->create_date->ymd . q{ at } . $self->create_date->hms;
+    }#}}}
+
+    sub OnResize {#{{{
+        my $self    = shift;
+        my $dialog  = shift;
+        my $event   = shift;    # Wx::SizeEvent
+
+        ###
+        ### Don't remove this handler!!!!!
+        ###
+        ### It needs to exist, or the existence of
+        ### OnResize in BodiesSummaryPane causes this behavior:
+        ###
+        ###     - Hit this alliance pane if you want.  It's fine.
+        ###         - Hitting this first is not necessary, just a
+        ###           demonstration that the pane initially works.
+        ###
+        ###     - Hit either the Stations or Planets summary pane.
+        ###
+        ###     - Now, hit this alliance pane again - Segfault.
+        ###
+        ### Having this empty handler in place here prevents the segfault.
+        ### No, I don't understand this behavior.
+        ###
+
     }#}}}
 
     no Moose;

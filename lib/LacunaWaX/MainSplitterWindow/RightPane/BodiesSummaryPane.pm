@@ -16,6 +16,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::BodiesSummaryPane {
         is          => 'rw',
         isa         => 'Wx::ScrolledWindow',
         required    => 1,
+        weak_ref    => 1,
     );
 
     has 'type' => (
@@ -71,6 +72,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::BodiesSummaryPane {
         is          => 'rw',
         isa         => 'Int',
         default     => 0,
+        lazy        => 1,
         documentation => q{
             The length of the header line in the text blob.  Calculated in _build_text.
         }
@@ -99,7 +101,6 @@ package LacunaWaX::MainSplitterWindow::RightPane::BodiesSummaryPane {
         $self->content_sizer->AddSpacer(20);
         $self->content_sizer->Add($self->txtctrl_text, 0, 0, 0);
 
-        $self->_set_events();
         return $self;
     }
     sub _build_lbl_header {#{{{
@@ -202,12 +203,19 @@ package LacunaWaX::MainSplitterWindow::RightPane::BodiesSummaryPane {
         $self->clear_ctrl_width;
         $self->clear_ctrl_height;
 
+        $self->txtctrl_text->SetMinSize(
+            Wx::Size->new(
+                $self->ctrl_width,
+                $self->ctrl_height,
+            )
+        );
         $self->txtctrl_text->SetMaxSize(
             Wx::Size->new(
                 $self->ctrl_width,
                 $self->ctrl_height,
             )
         );
+
     }#}}}
 
     no Moose;
