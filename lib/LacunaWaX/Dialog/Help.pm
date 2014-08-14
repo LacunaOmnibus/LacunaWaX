@@ -8,7 +8,6 @@ package LacunaWaX::Dialog::Help {
     use File::Spec;
     use File::Util;
     use HTML::Scrubber;
-    use HTML::TreeBuilder::XPath;
     use Lucy::Analysis::PolyAnalyzer;
     use Lucy::Index::Indexer;
     use Lucy::Plan::Schema;
@@ -50,8 +49,8 @@ package LacunaWaX::Dialog::Help {
     has 'szr_navbar'        => (is => 'rw', isa => 'Wx::Sizer',         lazy_build => 1, documentation => q{horizontal});
     has 'txt_search'        => (is => 'rw', isa => 'Wx::TextCtrl',      lazy_build => 1, documentation => q{horizontal});
 
-    ### Doesn't follow the Hungarian notation convention used for the other 
-    ### WxWindows on purpose, to set it apart from the other controls.    
+    ### Doesn't follow the Hungarian notation convention used for the other
+    ### WxWindows on purpose, to set it apart from the other controls.
     ### main_sizer is required by our NonScrolled parent.
     has 'main_sizer' => (is => 'rw', isa => 'Wx::Sizer', lazy_build => 1, documentation => q{vertical});
 
@@ -90,28 +89,28 @@ package LacunaWaX::Dialog::Help {
         $img->Rescale($self->nav_img_w - 10, $self->nav_img_h - 10);    # see build_bmp_left
         my $bmp = Wx::Bitmap->new($img);
         my $v = Wx::BitmapButton->new(
-            $self->dialog, -1, 
+            $self->dialog, -1,
             $bmp,
             wxDefaultPosition,
             Wx::Size->new($self->nav_img_w, $self->nav_img_h),
-            wxBU_AUTODRAW 
+            wxBU_AUTODRAW
         );
         return $v;
     }#}}}
     sub _build_bmp_left {#{{{
         my $self = shift;
         my $img = wxTheApp->get_image('app/arrow-left.png');
-        ### On Ubuntu, there's a margin inside the button.  If the image is 
-        ### the same size as the button, that margin obscures part of the 
+        ### On Ubuntu, there's a margin inside the button.  If the image is
+        ### the same size as the button, that margin obscures part of the
         ### image.  So the image must be a bit smaller than the button.
         $img->Rescale($self->nav_img_w - 10, $self->nav_img_h - 10);
         my $bmp = Wx::Bitmap->new($img);
         my $v = Wx::BitmapButton->new(
-            $self->dialog, -1, 
+            $self->dialog, -1,
             $bmp,
             wxDefaultPosition,
             Wx::Size->new($self->nav_img_w, $self->nav_img_h),
-            wxBU_AUTODRAW 
+            wxBU_AUTODRAW
         );
         return $v;
     }#}}}
@@ -121,11 +120,11 @@ package LacunaWaX::Dialog::Help {
         $img->Rescale($self->nav_img_w - 10, $self->nav_img_h - 10);    # see build_bmp_left
         my $bmp = Wx::Bitmap->new($img);
         return Wx::BitmapButton->new(
-            $self->dialog, -1, 
+            $self->dialog, -1,
             $bmp,
             wxDefaultPosition,
             Wx::Size->new($self->nav_img_w, $self->nav_img_h),
-            wxBU_AUTODRAW 
+            wxBU_AUTODRAW
         );
     }#}}}
     sub _build_bmp_search {#{{{
@@ -134,11 +133,11 @@ package LacunaWaX::Dialog::Help {
         $img->Rescale($self->nav_img_w - 10, $self->nav_img_h - 10);    # see build_bmp_left
         my $bmp = Wx::Bitmap->new($img);
         my $v = Wx::BitmapButton->new(
-            $self->dialog, -1, 
+            $self->dialog, -1,
             $bmp,
             wxDefaultPosition,
             Wx::Size->new($self->nav_img_w, $self->nav_img_h),
-            wxBU_AUTODRAW 
+            wxBU_AUTODRAW
         );
         return $v;
     }#}}}
@@ -153,8 +152,8 @@ package LacunaWaX::Dialog::Help {
         my $self = shift;
 
         my $v = Wx::HtmlWindow->new(
-            $self->dialog, -1, 
-            wxDefaultPosition, 
+            $self->dialog, -1,
+            wxDefaultPosition,
             Wx::Size->new($self->get_html_width, $self->get_html_height),
             wxHW_SCROLLBAR_AUTO
             |wxSIMPLE_BORDER
@@ -199,9 +198,9 @@ package LacunaWaX::Dialog::Help {
     sub _build_txt_search {#{{{
         my $self = shift;
         my $v = Wx::TextCtrl->new(
-            $self->dialog, -1, 
+            $self->dialog, -1,
             q{},
-            wxDefaultPosition, 
+            wxDefaultPosition,
             Wx::Size->new($self->search_box_w, $self->search_box_h),
             wxTE_PROCESS_ENTER
         );
@@ -262,15 +261,15 @@ package LacunaWaX::Dialog::Help {
         my $tree = shift;
 
         ### TBD
-        ### This used to avoid the H1 tag contents before summarizing the body 
+        ### This used to avoid the H1 tag contents before summarizing the body
         ### tag contents.
         ###
-        ### But HTML::TreeBuilder::XPath, which I was using before, does not 
+        ### But HTML::TreeBuilder::XPath, which I was using before, does not
         ### play well with being packaged by perlapp.
         ###
-        ### I'm sure there's a way to remove the H1 tag contents using 
-        ### TreeBuilder like I'm doing now, but having that H1 contents in the 
-        ### summary is extremely minor and I doubt anybody but me will ever 
+        ### I'm sure there's a way to remove the H1 tag contents using
+        ### TreeBuilder like I'm doing now, but having that H1 contents in the
+        ### summary is extremely minor and I doubt anybody but me will ever
         ### even notice, and I want this thing out the door.
         ###
         ### So I'm gonna punt.
@@ -332,10 +331,10 @@ package LacunaWaX::Dialog::Help {
         $schema->spec_field( name => 'filename',    type => $type );
         $schema->spec_field( name => 'summary',     type => $type );
         $schema->spec_field( name => 'title',       type => $type );
-        
+
         # Create the index and add documents.
         my $indexer = Lucy::Index::Indexer->new(
-            schema => $schema,  
+            schema => $schema,
             index  => wxTheApp->globals->dir_html_idx,
             create => 1,
             truncate => 1,  # if index already exists with content, trash them before adding more.
@@ -364,8 +363,8 @@ package LacunaWaX::Dialog::Help {
 
         $spacer_width < 10 and $spacer_width = 10;
 
-        ### AddSpacer is adding unwanted vertical space when it adds the 
-        ### wanted horizontal space.  So replace AddSpacer with manual Add 
+        ### AddSpacer is adding unwanted vertical space when it adds the
+        ### wanted horizontal space.  So replace AddSpacer with manual Add
         ### calls.
 
         $self->clear_szr_navbar;
@@ -448,8 +447,8 @@ package LacunaWaX::Dialog::Help {
         }
         $self->prev_click_href( $info->GetHref );
 
-        ### If the user has backed up through their history and then clicked a 
-        ### link, we need to diverge to an alternate timeline - truncate the 
+        ### If the user has backed up through their history and then clicked a
+        ### link, we need to diverge to an alternate timeline - truncate the
         ### history so the current location is the furthest point.
         $#{$self->history} = $self->history_idx;
 
@@ -466,7 +465,7 @@ package LacunaWaX::Dialog::Help {
         $self->main_sizer->Replace($old_szr_navbar, $self->szr_navbar);
 
         ### Layout to force the navbar to update
-        ### This must happen before the html window gets resized to avoid ugly 
+        ### This must happen before the html window gets resized to avoid ugly
         ### flashing.
         $self->Layout;
 
@@ -521,7 +520,7 @@ package LacunaWaX::Dialog::Help {
     }#}}}
 
     no Moose;
-    __PACKAGE__->meta->make_immutable; 
+    __PACKAGE__->meta->make_immutable;
 }
 
 1;
