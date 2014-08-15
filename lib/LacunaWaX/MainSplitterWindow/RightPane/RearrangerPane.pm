@@ -12,12 +12,6 @@ package LacunaWaX::MainSplitterWindow::RightPane::RearrangerPane {
     use LacunaWaX::MainSplitterWindow::RightPane::RearrangerPane::Buttons;
     use LacunaWaX::MainSplitterWindow::RightPane::RearrangerPane::SavedBuilding;
 
-    has 'ancestor' => (
-        is          => 'rw',
-        isa         => 'LacunaWaX::MainSplitterWindow::RightPane',
-        required    => 1,
-    );
-
     has 'parent' => (
         is          => 'rw',
         isa         => 'Wx::ScrolledWindow',
@@ -155,7 +149,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::RearrangerPane {
         my $panel   = shift;
         my $event   = shift;
 
-        my $bitmap_button   = $self->buttons->by_id($id);   
+        my $bitmap_button   = $self->buttons->by_id($id); 
         my $button          = $bitmap_button;
         my $image           = $button->GetBitmapLabel;
         my $label           = $button->GetLabel;
@@ -221,7 +215,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::RearrangerPane {
 
         $self->clear_saved_bldg;
         $self->buildings( $self->_build_buildings($self->planet_id, undef, 1) );
-        $self->ancestor->show_right_pane(
+        wxTheApp->main_frame->splitter->right_pane->show_right_pane(
             'LacunaWaX::MainSplitterWindow::RightPane::RearrangerPane', $self->planet_name
         );
         return 1;
@@ -311,9 +305,7 @@ building, then makes the one the user just clicked out currently-saved.
                 }
 
                 my $bmp_butt = LacunaWaX::MainSplitterWindow::RightPane::RearrangerPane::BitmapButton->new( 
-                        #app         => wxTheApp, 
                         parent      => $self->parent,
-                        #ancestor    => $self,
                         bitmap      => $bitmap,
                         bldg_id     => $bldg_hr->{'bldg_id'}     || 0,
                         name        => $bldg_hr->{'name'}        || 'Empty',
