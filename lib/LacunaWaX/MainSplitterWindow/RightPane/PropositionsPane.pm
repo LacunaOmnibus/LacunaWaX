@@ -15,6 +15,7 @@ Self-voting does not display a Dialog::Status as it's not necessary.
 package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane {
     use v5.14;
     use LacunaWaX::Model::Client;
+    use List::Util qw(shuffle);
     use Moose;
     use Try::Tiny;
     use Wx qw(:everything);
@@ -210,7 +211,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane {
         );
         $szr_props->Add($header->main_sizer, 0, 0, 0);
 
-        foreach my $prop( @{$self->props} ) {
+        foreach my $prop( shuffle @{$self->props} ) {
             my $row = LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane::PropRow->new(
                 ancestor    => $self,
                 parent      => $self->parent,
