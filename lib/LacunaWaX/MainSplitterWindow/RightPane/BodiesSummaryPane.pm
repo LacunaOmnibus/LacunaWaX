@@ -83,7 +83,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::BodiesSummaryPane {
         isa         => 'Str',
         lazy_build  => 1,
         documentation => q{
-            The text displayed on-screen.  It's just one big blob of text.
+            The text string displayed on-screen.
         }
     );
 
@@ -129,11 +129,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::BodiesSummaryPane {
             $self->text,
             wxDefaultPosition,
             Wx::Size->new($self->ctrl_width, $self->ctrl_height),
-              wxTE_MULTILINE
-            | wxTE_READONLY
-            | wxTE_DONTWRAP
-            | wxTE_NOHIDESEL
-            | wxBORDER_NONE
+              wxTE_MULTILINE | wxTE_READONLY | wxTE_DONTWRAP | wxTE_NOHIDESEL | wxBORDER_NONE
         );
 
         ### The control already has no border.  Now set the background color
@@ -142,7 +138,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::BodiesSummaryPane {
         $v->SetFont( wxTheApp->get_font('modern_text_2') ); # fixed width
 
         ### Documentation for GetStyle says that it may return false if
-        ### ""styles are not supported on this platform".  Linux allows me to
+        ### "styles are not supported on this platform".  Linux allows me to
         ### set styles, but not Get them (GetStyle gives me back undef).
         ### So I can't just modify the existing style; I have to create a new
         ### one and manually maintain the "defaults", like text and background
@@ -170,6 +166,8 @@ package LacunaWaX::MainSplitterWindow::RightPane::BodiesSummaryPane {
         my $key     = (lc $self->type eq 'planet') ? "planets" : "space_stations";
         my $hr      = { reverse %{$status->{'empire'}{$key}} };  # name => id
 
+        ### Get strlen of longest body name so we can calculate how many dots 
+        ### to add.
         my $longest = 0;
         foreach my $name( keys %{$hr} ) {
             $longest = (length $name > $longest) ? length $name : $longest;
@@ -190,10 +188,10 @@ package LacunaWaX::MainSplitterWindow::RightPane::BodiesSummaryPane {
 
         return $text;
     }#}}}
-    sub _set_events {
+    sub _set_events {#{{{
         my $self = shift;
         EVT_SIZE( $self->parent, sub{$self->OnResize(@_)} );
-    }
+    }#}}}
 
     sub OnResize {#{{{
         my $self    = shift;
