@@ -62,7 +62,7 @@ package LacunaWaX::Dialog::LogViewer {
 
         $self->szr_log->Add($self->list_log, 2, 0, 0);
         $self->add_pagination( $self->szr_log );
-    
+ 
         $self->main_sizer->AddSpacer(5);
         $self->main_sizer->Add($self->rdo_component, 0, 0, 0);
         $self->main_sizer->Add($self->szr_log, 0, 0, 0);
@@ -97,7 +97,7 @@ package LacunaWaX::Dialog::LogViewer {
     sub _build_component_labels {#{{{
         my $self = shift;
         ### If you update a label, also update the values below.
-        my $v = [ 'Clear', 'Main', 'Archmin', 'Autovote', 'SS Health' ];
+        my $v = [ 'Clear', 'Main', 'Archmin', 'SS Health' ];
         return $v;
     }#}}}
     sub _build_component_values {#{{{
@@ -108,7 +108,6 @@ package LacunaWaX::Dialog::LogViewer {
             Clear           => 'This does not appear in the table so this will clear the list',
             Main            => 'main',
             Archmin         => 'Archmin',
-            Autovote        => 'Autovote',
             'SS Health'     => 'SS_Health',
         };
         return $v;
@@ -164,7 +163,7 @@ package LacunaWaX::Dialog::LogViewer {
             $self->dialog, -1, 
             "Component", 
             wxDefaultPosition, 
-            Wx::Size->new(375,50), 
+            Wx::Size->new(325,50), 
             $self->component_labels,
             1, 
             wxRA_SPECIFY_ROWS
