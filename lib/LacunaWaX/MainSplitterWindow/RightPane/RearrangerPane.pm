@@ -1,10 +1,13 @@
 
+### search on CHECK
+
 package LacunaWaX::MainSplitterWindow::RightPane::RearrangerPane {
     use v5.14;
+    use Data::Dumper;
     use Moose;
     use Try::Tiny;
     use Wx qw(:everything);
-    use Wx::Event qw(EVT_BUTTON EVT_SIZE);
+    use Wx::Event qw(EVT_BUTTON EVT_CLOSE EVT_RADIOBOX EVT_SIZE);
     with 'LacunaWaX::Roles::MainSplitterWindow::RightPane';
 
     use LacunaWaX::MainSplitterWindow::RightPane::RearrangerPane::BitmapButton;
@@ -18,53 +21,110 @@ package LacunaWaX::MainSplitterWindow::RightPane::RearrangerPane {
         required    => 1,
     );
 
+    has 'planet_name'   => (
+        is          => 'rw',
+        isa         => 'Str',
+        required => 1
+    );
+
     #########################################
 
-    has 'planet_name'   => (is => 'rw', isa => 'Str',                           required => 1       );
-    has 'planet_id'     => (is => 'rw', isa => 'Int',       lazy_build => 1                         );
-    has 'gauge_value'   => (is => 'rw', isa => 'Int',       lazy => 1,          default => 1        );
+    has 'blank_image' => (
+        is          => 'rw',
+        isa         => 'Wx::Bitmap',
+        lazy_build  => 1,
+    );
+
+    has 'buildings' => (
+        is          => 'rw',
+        isa         => 'LacunaWaX::MainSplitterWindow::RightPane::RearrangerPane::Buildings', 
+        lazy_build  => 1,
+    );
 
     has 'buttons' => (
         is          => 'rw',
         isa         => 'LacunaWaX::MainSplitterWindow::RightPane::RearrangerPane::Buttons', 
         lazy_build  => 1,
     );
-    has 'buildings' => (
+
+    has 'dialogs' => (
         is          => 'rw',
-        isa         => 'LacunaWaX::MainSplitterWindow::RightPane::RearrangerPane::Buildings', 
-        lazy_build  => 1,
+        isa         => 'HashRef', 
+        lazy        => 1,
+        default     => sub{ {} },
+        documentation => q{
+            Hashref of building dialogs opened by this panel.
+            id => LacunaWaX::Dialog::Building
+        }
     );
+
+    has 'gauge_value' => (
+        is          => 'rw',
+        isa         => 'Int',
+        lazy        => 1,
+        default     => 1,
+    );
+
+    has 'mode_choices' => (
+        is          => 'rw',
+        isa         => 'ArrayRef',
+        lazy        => 1,
+        default     => sub{ [qw(Buildings Rearrange)]},
+    );
+
+    has 'mode_current' => (
+        is          => 'rw',
+        isa         => 'Int',
+        lazy        => 1,
+        default     => 0,
+    );
+
+    has 'planet_id' => (
+        is          => 'rw',
+        isa         => 'Int',
+        lazy_build  => 1
+    );
+
     has 'saved_bldg' => (
         is          => 'rw', 
         isa         => 'LacunaWaX::MainSplitterWindow::RightPane::RearrangerPane::SavedBuilding', 
         lazy_build  => 1
     );
 
-    has 'blank_image'           => (is => 'rw', isa => 'Wx::Bitmap',    lazy_build => 1                                 );
-    has 'szr_bottom_buttons'    => (is => 'rw', isa => 'Wx::BoxSizer',  lazy_build => 1, documentation => 'vertical'    );
-    has 'gridszr_buttons'       => (is => 'rw', isa => 'Wx::GridSizer', lazy_build => 1                                 );
 
-    has 'lbl_planet_name'       => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1);
-    has 'btn_rearrange'         => (is => 'rw', isa => 'Wx::Button',        lazy_build => 1);
-    has 'btn_reload'            => (is => 'rw', isa => 'Wx::Button',        lazy_build => 1);
+
+    has 'btn_rearrange'     => (is => 'rw', isa => 'Wx::Button',        lazy_build => 1);
+    has 'btn_reload'        => (is => 'rw', isa => 'Wx::Button',        lazy_build => 1);
+    has 'lbl_planet_name'   => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1);
+    has 'rdo_mode'          => (is => 'rw', isa => 'Wx::RadioBox',      lazy_build => 1);
+
+    has 'gridszr_buttons'       => (is => 'rw', isa => 'Wx::GridSizer', lazy_build => 1);
+    has 'szr_bottom_buttons'    => (is => 'rw', isa => 'Wx::BoxSizer',  lazy_build => 1);
+    has 'szr_mode'              => (is => 'rw', isa => 'Wx::BoxSizer',  lazy_build => 1);
 
     sub BUILD {
         my $self = shift;
 
         wxTheApp->borders_off();    # Change to borders_on to see borders around sizers
 
+
         $self->clear_saved_bldg;
         $self->reset_gauge();
         $self->set_surface_buttons;
+
+        $self->szr_mode->Add($self->rdo_mode, 0, 0, 0);
+        $self->szr_mode->AddSpacer(10);
 
         $self->szr_bottom_buttons->Add($self->btn_rearrange, 0, 0, 0);
         $self->szr_bottom_buttons->Add($self->btn_reload, 0, 0, 0);
 
         $self->content_sizer->Add($self->lbl_planet_name, 0, 0, 0);
+        $self->content_sizer->Add($self->szr_mode, 0, 0, 0);
         $self->content_sizer->Add($self->gridszr_buttons, 0, 0, 0);
         $self->content_sizer->Add($self->szr_bottom_buttons, 0, 0, 0);
         $self->refocus_window_name( 'lbl_planet_name' );
 
+        $self->set_mode(0);
         $self->_set_events();
         return $self;
     }
@@ -73,6 +133,18 @@ package LacunaWaX::MainSplitterWindow::RightPane::RearrangerPane {
         my $img = wxTheApp->get_image('planetside/blank.png');
         $img->Rescale(50, 50);
         return Wx::Bitmap->new($img);
+    }#}}}
+    sub _build_btn_rearrange {#{{{
+        my $self = shift;
+        my $v = Wx::Button->new($self->parent, -1, 'Rearrange');
+        $v->SetFont( wxTheApp->get_font('para_text_2') );
+        return $v;
+    }#}}}
+    sub _build_btn_reload {#{{{
+        my $self = shift;
+        my $v = Wx::Button->new($self->parent, -1, 'Reload');
+        $v->SetFont( wxTheApp->get_font('para_text_2') );
+        return $v;
     }#}}}
     sub _build_buildings {#{{{
         my $self = shift;
@@ -91,18 +163,6 @@ package LacunaWaX::MainSplitterWindow::RightPane::RearrangerPane {
     sub _build_buttons {#{{{
         my $self = shift;
         return LacunaWaX::MainSplitterWindow::RightPane::RearrangerPane::Buttons->new();
-    }#}}}
-    sub _build_btn_rearrange {#{{{
-        my $self = shift;
-        my $v = Wx::Button->new($self->parent, -1, 'Rearrange');
-        $v->SetFont( wxTheApp->get_font('para_text_2') );
-        return $v;
-    }#}}}
-    sub _build_btn_reload {#{{{
-        my $self = shift;
-        my $v = Wx::Button->new($self->parent, -1, 'Reload');
-        $v->SetFont( wxTheApp->get_font('para_text_2') );
-        return $v;
     }#}}}
     sub _build_gridszr_buttons {#{{{
         my $self = shift;
@@ -123,6 +183,21 @@ package LacunaWaX::MainSplitterWindow::RightPane::RearrangerPane {
         my $self = shift;
         return wxTheApp->game_client->planet_id( $self->planet_name );
     }#}}}
+    sub _build_rdo_mode {#{{{
+        my $self = shift;
+        my $v = Wx::RadioBox->new(
+            $self->parent, -1, 
+            "Mode", 
+            wxDefaultPosition, 
+            Wx::Size->new(225,50), 
+            $self->mode_choices,
+            1, 
+            wxRA_SPECIFY_ROWS
+        );
+        #$v->SetSize( $v->GetBestSize );
+        $v->SetSelection( $self->mode_current );    # 0-based
+        return $v;
+    }#}}}
     sub _build_saved_bldg {#{{{
         my $self = shift;
 
@@ -135,12 +210,18 @@ package LacunaWaX::MainSplitterWindow::RightPane::RearrangerPane {
         my $self = shift;
         return wxTheApp->build_sizer($self->parent, wxHORIZONTAL, 'Bottom Buttons');
     }#}}}
+    sub _build_szr_mode {#{{{
+        my $self = shift;
+        return wxTheApp->build_sizer($self->parent, wxVERTICAL, 'Mode');
+    }#}}}
     sub _set_events {#{{{
         my $self = shift;
         ### Events for individual plot buttons are set in set_surface_buttons
-        EVT_BUTTON( $self->parent,  $self->btn_rearrange->GetId,    sub{$self->OnRearrangeButtonClick(@_)}  );
-        EVT_BUTTON( $self->parent,  $self->btn_reload->GetId,       sub{$self->OnReloadButtonClick(@_)}     );
-        EVT_SIZE(   $self->parent,                                  sub{$self->OnResize(@_)}                );
+        EVT_BUTTON(     $self->parent,  $self->btn_rearrange->GetId,    sub{$self->OnRearrangeButtonClick(@_)}  );
+        EVT_BUTTON(     $self->parent,  $self->btn_reload->GetId,       sub{$self->OnReloadButtonClick(@_)}     );
+        EVT_CLOSE(      $self->parent,                                  sub{$self->OnClose(@_)}         );
+        EVT_RADIOBOX(   $self->parent,  $self->rdo_mode->GetId,         sub{$self->OnRadio(@_)}         );
+        EVT_SIZE(       $self->parent,                                  sub{$self->OnResize(@_)}                );
         return 1;
     }#}}}
 
@@ -155,8 +236,15 @@ package LacunaWaX::MainSplitterWindow::RightPane::RearrangerPane {
         my $image           = $button->GetBitmapLabel;
         my $label           = $button->GetLabel;
 
-        return if $bitmap_button->x == 0 and $bitmap_button->y == 0;    # PCC; can't be moved.
-        $self->swap($bitmap_button);
+        my $mode_str = $self->rdo_mode->GetStringSelection;
+        if( $mode_str eq 'Rearrange' ) {
+            return if $bitmap_button->x == 0 and $bitmap_button->y == 0;    # PCC; can't be moved.
+            $self->swap($bitmap_button);
+        }
+        elsif( $mode_str eq 'Buildings' ) {
+            $self->catch_building_click( $button->bldg );
+        }
+
         return 1;
     }#}}}
     sub OnRearrangeButtonClick {#{{{
@@ -222,6 +310,59 @@ package LacunaWaX::MainSplitterWindow::RightPane::RearrangerPane {
         return 1;
     }#}}}
 
+    sub catch_building_click {#{{{
+        my $self = shift;
+        my $bldg = shift;   # hr
+
+    ### I need a new Building dialog.  Pass it planet_id and the $bldg 
+    ### hashref, then let it do whatever it's going to do.
+
+
+=pod
+
+$VAR1 = {
+  'efficiency' => '100',
+  'url' => '/geothermalvent',
+  'level' => '30',
+  'x' => '-2',
+  'name' => 'Geo Thermal Vent',
+  'bldg_id' => '3808421',
+  'image' => 'geothermalvent1',
+  'y' => '5'
+};
+
+=cut
+
+    ### CHECK
+    ###
+    ### If the app gets closed while this dialog is still open, we get a 
+    ### segfault.
+    ###
+    ### I'm thinking that we should:
+    ###     - Register each building dialog we open (put it in a hash)
+    ###     - In OnClose here, close all open building dialogs.
+    ###     - In the building dialog OnClose, call building_dialog_closed() in 
+    ###       here.  That method should delete the building from our "open 
+    ###       dialogs" hash.
+    ###         - That method doesn't exist yet.
+    ###
+    ###     - The dialog should maybe have a "opener" attribute, which points 
+    ###       back to us in this case, so the dialog will always know which 
+    ###       "building_dialog_closed" method it should call.
+    ###
+        my $d = LacunaWaX::Dialog::Building->new(
+            building_hr => $bldg,
+            caller      => $self,
+            planet_id   => $self->planet_id,
+        );
+        $self->dialogs->{ $d->id } = $d;
+        $d->Show(1);
+    }#}}}
+    sub building_dialog_closed {#{{{
+        my $self    = shift;
+        my $id      = shift;
+        delete $self->dialogs->{ $id };
+    }#}}}
     sub inc_gauge {#{{{
         my $self = shift;
         my $inc  = shift || 1;
@@ -230,6 +371,75 @@ package LacunaWaX::MainSplitterWindow::RightPane::RearrangerPane {
         $sb->gauge->SetValue($self->gauge_value);
         $sb->gauge->Update();
         return $self->gauge_value;
+    }#}}}
+    sub reset_gauge {#{{{
+        my $self = shift;
+        my $sb = wxTheApp->main_frame->status_bar;
+        $sb->gauge->SetRange(121);
+        $self->gauge_value(0); 
+        $sb->gauge->SetValue($self->gauge_value);
+        return $self->gauge_value;
+    }#}}}
+    sub set_mode {#{{{
+        my $self = shift;
+        my $mode = shift;   # zero based offset
+ 
+        my $mode_str = $self->rdo_mode->GetLabel( $mode );
+        my $btn_show = ($mode_str eq 'Rearrange') ? 1 : 0;
+
+        $self->btn_rearrange->Show($btn_show);
+        $self->btn_reload->Show($btn_show);
+        $self->parent->Layout();
+
+        return 1;
+    }#}}}
+    sub set_surface_buttons {#{{{
+        my $self = shift;
+
+        ### button packing starts in the upper left corner (-5,5) and works in 
+        ### reading order (left to right, CR, left to right, etc) through to 
+        ### (5,-5)
+        my $cnt = 0;
+        for my $y(reverse(-5..5)) {
+            for my $x(-5..5) {
+                $cnt++;
+
+                $self->inc_gauge;
+                my $bldg_hr = $self->buildings->by_loc($x, $y);
+
+                my $bitmap;
+                if( defined $bldg_hr->{'image'} ) {
+                    my $img = wxTheApp->get_image("planetside/$bldg_hr->{'image'}.png");
+                    $img->Rescale(50, 50);
+                    $bitmap = Wx::Bitmap->new($img);
+                }
+                else {
+                    $bitmap = $self->blank_image;
+                }
+
+                my $bmp_butt = LacunaWaX::MainSplitterWindow::RightPane::RearrangerPane::BitmapButton->new( 
+                        parent      => $self->parent,
+                        bitmap      => $bitmap,
+                        bldg        => $bldg_hr,
+                        bldg_id     => $bldg_hr->{'bldg_id'}     || 0,
+                        name        => $bldg_hr->{'name'}        || 'Empty',
+                        level       => $bldg_hr->{'level'}       || 0,
+                        efficiency  => $bldg_hr->{'efficiency'}  || 0,
+                        x           => $x,
+                        y           => $y,
+                        orig_x      => $x,
+                        orig_y      => $y,
+                );
+                $self->buttons->add($bmp_butt);
+                EVT_BUTTON( $self->parent, $bmp_butt->GetId, sub{$self->OnPlotButtonClick($bmp_butt->GetId, @_)} );
+
+                $self->gridszr_buttons->Add(
+                    $bmp_butt->bitmap_button, 0, wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 0
+                );
+            }
+        }
+        $self->reset_gauge;
+        return 1;
     }#}}}
     sub swap {#{{{
         my $self   = shift;
@@ -273,62 +483,26 @@ building, then makes the one the user just clicked out currently-saved.
         $button->update_button_tooltip;
         return 1;
     }#}}}
-    sub reset_gauge {#{{{
-        my $self = shift;
-        my $sb = wxTheApp->main_frame->status_bar;
-        $sb->gauge->SetRange(121);
-        $self->gauge_value(0); 
-        $sb->gauge->SetValue($self->gauge_value);
-        return $self->gauge_value;
-    }#}}}
-    sub set_surface_buttons {#{{{
-        my $self = shift;
 
-        ### button packing starts in the upper left corner (-5,5) and works in 
-        ### reading order (left to right, CR, left to right, etc) through to 
-        ### (5,-5)
-        my $cnt = 0;
-        for my $y(reverse(-5..5)) {
-            for my $x(-5..5) {
-                $cnt++;
+    sub OnClose {#{{{
+        my $self    = shift;
 
-                $self->inc_gauge;
-                my $bldg_hr = $self->buildings->by_loc($x, $y);
-
-                my $bitmap;
-                if( defined $bldg_hr->{'image'} ) {
-                    my $img = wxTheApp->get_image("planetside/$bldg_hr->{'image'}.png");
-                    $img->Rescale(50, 50);
-                    $bitmap = Wx::Bitmap->new($img);
-                }
-                else {
-                    $bitmap = $self->blank_image;
-                }
-
-                my $bmp_butt = LacunaWaX::MainSplitterWindow::RightPane::RearrangerPane::BitmapButton->new( 
-                        parent      => $self->parent,
-                        bitmap      => $bitmap,
-                        bldg_id     => $bldg_hr->{'bldg_id'}     || 0,
-                        name        => $bldg_hr->{'name'}        || 'Empty',
-                        level       => $bldg_hr->{'level'}       || 0,
-                        efficiency  => $bldg_hr->{'efficiency'}  || 0,
-                        x           => $x,
-                        y           => $y,
-                        orig_x      => $x,
-                        orig_y      => $y,
-                );
-                $self->buttons->add($bmp_butt);
-                EVT_BUTTON( $self->parent, $bmp_butt->GetId, sub{$self->OnPlotButtonClick($bmp_butt->GetId, @_)} );
-
-                $self->gridszr_buttons->Add(
-                    $bmp_butt->bitmap_button, 0, wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 0
-                );
-            }
+        foreach my $dialog( values %{$self->dialogs} ) {
+            $dialog->OnClose();
         }
-        $self->reset_gauge;
         return 1;
     }#}}}
+    sub OnRadio {#{{{
+        my $self    = shift;
+        my $dialog  = shift;
+        my $event   = shift;    # Wx::CommandEvent
 
+        my $mode = $self->rdo_mode->GetSelection();
+        $self->set_mode($mode);
+
+
+        return 1;
+    }#}}}
     sub OnResize {#{{{
         my $self    = shift;
         my $dialog  = shift;

@@ -15,6 +15,8 @@ package LacunaWaX {
     our $VERSION        = '3.0a';
 
     use LacunaWaX::Preload::Perlapp;
+
+    use LacunaWaX::Dialog::Building;
     use LacunaWaX::MainFrame;
     use LacunaWaX::Model::Colours;
     use LacunaWaX::Model::Dates;

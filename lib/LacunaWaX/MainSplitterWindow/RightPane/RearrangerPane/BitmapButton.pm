@@ -28,6 +28,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::RearrangerPane::BitmapButton {
     );
 
     has 'bitmap'        => (is => 'rw', isa => 'Wx::Bitmap' );
+    has 'bldg'          => (is => 'rw', isa => 'Maybe[HashRef]' );
     has 'bldg_id'       => (is => 'rw', isa => 'Maybe[Int]' );
     has 'name'          => (is => 'rw', isa => 'Maybe[Str]' );
     has 'level'         => (is => 'rw', isa => 'Maybe[Int]' );
