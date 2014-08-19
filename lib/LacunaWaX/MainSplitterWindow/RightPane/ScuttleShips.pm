@@ -6,7 +6,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::ScuttleShips {
     use Moose;
     use Try::Tiny;
     use Wx qw(:everything);
-    use Wx::Event qw(EVT_BUTTON EVT_CHECKBOX EVT_CHOICE EVT_CLOSE EVT_TIMER);
+    use Wx::Event qw(EVT_BUTTON EVT_CHECKBOX EVT_CHOICE EVT_CLOSE EVT_SIZE EVT_TIMER);
     with 'LacunaWaX::Roles::MainSplitterWindow::RightPane';
 
     has 'parent' => (
@@ -262,7 +262,8 @@ package LacunaWaX::MainSplitterWindow::RightPane::ScuttleShips {
     }#}}}
     sub _set_events {
         my $self = shift;
-        EVT_BUTTON( $self->parent, $self->btn_scuttle->GetId,   sub{$self->OnScuttle(@_)} );
+        EVT_BUTTON( $self->parent, $self->btn_scuttle->GetId,   sub{$self->OnScuttle(@_)}   );
+        EVT_SIZE(   $self->parent,                              sub{$self->OnResize(@_)}    );
         return 1;
     }
 
@@ -302,6 +303,19 @@ package LacunaWaX::MainSplitterWindow::RightPane::ScuttleShips {
         $self->lbl_summary->Wrap($self->max_w);
     }#}}}
 
+    sub OnResize {#{{{
+        my $self    = shift;
+        my $dialog  = shift;
+        my $event   = shift;    # Wx::SizeEvent
+
+        ###
+        ### Don't remove this handler!!!!!
+        ### 
+        ### Its existence appears to be stopping a segfault.  See 
+        ### AllianceSummaryPane's OnResize for more info.
+        ###
+
+    }#}}}
     sub OnScuttle {#{{{
         my $self        = shift;
         my $dialog      = shift;    # Wx::ScrolledWindow

@@ -5,7 +5,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::SSHealth {
     use Moose;
     use Try::Tiny;
     use Wx qw(:everything);
-    use Wx::Event qw(EVT_BUTTON EVT_CHECKBOX EVT_CLOSE EVT_TEXT);
+    use Wx::Event qw(EVT_BUTTON EVT_CHECKBOX EVT_CLOSE EVT_SIZE EVT_TEXT);
     with 'LacunaWaX::Roles::MainSplitterWindow::RightPane';
 
     has 'ancestor' => (
@@ -98,7 +98,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::SSHealth {
     }
     sub _build_alert_record {#{{{
         my $self = shift;
-        
+ 
         my $schema = wxTheApp->main_schema;
         my $rec = $schema->resultset("SSAlerts")->find_or_create(
             {
@@ -240,7 +240,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::SSHealth {
     sub _build_lbl_instructions {#{{{
         my $self = shift;
 
-        my $text = "Sends mail to alert you to possible problems with a Space Station.  See Help for details.";
+        my $text = "Sends mail to warn about problems with a Space Station.  See Help for details.";
 
         my $v = Wx::StaticText->new(
             $self->parent, -1, 
@@ -332,6 +332,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::SSHealth {
         EVT_CHECKBOX(   $self->parent, $self->chk_hostile_ships->GetId,     sub{$self->OnCheckShips(@_)}    );
         EVT_CHECKBOX(   $self->parent, $self->chk_hostile_spies->GetId,     sub{$self->OnCheckSpies(@_)}    );
         EVT_CHECKBOX(   $self->parent, $self->chk_own_star_seized->GetId,   sub{$self->OnCheckStar(@_)}     );
+        EVT_SIZE(       $self->parent,                                      sub{$self->OnResize(@_)}    );
         return;
     }#}}}
 
@@ -388,6 +389,19 @@ package LacunaWaX::MainSplitterWindow::RightPane::SSHealth {
         $self->enable_alerts_check_from_child( $self->chk_own_star_seized );
 
         return 1;
+    }#}}}
+    sub OnResize {#{{{
+        my $self    = shift;
+        my $dialog  = shift;
+        my $event   = shift;    # Wx::SizeEvent
+
+        ###
+        ### Don't remove this handler!!!!!
+        ### 
+        ### Its existence appears to be stopping a segfault.  See 
+        ### AllianceSummaryPane's OnResize for more info.
+        ###
+
     }#}}}
     sub OnSave {#{{{
         my $self    = shift;

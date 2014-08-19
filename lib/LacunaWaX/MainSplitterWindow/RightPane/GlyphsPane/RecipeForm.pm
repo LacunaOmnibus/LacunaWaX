@@ -4,7 +4,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::GlyphsPane::RecipeForm {
     use Moose;
     use Try::Tiny;
     use Wx qw(:everything);
-    use Wx::Event qw(EVT_BUTTON EVT_SPINCTRL);
+    use Wx::Event qw(EVT_BUTTON EVT_SIZE EVT_SPINCTRL);
 
     has 'parent' => (
         is          => 'rw',
@@ -44,7 +44,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::GlyphsPane::RecipeForm {
 
     sub BUILD {
         my $self = shift;
-        
+ 
         ### In this case, existence of the dialog_status is very conditional 
         ### (only upon making the all halls recipe), and it requires a quantity 
         ### arg.  So don't try making it here.
@@ -175,7 +175,7 @@ name.)
 That explanation includes the fact that something mysterious was touching 
 $self->dialog_status over in GlyphsPane.  I have not verified that that is 
 happening here, so it's possible that a simple lazy_build would work fine in 
-this case.  
+this case. 
 
 But since this pseudo-lazy _make method also works fine, I'm going to stay with 
 it for consistency with GlyphsPane.
@@ -197,6 +197,7 @@ arg is not necessary there.
         my $self = shift;
         my $btn_id  = $self->btn_assemble->GetId;
         EVT_BUTTON( $self->parent, $btn_id, sub{$self->OnAssembleButtonClick($btn_id, @_)} );
+        EVT_SIZE(   $self->parent,          sub{$self->OnResize(@_)}    );
         return 1;
     }#}}}
 
@@ -340,6 +341,19 @@ arg is not necessary there.
         wxTheApp->endthrob();
         wxTheApp->popmsg($response, "Success!");
         return 1;
+    }#}}}
+    sub OnResize {#{{{
+        my $self    = shift;
+        my $dialog  = shift;
+        my $event   = shift;    # Wx::SizeEvent
+
+        ###
+        ### Don't remove this handler!!!!!
+        ### 
+        ### Its existence appears to be stopping a segfault.  See 
+        ### AllianceSummaryPane's OnResize for more info.
+        ###
+
     }#}}}
 
     no Moose;

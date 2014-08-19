@@ -4,7 +4,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::RearrangerPane {
     use Moose;
     use Try::Tiny;
     use Wx qw(:everything);
-    use Wx::Event qw(EVT_BUTTON);
+    use Wx::Event qw(EVT_BUTTON EVT_SIZE);
     with 'LacunaWaX::Roles::MainSplitterWindow::RightPane';
 
     use LacunaWaX::MainSplitterWindow::RightPane::RearrangerPane::BitmapButton;
@@ -138,8 +138,9 @@ package LacunaWaX::MainSplitterWindow::RightPane::RearrangerPane {
     sub _set_events {#{{{
         my $self = shift;
         ### Events for individual plot buttons are set in set_surface_buttons
-        EVT_BUTTON(         $self->parent,  $self->btn_rearrange->GetId,    sub{$self->OnRearrangeButtonClick(@_)}  );
-        EVT_BUTTON(         $self->parent,  $self->btn_reload->GetId,       sub{$self->OnReloadButtonClick(@_)}     );
+        EVT_BUTTON( $self->parent,  $self->btn_rearrange->GetId,    sub{$self->OnRearrangeButtonClick(@_)}  );
+        EVT_BUTTON( $self->parent,  $self->btn_reload->GetId,       sub{$self->OnReloadButtonClick(@_)}     );
+        EVT_SIZE(   $self->parent,                                  sub{$self->OnResize(@_)}                );
         return 1;
     }#}}}
 
@@ -326,6 +327,20 @@ building, then makes the one the user just clicked out currently-saved.
         }
         $self->reset_gauge;
         return 1;
+    }#}}}
+
+    sub OnResize {#{{{
+        my $self    = shift;
+        my $dialog  = shift;
+        my $event   = shift;    # Wx::SizeEvent
+
+        ###
+        ### Don't remove this handler!!!!!
+        ### 
+        ### Its existence appears to be stopping a segfault.  See 
+        ### AllianceSummaryPane's OnResize for more info.
+        ###
+
     }#}}}
 
     no Moose;

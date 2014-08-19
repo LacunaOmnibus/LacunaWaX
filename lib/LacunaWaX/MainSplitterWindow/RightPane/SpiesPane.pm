@@ -5,7 +5,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::SpiesPane {
     use Moose;
     use Try::Tiny;
     use Wx qw(:everything);
-    use Wx::Event qw(EVT_CHOICE EVT_BUTTON);
+    use Wx::Event qw(EVT_CHOICE EVT_BUTTON EVT_SIZE);
     with 'LacunaWaX::Roles::MainSplitterWindow::RightPane';
 
     use LacunaWaX::Dialog::Captcha;
@@ -188,34 +188,14 @@ package LacunaWaX::MainSplitterWindow::RightPane::SpiesPane {
     }
     sub _set_events {#{{{
         my $self = shift;
+        EVT_BUTTON( $self->parent, $self->btn_clear->GetId,     sub{$self->OnClearButton(@_)}                       );
+        EVT_BUTTON( $self->parent, $self->btn_rename->GetId,    sub{$self->OnRenameButton(@_)}                      );
+        EVT_BUTTON( $self->parent, $self->btn_save->GetId,      sub{$self->OnSaveButton(@_)}                        );
         EVT_CHOICE( $self->parent, $self->chc_train_1->GetId,   sub{$self->OnAllTrainChoice($self->chc_train_1,@_)} );
         EVT_CHOICE( $self->parent, $self->chc_train_2->GetId,   sub{$self->OnAllTrainChoice($self->chc_train_2,@_)} );
         EVT_CHOICE( $self->parent, $self->chc_train_3->GetId,   sub{$self->OnAllTrainChoice($self->chc_train_3,@_)} );
         EVT_CHOICE( $self->parent, $self->chc_train_4->GetId,   sub{$self->OnAllTrainChoice($self->chc_train_4,@_)} );
-        EVT_BUTTON( $self->parent, $self->btn_clear->GetId,     sub{$self->OnClearButton(@_)}                       );
-        EVT_BUTTON( $self->parent, $self->btn_rename->GetId,    sub{$self->OnRenameButton(@_)}                      );
-        EVT_BUTTON( $self->parent, $self->btn_save->GetId,      sub{$self->OnSaveButton(@_)}                        );
-
-        ### When the user clicks on the instructions text at the top of the 
-        ### screen, this will cause that text to gain focus, thereby enabling 
-        ### the user's mousewheel to scroll the long spies list as they'd 
-        ### expect.
-        ###
-        ### I'm starting to think that this crap is what's causing the spy 
-        ### pane to be so non-responsive.  The problem is that 
-        ### non-responsiveness was only periodic anyway, so I'm not sure if 
-        ### the fact that it's not showing up now is due to my commenting this 
-        ### out or whether it's just due to luck.
-        ###
-        ### Leave this commented for a bit.  If no more slowness happens on 
-        ### this pane after a few days (03/13 now), call it fixed and delete 
-        ### all this.
-#        $self->lbl_instructions->Connect(
-#            $self->lbl_instructions->GetId,
-#            wxID_ANY,
-#            wxEVT_LEFT_DOWN,
-#            sub{$self->OnStaticTextClick(@_)},
-#        );
+        EVT_SIZE(   $self->parent,                              sub{$self->OnResize(@_)}                            );
 
         return 1;
     }#}}}
@@ -592,7 +572,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::SpiesPane {
             my $key  = join q{:}, ('BODIES', 'SPIES', $self->planet_id);
             $chi->remove($key);
         }
-        
+ 
         my $v = ($cnt == 1) ? "spy has" : "spies have";
         wxTheApp->popmsg(
             "$cnt $v been renamed.",
@@ -687,6 +667,19 @@ package LacunaWaX::MainSplitterWindow::RightPane::SpiesPane {
         $self->stop_renaming(1);
         return 1;
     }#}}}
+    sub OnResize {#{{{
+        my $self    = shift;
+        my $dialog  = shift;
+        my $event   = shift;    # Wx::SizeEvent
+
+        ###
+        ### Don't remove this handler!!!!!
+        ### 
+        ### Its existence appears to be stopping a segfault.  See 
+        ### AllianceSummaryPane's OnResize for more info.
+        ###
+
+    }#}}}
 
     sub int_min_exists_here {#{{{
         my $self = shift;
@@ -721,32 +714,32 @@ see what you're doing.
 
 =begin rawtext
 
-                                                                                                  
- ___ Bottom Centering ______________________________________________________                                                                                               
-|                                                                           |                     
-|                 __ Bottom Right _________________________________________ |                     
-|                | __ Bottom Buttons _____________________________________ ||                     
-|                ||                                                       |||                     
-|                ||   SAVE SPY ASSIGNMENTS      RENAME SPIES              |||                     
-|                ||                                                       |||                     
-|                ||                                                       |||                     
-|                ||_______________________________________________________|||                     
-|      S         |                                                         ||                     
-|      P         |            SPACER                                       ||                     
-|      A         |                                                         ||                     
-|      C         | __ Batch Centering ______________________________       ||                     
-|      E         ||            __ Batch Rename ____________________ |      ||                     
-|      R         ||           |                                    ||      ||                     
-|                ||     S     |   NEW NAME TEXT BOX                ||      ||                     
-|                ||     P     |                                    ||      ||                     
-|                ||     A     |                                    ||      ||                     
-|                ||     C     |   PRE- SUF- FIX RADIO BOX          ||      ||                     
-|                ||     E     |                                    ||      ||                     
-|                ||     R     |                                    ||      ||                     
-|                ||           |____________________________________||      ||                     
-|                ||_________________________________________________|      ||                     
-|                |_________________________________________________________||                     
-|___________________________________________________________________________|                                                                                            
+ 
+ ___ Bottom Centering ______________________________________________________ 
+|                                                                           | 
+|                 __ Bottom Right _________________________________________ | 
+|                | __ Bottom Buttons _____________________________________ || 
+|                ||                                                       ||| 
+|                ||   SAVE SPY ASSIGNMENTS      RENAME SPIES              ||| 
+|                ||                                                       ||| 
+|                ||                                                       ||| 
+|                ||_______________________________________________________||| 
+|      S         |                                                         || 
+|      P         |            SPACER                                       || 
+|      A         |                                                         || 
+|      C         | __ Batch Centering ______________________________       || 
+|      E         ||            __ Batch Rename ____________________ |      || 
+|      R         ||           |                                    ||      || 
+|                ||     S     |   NEW NAME TEXT BOX                ||      || 
+|                ||     P     |                                    ||      || 
+|                ||     A     |                                    ||      || 
+|                ||     C     |   PRE- SUF- FIX RADIO BOX          ||      || 
+|                ||     E     |                                    ||      || 
+|                ||     R     |                                    ||      || 
+|                ||           |____________________________________||      || 
+|                ||_________________________________________________|      || 
+|                |_________________________________________________________|| 
+|___________________________________________________________________________| 
 
 =end rawtext
 

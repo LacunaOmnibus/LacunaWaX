@@ -8,7 +8,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::RepairPane {
     use Moose;
     use Try::Tiny;
     use Wx qw(:everything);
-    use Wx::Event qw(EVT_BUTTON EVT_CLOSE EVT_LIST_COL_CLICK);
+    use Wx::Event qw(EVT_BUTTON EVT_CLOSE EVT_LIST_COL_CLICK EVT_SIZE);
     with 'LacunaWaX::Roles::MainSplitterWindow::RightPane';
 
     has 'ancestor' => (
@@ -474,6 +474,7 @@ If many buildings are damaged, you may run out of resources before you can repai
         EVT_CLOSE(          $self->parent,                                      sub{$self->OnClose(@_)}                 );
         EVT_LIST_COL_CLICK( $self->parent, $self->lst_bldgs_onsite->GetId,      sub{$self->OnLeftLstHeaderClick(@_)}    );
         EVT_LIST_COL_CLICK( $self->parent, $self->lst_bldgs_to_repair->GetId,   sub{$self->OnRightLstHeaderClick(@_)}   );
+        EVT_SIZE(           $self->parent,                                      sub{$self->OnResize(@_)}    );
         return 1;
     }#}}}
 
@@ -806,7 +807,7 @@ I have not tested the "fails if we're out of res" yet.
         foreach my $r(@glyph_rows) {
             $self->add_row( $self->lst_bldgs_to_repair, @{$r} );
         }
-            
+ 
         return 1;
     }#}}}
     sub OnClose {#{{{
@@ -1051,6 +1052,19 @@ I have not tested the "fails if we're out of res" yet.
         $self->post_repair_cleanup();
         return 1;
     }#}}}
+    sub OnResize {#{{{
+        my $self    = shift;
+        my $dialog  = shift;
+        my $event   = shift;    # Wx::SizeEvent
+
+        ###
+        ### Don't remove this handler!!!!!
+        ### 
+        ### Its existence appears to be stopping a segfault.  See 
+        ### AllianceSummaryPane's OnResize for more info.
+        ###
+
+    }#}}}
     sub OnDialogStatusClose {#{{{
         my $self    = shift;
         my $status  = shift;    # LacunaWaX::Dialog::Status
@@ -1082,7 +1096,7 @@ __END__
 Wx::ListCtrl is pretty notorious for having a terrible API an just general 
 sucktitude.  There exists Wx::Perl::ListCtrl, which is meant to somewhat 
 de-awful-ize the problem.  But it's not a drop-in replacement for Wx::ListCtrl, 
-and I haven't switched from the one to the other at this point.  
+and I haven't switched from the one to the other at this point. 
 
 
 In Report mode, which is what's mostly being used in LacunaWaX, an "item" is a 

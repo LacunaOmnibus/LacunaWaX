@@ -503,11 +503,11 @@ which planet that is (although the calculations must be done elsewhere).
         $event->Skip();
         return;
     }#}}}
-    sub OnExit {
+    sub OnExit {#{{{
         my $self = shift;
         my $event = shift;
         $self->Destroy();
-    }
+    }#}}}
 
 ### Utilities
     sub api_ship_name {#{{{

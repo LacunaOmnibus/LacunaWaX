@@ -14,6 +14,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::SummaryPane {
     use Moose;
     use Try::Tiny;
     use Wx qw(:everything);
+    use Wx::Event qw(EVT_SIZE);
     with 'LacunaWaX::Roles::MainSplitterWindow::RightPane';
 
     has 'ancestor' => (
@@ -45,7 +46,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::SummaryPane {
     has 'szr_header'    => (is => 'rw', isa => 'Wx::Sizer',         lazy_build => 1   );
     has 'szr_res_grid' => (
         is          => 'rw', 
-        isa         => 'Wx::FlexGridSizer',     
+        isa         => 'Wx::FlexGridSizer', 
         lazy_build  => 1,
     );
     has 'lbl_header'    => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1   );
@@ -100,7 +101,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::SummaryPane {
             $self->text, 
             wxDefaultPosition, 
             ### If you start changing the height on this, check the result on 
-            ### both a station and on a planet.  Station text is bigger.  
+            ### both a station and on a planet.  Station text is bigger. 
             ### Also, stations with warning text ("OMG we haven't seize our 
             ### own star!") will need even more height here.
             Wx::Size->new(400,220)
@@ -144,7 +145,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::SummaryPane {
     sub _build_text_orig {#{{{
         my $self  = shift;
         my $owner = $self->owner;
-        
+ 
         my $s = $self->status;
 
         my $text = $self->type . " $s->{name} ($s->{x}, $s->{y}) (ID $s->{id})
@@ -206,7 +207,7 @@ Orbit $s->{orbit} around $s->{star_name} (ID $s->{star_id}), in zone $s->{zone}\
     sub _build_text {#{{{
         my $self  = shift;
         my $owner = $self->owner;
-        
+ 
         my $s = $self->status;
 
         my $text = $self->type . " $s->{name} ($s->{x}, $s->{y}) (ID $s->{id})
@@ -260,7 +261,10 @@ Orbit $s->{orbit} around $s->{star_name} (ID $s->{star_id}), in zone $s->{zone}\
         #return ($self->status->{'type'} eq 'space station') ? 'Station' : 'Planet';
         return wxTheApp->game_client->isa_planet($self->planet_name) ? 'Planet' : 'Station';
     }#}}}
-    sub _set_events {}
+    sub _set_events {
+        my $self = shift;
+        EVT_SIZE(   $self->parent,      sub{$self->OnResize(@_)}    );
+    }
 
     sub fill_res_grid {#{{{
         my $self = shift;
@@ -309,6 +313,19 @@ Orbit $s->{orbit} around $s->{star_name} (ID $s->{star_id}), in zone $s->{zone}\
         }
     }#}}}
 
+    sub OnResize {#{{{
+        my $self    = shift;
+        my $dialog  = shift;
+        my $event   = shift;    # Wx::SizeEvent
+
+        ###
+        ### Don't remove this handler!!!!!
+        ### 
+        ### Its existence appears to be stopping a segfault.  See 
+        ### AllianceSummaryPane's OnResize for more info.
+        ###
+
+    }#}}}
 
     no Moose;
     __PACKAGE__->meta->make_immutable;

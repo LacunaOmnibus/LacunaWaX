@@ -4,7 +4,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::GlyphsPane {
     use Moose;
     use Try::Tiny;
     use Wx qw(:everything);
-    use Wx::Event qw(EVT_BUTTON EVT_LIST_ITEM_SELECTED EVT_ENTER_WINDOW);
+    use Wx::Event qw(EVT_BUTTON EVT_LIST_ITEM_SELECTED EVT_SIZE EVT_ENTER_WINDOW);
     with 'LacunaWaX::Roles::MainSplitterWindow::RightPane';
 
     use LacunaWaX::MainSplitterWindow::RightPane::GlyphsPane::RecipeForm;
@@ -418,7 +418,7 @@ So now those /.*_box_.*/ sizers are just sizers.
         );
         $v->SetFont( wxTheApp->get_font('header_1') );
         return $v;
-    }#}}}  
+    }#}}} 
 
     sub _build_list_sizer {#{{{
         my $self = shift;
@@ -531,12 +531,12 @@ The problem here is:
         - this semi-lazy method needs to be called after $self (the GlyphsPane 
           object) is fully created, but NOT auto-called every time somebody 
           mentions $self->dialog_status.
-          
+ 
           - I found some forum postings indicating this sort of thing may be in 
             a future version of Moose, but it's not there now.
 
     - SO, what I've ended up with is:
-        - The dialog_status attribute is defined but with no builder method.  
+        - The dialog_status attribute is defined but with no builder method. 
         - This pseudo-builder (_make_dialog_status), which you're reading about 
           right now, must therefore be called explicitly when you want to create 
           a Dialog::Status window.
@@ -576,12 +576,13 @@ The problem here is:
         EVT_BUTTON(         $self->parent, $self->btn_auto_search->GetId,       sub{$self->OnSetAutoSearch(@_)} );
         EVT_BUTTON(         $self->parent, $self->btn_build_all_halls->GetId,   sub{$self->OnBuildAllHalls(@_)} );
         EVT_ENTER_WINDOW(   $self->list_glyphs,                                 sub{$self->OnMouseEnterGlyphsList(@_)}    );
+        EVT_SIZE(           $self->parent,                                      sub{$self->OnResize(@_)}    );
         return 1;
     }#}}}
 
     before 'clear_dialog_status' => sub {#{{{
         my $self = shift;
-        
+ 
         ### Call the dialog_status object's own close method, which removes its 
         ### wxwidgets, before clearing this object's dialog_status attribute.
         if($self->has_dialog_status) {
@@ -757,6 +758,19 @@ The problem here is:
         $self->list_glyphs->SetFocus;
         $self->ancestor->has_focus(0);
         return 1;
+    }#}}}
+    sub OnResize {#{{{
+        my $self    = shift;
+        my $dialog  = shift;
+        my $event   = shift;    # Wx::SizeEvent
+
+        ###
+        ### Don't remove this handler!!!!!
+        ### 
+        ### Its existence appears to be stopping a segfault.  See 
+        ### AllianceSummaryPane's OnResize for more info.
+        ###
+
     }#}}}
 
     no Moose;

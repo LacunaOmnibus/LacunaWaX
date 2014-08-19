@@ -19,7 +19,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::BuildShips {
     use Moose;
     use Try::Tiny;
     use Wx qw(:everything);
-    use Wx::Event qw(EVT_BUTTON EVT_CHECKBOX EVT_CHOICE EVT_CLOSE EVT_TIMER);
+    use Wx::Event qw(EVT_BUTTON EVT_CHECKBOX EVT_CHOICE EVT_CLOSE EVT_SIZE EVT_TIMER);
     with 'LacunaWaX::Roles::MainSplitterWindow::RightPane';
 
     has 'parent' => (
@@ -149,7 +149,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::BuildShips {
         isa         => 'Games::Lacuna::Client::Buildings::SpacePort',
         lazy_build  => 1,
         documentation => q{
-            One of the spaceports on the planet.  Used to initially figure out  
+            One of the spaceports on the planet.  Used to initially figure out 
             the number of docks available, so it doesn't matter which 
             spaceport.
         }
@@ -624,6 +624,7 @@ Closing LacunaWaX all the way will stop any more ships from being added to the q
         EVT_CHECKBOX(   $self->parent, $self->chk_tag_trade->GetId,         sub{$self->OnTagCheck(@_)} );
         EVT_CHECKBOX(   $self->parent, $self->chk_tag_war->GetId,           sub{$self->OnTagCheck(@_)} );
         EVT_CHOICE(     $self->parent, $self->chc_min_level->GetId,         sub{$self->OnChooseLevel(@_)} );
+        EVT_SIZE(       $self->parent,                                      sub{$self->OnResize(@_)}    );
         EVT_TIMER(      $self->parent, $self->build_timer->GetId,           sub{$self->OnBuildTimer(@_)} );
         EVT_TIMER(      $self->parent, $self->caption_timer->GetId,         sub{$self->OnCaptionTimer(@_)} );
         return 1;
@@ -934,7 +935,7 @@ No arguments are required; this does all the calculations.
             wxTheApp->endthrob();
             return;
         }
-        
+ 
         ### Keep just the yards matching the user's requirement.
         $self->clear_usable_shipyards();
         wxTheApp->Yield();
@@ -966,13 +967,26 @@ No arguments are required; this does all the calculations.
             $self->assign_shiptypes();
         }
 
-        ### Now that everything's recalced, be sure the summary text is shown.  
+        ### Now that everything's recalced, be sure the summary text is shown. 
         ### The first time the user choses a level, it won't be yet.
         $self->lbl_summary->Show(1);
         $self->parent->Layout();
 
         wxTheApp->endthrob();
         return 1;
+    }#}}}
+    sub OnResize {#{{{
+        my $self    = shift;
+        my $dialog  = shift;
+        my $event   = shift;    # Wx::SizeEvent
+
+        ###
+        ### Don't remove this handler!!!!!
+        ### 
+        ### Its existence appears to be stopping a segfault.  See 
+        ### AllianceSummaryPane's OnResize for more info.
+        ###
+
     }#}}}
     sub OnTagCheck {#{{{
         my $self        = shift;

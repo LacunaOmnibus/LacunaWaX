@@ -6,7 +6,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::BFGPane {
     use Moose;
     use Try::Tiny;
     use Wx qw(:everything);
-    use Wx::Event qw(EVT_BUTTON);
+    use Wx::Event qw(EVT_BUTTON EVT_SIZE);
     with 'LacunaWaX::Roles::MainSplitterWindow::RightPane';
 
     has 'ancestor' => (
@@ -113,7 +113,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::BFGPane {
         my $indent = q{ }x4;
         my $text = "${indent}YOU MUST BE LOGGED IN USING YOUR FULL PASSWORD.  Sitter passwords are not permitted to create propositions.
 ${indent}If you're on your sitter right now, change to your full password in Edit... Preferences, then close and re-start LacunaWaX.  Simply re-connecting from the File menu after changing your credentials will not work; you must restart the program.
-        
+ 
 ${indent}If you know the ID of your target planet, that's all you need.  And it's safer to use; if the target planet gets moved elsewhere by a BHG, using the ID will still hit it, whereas accidentally providing the wrong orbit will end up targeting the wrong body (this is known as A Bad Thing).
 ${indent}If you don't know the ID of your target, (carefully) provide its star's name and the target's orbit around that star.  You'll be provided the target ID so you can write it down somewhere for use next time.
 
@@ -279,7 +279,8 @@ ${indent}Remember that this form only creates a proposition to fire the BFG, and
     }#}}}
     sub _set_events {#{{{
         my $self = shift;
-        EVT_BUTTON( $self->parent, $self->btn_fire->GetId, sub{$self->OnFire(@_)}  );
+        EVT_BUTTON( $self->parent, $self->btn_fire->GetId,  sub{$self->OnFire(@_)}      );
+        EVT_SIZE(   $self->parent,                          sub{$self->OnResize(@_)}    );
         return 1;
     }#}}}
 
@@ -346,7 +347,7 @@ However, given a body object created just by ID, as when given a target ID, I am
 unable to get any information at all on that body, unless it's a body I own - 
 body->get_status returns "1002: That body does not exist" (or similar) for 
 foreign bodies.  I can't even get the name of the orbited star given just the 
-planet ID.  
+planet ID. 
 
 So I'd really like it if this method could return the target planet name, but 
 it's only able to do so if the user supplied the (less preferred) star name and 
@@ -445,6 +446,19 @@ without ever having to probe them.
 
         wxTheApp->popmsg("Proposal to fire the BFG at $target_name has been submitted; don't forget to vote.", "Success!"); 
         return 1;
+    }#}}}
+    sub OnResize {#{{{
+        my $self    = shift;
+        my $dialog  = shift;
+        my $event   = shift;    # Wx::SizeEvent
+
+        ###
+        ### Don't remove this handler!!!!!
+        ### 
+        ### Its existence appears to be stopping a segfault.  See 
+        ### AllianceSummaryPane's OnResize for more info.
+        ###
+
     }#}}}
 
     no Moose;

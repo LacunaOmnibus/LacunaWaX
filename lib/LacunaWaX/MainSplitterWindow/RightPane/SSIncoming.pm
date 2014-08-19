@@ -6,7 +6,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::SSIncoming {
     use Moose;
     use Try::Tiny;
     use Wx qw(:everything);
-    use Wx::Event qw(EVT_BUTTON EVT_CLOSE);
+    use Wx::Event qw(EVT_BUTTON EVT_CLOSE EVT_SIZE);
     with 'LacunaWaX::Roles::MainSplitterWindow::RightPane';
 
     has 'ancestor' => (
@@ -272,8 +272,9 @@ package LacunaWaX::MainSplitterWindow::RightPane::SSIncoming {
     }#}}}
     sub _set_events {#{{{
         my $self = shift;
-        EVT_BUTTON( $self->parent, $self->btn_prev->GetId,        sub{$self->OnPrev(@_)}         );
-        EVT_BUTTON( $self->parent, $self->btn_next->GetId,        sub{$self->OnNext(@_)}         );
+        EVT_BUTTON( $self->parent, $self->btn_prev->GetId,  sub{$self->OnPrev(@_)}      );
+        EVT_BUTTON( $self->parent, $self->btn_next->GetId,  sub{$self->OnNext(@_)}      );
+        EVT_SIZE(   $self->parent,                          sub{$self->OnResize(@_)}    );
         return;
     }#}}}
 
@@ -424,6 +425,19 @@ The list of ships is an AoH, each H representing a ship:
         $self->show_list_page;
 
         return 1;
+    }#}}}
+    sub OnResize {#{{{
+        my $self    = shift;
+        my $dialog  = shift;
+        my $event   = shift;    # Wx::SizeEvent
+
+        ###
+        ### Don't remove this handler!!!!!
+        ### 
+        ### Its existence appears to be stopping a segfault.  See 
+        ### AllianceSummaryPane's OnResize for more info.
+        ###
+
     }#}}}
 
     no Moose;
