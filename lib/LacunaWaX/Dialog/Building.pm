@@ -1,21 +1,18 @@
 
-### Just opens a dialog displaying the name of the planet, the building in 
-### question, and its coords on the planet.
-###
-### Segfaults if the app is closed while the dialog is still open; deal with 
-### that.
+### Search on CHECK
 
 package LacunaWaX::Dialog::Building {
     use v5.14;
-    use Data::UUID;
+    use Data::Dumper;
     use Moose;
     use Try::Tiny;
     use Wx qw(:everything);
     use Wx::Event qw(EVT_BUTTON EVT_CLOSE EVT_RADIOBOX EVT_SIZE);
 
+    use LacunaWaX::Generics::BldgUpgradeBar;
     extends 'LacunaWaX::Dialog::NonScrolled';
 
-    has 'building_hr' => (
+    has 'bldg_hr' => (
         is      => 'rw',
         isa     => 'HashRef',
         required => 1,
@@ -39,9 +36,21 @@ package LacunaWaX::Dialog::Building {
 
     #####################
 
-    has 'id' => (
+    has 'bldg_id' => (
         is          => 'ro', 
-        isa         => 'Str', 
+        isa         => 'Int', 
+        lazy_build  => 1,
+    );
+
+    has 'bldg_obj' => (
+        is          => 'ro', 
+        isa         => 'Object', 
+        lazy_build  => 1,
+    );
+
+    has 'bldg_view' => (
+        is          => 'ro', 
+        isa         => 'HashRef', 
         lazy_build  => 1,
     );
 
@@ -70,26 +79,55 @@ package LacunaWaX::Dialog::Building {
 
         $self->szr_header->Add($self->lbl_header, 0, 0, 0);
 
+
+my $upgrade_bar = LacunaWaX::Generics::BldgUpgradeBar->new(
+    parent      => $self->dialog,
+    bldg_obj    => $self->bldg_obj,
+    bldg_view   => $self->bldg_view,
+
+);
+#say Dumper $self->bldg_obj;
+#say Dumper $self->bldg_view;
+
+
         $self->main_sizer->Add($self->szr_header, 0, 0, 0);
+        $self->main_sizer->Add($upgrade_bar->szr_main, 0, 0, 0);
 
         $self->_set_events();
         $self->init_screen();
         return $self;
     }
 
-    sub _build_id {#{{{
+    sub _build_bldg_id {#{{{
         my $self = shift;
-
-        my $g = Data::UUID->new();
-        my $id = $g->create();
-        return $g->to_string($id);
+        return $self->bldg_hr->{'bldg_id'};
+    }#}}}
+    sub _build_bldg_obj {#{{{
+        my $self = shift;
+        my $obj = wxTheApp->game_client->get_building(
+            $self->planet_id,
+            $self->bldg_hr->{'name'},
+            0,                          # Don't force a re-grab - CHECK this should be variablized to re-grab when we need a refresh.
+            {
+                id => $self->bldg_id
+            }
+        );
+        return $obj;
+    }#}}}
+    sub _build_bldg_view {#{{{
+        my $self = shift;
+        my $view = wxTheApp->game_client->get_building_view(
+            $self->bldg_id,
+            $self->bldg_obj,
+        );
+        return $view;
     }#}}}
     sub _build_lbl_header {#{{{
         my $self = shift;
 
-        my $str = $self->building_hr->{'name'} . "\n";
+        my $str = $self->bldg_hr->{'name'} . "\n";
           $str .= "On " . $self->planet_name . "\n";
-          $str .= "At coords (" . $self->building_hr->{'x'} . ", " . $self->building_hr->{'y'} . ")";
+          $str .= "At coords (" . $self->bldg_hr->{'x'} . ", " . $self->bldg_hr->{'y'} . ")";
 
         my $v = Wx::StaticText->new( $self->dialog, -1, 
             $str,
@@ -111,7 +149,7 @@ package LacunaWaX::Dialog::Building {
     }#}}}
     sub _build_title {#{{{
         my $self = shift;
-        return $self->building_hr->{'name'};
+        return $self->bldg_hr->{'name'};
     }#}}}
     sub _build_szr_header {#{{{
         my $self = shift;
@@ -126,7 +164,7 @@ package LacunaWaX::Dialog::Building {
 
     sub OnClose {#{{{
         my $self = shift;
-        $self->caller->building_dialog_closed( $self->id );
+        $self->caller->building_dialog_closed( $self->bldg_id );
         $self->Destroy;
         return 1;
     }#}}}

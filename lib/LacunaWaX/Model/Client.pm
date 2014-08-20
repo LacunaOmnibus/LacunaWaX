@@ -832,10 +832,73 @@ status (rather than including the extra junk that GLC's get_status returns.)
         my $pid   = shift;
         my $type  = shift;
         my $force = shift || 0;
+        my $args  = shift || undef;
 
 =head2 get_building
 
-Returns a single GLC building object for a unique building.  
+Returns a single GLC building object for a unique building. 
+
+eg Games::Lacuna::Client::Buildings::PoliceStation
+
+$type is fairly liberal - either the machine name ("entertainment") or the 
+human name ("Entertainment Ministry") can be passed.  Both are case insensitive.
+
+If there are multiple buildings of the requested type, you'll get back one at 
+random unless you pass in $args.  Getting one at random is usually fine, but 
+if you want a specific building, include your requirements in $args:
+
+ my $b = $client->get_building(
+  $planet_id,
+  'Space Port',
+  $force,
+  {
+    id => $bldg_id,
+    x  => $bldg_x,
+    y  => $bldg_y,
+    ...
+  }
+ )
+
+The first building that matches your required args will be returned.  So if 
+you absolutely want a specific building, include its ID.  If you want any 
+space port that appears in the top row, include only { x => 5 }.  Etc.
+
+=cut
+
+        ### No caching needed here; both get_buildings and get_building_object 
+        ### are managing their own caches.
+        my $bldgs_hr = $self->get_buildings( $pid, $type, $force );
+
+        my $bldg_hr_to_return = {};
+        if($args) {
+            SURFACE_BUILDING:
+            foreach my $id( keys %{$bldgs_hr} ) {
+                my $bldg_hr = $bldgs_hr->{$id};
+
+                while( my($k,$v) = each %{$args} ) {
+                    unless( $bldg_hr->{$k} eq $v ) {
+                        next SURFACE_BUILDING;
+                    }
+                }
+                $bldg_hr_to_return = $bldg_hr;
+            }
+        }
+        else {
+            my($id, $bldg_hr) = each %{$bldgs_hr};
+            $bldg_hr_to_return = $bldg_hr;
+        }
+
+        return $self->get_building_object($pid, $bldg_hr_to_return);
+    }#}}}
+    sub get_building_orig {#{{{
+        my $self  = shift;
+        my $pid   = shift;
+        my $type  = shift;
+        my $force = shift || 0;
+
+=head2 get_building
+
+Returns a single GLC building object for a unique building. 
 
 eg Games::Lacuna::Client::Buildings::PoliceStation
 
@@ -948,7 +1011,7 @@ GLC building object.
 
         my $id   = $bldg_hr->{'id'}; 
         my $type = substr $bldg_hr->{'url'}, 1;   # remove the leading slash from the url
-        
+ 
         my $obj;
         if( $self->use_gui ) {
             my $chi = $self->cache;
@@ -1151,7 +1214,7 @@ building_id is the ID of the Entertainment District building from which the
 links were first pulled before being cached.
 
 Hitting the URLs as they are will play the lottery I<in the zone where that 
-original Entertainment District existed>.  This may or may not be what you want.  
+original Entertainment District existed>.  This may or may not be what you want. 
 
 See LacunaWaX::Model::Links for methods to change the building id so you can 
 play the lottery in a different zone.
@@ -1472,7 +1535,7 @@ eg
             "scanner" => 'Scanner',
         }#}}}
 
-        
+ 
     }#}}}
     sub get_spies {#{{{
         my $self   = shift;
@@ -1539,7 +1602,7 @@ to 5000, the maximum.
 $exact is a boolean flag.  If true, we will build exactly $num_requested of the 
 requested recipe or we'll fail.  So if you request to build 10 of a given 
 recipe, but there are only enough glyphs onsite to build 8 of that recipe, a 
-true value for $exact will cause the build to fail.  Normally not what you want.  
+true value for $exact will cause the build to fail.  Normally not what you want. 
 If false, we'll build I<up to> $num_requested of the requested recipe.  In our 
 example, the 8 possible plans would have been built.  Defaults to false.
 
@@ -1691,7 +1754,7 @@ A LacunaWaX object
 
 =head2 server_id (Required)
 
-The integer ID of the server, in the local Servers table, to which to connect.  
+The integer ID of the server, in the local Servers table, to which to connect. 
 This must currently be either 1 (US1) or 2 (PT).
 
 =head2 use_gui

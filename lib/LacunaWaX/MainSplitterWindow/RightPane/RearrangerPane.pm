@@ -1,6 +1,4 @@
 
-### search on CHECK
-
 package LacunaWaX::MainSplitterWindow::RightPane::RearrangerPane {
     use v5.14;
     use Data::Dumper;
@@ -333,29 +331,12 @@ $VAR1 = {
 
 =cut
 
-    ### CHECK
-    ###
-    ### If the app gets closed while this dialog is still open, we get a 
-    ### segfault.
-    ###
-    ### I'm thinking that we should:
-    ###     - Register each building dialog we open (put it in a hash)
-    ###     - In OnClose here, close all open building dialogs.
-    ###     - In the building dialog OnClose, call building_dialog_closed() in 
-    ###       here.  That method should delete the building from our "open 
-    ###       dialogs" hash.
-    ###         - That method doesn't exist yet.
-    ###
-    ###     - The dialog should maybe have a "opener" attribute, which points 
-    ###       back to us in this case, so the dialog will always know which 
-    ###       "building_dialog_closed" method it should call.
-    ###
         my $d = LacunaWaX::Dialog::Building->new(
-            building_hr => $bldg,
+            bldg_hr     => $bldg,
             caller      => $self,
             planet_id   => $self->planet_id,
         );
-        $self->dialogs->{ $d->id } = $d;
+        $self->dialogs->{ $d->bldg_id } = $d;
         $d->Show(1);
     }#}}}
     sub building_dialog_closed {#{{{
