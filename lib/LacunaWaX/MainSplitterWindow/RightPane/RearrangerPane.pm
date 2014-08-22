@@ -331,6 +331,10 @@ $VAR1 = {
 
 =cut
 
+        ### Don't try to display a building dialog if the user clicked an 
+        ### empty plot.
+        return unless keys %{$bldg};
+
         my $d = LacunaWaX::Dialog::Building->new(
             bldg_hr     => $bldg,
             caller      => $self,

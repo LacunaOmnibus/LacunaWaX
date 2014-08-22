@@ -778,6 +778,12 @@ Returns true/false on success/fail.
         my $val     = shift || 0;
         $self->main_frame->status_bar->gauge->SetValue($val);
     }#}}}
+    sub get_screen_resolution {#{{{
+        my $self = shift;
+        my $d = Wx::Display->new(0);
+        my $s = $d->GetClientArea;
+        return( $s->width, $s->height );
+    }#}}}
     sub get_top_left_corner {#{{{
         my $self = shift;
         return $self->GetTopWindow()->GetPosition;

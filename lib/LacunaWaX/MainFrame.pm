@@ -110,13 +110,13 @@ package LacunaWaX::MainFrame {
 
     sub _build_default_height {#{{{
         my $self = shift;
-        my( $sw, $sh ) = $self->get_screen_resolution;
+        my( $sw, $sh ) = wxTheApp->get_screen_resolution;
         my $desired = 900;
         return( $sh < $desired ) ? $sh - 50 : $desired;
     }#}}}
     sub _build_default_width {#{{{
         my $self = shift;
-        my( $sw, $sh ) = $self->get_screen_resolution;
+        my( $sw, $sh ) = wxTheApp->get_screen_resolution;
         my $desired = 800;
         return( $sw < $desired ) ? $sw - 50 : $desired;
     }#}}}
@@ -242,13 +242,6 @@ package LacunaWaX::MainFrame {
         $self->splitter->splitter_window->Destroy();
         return;
     };#}}}
-
-    sub get_screen_resolution {#{{{
-        my $self = shift;
-        my $d = Wx::Display->new(0);
-        my $s = $d->GetClientArea;
-        return( $s->width, $s->height );
-    }#}}}
 
     sub OnClose {#{{{
         my $self    = shift;

@@ -7,7 +7,7 @@ package LacunaWaX::Dialog::NonScrolled {
 
     use Moose;
 
-    ### Perlapp does not like MooseX-NonMoose::InsideOut one little bit.  
+    ### Perlapp does not like MooseX-NonMoose::InsideOut one little bit. 
     ### Outside of perlapp it works just fine.
     ###
     ### We'll attempt to at least partially imitate it, by allowing the dialog 
@@ -28,20 +28,22 @@ package LacunaWaX::Dialog::NonScrolled {
         isa         => 'Wx::Dialog',
         lazy_build  => 1,
         handles => {
-            Centre              => "Centre",
-            Close               => "Close",
-            Connect             => "Connect",
-            Destroy             => "Destroy",
-            EndModal            => "EndModal",
-            GetClientSize       => "GetClientSize",
-            GetWindowStyleFlag  => "GetWindowStyleFlag",
-            Layout              => "Layout",
-            SetSize             => "SetSize",
-            SetSizer            => "SetSizer",
-            SetTitle            => "SetTitle",
-            SetWindowStyle      => "SetWindowStyle",
-            Show                => "Show",
-            ShowModal           => "ShowModal",
+            Centre                  => "Centre",
+            Close                   => "Close",
+            Connect                 => "Connect",
+            Destroy                 => "Destroy",
+            EndModal                => "EndModal",
+            GetClientSize           => "GetClientSize",
+            GetWindowStyleFlag      => "GetWindowStyleFlag",
+            Layout                  => "Layout",
+            SetMinSize                 => "SetMinSize",
+            SetMaxSize                 => "SetMaxSize",
+            SetSize                 => "SetSize",
+            SetSizer                => "SetSizer",
+            SetTitle                => "SetTitle",
+            SetWindowStyle          => "SetWindowStyle",
+            Show                    => "Show",
+            ShowModal               => "ShowModal",
         },
     );
 
@@ -96,13 +98,24 @@ package LacunaWaX::Dialog::NonScrolled {
         my $self = shift;
         my $style = $self->GetWindowStyleFlag;
 
+        ### Works on Ubuntu.
+        $self->SetMinSize($self->size);
+        $self->SetMaxSize($self->size);
+
+        ### This has no affect on Ubuntu, but it's been here for a long time, 
+        ### so I suspect it works on Windows.
         $style = ($style ^ wxRESIZE_BORDER);
         $self->SetWindowStyle($style);
+
         return 1;
     }#}}}
     sub make_resizable {#{{{
         my $self = shift;
         my $style = $self->GetWindowStyleFlag;
+
+        ### Works on Ubuntu.
+        $self->SetMinSize( Wx::Size->new(0,0) );
+        $self->SetMaxSize( Wx::Size->new(wxTheApp->get_screen_resolution) );
 
         $style = ($style | wxRESIZE_BORDER);
         $self->SetWindowStyle($style);

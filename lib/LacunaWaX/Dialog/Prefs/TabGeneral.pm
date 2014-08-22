@@ -26,7 +26,7 @@ package LacunaWax::Dialog::Prefs::TabGeneral {
 
     has 'szr_grid' => (
         is          => 'rw', 
-        isa         => 'Wx::FlexGridSizer',     
+        isa         => 'Wx::FlexGridSizer', 
         lazy_build  => 1,
     );
 

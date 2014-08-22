@@ -8,9 +8,9 @@ package LacunaWaX::Dialog::Building {
     use Try::Tiny;
     use Wx qw(:everything);
     use Wx::Event qw(EVT_BUTTON EVT_CLOSE EVT_RADIOBOX EVT_SIZE);
-
-    use LacunaWaX::Generics::BldgUpgradeBar;
     extends 'LacunaWaX::Dialog::NonScrolled';
+
+    use LacunaWaX::Dialog::Building::TabUpgrade;
 
     has 'bldg_hr' => (
         is      => 'rw',
@@ -54,9 +54,21 @@ package LacunaWaX::Dialog::Building {
         lazy_build  => 1,
     );
 
+    has 'notebook_size' => (
+        is          => 'rw',
+        isa         => 'Wx::Size',
+        lazy_build  => 1
+    );
+
     has 'planet_name' => (
         is          => 'rw',
         isa         => 'Str',
+        lazy_build  => 1,
+    );
+
+    has 'tabs' => (
+        is          => 'rw',
+        isa         => 'ArrayRef[Object]',
         lazy_build  => 1,
     );
 
@@ -66,8 +78,9 @@ package LacunaWaX::Dialog::Building {
         lazy_build  => 1,
     );
 
-    has 'lbl_header'          => (is => 'rw', isa => 'Wx::StaticText',      lazy_build => 1);
-    has 'szr_header'          => (is => 'rw', isa => 'Wx::BoxSizer',        lazy_build => 1);
+    has 'lbl_header'        => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1);
+    has 'ntbk_features'     => (is => 'rw', isa => 'Wx::Notebook',      lazy_build => 1);
+    has 'szr_header'        => (is => 'rw', isa => 'Wx::BoxSizer',      lazy_build => 1);
 
     sub BUILD {
         my $self = shift;
@@ -76,28 +89,22 @@ package LacunaWaX::Dialog::Building {
 
         $self->SetTitle( $self->title );
         $self->SetSize( $self->size );
+        $self->make_non_resizable;
 
+        ### CHECK this obviously looks like crap and needs to change.  Be sure 
+        ### to twiddle build_notebook_size when you fix this.
         $self->szr_header->Add($self->lbl_header, 0, 0, 0);
 
-
-my $upgrade_bar = LacunaWaX::Generics::BldgUpgradeBar->new(
-    parent      => $self->dialog,
-    bldg_obj    => $self->bldg_obj,
-    bldg_view   => $self->bldg_view,
-
-);
-#say Dumper $self->bldg_obj;
-#say Dumper $self->bldg_view;
-
+        $self->bind_notebook();
 
         $self->main_sizer->Add($self->szr_header, 0, 0, 0);
-        $self->main_sizer->Add($upgrade_bar->szr_main, 0, 0, 0);
+        $self->main_sizer->AddSpacer(10);
+        $self->main_sizer->Add($self->ntbk_features, 0, 0, 0);
 
         $self->_set_events();
         $self->init_screen();
         return $self;
     }
-
     sub _build_bldg_id {#{{{
         my $self = shift;
         return $self->bldg_hr->{'bldg_id'};
@@ -138,6 +145,19 @@ my $upgrade_bar = LacunaWaX::Generics::BldgUpgradeBar->new(
 
         return $v;
     }#}}}
+    sub _build_ntbk_features {#{{{
+        my $self = shift;
+        my $v = Wx::Notebook->new($self->dialog, -1, wxDefaultPosition, $self->notebook_size, 0);
+        return $v;
+    }#}}}
+    sub _build_notebook_size {#{{{
+        my $self = shift;
+        my $s = Wx::Size->new(
+            $self->GetClientSize->width - 120,
+            $self->GetClientSize->height - 120
+        );
+        return $s;
+    }#}}}
     sub _build_planet_name {#{{{
         my $self = shift;
         return wxTheApp->game_client->planet_name( $self->planet_id );
@@ -147,19 +167,43 @@ my $upgrade_bar = LacunaWaX::Generics::BldgUpgradeBar->new(
         my $s = Wx::Size->new(650, 700);
         return $s;
     }#}}}
-    sub _build_title {#{{{
+    sub _build_tabs {#{{{
         my $self = shift;
-        return $self->bldg_hr->{'name'};
+        my $tabs = [];
+
+        ### This needs to decide which tabs to display based on the building 
+        ### type.
+
+        push @{$tabs}, LacunaWaX::Dialog::Building::TabUpgrade->new(
+            parent      => $self,
+            bldg_obj    => $self->bldg_obj,
+            bldg_view   => $self->bldg_view,
+        );
+
+        return $tabs;
     }#}}}
     sub _build_szr_header {#{{{
         my $self = shift;
         return wxTheApp->build_sizer($self->dialog, wxHORIZONTAL, 'Header');
+    }#}}}
+    sub _build_title {#{{{
+        my $self = shift;
+        return $self->bldg_hr->{'name'};
     }#}}}
     sub _set_events {#{{{
         my $self = shift;
         EVT_CLOSE(      $self,                              sub{$self->OnClose(@_)}         );
         EVT_SIZE(       $self,                              sub{$self->OnResize(@_)}        );
         return 1;
+    }#}}}
+
+    sub bind_notebook {#{{{
+        my $self = shift;
+
+        foreach my $t( @{$self->tabs} ) {
+            $self->ntbk_features->AddPage( $t->pnl_main, $t->tab_name );
+        }
+ 
     }#}}}
 
     sub OnClose {#{{{
