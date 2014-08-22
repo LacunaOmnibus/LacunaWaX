@@ -868,25 +868,43 @@ space port that appears in the top row, include only { x => 5 }.  Etc.
         ### No caching needed here; both get_buildings and get_building_object 
         ### are managing their own caches.
         my $bldgs_hr = $self->get_buildings( $pid, $type, $force );
+say "I got " . (scalar keys $bldgs_hr) . " buildings of $type";
+
+
+
+### See the comment top of Dialog::Building.pm.
+###
+### The working SP reports 71 SPs on the surface, and finds the right one.
+###
+### The non-working SP reports < 71.  The number it reports changes each time. 
+### I dunno wtf is happening.
+
+
+
 
         my $bldg_hr_to_return = {};
         if($args) {
             SURFACE_BUILDING:
-            foreach my $id( keys %{$bldgs_hr} ) {
+            foreach my $id( sort{$a<=>$b}keys %{$bldgs_hr} ) {
+say "-$id- -$args->{id}-";
                 my $bldg_hr = $bldgs_hr->{$id};
 
                 while( my($k,$v) = each %{$args} ) {
+#say "-$id- -$bldg_hr->{id}- -$v-";
                     unless( $bldg_hr->{$k} eq $v ) {
                         next SURFACE_BUILDING;
                     }
+#say "got a match";
+                    $bldg_hr_to_return = $bldg_hr;
                 }
-                $bldg_hr_to_return = $bldg_hr;
             }
         }
         else {
             my($id, $bldg_hr) = each %{$bldgs_hr};
             $bldg_hr_to_return = $bldg_hr;
         }
+
+die "shit" unless keys %$bldg_hr_to_return;
 
         return $self->get_building_object($pid, $bldg_hr_to_return);
     }#}}}
@@ -949,7 +967,6 @@ sending a true value as the third ('force') arg:
         $self->app->Yield if $self->app;
         my $pobj  = $self->get_body($pid);
         $self->app->Yield if $self->app;
-
 
         my $code_to_cache = sub {
             my $bldg = $pobj->get_buildings;
@@ -1535,6 +1552,272 @@ eg
             "scanner" => 'Scanner',
         }#}}}
 
+ 
+    }#}}}
+    sub get_ship_types_by_tag {#{{{
+        my $self = shift;
+
+=head2 get_ship_types_by_tag
+
+Returns a hashref of all ships by tag. 
+
+I dug this data out of Games::Lacuna::Client::Types - look for %ships.
+
+ $hr = {
+    Trade => [
+        {
+            type_human => 'Freighter',
+            type => 'freighter',
+        }
+        ...etc...
+    ]
+    ...etc...
+ }
+
+=cut
+
+        my $tags = {#{{{
+            'Trade' => [#{{{
+                {
+                'type_human' => 'Freighter',
+                'type' => 'freighter'
+                },
+                {
+                'type' => 'galleon',
+                'type_human' => 'Galleon'
+                },
+                {
+                'type' => 'cargo_ship',
+                'type_human' => 'Cargo Ship'
+                },
+                {
+                'type_human' => 'Smuggler Ship',
+                'type' => 'smuggler_ship'
+                },
+                {
+                'type_human' => 'Hulk',
+                'type' => 'hulk'
+                },
+                {
+                'type' => 'dory',
+                'type_human' => 'Dory'
+                },
+                {
+                'type_human' => 'Barge',
+                'type' => 'barge'
+                }
+            ],#}}}
+            'Mining' => [#{{{
+                {
+                'type' => 'freighter',
+                'type_human' => 'Freighter'
+                },
+                {
+                'type_human' => 'Galleon',
+                'type' => 'galleon'
+                },
+                {
+                'type' => 'cargo_ship',
+                'type_human' => 'Cargo Ship'
+                },
+                {
+                'type' => 'smuggler_ship',
+                'type_human' => 'Smuggler Ship'
+                },
+                {
+                'type' => 'mining_platform_ship',
+                'type_human' => 'Mining Platform Ship'
+                },
+                {
+                'type_human' => 'Hulk',
+                'type' => 'hulk'
+                },
+                {
+                'type' => 'dory',
+                'type_human' => 'Dory'
+                },
+                {
+                'type' => 'barge',
+                'type_human' => 'Barge'
+                }
+            ],#}}}
+            'Colonization' => [#{{{
+                {
+                'type_human' => 'Supply Pod II',
+                'type' => 'supply_pod2'
+                },
+                {
+                'type' => 'colony_ship',
+                'type_human' => 'Colony Ship'
+                },
+                {
+                'type_human' => 'Supply Pod III',
+                'type' => 'supply_pod3'
+                },
+                {
+                'type_human' => 'Short Range Colony Ship',
+                'type' => 'short_range_colony_ship'
+                },
+                {
+                'type_human' => 'Gas Giant Settlement Ship',
+                'type' => 'gas_giant_settlement_ship'
+                },
+                {
+                'type' => 'terraforming_platform_ship',
+                'type_human' => 'Terraforming Platform Ship'
+                },
+                {
+                'type' => 'supply_pod',
+                'type_human' => 'Supply Pod'
+                },
+                {
+                'type_human' => 'Stake',
+                'type' => 'stake'
+                },
+                {
+                'type_human' => 'Supply Pod IV',
+                'type' => 'supply_pod4'
+                }
+            ],#}}}
+            'Intelligence' => [#{{{
+                {
+                'type_human' => 'Probe',
+                'type' => 'probe'
+                },
+                {
+                'type' => 'scanner',
+                'type_human' => 'Scanner'
+                },
+                {
+                'type_human' => 'Cargo Ship',
+                'type' => 'cargo_ship'
+                },
+                {
+                'type' => 'smuggler_ship',
+                'type_human' => 'Smuggler Ship'
+                },
+                {
+                'type' => 'spy_shuttle',
+                'type_human' => 'Spy Shuttle'
+                },
+                {
+                'type' => 'surveyor',
+                'type_human' => 'Surveyor'
+                },
+                {
+                'type' => 'spy_pod',
+                'type_human' => 'Spy Pod'
+                },
+                {
+                'type_human' => 'Dory',
+                'type' => 'dory'
+                },
+                {
+                'type_human' => 'Space Station Hull',
+                'type' => 'space_station'
+                }
+            ],#}}}
+            'Exploration' => [#{{{
+                {
+                'type' => 'probe',
+                'type_human' => 'Probe'
+                },
+                {
+                'type' => 'scanner',
+                'type_human' => 'Scanner'
+                },
+                {
+                'type_human' => 'Excavator',
+                'type' => 'excavator'
+                },
+                {
+                'type_human' => 'Surveyor',
+                'type' => 'surveyor'
+                }
+            ],#}}}
+            'War' => [#{{{
+                {
+                'type' => 'placebo2',
+                'type_human' => 'Placebo II'
+                },
+                {
+                'type' => 'placebo',
+                'type_human' => 'Placebo'
+                },
+                {
+                'type' => 'fighter',
+                'type_human' => 'Fighter'
+                },
+                {
+                'type' => 'snark2',
+                'type_human' => 'Snark II'
+                },
+                {
+                'type_human' => 'Security Ministry Seeker',
+                'type' => 'security_ministry_seeker'
+                },
+                {
+                'type' => 'snark3',
+                'type_human' => 'Snark III'
+                },
+                {
+                'type_human' => 'Observatory Seeker',
+                'type' => 'observatory_seeker'
+                },
+                {
+                'type_human' => 'Placebo IV',
+                'type' => 'placebo4'
+                },
+                {
+                'type_human' => 'Snark',
+                'type' => 'snark'
+                },
+                {
+                'type' => 'scow',
+                'type_human' => 'Scow'
+                },
+                {
+                'type_human' => 'Drone',
+                'type' => 'drone'
+                },
+                {
+                'type_human' => 'Detonator',
+                'type' => 'detonator'
+                },
+                {
+                'type_human' => 'Sweeper',
+                'type' => 'sweeper'
+                },
+                {
+                'type_human' => 'Placebo VI',
+                'type' => 'placebo6'
+                },
+                {
+                'type_human' => 'Placebo V',
+                'type' => 'placebo5'
+                },
+                {
+                'type_human' => 'Thud',
+                'type' => 'thud'
+                },
+                {
+                'type' => 'bleeder',
+                'type_human' => 'Bleeder'
+                },
+                {
+                'type_human' => 'Placebo III',
+                'type' => 'placebo3'
+                },
+                {
+                'type_human' => 'Spaceport Seeker',
+                'type' => 'spaceport_seeker'
+                },
+                {
+                'type_human' => 'Space Station Hull',
+                'type' => 'space_station'
+                }
+            ]#}}}
+        };#}}}
  
     }#}}}
     sub get_spies {#{{{

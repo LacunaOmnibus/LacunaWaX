@@ -1,6 +1,19 @@
 
 ### Search on CHECK
 
+
+### Somewhere along the line, the correct building object is not being passed 
+### to TabSpacePortView (or probably TabUpgrade either).
+###
+### On bmots08, the SP in the top left corner works fine.  The one just to its 
+### right does not.
+###
+### See my debugging stuff in Client.pm's get_building().
+
+
+
+
+
 package LacunaWaX::Dialog::Building {
     use v5.14;
     use Data::Dumper;
@@ -11,6 +24,7 @@ package LacunaWaX::Dialog::Building {
     extends 'LacunaWaX::Dialog::NonScrolled';
 
     use LacunaWaX::Dialog::Building::TabUpgrade;
+    use LacunaWaX::Dialog::Building::TabSpacePortView;
 
     has 'bldg_hr' => (
         is      => 'rw',
@@ -66,6 +80,12 @@ package LacunaWaX::Dialog::Building {
         lazy_build  => 1,
     );
 
+    has 'tab_db' => (
+        is          => 'rw',
+        isa         => 'HashRef[ArrayRef]',
+        lazy_build  => 1,
+    );
+
     has 'tabs' => (
         is          => 'rw',
         isa         => 'ArrayRef[Object]',
@@ -111,6 +131,7 @@ package LacunaWaX::Dialog::Building {
     }#}}}
     sub _build_bldg_obj {#{{{
         my $self = shift;
+
         my $obj = wxTheApp->game_client->get_building(
             $self->planet_id,
             $self->bldg_hr->{'name'},
@@ -119,6 +140,7 @@ package LacunaWaX::Dialog::Building {
                 id => $self->bldg_id
             }
         );
+
         return $obj;
     }#}}}
     sub _build_bldg_view {#{{{
@@ -153,7 +175,7 @@ package LacunaWaX::Dialog::Building {
     sub _build_notebook_size {#{{{
         my $self = shift;
         my $s = Wx::Size->new(
-            $self->GetClientSize->width - 120,
+            $self->GetClientSize->width - 10,
             $self->GetClientSize->height - 120
         );
         return $s;
@@ -180,7 +202,27 @@ package LacunaWaX::Dialog::Building {
             bldg_view   => $self->bldg_view,
         );
 
+        foreach my $t( @{ $self->tab_db->{$self->bldg_hr->{'name'}} } ) {
+            my $class = "LacunaWaX::Dialog::Building::$t";
+            push @{$tabs}, $class->new(
+                parent      => $self,
+                bldg_obj    => $self->bldg_obj,
+                bldg_view   => $self->bldg_view,
+            );
+        }
+
         return $tabs;
+    }#}}}
+    sub _build_tab_db {#{{{
+        my $self = shift;
+
+        my $db = {
+            'Space Port' => [
+                'TabSpacePortView'
+            ]
+        };
+
+        return $db;
     }#}}}
     sub _build_szr_header {#{{{
         my $self = shift;
