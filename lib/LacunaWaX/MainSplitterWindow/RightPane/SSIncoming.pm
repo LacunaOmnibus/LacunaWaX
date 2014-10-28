@@ -212,7 +212,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::SSIncoming {
         ### 380 is as much height as we need to display 25 records, which is 
         ### the most we can have at one time.
         my $width  = 700;
-        my $height = 380;
+        my $height = 580;
 
         my $v = Wx::ListCtrl->new(
             $self->parent, -1, 
@@ -353,22 +353,32 @@ The list of ships is an AoH, each H representing a ship:
         foreach my $ship( @{$self->incoming} ) {
             $self->lst_incoming->InsertStringItem($row, $ship->{'type_human'});
             $self->lst_incoming->SetItem($row, 1, $ship->{'date_arrives'});
-            $self->lst_incoming->SetItem($row, 2, $ship->{'from'}{'name'});
-            $self->lst_incoming->SetItem($row, 3, $ship->{'from'}{'id'});
-            $self->lst_incoming->SetItem($row, 4, $ship->{'from'}{'empire'}{'name'});
-            $self->lst_incoming->SetItem($row, 5, $ship->{'from'}{'empire'}{'id'});
+
+            my $from_planet = ($ship->{'from'}{'name'})
+                ?  $ship->{'from'}{'name'} 
+                : 'Unknown';
+            $self->lst_incoming->SetItem($row, 2, $from_planet);
+
+            $self->lst_incoming->SetItem($row, 3, $ship->{'from'}{'id'}) if $ship->{'from'}{'id'};
+
+            my $from_empire = ($ship->{'from'}{'empire'}{'name'})
+                ? $ship->{'from'}{'empire'}{'name'} : 'Unknown';
+            $self->lst_incoming->SetItem($row, 4, $from_empire);
+
+            $self->lst_incoming->SetItem($row, 5, $ship->{'from'}{'empire'}{'id'}) if $ship->{'from'}{'empire'}{'id'};
+
             $row++;
             wxTheApp->Yield;
         }
         if($row) {
             ### Only resize the ListCtrl if we added data to it (don't bother 
             ### if there are no ships incoming.)
-            $self->lst_incoming->SetColumnWidth(0, wxLIST_AUTOSIZE);
-            $self->lst_incoming->SetColumnWidth(1, wxLIST_AUTOSIZE_USEHEADER);
-            $self->lst_incoming->SetColumnWidth(2, wxLIST_AUTOSIZE);
-            $self->lst_incoming->SetColumnWidth(3, wxLIST_AUTOSIZE_USEHEADER);
-            $self->lst_incoming->SetColumnWidth(4, wxLIST_AUTOSIZE);
-            $self->lst_incoming->SetColumnWidth(5, wxLIST_AUTOSIZE_USEHEADER);
+            $self->lst_incoming->SetColumnWidth(0, wxLIST_AUTOSIZE);            # type
+            $self->lst_incoming->SetColumnWidth(1, wxLIST_AUTOSIZE);            # inc date
+            $self->lst_incoming->SetColumnWidth(2, wxLIST_AUTOSIZE_USEHEADER);  # planet name
+            $self->lst_incoming->SetColumnWidth(3, wxLIST_AUTOSIZE_USEHEADER);  # pid
+            $self->lst_incoming->SetColumnWidth(4, wxLIST_AUTOSIZE_USEHEADER);  # empire name
+            $self->lst_incoming->SetColumnWidth(5, wxLIST_AUTOSIZE_USEHEADER);  # eid
         }
 
         $self->update_pagination;
