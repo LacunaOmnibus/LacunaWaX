@@ -297,7 +297,7 @@ package LacunaWaX {
                         $x >= 0 and $x < $self->display_x
                     and $y >= 0 and $y < $self->display_y
                 ) {
-                    ### Attempting to fix the hidden window problem.  Only try  
+                    ### Attempting to fix the hidden window problem.  Only try 
                     ### to set the MainFrame's position if the recorded X and 
                     ### Y are inside the bounds of the current display.
                     $args->{'position'} = Wx::Point->new($x, $y);
@@ -777,7 +777,7 @@ Returns the number of halls needed to get from one level to another.
             )],
         };
 
-        ### These are the tables we're going to try to import.  If any of them  
+        ### These are the tables we're going to try to import.  If any of them 
         ### don't exist in the old database, they'll just be skipped.
         ###
         ### The old database may contain these tables sans some columns that 

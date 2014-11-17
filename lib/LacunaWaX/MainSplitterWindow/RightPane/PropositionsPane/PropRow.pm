@@ -1,4 +1,6 @@
 
+### SITTERVOTE
+
 package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane::PropRow {
     use v5.14;
     use Carp;
@@ -548,9 +550,11 @@ package LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane::PropRow {
 
             ### SITTERVOTE
             ### That 'tag' comment exists so this chunk of code is easy to 
-            ### find, please do not delete it.
-            my $rv = $sitter_parl->cast_vote($prop->{'id'}, 1);
-#            my $rv = $sitter_parl->cast_vote($prop->{'id'}, 0);  # to force 'no' votes
+            ### find, please do not delete it. 
+            ###
+            ### to force 'no' votes , swap the comments below
+            my $rv = $sitter_parl->cast_vote($prop->{'id'}, 1);     # Yes (regular)
+#           my $rv = $sitter_parl->cast_vote($prop->{'id'}, 0);     # No
             alarm 0;
 
             return $rv;
@@ -627,7 +631,7 @@ sitters.
             $self->clear_dialog_status;
             return;
         }
-        
+ 
         my $current_yes         = $row->lbl_votes_yes->GetLabelText;
         my $total_needed        = $row->lbl_votes_needed->GetLabelText;
         my $voting_members      = [];
@@ -702,7 +706,7 @@ sitters.
     }#}}}
     before 'clear_dialog_status' => sub {#{{{
         my $self = shift;
-        
+ 
         ### Call the dialog_status object's own close method, which removes its 
         ### wxwidgets, before clearing this object's dialog_status attribute.
         if($self->has_dialog_status) {
@@ -806,7 +810,7 @@ sitters.
             my $current_yes = $self->lbl_votes_yes->GetLabelText;
             $self->lbl_votes_yes->SetLabel(++$current_yes);
             $vote_text = 'Yes';
-            
+ 
         }
         else {
             my $current_no = $self->lbl_votes_no->GetLabelText;
@@ -842,7 +846,7 @@ sitters.
         ### starts.  I have not been able yet to figure out why, but the damn 
         ### thing will suddenly show a bar partway through the gauge, and that 
         ### bar will very infrequently throb.
-        ### For now, just reset it at the beginning of voting for each prop.  
+        ### For now, just reset it at the beginning of voting for each prop. 
         ### This won't stop it from periodically showing up, but will clean it 
         ### up when it does.
         wxTheApp->endthrob;
@@ -904,7 +908,7 @@ the user closes that dialog with a mouseclick:
       pseudo-event method, which clears the dialog_status from the PropRow 
       object.
     - This could happen at any time, without warning.
-    
+ 
 So any calls to dialog_status in here (eg dialog_status->say(...);) need to be 
 wrapped in checks that first ensure the thing still exists; dialog_status_say() 
 and dialog_status_say_recsep() methods exist to that end.
