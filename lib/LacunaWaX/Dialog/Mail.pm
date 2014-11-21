@@ -1,4 +1,10 @@
 
+### CHECK
+### The mail tool needs to be cleaned up - check the version in the SS changes 
+### branch - I'm sure I cleaned that up.  But the mass delete thing is working 
+### now.
+
+
 package LacunaWaX::Dialog::Mail {
     use v5.14;
     use Data::Dumper; $Data::Dumper::Indent = 1;
@@ -703,7 +709,6 @@ already used 'bless'.
         my $event           = shift;
         my $tags_to_trash   = [];
 
-
         foreach my $checkbox( $self->chk_alert, $self->chk_attacks, $self->chk_corr, $self->chk_excav, $self->chk_parl, $self->chk_probe ) {
             push @{$tags_to_trash}, $checkbox->GetLabel if $checkbox->GetValue;
         }
@@ -737,84 +742,7 @@ already used 'bless'.
             return;
         } or return;
 
-### CHECK
-### $rv->{'deleted'} is supposed to be an arrayref of message IDs, but it's an 
-### integer.
-### Actually, $rv is completely messed up:
-###
-### $VAR1 = {
-###     '71035244' => 'status',
-###     'deleted' => '71032095',
-###     'HASH(0x58fa7d8)' => undef,
-###     '71034758' => '71034977'
-### };
-###
-### All those integers are probably the individual message IDs I deleted (the 
-### delete that generated that may well have just deleted 5 messages).
-###
-### Anyway, TT says he fixed this once on PT and his fix disappeared, so he's 
-### going to try to get another fix in tonight. (11/20/2014).  Check back 
-### then.
-### 
-### Other than the goofy retval, the method does appear to be deleting 
-### messages properly.
-
-print Dumper $rv;
-        wxTheApp->popmsg( "I just trashed a bunch of messages." );
-        #wxTheApp->popmsg( "I just trashed ", scalar @{$rv->{'deleted'}}, " messages." );
-    }#}}}
-    sub OnClearMailOrig {#{{{
-        my $self            = shift;
-        my $dialog          = shift;
-        my $event           = shift;
-        my $tags_to_trash   = [];
-
-		my $del_string = q{};
-        if( my $str = $self->txt_cust->GetValue ) {
-            $del_string = $str;
-        }
-
-        foreach my $checkbox( $self->chk_alert, $self->chk_attacks, $self->chk_corr, $self->chk_excav, $self->chk_parl, $self->chk_probe ) {
-            push @{$tags_to_trash}, $checkbox->GetLabel if $checkbox->GetValue;
-        }
- 
-        unless( @{$tags_to_trash} or $del_string ) {
-            wxTheApp->poperr(
-                "I should remove nothing?  You got it.",
-                "No checkboxes checked",
-            );
-            $self->btn_clear_inbox->SetFocus;
-            return;
-        }
-
-        my $status = LacunaWaX::Dialog::Status->new(
-            parent => $self->dialog,
-            title  => 'Clear Mail',
-        );
-        $status->show;
-
-        my $trash_these = $self->_get_trash_messages($del_string, $tags_to_trash, $status);
- 
-        $status->say("Deleting selected messages");
-        my $rv = try {
-            $self->inbox->trash_messages($trash_these);
-        }
-        catch {
-            my $msg = (ref $_) ? $_->text : $_;
-            wxTheApp->poperr("Unable to delete messages: $msg");
-            return;
-        } or return;
-        my $trashed     = scalar @{$rv->{'success'}} || 0;
-        my $not_trashed = scalar @{$rv->{'failure'}} || 0;
-
-        my $t_pl  = ($trashed == 1) ? q{ was} : q{s were};
-        my $nt_pl = ($not_trashed == 1) ? q{} : q{s};
-        my $msg  = "$trashed message${t_pl} moved to the trash.";
-           $msg .= "\n\n$not_trashed message${nt_pl} could not be moved to the trash." if $not_trashed;
-        $status->say($msg);
-        $status->say_recsep;
-        $status->say("Mail clearing complete.");
-        return 1;
+        wxTheApp->popmsg( "I just trashed ". (scalar @{$rv->{'deleted'}}) . " messages.", "Done!" );
     }#}}}
     sub OnClearTo {#{{{
         my $self = shift;
