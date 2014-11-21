@@ -11,28 +11,51 @@ use Games::Lacuna::Client;
 use Games::Lacuna::Client::Module;
 our @ISA = qw(Games::Lacuna::Client::Module);
 
+### JDB
+### This is the original.  It was assumed that all methods would always have 
+### positional parameters, but TT is adding trash_messages_where to have named 
+### parameters, so this entire method is now broken.
+#sub api_methods {
+#  return {
+#    (
+#      map {
+#        ($_ => { default_args => [qw(session_id)] })
+#      }
+#        ### JDB added trash_messages_where
+#      qw(
+#        view_inbox
+#        view_archived
+#        view_trashed
+#        view_sent
+#        read_message
+#        archive_messages
+#        trash_messages
+#        trash_messages_where
+#        send_message
+#      )
+#    ),
+#  };
+#}
+
+
+### JDB I copied this more standard structure from Map.pm and filled it out 
+### with Inbox methods.
 sub api_methods {
   return {
-    (
-      map {
-        ($_ => { default_args => [qw(session_id)] })
-      }
-        ### JDB added trash_messages_where
-      qw(
-        view_inbox
-        view_archived
-        view_trashed
-        view_sent
-        read_message
-        archive_messages
-        trash_messages
-        trash_messages_where
-        send_message
-      )
-    ),
+    view_inbox              => { default_args => [qw(session_id)] },
+    view_archived           => { default_args => [qw(session_id)] },
+    view_trashed            => { default_args => [qw(session_id)] },
+    view_sent               => { default_args => [qw(session_id)] },
+    read_message            => { default_args => [qw(session_id)] },
+    archive_messages        => { default_args => [qw(session_id)] },
+    trash_messages          => { default_args => [qw(session_id)] },
+    trash_messages_where    => { default_args => [qw(session_id)] },
+    send_message            => { default_args => [qw(session_id)] },
   };
 }
 
+
+### JDB I don't know why this exists; it was commented out when I got here.
 #sub new {
 #  my $class = shift;
 #  my %opt = @_;
