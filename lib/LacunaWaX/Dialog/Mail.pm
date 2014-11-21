@@ -22,8 +22,11 @@ package LacunaWaX::Dialog::Mail {
     has 'chk_attacks'       => (is => 'rw', isa => 'Wx::CheckBox',      lazy_build => 1);
     has 'chk_corr'          => (is => 'rw', isa => 'Wx::CheckBox',      lazy_build => 1);
     has 'chk_excav'         => (is => 'rw', isa => 'Wx::CheckBox',      lazy_build => 1);
+    has 'chk_fissure'       => (is => 'rw', isa => 'Wx::CheckBox',      lazy_build => 1);
+    has 'chk_intelligence'  => (is => 'rw', isa => 'Wx::CheckBox',      lazy_build => 1);
     has 'chk_parl'          => (is => 'rw', isa => 'Wx::CheckBox',      lazy_build => 1);
     has 'chk_probe'         => (is => 'rw', isa => 'Wx::CheckBox',      lazy_build => 1);
+    has 'chk_spies'         => (is => 'rw', isa => 'Wx::CheckBox',      lazy_build => 1);
     has 'chk_read'          => (is => 'rw', isa => 'Wx::CheckBox',      lazy_build => 1);
     has 'lbl_ally'          => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1);
     has 'lbl_body'          => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1);
@@ -64,6 +67,23 @@ package LacunaWaX::Dialog::Mail {
         $self->szr_header->Add($self->lbl_hdr_page, 0, 0, 0);
 
         ### clear mail checkboxes
+        #$self->szr_check_1->Add($self->chk_alert, 0, 0, 0);
+        #$self->szr_check_1->AddSpacer(2);
+        #$self->szr_check_1->Add($self->chk_attacks, 0, 0, 0);
+        #$self->szr_check_1->AddSpacer(2);
+        #$self->szr_check_1->Add($self->chk_corr, 0, 0, 0);
+        #$self->szr_check_1->AddSpacer(2);
+        #$self->szr_check_1->Add($self->chk_excav, 0, 0, 0);
+        #$self->szr_check_2->Add($self->chk_parl, 0, 0, 0);
+        #$self->szr_check_2->AddSpacer(2);
+        #$self->szr_check_2->Add($self->chk_probe, 0, 0, 0);
+        #$self->szr_check_2->AddSpacer(20);
+        #$self->szr_check_2->Add($self->chk_read, 0, 0, 0); 
+        #$self->szr_check_outer->Add($self->szr_check_1, 0, 0, 0); 
+        #$self->szr_check_outer->Add($self->szr_check_2, 0, 0, 0); 
+
+        ### clear mail checkboxes
+        ### Line 1
         $self->szr_check_1->Add($self->chk_alert, 0, 0, 0);
         $self->szr_check_1->AddSpacer(2);
         $self->szr_check_1->Add($self->chk_attacks, 0, 0, 0);
@@ -71,13 +91,17 @@ package LacunaWaX::Dialog::Mail {
         $self->szr_check_1->Add($self->chk_corr, 0, 0, 0);
         $self->szr_check_1->AddSpacer(2);
         $self->szr_check_1->Add($self->chk_excav, 0, 0, 0);
-
+        ### Line 2
+        $self->szr_check_2->Add($self->chk_fissure, 0, 0, 0);
+        $self->szr_check_2->AddSpacer(2);
+        $self->szr_check_2->Add($self->chk_intelligence, 0, 0, 0);
+        $self->szr_check_2->AddSpacer(2);
         $self->szr_check_2->Add($self->chk_parl, 0, 0, 0);
         $self->szr_check_2->AddSpacer(2);
         $self->szr_check_2->Add($self->chk_probe, 0, 0, 0);
-        $self->szr_check_2->AddSpacer(20);
-        $self->szr_check_2->Add($self->chk_read, 0, 0, 0); 
-
+        $self->szr_check_2->AddSpacer(2);
+        $self->szr_check_2->Add($self->chk_spies, 0, 0, 0);
+        ### Combine
         $self->szr_check_outer->Add($self->szr_check_1, 0, 0, 0); 
         $self->szr_check_outer->Add($self->szr_check_2, 0, 0, 0); 
  
@@ -225,6 +249,24 @@ package LacunaWaX::Dialog::Mail {
             Wx::Size->new(-1,-1), 
         );
     }#}}}
+    sub _build_chk_fissure {#{{{
+        my $self = shift;
+        return Wx::CheckBox->new(
+            $self->dialog, -1, 
+            'Fissure',
+            wxDefaultPosition, 
+            Wx::Size->new(-1,-1), 
+        );
+    }#}}}
+    sub _build_chk_intelligence {#{{{
+        my $self = shift;
+        return Wx::CheckBox->new(
+            $self->dialog, -1, 
+            'Intelligence',
+            wxDefaultPosition, 
+            Wx::Size->new(-1,-1), 
+        );
+    }#}}}
     sub _build_chk_parl {#{{{
         my $self = shift;
         return Wx::CheckBox->new(
@@ -239,6 +281,15 @@ package LacunaWaX::Dialog::Mail {
         return Wx::CheckBox->new(
             $self->dialog, -1, 
             'Probe',
+            wxDefaultPosition, 
+            Wx::Size->new(-1,-1), 
+        );
+    }#}}}
+    sub _build_chk_spies {#{{{
+        my $self = shift;
+        return Wx::CheckBox->new(
+            $self->dialog, -1, 
+            'Spies',
             wxDefaultPosition, 
             Wx::Size->new(-1,-1), 
         );
@@ -704,7 +755,17 @@ already used 'bless'.
         my $tags_to_trash   = [];
 
 
-        foreach my $checkbox( $self->chk_alert, $self->chk_attacks, $self->chk_corr, $self->chk_excav, $self->chk_parl, $self->chk_probe ) {
+        foreach my $checkbox(
+            $self->chk_alert,
+            $self->chk_attacks,
+            $self->chk_corr,
+            $self->chk_excav,
+            $self->chk_fissure,
+            $self->chk_intelligence,
+            $self->chk_parl,
+            $self->chk_probe,
+            $self->chk_spies,
+        ) {
             push @{$tags_to_trash}, $checkbox->GetLabel if $checkbox->GetValue;
         }
 
