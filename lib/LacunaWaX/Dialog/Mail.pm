@@ -864,11 +864,31 @@ already used 'bless'.
             return;
         } or return;
 
-delete $rv->{'status'};
-print Dumper $rv;
+### CHECK
+### $rv->{'deleted'} is supposed to be an arrayref of message IDs, but it's an 
+### integer.
+### Actually, $rv is completely messed up:
+###
+### $VAR1 = {
+###     '71035244' => 'status',
+###     'deleted' => '71032095',
+###     'HASH(0x58fa7d8)' => undef,
+###     '71034758' => '71034977'
+### };
+###
+### All those integers are probably the individual message IDs I deleted (the 
+### delete that generated that may well have just deleted 5 messages).
+###
+### Anyway, TT says he fixed this once on PT and his fix disappeared, so he's 
+### going to try to get another fix in tonight. (11/20/2014).  Check back 
+### then.
+### 
+### Other than the goofy retval, the method does appear to be deleting 
+### messages properly.
 
-        #wxTheApp->popmsg( "I just trashed " . (scalar @{$rv->{'deleted'}}) . " messages.", "*Poof*" );
-        wxTheApp->popmsg( "I just trashed $rv->{'return_count'} messages.", "*Poof*" );
+print Dumper $rv;
+        wxTheApp->popmsg( "I just trashed a bunch of messages." );
+        #wxTheApp->popmsg( "I just trashed ", scalar @{$rv->{'deleted'}}, " messages." );
     }#}}}
     sub OnClearMailOrig {#{{{
         my $self            = shift;
