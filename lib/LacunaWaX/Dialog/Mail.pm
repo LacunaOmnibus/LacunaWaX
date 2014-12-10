@@ -789,26 +789,6 @@ already used 'bless'.
         my $event           = shift;
         my $tags_to_trash   = [];
 
-### Tags in [Alert, Complaint, Spies] AND subject like 'user-entered subject string%' 
-###
-### So you could tick Alert and Parl and enter "Pass: Upgrade%" and all of the 
-### parl upgrade messages will go.
-###
-###
-### it'll be [ $building_id, $session_id, { "spec": [ @options ], "return_ids": 0|1 } ] 
-### 
-### return_ids == 1:
-###     All IDs of deleted messages are returned in an arrayref named 
-###     'deleted'
-###
-### return_ids == 0:
-###     'deleted' will not exist
-###
-### Regardless of the value of return_ids, we'll also get 'return_count', 
-### which will be an integer count of the number of deleted messages (should 
-### just be the same as "scalar deleted" if return_ids was 1).
-
-
         foreach my $checkbox(
             $self->chk_alert,
             $self->chk_attacks,
@@ -830,10 +810,7 @@ already used 'bless'.
         }
         else { 
             if(not scalar @$tags_to_trash) {
-                wxTheApp->poperr(
-                    "You must specify either one or more tags or a subject to delete.",
-                    "Nothing specified ",
-                );
+                wxTheApp->poperr( "You must specify one or more tags to delete.", "Nothing specified " );
                 return
             }
             $subject = '%'
@@ -841,10 +818,6 @@ already used 'bless'.
 
         my $options = {
             tags        => $tags_to_trash,
-    ### I'm pretty sure this is not where return_ids is supposed to end up; I 
-    ### think it's supposed to be a sibling of spec, as below, but I'm not 
-    ### sure.
-            return_ids  => 0,
             subject     => $subject
         };
 
@@ -853,10 +826,6 @@ already used 'bless'.
         ### this right now, so until he's done, I have nothing to test.
         my $rv = try {
             $self->inbox->trash_messages_where( $options );
-            #$self->inbox->trash_messages_where({
-            #    spec        => $options,
-            #    return_ids  => 0,
-            #});
         }
         catch {
             my $msg = (ref $_) ? $_->text : $_;
@@ -864,31 +833,8 @@ already used 'bless'.
             return;
         } or return;
 
-### CHECK
-### $rv->{'deleted'} is supposed to be an arrayref of message IDs, but it's an 
-### integer.
-### Actually, $rv is completely messed up:
-###
-### $VAR1 = {
-###     '71035244' => 'status',
-###     'deleted' => '71032095',
-###     'HASH(0x58fa7d8)' => undef,
-###     '71034758' => '71034977'
-### };
-###
-### All those integers are probably the individual message IDs I deleted (the 
-### delete that generated that may well have just deleted 5 messages).
-###
-### Anyway, TT says he fixed this once on PT and his fix disappeared, so he's 
-### going to try to get another fix in tonight. (11/20/2014).  Check back 
-### then.
-### 
-### Other than the goofy retval, the method does appear to be deleting 
-### messages properly.
-
-print Dumper $rv;
-        wxTheApp->popmsg( "I just trashed a bunch of messages." );
-        #wxTheApp->popmsg( "I just trashed ", scalar @{$rv->{'deleted'}}, " messages." );
+        ### This works on PT.  Just waiting for it to come over to US1.
+        wxTheApp->popmsg( "I just trashed $rv->{'deleted_count'} messages." );
     }#}}}
     sub OnClearMailOrig {#{{{
         my $self            = shift;
