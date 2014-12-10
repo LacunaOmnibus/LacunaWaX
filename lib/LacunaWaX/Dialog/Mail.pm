@@ -76,24 +76,24 @@ package LacunaWaX::Dialog::Mail {
         $self->szr_check_2->AddSpacer(2);
         $self->szr_check_2->Add($self->chk_probe, 0, 0, 0);
         $self->szr_check_2->AddSpacer(20);
-        $self->szr_check_2->Add($self->chk_read, 0, 0, 0);		
+        $self->szr_check_2->Add($self->chk_read, 0, 0, 0); 
 
-        $self->szr_check_outer->Add($self->szr_check_1, 0, 0, 0);		
-        $self->szr_check_outer->Add($self->szr_check_2, 0, 0, 0);		
-		
+        $self->szr_check_outer->Add($self->szr_check_1, 0, 0, 0); 
+        $self->szr_check_outer->Add($self->szr_check_2, 0, 0, 0); 
+ 
         ### clear mail block
         $self->szr_clear->Add($self->lbl_hdr_clear, 0, 0, 0);
         $self->szr_clear->AddSpacer(5);
         $self->szr_clear->Add($self->szr_check_outer, 0, 0, 0);
-		
+ 
 		### custom text entry	
         $self->szr_clear->AddSpacer(5);
         $self->szr_clear->Add($self->szr_cust, 0, 0, 0);
         $self->szr_cust->AddSpacer(5);
-        $self->szr_cust->Add($self->btn_clear_inbox, 0, 0, 0);		
+        $self->szr_cust->Add($self->btn_clear_inbox, 0, 0, 0); 
         $self->szr_cust->AddSpacer(20);
-        $self->szr_cust->Add($self->txt_cust, 0, 0, 0);		
-		
+        $self->szr_cust->Add($self->txt_cust, 0, 0, 0); 
+ 
         ### send mail form sizers
         $self->szr_ally->Add($self->lbl_ally, 0, 0, 0);
         $self->szr_ally->Add($self->chc_ally, 0, 0, 0);
@@ -120,7 +120,7 @@ package LacunaWaX::Dialog::Mail {
         $self->szr_send->Add($self->szr_body, 0, 0, 0);
         $self->szr_send->AddSpacer(2);
         $self->szr_send->Add($self->szr_btn_send, 0, 0, 0);
-    
+ 
         ### combine the above
         $self->main_sizer->Add($self->szr_header, 0, 0, 0);
         $self->main_sizer->AddSpacer(15);
@@ -128,7 +128,7 @@ package LacunaWaX::Dialog::Mail {
         $self->main_sizer->AddSpacer(20);
         $self->main_sizer->Add($self->szr_send, 0, 0, 0);
 
-		
+ 
         $self->btn_clear_inbox->SetFocus;
         $self->_set_events();
         $self->init_screen();
@@ -541,7 +541,7 @@ package LacunaWaX::Dialog::Mail {
             ### If any of the message's tags match any of the tags we were 
             ### told to dump, the message is trash.
             my @matching_tags = grep{ $tags_to_trash_hash{$_} }@{$m->{'tags'}};
-            push(@{$trash_these}, $m) if scalar @matching_tags;
+            push(@{$trash_these}, $m->{'id'}) if scalar @matching_tags;
         }
 
         ### Get subsequent pages if necessary.
@@ -566,7 +566,7 @@ package LacunaWaX::Dialog::Mail {
                     push @{$trash_these}, $m->{'id'};
                 }
                 my @matching_tags = grep{ $tags_to_trash_hash{$_} }@{$m->{'tags'}};
-                push(@{$trash_these}, $m) if scalar @matching_tags;
+                push(@{$trash_these}, $m->{'id'}) if scalar @matching_tags;
             }
             if( $max_page >= 60 ) {
                 ### Or we'll hit the RPC limit when there are more than 60 
@@ -711,7 +711,7 @@ already used 'bless'.
         foreach my $checkbox( $self->chk_alert, $self->chk_attacks, $self->chk_corr, $self->chk_excav, $self->chk_parl, $self->chk_probe ) {
             push @{$tags_to_trash}, $checkbox->GetLabel if $checkbox->GetValue;
         }
-		
+ 
         unless( @{$tags_to_trash} or $del_string ) {
             wxTheApp->poperr(
                 "I should remove nothing?  You got it.",
@@ -728,7 +728,7 @@ already used 'bless'.
         $status->show;
 
         my $trash_these = $self->_get_trash_messages($del_string, $tags_to_trash, $status);
-		
+ 
         $status->say("Deleting selected messages");
         my $rv = try {
             $self->inbox->trash_messages($trash_these);
@@ -739,12 +739,12 @@ already used 'bless'.
             return;
         } or return;
         my $trashed     = scalar @{$rv->{'success'}} || 0;
-        my $not_trashed = scalar @{$rv->{'failure'}} || 0;
+        #my $not_trashed = scalar @{$rv->{'failure'}} || 0;
 
         my $t_pl  = ($trashed == 1) ? q{ was} : q{s were};
-        my $nt_pl = ($not_trashed == 1) ? q{} : q{s};
+        #my $nt_pl = ($not_trashed == 1) ? q{} : q{s};
         my $msg  = "$trashed message${t_pl} moved to the trash.";
-           $msg .= "\n\n$not_trashed message${nt_pl} could not be moved to the trash." if $not_trashed;
+           #$msg .= "\n\n$not_trashed message${nt_pl} could not be moved to the trash." if $not_trashed;
         $status->say($msg);
         $status->say_recsep;
         $status->say("Mail clearing complete.");
