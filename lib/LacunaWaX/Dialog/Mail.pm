@@ -1,4 +1,9 @@
 
+### Works on US1.  Displays "I just deleted some messages" instead of the 
+### actual number deleted.  Once the PT code comes to US1, the number will be 
+### displayed there instead of "some", so this could really be packaged up 
+### into an installer as-is.
+
 package LacunaWaX::Dialog::Mail {
     use v5.14;
     use Data::Dumper; $Data::Dumper::Indent = 1;
@@ -834,7 +839,8 @@ already used 'bless'.
         } or return;
 
         ### This works on PT.  Just waiting for it to come over to US1.
-        wxTheApp->popmsg( "I just trashed $rv->{'deleted_count'} messages." );
+        my $num = $rv->{'deleted_count'} // 'some';
+        wxTheApp->popmsg( "I just trashed $num messages." );
     }#}}}
     sub OnClearMailOrig {#{{{
         my $self            = shift;
