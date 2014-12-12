@@ -347,6 +347,7 @@ false and never die.
         catch {
             return;
         };
+
         return $rv;
     }#}}}
     sub planet_id {#{{{
@@ -752,7 +753,7 @@ planet.
 
 =head2 get_building
 
-Returns a single GLC building object for a unique building.  
+Returns a single GLC building object for a unique building. 
 
 eg Games::Lacuna::Client::Buildings::PoliceStation
 
@@ -865,7 +866,7 @@ GLC building object.
 
         my $id   = $bldg_hr->{'id'}; 
         my $type = substr $bldg_hr->{'url'}, 1;   # remove the leading slash from the url
-        
+ 
         my $obj;
         if( $self->use_gui ) {
             my $chi  = $self->app->get_cache;
@@ -1065,7 +1066,7 @@ building_id is the ID of the Entertainment District building from which the
 links were first pulled before being cached.
 
 Hitting the URLs as they are will play the lottery I<in the zone where that 
-original Entertainment District existed>.  This may or may not be what you want.  
+original Entertainment District existed>.  This may or may not be what you want. 
 
 See LacunaWaX::Model::Links for methods to change the building id so you can 
 play the lottery in a different zone.
@@ -1316,7 +1317,7 @@ to 5000, the maximum.
 $exact is a boolean flag.  If true, we will build exactly $num_requested of the 
 requested recipe or we'll fail.  So if you request to build 10 of a given 
 recipe, but there are only enough glyphs onsite to build 8 of that recipe, a 
-true value for $exact will cause the build to fail.  Normally not what you want.  
+true value for $exact will cause the build to fail.  Normally not what you want. 
 If false, we'll build I<up to> $num_requested of the requested recipe.  In our 
 example, the 8 possible plans would have been built.  Defaults to false.
 
@@ -1468,7 +1469,7 @@ A LacunaWaX object
 
 =head2 server_id (Required)
 
-The integer ID of the server, in the local Servers table, to which to connect.  
+The integer ID of the server, in the local Servers table, to which to connect. 
 This must currently be either 1 (US1) or 2 (PT).
 
 =head2 use_gui
