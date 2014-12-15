@@ -11,10 +11,8 @@ package LacunaWaX::MainFrame::MenuBar::Tools {
     use LacunaWaX::Dialog::Mail;
     use LacunaWaX::Dialog::SitterManager;
     use LacunaWaX::Dialog::Captcha;
-    use LacunaWaX::MainFrame::MenuBar::Tools::GLC;
 
     has 'itm_calc'      => (is => 'rw', isa => 'Wx::MenuItem',  lazy_build => 1);
-    has 'itm_glc'       => (is => 'rw', isa => 'LacunaWaX::MainFrame::MenuBar::Tools::GLC', lazy_build => 1);
     has 'itm_logview'   => (is => 'rw', isa => 'Wx::MenuItem',  lazy_build => 1);
     has 'itm_mail'      => (is => 'rw', isa => 'Wx::MenuItem',  lazy_build => 1);
     has 'itm_sitter'    => (is => 'rw', isa => 'Wx::MenuItem',  lazy_build => 1);
@@ -24,7 +22,6 @@ package LacunaWaX::MainFrame::MenuBar::Tools {
     }#}}}
     sub BUILD {
         my $self = shift;
-        $self->AppendSubMenu    ( $self->itm_glc->menu, "&GLC...",  "Set up scripting environment"   );
         $self->Append           ( $self->itm_calc      );
         $self->Append           ( $self->itm_logview   );
         $self->Append           ( $self->itm_mail      );
@@ -44,12 +41,6 @@ package LacunaWaX::MainFrame::MenuBar::Tools {
             'Calculator',
             wxITEM_NORMAL,
             undef   # if defined, this is a sub-menu
-        );
-    }#}}}
-    sub _build_itm_glc {#{{{
-        my $self = shift;
-        return LacunaWaX::MainFrame::MenuBar::Tools::GLC->new(
-            parent => $self->parent,   # MainFrame, not this Menu, is the parent.
         );
     }#}}}
     sub _build_itm_logview {#{{{
@@ -99,7 +90,6 @@ package LacunaWaX::MainFrame::MenuBar::Tools {
     sub show_connected {#{{{
         my $self = shift;
         $self->Enable($self->itm_calc->GetId, 1);
-        $self->Enable($self->itm_glc->itm_install_glc->GetId, 1);
         $self->Enable($self->itm_mail->GetId, 1);
         $self->Enable($self->itm_sitter->GetId, 1);
         return 1;
@@ -107,7 +97,6 @@ package LacunaWaX::MainFrame::MenuBar::Tools {
     sub show_not_connected {#{{{
         my $self = shift;
         $self->Enable($self->itm_calc->GetId, 0);
-        $self->Enable($self->itm_glc->itm_install_glc->GetId, 0);
         $self->Enable($self->itm_mail->GetId, 0);
         $self->Enable($self->itm_sitter->GetId, 0);
         return 1;

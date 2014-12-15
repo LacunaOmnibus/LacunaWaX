@@ -93,8 +93,7 @@
     <ROW File="menu_file_import.html" Component_="add_help_pages.html" FileName="MENU_F~4.HTM|menu_file_import.html" Attributes="0" SourcePath="..\..\user\doc\html\menu_file_import.html" SelfReg="false" NextFile="menu_help_about.html"/>
     <ROW File="menu_help_about.html" Component_="add_help_pages.html" FileName="MENU_H~1.HTM|menu_help_about.html" Attributes="0" SourcePath="..\..\user\doc\html\menu_help_about.html" SelfReg="false" NextFile="menu_help_help.html"/>
     <ROW File="menu_help_help.html" Component_="add_help_pages.html" FileName="MENU_H~2.HTM|menu_help_help.html" Attributes="0" SourcePath="..\..\user\doc\html\menu_help_help.html" SelfReg="false" NextFile="menu_tools_calculator.html"/>
-    <ROW File="menu_tools_GLC.html" Component_="add_help_pages.html" FileName="MENU_T~2.HTM|menu_tools_GLC.html" Attributes="0" SourcePath="..\..\user\doc\html\menu_tools_GLC.html" SelfReg="false" NextFile="menu_tools_log_viewer.html"/>
-    <ROW File="menu_tools_calculator.html" Component_="add_help_pages.html" FileName="MENU_T~1.HTM|menu_tools_calculator.html" Attributes="0" SourcePath="..\..\user\doc\html\menu_tools_calculator.html" SelfReg="false" NextFile="menu_tools_GLC.html"/>
+    <ROW File="menu_tools_calculator.html" Component_="add_help_pages.html" FileName="MENU_T~1.HTM|menu_tools_calculator.html" Attributes="0" SourcePath="..\..\user\doc\html\menu_tools_calculator.html" SelfReg="false" NextFile="menu_tools_log_viewer.html"/>
     <ROW File="menu_tools_log_viewer.html" Component_="add_help_pages.html" FileName="MENU_T~3.HTM|menu_tools_log_viewer.html" Attributes="0" SourcePath="..\..\user\doc\html\menu_tools_log_viewer.html" SelfReg="false" NextFile="menu_tools_mail.html"/>
     <ROW File="menu_tools_mail.html" Component_="add_help_pages.html" FileName="MENU_T~4.HTM|menu_tools_mail.html" Attributes="0" SourcePath="..\..\user\doc\html\menu_tools_mail.html" SelfReg="false" NextFile="menu_tools_sitter_manager.html"/>
     <ROW File="menu_tools_sitter_manager.html" Component_="add_help_pages.html" FileName="MENU_T~5.HTM|menu_tools_sitter_manager.html" Attributes="0" SourcePath="..\..\user\doc\html\menu_tools_sitter_manager.html" SelfReg="false" NextFile="propositions_pane.html"/>
@@ -119,7 +118,7 @@
     <ROW File="wrapper" Component_="add_help_pages.html" FileName="wrapper" Attributes="0" SourcePath="..\..\user\doc\html\wrapper" SelfReg="false"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.BuildComponent">
-    <ROW BuildKey="DefaultBuild" BuildName="DefaultBuild" BuildOrder="1" BuildType="0" PackageFolder="." PackageFileName="LacunaWaX_v2.04" Languages="en" InstallationType="4" UseLargeSchema="true"/>
+    <ROW BuildKey="DefaultBuild" BuildName="DefaultBuild" BuildOrder="1" BuildType="0" PackageFolder="." PackageFileName="LacunaWaX_v2.06" Languages="en" InstallationType="4" UseLargeSchema="true"/>
     <ATTRIBUTE name="CurrentBuild" value="DefaultBuild"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.DictionaryComponent">
