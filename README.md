@@ -1,5 +1,6 @@
 LacunaWaX
 =========
+
 A GUI for The Lacuna Expanse
 
 Copyright 2012-2014 Jonathan D. Barton (tmtowtdi@gmail.com) 
