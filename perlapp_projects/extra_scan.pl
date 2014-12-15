@@ -55,5 +55,6 @@ use Games::Lacuna::Client::Buildings::WasteExchanger;
 use Games::Lacuna::Client::Buildings::WasteRecycling;
 use Games::Lacuna::Client::Buildings::WaterStorage;
 
+use CPAN;
 use HTML::TreeBuilder;
 
