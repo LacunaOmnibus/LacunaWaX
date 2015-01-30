@@ -228,20 +228,26 @@ Displays one of the RightPane/*.pm panels in the splitter window's right pane.
             $error = "This pane requires that a $bldg_name exist on this body, and there isn't one."; 
         }
 
-        if( $bldg and $bldg_lvl ) {
-            my $b_view = try {
-                wxTheApp->game_client->get_building_view($pid, $bldg);
-            }
-            catch {
-                my $msg = (ref $_) ? $_->text : $_;
-                wxTheApp->poperr($msg);
-                return;
-            };
-            $b_view or return;
+
+        my $b_view = try {
+            wxTheApp->game_client->get_building_view($pid, $bldg);
+        }
+        catch {
+            my $msg = (ref $_) ? $_->text : $_;
+            wxTheApp->poperr($msg);
+            return;
+        };
+        $b_view or return;
+
+        if( $b_view->{'building'}{'efficiency'} < 100 ) {
+            $error = "Your $bldg_name is damaged and therefore cannot be used.";
+        }
+        elsif( $bldg and $bldg_lvl ) {
             if( $b_view->{'building'}{'level'} < $bldg_lvl ) {
                 $error = "This pane requires that a $bldg_name exist at level $bldg_lvl or above.";
             }
         }
+
 
         if( $error ) {
             wxTheApp->popmsg( $error, "Missing building requirements" );
