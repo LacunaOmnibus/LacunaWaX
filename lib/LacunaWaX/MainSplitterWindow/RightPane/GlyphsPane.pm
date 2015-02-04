@@ -235,7 +235,45 @@ So now those /.*_box_.*/ sizers are just sizers.
     sub _build_chc_glyph_home {#{{{
         my $self = shift;
 
-        my %planets_by_id = reverse %{wxTheApp->game_client->planets};
+        my %colonies_by_id = reverse %{wxTheApp->game_client->colonies};
+
+        my $schema = wxTheApp->main_schema;
+        my @sorted_planets = sort values %colonies_by_id;
+
+        my $selection_ss = 0;
+        if( $self->prefs_rec ) {
+            my $glyph_home_name;
+            if( $self->prefs_rec->glyph_home_id ) {
+                $glyph_home_name = $colonies_by_id{ $self->prefs_rec->glyph_home_id };
+            }
+
+            my $cnt = 0;
+            for my $p(@sorted_planets) {
+                ### Yeah, increment first.  The selection subscript has to be 
+                ### one greater than the position in @sorted_planets, because 
+                ### we're hardcoding 'None' on the front of the select box.
+                $cnt++;
+                if( $glyph_home_name and $p eq $glyph_home_name ) {
+                    $selection_ss = $cnt;
+                }
+            }
+        }
+
+        my $v = Wx::Choice->new(
+            $self->parent, -1, 
+            wxDefaultPosition, 
+            Wx::Size->new(110, 25), 
+            ['None', @sorted_planets],
+        );
+        $v->SetSelection($selection_ss);
+        $v->SetFont( wxTheApp->get_font('para_text_1') );
+        return $v;
+    }#}}}
+    sub _build_chc_glyph_home_orig {#{{{
+        my $self = shift;
+
+        #my %planets_by_id = reverse %{wxTheApp->game_client->planets};
+        my %planets_by_id = reverse %{wxTheApp->game_client->colonies};
 
         my $schema = wxTheApp->main_schema;
         foreach my $id( sort keys %planets_by_id ) {
@@ -423,7 +461,7 @@ So now those /.*_box_.*/ sizers are just sizers.
         );
         $v->SetFont( wxTheApp->get_font('header_1') );
         return $v;
-    }#}}}  
+    }#}}} 
 
     sub _build_list_sizer {#{{{
         my $self = shift;
@@ -536,12 +574,12 @@ The problem here is:
         - this semi-lazy method needs to be called after $self (the GlyphsPane 
           object) is fully created, but NOT auto-called every time somebody 
           mentions $self->dialog_status.
-          
+ 
           - I found some forum postings indicating this sort of thing may be in 
             a future version of Moose, but it's not there now.
 
     - SO, what I've ended up with is:
-        - The dialog_status attribute is defined but with no builder method.  
+        - The dialog_status attribute is defined but with no builder method. 
         - This pseudo-builder (_make_dialog_status), which you're reading about 
           right now, must therefore be called explicitly when you want to create 
           a Dialog::Status window.
@@ -586,7 +624,7 @@ The problem here is:
 
     before 'clear_dialog_status' => sub {#{{{
         my $self = shift;
-        
+ 
         ### Call the dialog_status object's own close method, which removes its 
         ### wxwidgets, before clearing this object's dialog_status attribute.
         if($self->has_dialog_status) {

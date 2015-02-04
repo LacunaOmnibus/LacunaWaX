@@ -88,6 +88,12 @@ package LacunaWaX::Model::Client {
     has 'planets' => ( is => 'rw', isa => 'HashRef', lazy => 1, default => sub {{}},
         documentation => q{ name => id },
     );
+    has 'colonies' => ( is => 'rw', isa => 'HashRef', lazy => 1, default => sub {{}},
+        documentation => q{ name => id },
+    );
+    has 'stations' => ( is => 'rw', isa => 'HashRef', lazy => 1, default => sub {{}},
+        documentation => q{ name => id },
+    );
 
     has 'sitter_clients' => ( is => 'rw', isa => 'HashRef', lazy => 1, default => sub {{}},
         documentation => q{
@@ -965,6 +971,8 @@ necessary, call ping() instead.
         $self->pingtime( DateTime->now );
         $self->app->Yield if $self->app;
         $self->planets({ reverse %{$status->{'empire'}{'planets'}} });
+        $self->colonies({ reverse %{$status->{'empire'}{'colonies'}} });
+        $self->stations({ reverse %{$status->{'empire'}{'stations'}} });
         $self->app->Yield if $self->app;
         return 1;
     }#}}}
