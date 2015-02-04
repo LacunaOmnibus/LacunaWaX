@@ -213,7 +213,7 @@ So now those /.*_box_.*/ sizers are just sizers.
             my $cnt = 0;
             for my $o(@{$ore_types}) {
                 ### Yeah, increment first.  The selection subscript has to be 
-                ### one greater than the position in @sorted_planets, because 
+                ### one greater than the position in @sorted_colonies, because 
                 ### we're hardcoding 'None' on the front of the select box.
                 $cnt++;
                 if( $self->prefs_rec and $self->prefs_rec->auto_search_for and $o eq $self->prefs_rec->auto_search_for ) {
@@ -238,7 +238,7 @@ So now those /.*_box_.*/ sizers are just sizers.
         my %colonies_by_id = reverse %{wxTheApp->game_client->colonies};
 
         my $schema = wxTheApp->main_schema;
-        my @sorted_planets = sort values %colonies_by_id;
+        my @sorted_colonies = sort values %colonies_by_id;
 
         my $selection_ss = 0;
         if( $self->prefs_rec ) {
@@ -248,9 +248,9 @@ So now those /.*_box_.*/ sizers are just sizers.
             }
 
             my $cnt = 0;
-            for my $p(@sorted_planets) {
+            for my $p(@sorted_colonies) {
                 ### Yeah, increment first.  The selection subscript has to be 
-                ### one greater than the position in @sorted_planets, because 
+                ### one greater than the position in @sorted_colonies, because 
                 ### we're hardcoding 'None' on the front of the select box.
                 $cnt++;
                 if( $glyph_home_name and $p eq $glyph_home_name ) {
@@ -263,51 +263,7 @@ So now those /.*_box_.*/ sizers are just sizers.
             $self->parent, -1, 
             wxDefaultPosition, 
             Wx::Size->new(110, 25), 
-            ['None', @sorted_planets],
-        );
-        $v->SetSelection($selection_ss);
-        $v->SetFont( wxTheApp->get_font('para_text_1') );
-        return $v;
-    }#}}}
-    sub _build_chc_glyph_home_orig {#{{{
-        my $self = shift;
-
-        #my %planets_by_id = reverse %{wxTheApp->game_client->planets};
-        my %planets_by_id = reverse %{wxTheApp->game_client->colonies};
-
-        my $schema = wxTheApp->main_schema;
-        foreach my $id( sort keys %planets_by_id ) {
-            ### Get SSs out of the dropdown
-            if( my $rec = $schema->resultset('BodyTypes')->find({body_id => $id, type_general => 'space station', server_id => wxTheApp->server->id }) ) {
-                delete $planets_by_id{$id};
-            }
-        }
-        my @sorted_planets = sort values %planets_by_id;
-
-        my $selection_ss = 0;
-        if( $self->prefs_rec ) {
-            my $glyph_home_name;
-            if( $self->prefs_rec->glyph_home_id ) {
-                $glyph_home_name = $planets_by_id{ $self->prefs_rec->glyph_home_id };
-            }
-
-            my $cnt = 0;
-            for my $p(@sorted_planets) {
-                ### Yeah, increment first.  The selection subscript has to be 
-                ### one greater than the position in @sorted_planets, because 
-                ### we're hardcoding 'None' on the front of the select box.
-                $cnt++;
-                if( $glyph_home_name and $p eq $glyph_home_name ) {
-                    $selection_ss = $cnt;
-                }
-            }
-        }
-
-        my $v = Wx::Choice->new(
-            $self->parent, -1, 
-            wxDefaultPosition, 
-            Wx::Size->new(110, 25), 
-            ['None', @sorted_planets],
+            ['None', @sorted_colonies],
         );
         $v->SetSelection($selection_ss);
         $v->SetFont( wxTheApp->get_font('para_text_1') );

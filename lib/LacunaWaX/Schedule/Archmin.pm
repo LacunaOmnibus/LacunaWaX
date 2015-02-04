@@ -55,7 +55,7 @@ before returning the hash.
         unless( ref $glyphs_rv eq 'HASH' and defined $glyphs_rv->{'glyphs'} and @{$glyphs_rv->{'glyphs'}} ) {
             return $ret_ar;
         }
-        
+ 
         $ret_ar = [ map{ $_->{'quantity'} -= $am_rec->reserve_glyphs; $_->{'quantity'} = 0 if $_->{'quantity'} < 0; $_ }@{$glyphs_rv->{'glyphs'}} ];
         return $ret_ar;
     }#}}}

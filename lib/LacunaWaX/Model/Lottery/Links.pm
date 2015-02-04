@@ -89,7 +89,7 @@ package LacunaWaX::Model::Lottery::Links {
 
     has 'links' => (
         is          => 'rw', 
-        isa         => 'ArrayRef[LacunaWaX::Model::Lottery::Link]',  
+        isa         => 'ArrayRef[LacunaWaX::Model::Lottery::Link]', 
         lazy_build  => 1,
     );
 
@@ -182,8 +182,8 @@ Returns true if we're currently at the start of our list of links.
 Changes the building to which our links are currently pointing.  This will 
 change the zone that the lottery is recorded as being played at.
 
- my $this_planets_ent_district = get_entertainment_district;
- $links->change_building( $this_planets_ent_district->id );
+ my $this_planetS_ent_district = get_entertainment_district;
+ $links->change_building( $this_planetS_ent_district->id );
 
 However, it's generally more convenient to call L<change_planet|change_planet>.
 
@@ -300,7 +300,7 @@ Returns the next LacunaWaX::Model::Lottery::Link object in the list.  Returns
 undef upon reaching the end of the list, and then resets the pointer.
 
 ***
-That's true for now, but I'm now unsure if that's the 'correct' behavior.  
+That's true for now, but I'm now unsure if that's the 'correct' behavior. 
 Once next() reaches the end of the list, I'm beginning to think that it should 
 be the user's responsibility to reset the list to the beginning (with 
 reset_idx) rather than doing it automatically.

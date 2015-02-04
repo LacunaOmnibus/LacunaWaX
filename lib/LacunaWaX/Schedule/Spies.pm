@@ -54,7 +54,7 @@ package LacunaWaX::Schedule::Spies {
             return $trained;
         }
 
-        foreach my $pid( values %{$self->game_client->planets} ) {
+        foreach my $pid( values %{$self->game_client->colonies} ) {
             $trained += $self->train_planet($pid, $s_rec->id);
         }
         $self->logger->info("$trained spies trained on " . $s_rec->name . q{.});
@@ -176,7 +176,7 @@ The hashref is { type => building_obj }, eg:
  }
 
 If no training buildings exist on the planet, returns undef.
-  
+ 
 =cut
 
         my $training_bldgs = {};

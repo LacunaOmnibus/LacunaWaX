@@ -18,7 +18,7 @@ package LacunaWaX::Dialog::Calculator {
     has 'szr_header'        => (is => 'rw', isa => 'Wx::Sizer',         lazy_build => 1, documentation => 'vertical'    );
     has 'szr_instructions'  => (is => 'rw', isa => 'Wx::Sizer',         lazy_build => 1);
 
-    has 'sorted_planets'  => (is => 'rw', isa => 'ArrayRef[Str]', default => sub{ [] },
+    has 'sorted_colonies'  => (is => 'rw', isa => 'ArrayRef[Str]', default => sub{ [] },
         documentation => q{
             Curry cache; used for the planets dropdowns.  There are two dropdowns; both contain 
             sorted planet names.
@@ -414,28 +414,16 @@ package LacunaWaX::Dialog::Calculator {
     sub _build_chc_body {#{{{
         my $self = shift;
 
-        unless( scalar @{$self->sorted_planets} ) {
-            my %planets_by_id   = reverse %{wxTheApp->game_client->planets};
-            my $schema = wxTheApp->main_schema;
-            foreach my $id( keys %planets_by_id ) {
-                my $name = $planets_by_id{$id};
-
-                ### Get SSs out of the dropdown
-                if( 
-                    my $rec = $schema->resultset('BodyTypes')->find({body_id => $id, type_general => 'space station'}) 
-                    or $name =~ /^(S|Z)ASS/
-                ) {
-                    delete $planets_by_id{$id};
-                }
-            }
-            $self->sorted_planets([ sort values %planets_by_id ]);
+        unless( scalar @{$self->sorted_colonies} ) {
+            my %colonies_by_id   = reverse %{wxTheApp->game_client->colonies};
+            $self->sorted_colonies([ sort values %colonies_by_id ]);
         }
 
         my $v = Wx::Choice->new(
             $self->dialog, -1, 
             wxDefaultPosition, 
             Wx::Size->new(110, 25), 
-            ['', @{$self->sorted_planets}],
+            ['', @{$self->sorted_colonies}],
         );
         $v->SetFont( wxTheApp->get_font('para_text_1') );
         return $v;
@@ -619,7 +607,7 @@ sub trilaterate {#{{{
     my $b_y = shift;
     my $ab_length = shift;
     my $ac_length = shift;
-    my $bc_length = shift;  
+    my $bc_length = shift; 
 
     if( $ab_length > ($ac_length + $bc_length) ) {
         die "Points do not intersect!";
@@ -631,7 +619,7 @@ sub trilaterate {#{{{
     my $ad_length = ($ab_length**2 + $ac_length**2 - $bc_length**2) / (2 * $ab_length);
     my $d_x = $a_x + $ad_length * ($b_x - $a_x) / $ab_length;
     my $d_y = $a_y + $ad_length * ($b_y - $a_y) / $ab_length;
-    
+ 
     my $h = sqrt( abs($ac_length**2 - $ad_length**2) );
 
     my $c_x1 = $d_x + $h * ($b_y - $a_y) / $ab_length;
@@ -649,7 +637,7 @@ sub trilaterate {#{{{
         $c_x1, $c_y1,
         $c_x2, $c_y2
     );
-    
+ 
 }#}}}
 sub secs_from_game_dur {#{{{
     my $self = shift;
@@ -767,7 +755,7 @@ sub distance_from_coords {#{{{
         my $dialog  = shift;    # self
         my $event   = shift;    # CommandEvent
 
-        my %planets     = %{wxTheApp->game_client->planets};   # keyed by name
+        my %colonies     = %{wxTheApp->game_client->colonies};   # keyed by name
 
         my $b1_idx      = $self->chc_body_1->GetSelection;
         unless($b1_idx) {
@@ -775,7 +763,7 @@ sub distance_from_coords {#{{{
             return 0;
         }
         my $b1_name     = $self->chc_body_1->GetString( $b1_idx );
-        my $b1_status   = wxTheApp->game_client->get_body_status( $planets{$b1_name} );
+        my $b1_status   = wxTheApp->game_client->get_body_status( $colonies{$b1_name} );
         my( $ax, $ay )  = ($b1_status->{'x'}, $b1_status->{'y'} );
 
         my $b2_idx      = $self->chc_body_2->GetSelection;
@@ -788,7 +776,7 @@ sub distance_from_coords {#{{{
             return 0;
         }
         my $b2_name     = $self->chc_body_2->GetString( $b2_idx );
-        my $b2_status   = wxTheApp->game_client->get_body_status( $planets{$b2_name} );
+        my $b2_status   = wxTheApp->game_client->get_body_status( $colonies{$b2_name} );
         my( $bx, $by )  = ($b2_status->{'x'}, $b2_status->{'y'} );
 
         my $ac_rate = $self->txt_p1_rate->GetValue;

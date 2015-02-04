@@ -1546,9 +1546,14 @@ HoA keyed off the final product name:
  'Library of Jith'       => [qw(anthracite bauxite beryl chalcopyrite)],
  ...
 
-=head2 planets
+=head2 planets, colonies, stations
 
 Hashref of the current empire's planets: C<name =E<gt> ID>
+
+'colonies' contains only the habitable planets and gas giants this empire has
+colonized.
+'stations' contains all of the current alliance's space stations.
+'planets' is a combination of colonies and stations.
 
 =head1 METHODS
 
