@@ -32,23 +32,29 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
         }
     );
 
+    has 'colonies_item_id' => (
+        is              => 'rw', 
+        isa             => 'Wx::TreeItemId',
+        lazy_build      => 1,
+        documentation   => q{
+            The 'Colonies' leaf.
+        }
+    );
+    has 'stations_item_id' => (
+        is              => 'rw', 
+        isa             => 'Wx::TreeItemId',
+        lazy_build      => 1,
+        documentation   => q{
+            The 'Stations' leaf.
+        }
+    );
+
     has 'dispatch' => (
         is          => 'rw',
         isa         => 'HashRef',
         lazy_build  => 1,
         documentation => q{
             dispatch table for leaf click actions
-        }
-    );
-
-    has 'expand_state' => (
-        is              => 'rw',
-        isa             => 'Str',
-        lazy            => 1,
-        default         => 'collapsed', 
-        documentation   => q{
-            Starts out 'collapsed', the other option is 'expanded'.  Used to keep track of what we should
-            do (expand or collapse) on a double-click on the visible root item.
         }
     );
 
@@ -95,7 +101,8 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
         my $self    = shift;
 
         my $dispatch = {
-            bodies => sub{ $self->toggle_expansion_state() },
+            colonies => sub{ $self->toggle_expansion_state( 'colonies' ) },
+            stations => sub{ $self->toggle_expansion_state( 'stations' ) },
             default => sub {
                 wxTheApp->right_pane->show_right_pane(
                     'LacunaWaX::MainSplitterWindow::RightPane::DefaultPane'
@@ -188,13 +195,18 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
     }#}}}
     sub _build_treemodel {#{{{
         my $self = shift;
-        my $b64_bodies = encode_base64(join q{:}, ('bodies'));
+        my $b64_colonies = encode_base64(join q{:}, ('colonies'));
+        my $b64_stations = encode_base64(join q{:}, ('stations'));
         my $tree_data = {
             node    => 'Root',
             childs  => [
                 { 
-                    node => 'Bodies',
-                    data => $b64_bodies,
+                    node => 'Colonies',
+                    data => $b64_colonies,
+                },
+                { 
+                    node => 'Stations',
+                    data => $b64_stations,
                 },
             ],
         };
@@ -219,6 +231,27 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
         my($body_id, $cookie) = $self->treeview->treectrl->GetFirstChild($self->root_item_id);
         return $body_id;
     }#}}}
+    sub _build_colonies_item_id {#{{{
+        my $self = shift;
+        ### This only works if Colonies is listed first.
+        my($body_id, $cookie) = $self->treeview->treectrl->GetFirstChild($self->root_item_id);
+        return $body_id;
+    }#}}}
+    sub _build_stations_item_id {#{{{
+        my $self = shift;
+        ### This only works if Colonies is listed first, and Stations listed 
+        ### second.
+        my( $colonies_id, $stations_id, $cookie );
+        ($colonies_id, $cookie) = $self->treeview->treectrl->GetFirstChild($self->root_item_id);
+
+        ### Two different ways of finding the stations_id -- both work, proven 
+        ### by the die().
+        ($stations_id, $cookie) = $self->treeview->treectrl->GetNextChild($self->root_item_id, $cookie);
+        #$stations_id = $self->treeview->treectrl->GetNextSibling($colonies_id);
+        #die $self->treectrl->GetItemText( $stations_id );
+
+        return $stations_id;
+    }#}}}
     sub _set_events {#{{{
         my $self = shift;
         EVT_TREE_ITEM_ACTIVATED(    $self->treeview->treectrl, $self->treeview->treectrl->GetId,    sub{$self->OnTreeClick(@_)}     );
@@ -226,7 +259,13 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
         return 1;
     }#}}}
 
-    sub bold_planet_names {#{{{
+    sub bold_toplevel_leaves {#{{{
+        my $self = shift;
+
+        $self->treectrl->SetItemFont( $self->colonies_item_id, wxTheApp->get_font('bold_para_text_1') );
+        $self->treectrl->SetItemFont( $self->stations_item_id, wxTheApp->get_font('bold_para_text_1') );
+    }#}}}
+    sub bold_planet_names_orig {#{{{
         my $self = shift;
 
         my( $planet_id, $cookie ) = $self->treeview->treectrl->GetFirstChild( $self->bodies_item_id );
@@ -245,17 +284,15 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
 
         return unless( wxTheApp->game_client and wxTheApp->game_client->ping );
 
-        my $schema = wxTheApp->main_schema;
-        my $bodies = [];
-        foreach my $pname( sort{lc $a cmp lc $b} keys %{wxTheApp->game_client->planets} ) {#{{{
+        my $colonies = [];
+        foreach my $cname( sort{lc $a cmp lc $b} keys %{wxTheApp->game_client->colonies} ) {#{{{
 
-            my $pid = wxTheApp->game_client->planet_id($pname);
-            my $planet_node = {
-                node    => $pname,
+            my $pid = wxTheApp->game_client->planet_id($cname);
+            my $colony_node = {
+                node    => $cname,
                 data    => encode_base64(join q{:}, ('name', $pid)),
                 childs  => [],
             };
-
 
             ### Both Planet and Station
             my $b64_rearrange   = encode_base64(join q{:}, ('rearrange', $pid));
@@ -263,114 +300,78 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
             my $b64_glyphs      = encode_base64(join q{:}, ('glyphs', $pid));
             my $b64_repair      = encode_base64(join q{:}, ('repair', $pid));
             my $b64_spies       = encode_base64(join q{:}, ('spies', $pid));
+
+            push @{ $colony_node->{'childs'} }, { node => 'Glyphs',     data => $b64_glyphs };
+            push @{ $colony_node->{'childs'} }, { node => 'Rearrange',  data => $b64_rearrange };
+            push @{ $colony_node->{'childs'} }, { node => 'Repair',     data => $b64_repair };
+            push @{ $colony_node->{'childs'} }, { node => 'Spies',      data => $b64_spies };
+
+            push @{$colonies}, $colony_node;
+        }#}}}
+
+        my $stations = [];
+        foreach my $sname( sort{lc $a cmp lc $b} keys %{wxTheApp->game_client->stations} ) {#{{{
+
+            my $pid = wxTheApp->game_client->planet_id($sname);
+            my $station_node = {
+                node    => $sname,
+                data    => encode_base64(join q{:}, ('name', $pid)),
+                childs  => [],
+            };
+
+            ### Both Planet and Station
+            my $b64_rearrange   = encode_base64(join q{:}, ('rearrange', $pid));
             ### Station
             my $b64_bfg         = encode_base64(join q{:}, ('bfg', $pid));
             my $b64_inc         = encode_base64(join q{:}, ('incoming', $pid));
             my $b64_props       = encode_base64(join q{:}, ('propositions', $pid));
             my $b64_sshealth    = encode_base64(join q{:}, ('sshealth', $pid));
 
-            if(
-                my $rec = $schema->resultset('BodyTypes')->search({
-                    body_id         => $pid,
-                    type_general    => 'space station',
-                    server_id       => wxTheApp->server->id,
-                })->next
-            ) {
-                ### Space Station
-                ###
-                ### IMPORTANT!
-                ### SummaryPane::fix_tree_for_stations() is expecting the 
-                ### first child of a SS leaf to be "Fire the BFG".
-                ###
-                ### If you change the first child, or even just change the 
-                ### label on that BFG leaf, be sure to update 
-                ### fix_tree_for_stations as well.
-                push @{ $planet_node->{'childs'} }, { node => 'Fire the BFG',   data => $b64_bfg };
-                push @{ $planet_node->{'childs'} }, { node => 'Health Alerts',  data => $b64_sshealth };
-                push @{ $planet_node->{'childs'} }, { node => 'Incoming',       data => $b64_inc };
-                push @{ $planet_node->{'childs'} }, { node => 'Propositions',   data => $b64_props };
-                push @{ $planet_node->{'childs'} }, { node => 'Rearrange',      data => $b64_rearrange };
-            }
-            else {
-                ### Planet
-                push @{ $planet_node->{'childs'} }, { node => 'Glyphs',     data => $b64_glyphs };
-                push @{ $planet_node->{'childs'} }, { node => 'Rearrange',  data => $b64_rearrange };
-                push @{ $planet_node->{'childs'} }, { node => 'Repair',     data => $b64_repair };
-                push @{ $planet_node->{'childs'} }, { node => 'Spies',      data => $b64_spies };
-            }
+            ### Space Station
+            push @{ $station_node->{'childs'} }, { node => 'Fire the BFG',   data => $b64_bfg };
+            push @{ $station_node->{'childs'} }, { node => 'Health Alerts',  data => $b64_sshealth };
+            push @{ $station_node->{'childs'} }, { node => 'Incoming',       data => $b64_inc };
+            push @{ $station_node->{'childs'} }, { node => 'Propositions',   data => $b64_props };
+            push @{ $station_node->{'childs'} }, { node => 'Rearrange',      data => $b64_rearrange };
 
-            push @{$bodies}, $planet_node;
+            push @{$stations}, $station_node;
         }#}}}
 
         for(1..2) {
-            ### Add some empty nodes at the bottom, or the last item will be 
-            ### obscured by the bottom of the frame.
+            ### Add some empty nodes at the bottom of the Stations branch, 
+            ### which is our last branch, or the last item will be obscured by 
+            ### the bottom of the frame.
             my $empty_node = {
                 node    => q{},
                 childs  => [],
             };
-            push @{$bodies}, $empty_node;
+            push @{$stations}, $empty_node;
         }
 
         my $model_data = $self->treeview->model->data;
-        $model_data->{'childs'}[0]{'childs'} = $bodies; # {'childs'}[0] is the leaf labeled 'Bodies'
+        $model_data->{'childs'}[0]{'childs'} = $colonies;
+        $model_data->{'childs'}[1]{'childs'} = $stations;
         $self->treeview->model->data( $model_data );
         $self->treeview->reload();
 
-        $self->clear_root_item_id;
-        $self->clear_bodies_item_id;
+        ### Why was I doing this?
+        #$self->clear_root_item_id;
+        #$self->clear_colonies_item_id;
+        #$self->clear_stations_item_id;
 
-        $self->treeview->treectrl->Expand( $self->bodies_item_id );
-        $self->bold_planet_names();
-        $self->expand_state('collapsed');
-
-        ### CHECK do I still need to do this?
-        ### On Ubuntu, if the tree is taller than the height of the window, 
-        ### the last item in the tree is partially obscured by the status bar, 
-        ### even after scrolling all the way down.
-        ### Appending an empty item at the very end fixes this.
-        #my $blank_id = $self->treectrl->AppendItem( $self->bodies_item_id, q{}, -1, -1 );
-        #$self->treectrl->Expand($self->bodies_item_id);
+        ### Start out with only the colonies expanded.
+        $self->toggle_expansion_state( 'colonies' );
+        $self->bold_toplevel_leaves();
 
         return 1;
     }#}}}
     sub toggle_expansion_state {#{{{
         my $self = shift;
+        my $leaf = shift;
 
-        ### Collapsing and expanding provides a bit of animation.
-        ###
-        ### Hiding the tree before doing anything, then showing it afterwards, 
-        ### removes that animation, but it makes the state toggle happen much 
-        ### more quickly.
-        ### 
-        ### The animation is vaguely pretty, but it's also clunky-looking and 
-        ### slow.  Hiding it toggles the state almost instantly and looks more 
-        ### solid.
-
-        $self->treectrl->Show(0);
-        if( $self->expand_state eq 'collapsed' ) {
-            $self->treectrl->ExpandAllChildren( $self->bodies_item_id );
-            ### Expanding everything auto-scrolls us to the bottom, and 
-            ### nobody wants that.  Rescroll back up to the top.
-            $self->treectrl->ScrollTo( $self->bodies_item_id );
-            $self->expand_state('expanded');
-        }
-        else {
-            my($child, $cookie) = $self->treectrl->GetFirstChild($self->bodies_item_id);
-            $self->treectrl->CollapseAllChildren( $child );
-
-            COLLAPSE:
-            while( 1 ) {
-                ($child, $cookie) = $self->treectrl->GetNextChild($self->bodies_item_id, $cookie); 
-                last COLLAPSE unless $child->IsOk;
-                $self->treectrl->CollapseAllChildren( $child );
-            }
-            $self->expand_state('collapsed');
-            $self->treectrl->ScrollTo( $self->bodies_item_id );
-        }
-        $self->treectrl->Show(1);
-
-        $self->bold_planet_names();
+        my $id = ($leaf eq 'colonies') ? $self->colonies_item_id : $self->stations_item_id;
+        if( $self->treectrl->IsExpanded($id) )  { $self->treectrl->Collapse( $id )  }
+        else                                    { $self->treectrl->Expand( $id ) }
 
         return 1;
     }#}}}
@@ -409,7 +410,7 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
             my ($action, $pid, @args)   = split /:/, decode_base64($hr->{'data'} || q{});
             my $planet                  = wxTheApp->game_client->planet_name($pid);
 
-            $action ||= q{};    
+            $action ||= q{}; 
             if( defined $self->dispatch->{$action} ) {
                 &{ $self->dispatch->{$action} }($planet);
             }

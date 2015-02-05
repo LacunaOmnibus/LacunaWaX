@@ -39,7 +39,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::SummaryPane {
     has 'szr_header'    => (is => 'rw', isa => 'Wx::Sizer',         lazy_build => 1   );
     has 'szr_res_grid' => (
         is          => 'rw', 
-        isa         => 'Wx::FlexGridSizer',     
+        isa         => 'Wx::FlexGridSizer', 
         lazy_build  => 1,
     );
     has 'lbl_header'    => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1   );
@@ -60,8 +60,6 @@ package LacunaWaX::MainSplitterWindow::RightPane::SummaryPane {
         $self->content_sizer->Add($self->lbl_text, 0, 0, 0);
         $self->content_sizer->AddSpacer(20);
         $self->content_sizer->Add($self->szr_res_grid, 0, 0, 0);
-
-        $self->fix_tree_for_stations();
 
         $self->_set_events();
         return $self;
@@ -96,7 +94,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::SummaryPane {
             $self->text, 
             wxDefaultPosition, 
             ### If you start changing the height on this, check the result on 
-            ### both a station and on a planet.  Station text is bigger.  
+            ### both a station and on a planet.  Station text is bigger. 
             ### Also, stations with warning text ("OMG we haven't seize our 
             ### own star!") will need even more height here.
             Wx::Size->new(400,220)
@@ -128,7 +126,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::SummaryPane {
     sub _build_text {#{{{
         my $self  = shift;
         my $owner = $self->owner;
-        
+ 
         my $s = $self->status;
 
         my $text = $self->type . " $s->{name} ($s->{x}, $s->{y}) (ID $s->{id})
@@ -238,57 +236,6 @@ Orbit $s->{orbit} around $s->{star_name} (ID $s->{star_id}), in zone $s->{zone}\
             $v->SetFont( $font );
             $self->szr_res_grid->Add($v, 0, $style);
         }
-    }#}}}
-
-    sub fix_tree_for_stations {#{{{
-        my $self = shift;
-
-        return unless defined $self->status->{'influence'};
-
-        my $bodies_tree             = wxTheApp->left_pane->bodies_tree;
-        my $treectrl                = $bodies_tree->treeview->treectrl;
-
-        ### Get the first planet listed under 'Bodies'
-        my( $planet_id, $cookie )   = $treectrl->GetFirstChild( $bodies_tree->bodies_item_id );
-        my $data                    = $treectrl->GetItemData( $planet_id );
-        my $hr                      = $data->GetData;
-        my $planet_name             = $hr->{'cookie'}{'node'};
-
-        ### If that first planet listed is not our current planet, iterate 
-        ### through all of that first planet's siblings until we find our 
-        ### current planet
-        unless( $planet_name eq $self->planet_name ) {
-            PLANET_NAME_CHECK:
-            while( $planet_id = $treectrl->GetNextSibling($planet_id) ) {
-                last unless $planet_id->IsOk;
-                my $data        = $treectrl->GetItemData($planet_id);
-                my $hr          = $data->GetData;
-                $planet_name    = $hr->{'cookie'}{'node'};
-                last PLANET_NAME_CHECK if $planet_name eq $self->planet_name;
-            }
-        }
-
-        unless( $planet_name eq $self->planet_name ) {
-            ### Should never happen.
-            say "No leaf on the tree matches our current planet.  Wat?";
-            return;
-        }
-            
-        my( $planet_child_id, $planet_child_cookie ) = $treectrl->GetFirstChild( $planet_id );
-        my $planet_child_name = $treectrl->GetItemText( $planet_child_id );
-        if( $planet_child_name eq 'Fire the BFG' ) {
-            ### Our current leaf is already set up as a station, so we don't 
-            ### have to do anything.
-            return;
-        }
-
-        ### Still here?  The current leaf is a new-to-this-user Space Station, 
-        ### and it's currently displaying the child leaves of a Planet.  
-        ### Update the tree.
-
-        wxTheApp->left_pane->bodies_tree->fill_tree;
-        return 1;
-
     }#}}}
 
     no Moose;
