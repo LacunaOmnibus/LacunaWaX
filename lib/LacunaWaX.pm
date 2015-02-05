@@ -37,8 +37,7 @@ package LacunaWaX {
         $self->main_frame->SetIcon( $self->icon_image );
         $self->main_frame->Update();        # Make the icon actually show up
 
-        $self->main_frame->Show(1);
-
+        #$self->main_frame->frame->Show();
         $self->logger->debug('Starting application');
 
         $self->_set_events();
@@ -48,9 +47,19 @@ package LacunaWaX {
         my $self = shift;
 
         ### Etn is getting "Adding duplicate image handler" errors, and then a 
-        ### segfault (he's on an older Mac).  I don't know if 
-        ### InitAllImageHandlers is being called in here twice for him, but 
-        ### think that's a possibility.  This is to prevent that.
+        ### segfault.
+
+=pod
+
+I'm now getting the same thing under 5.20.1, and my "fix" isn't 
+fixing anything.
+
+CHECK the core dump is coming from:
+        my $mf = LacunaWaX::MainFrame->new( $args );
+
+=cut
+        ### I don't know if InitAllImageHandlers is being called in here twice 
+        ### for him, but think that's a possibility.  This is to prevent that.
         $self->{'image_handlers_initialized'} = 0;
 
         ### Do not change the order of the attributes without testing.
@@ -86,25 +95,9 @@ package LacunaWaX {
         ### The point being that any code in here should relate only to the 
         ### Wx::App, not to the LacunaWaX.
 
-
-        ### Etnmarchand start here
-        unless( $self->{'image_handlers_initialized'} ) {
-            ### If you continue to have the same problem, comment out this 
-            ### next line (add a # to the front of the line)...
-            Wx::InitAllImageHandlers();
-
-            ### ...and uncomment this line (remove the # from the front)
-            #Wx::InitAllImageHandlers() unless $^O eq 'darwin';
-
-
-
-            ### There's absolutely zero guarantee that will do anything, but 
-            ### it's worth a try.
-
-            ### Leave this alone.
-            $self->{'image_handlers_initialized'} = 1;
-        }
-
+        ### If we're using SplashFast in the calling script, this causes 
+        ### "duplicate image handler" warnings in Perl 5.20.
+        #Wx::InitAllImageHandlers();
 
         return 1;
     }#}}}
@@ -304,7 +297,6 @@ package LacunaWaX {
                 }
             }
         }
-
 
         ### position arg is optional.  Window will be centered on display if 
         ### position is not sent.

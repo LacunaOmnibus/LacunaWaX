@@ -80,7 +80,6 @@ package LacunaWaX::MainFrame::StatusBar {
         $self->bar_reset;
 
         $self->_set_events();
-
         return $self;
     }
     sub _build_status_bar {#{{{

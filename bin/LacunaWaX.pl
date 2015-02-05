@@ -17,7 +17,7 @@ BEGIN {
 }
 BEGIN {
     use LacunaWaX::Preload::Perlapp;
-    use Wx::Perl::SplashFast( $i, 2000 );
+    use Wx::Perl::SplashFast( $i, 1000 );
 }
 use LacunaWaX;
 use LacunaWaX::Util;

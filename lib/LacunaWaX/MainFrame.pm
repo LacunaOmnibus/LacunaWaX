@@ -25,6 +25,7 @@ package LacunaWaX::MainFrame {
             GetSize             => "GetSize",
             GetTitle            => "GetTitle",
             GetStatusBar        => "GetStatusBar",
+            Hide                => "Hide",
             Layout              => "Layout",
             SetMenuBar          => "SetMenuBar",
             SetIcon             => "SetIcon",
@@ -94,10 +95,57 @@ package LacunaWaX::MainFrame {
     sub BUILD {
         my $self = shift;
 
-        $self->Show(0);
+        ### We want to hide the window while it's being constructed, and then 
+        ### only display it when it's finished, hence the Hide() .... Show() 
+        ### below.
+        ###
+        ### But 5.20's wx needs the window to be complete, including being 
+        ### shown, before the status bar's set_events() is called.  I believe 
+        ### that set_events() method is issuing an event of its own, and we 
+        ### can't (apparently) be issuing events while we're still in the 
+        ### process of building this frame (and it's apparently not "built" 
+        ### until it's been shown.)
+        ### 
+        ### Our options re: the status bar are:
+        ###     - Skip it here altogether.
+        ###         - This leaves it off the intro screen, where it's not 
+        ###           really needed anyway.  It'll then get automatically 
+        ###           added on to any subsequent screens once the user logs 
+        ###           in.
+        ###             - This is the easiest way to go, but results in no 
+        ###               status bar on the intro screen.  Which is OK, but 
+        ###               it's different from what's come before, and its 
+        ###               sudden appearance during login is a little hokey.
+        ###     - Include the status bar, but either:
+        ###         - call Show() on this main frame before calling 
+        ###           _build_status_bar()
+        ###             - This is almost as easy as skipping the status bar 
+        ###               altogether, and preserves consistency with the way 
+        ###               the app has always looked.
+        ###             - It's also going to mean that the main_frame will be 
+        ###               sitting there, visible, while build_status_bar() 
+        ###               does its thing.  So somebody on a slow windows 
+        ###               computer will be looking at a window without a 
+        ###               status bar that slowly gets a status bar.  Or 
+        ###               something.
+        ###                 - I'm coming to the conclusion that there's only 
+        ###                   so much I can do for people on slow Windows 
+        ###                   computers.  So this is what I'm going with.
+        ###         - pull the _set_events() out of the status bar's BUILD and 
+        ###           call it here, after calling Show() on the main frame.
+        ###             - This would require every bit of code implementing 
+        ###               the status bar to call _set_events() itself, which 
+        ###               is inconsistent with the way everything else works, 
+        ###               and I don't like it.
+
+
+        $self->Hide();
         $self->SetMenuBar($self->menu_bar->menu_bar);
         $self->intro_panel_sizer->Add( $self->intro_panel->main_panel, 1, wxEXPAND );
         $self->SetSizer($self->intro_panel_sizer);
+
+        ### Gotta show ourselves before adding the status bar.
+        $self->Show();
 
         ### The intro panel could really live without the status bar.  If you 
         ### wanted to skip it there for a cleaner look, this line could be 
@@ -106,7 +154,6 @@ package LacunaWaX::MainFrame {
         $self->_build_status_bar;
 
         $self->_set_events;
-        $self->Show(1);
         return $self;
     };
 

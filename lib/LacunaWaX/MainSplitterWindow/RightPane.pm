@@ -81,7 +81,7 @@ With no children.
                     wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL
                 )
             );
-            ### I'm unclear whether the arguments are doing anything at all.  
+            ### I'm unclear whether the arguments are doing anything at all. 
             ### Scrolling looks the same with the rate set at 10 as it does at 
             ### 1000.
             ### The method does definitely need to be called to create the 
