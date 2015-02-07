@@ -87,20 +87,34 @@ they'll simply be picked up on the next run.
 
 =cut
 
-        my $cargo = [];
-        my $count = 0;
+        my $cargo               = [];
+        my $count               = 0;
+        my $hold_size_left      = $hold_size;
+        my $ship_is_now_full    = 0;
         ADD_GLYPHS:
         foreach my $g( @{$glyphs} ) {
             ### A quantity of 0 won't ever be returned by get_glyph_summary, 
             ### but if the user wants to leave some glyphs onsite for 
             ### missions, we may have subtracted the quantity down to 0.
             next ADD_GLYPHS if $g->{'quantity'} == 0;
-            $count += $g->{'quantity'};
-            if( $count * $GLYPH_CARGO_SIZE > $hold_size ) { # Whoops
-                $count -= $g->{'quantity'};
-                last ADD_GLYPHS;
+
+            my $qty_this_glyph_to_send = 0;
+            if( $g->{'quantity'} * $GLYPH_CARGO_SIZE > $hold_size_left ) {
+                $qty_this_glyph_to_send = int( $hold_size_left / $GLYPH_CARGO_SIZE );
+                $ship_is_now_full = 1;
             }
-            push @{$cargo}, {type => 'glyph', name => $g->{'name'}, quantity => $g->{'quantity'}};
+            else {
+                $qty_this_glyph_to_send = $g->{'quantity'};
+            }
+            $hold_size_left -= ($qty_this_glyph_to_send * $GLYPH_CARGO_SIZE);
+            if( not $qty_this_glyph_to_send ) { next ADD_GLYPHS }
+
+            push @{$cargo}, {type => 'glyph', name => $g->{'name'}, quantity => $qty_this_glyph_to_send};
+
+            if( $ship_is_now_full ) {
+                $self->logger->info("Ship is full now; not adding any more glyphs.");
+                last ADD_GLYPHS 
+            }
         }
         return $cargo;
     }#}}}
@@ -157,7 +171,6 @@ they'll simply be picked up on the next run.
             return $pushes;
         }
 
-        #unless( ($am_rec->glyph_home_id and $am_rec->pusher_ship_name) or $am_rec->auto_search_for ) {
         if( $am_rec->glyph_home_id and $am_rec->pusher_ship_name ) {
             $self->logger->info("Pushing glyphs from $body_name.");
         }
@@ -225,7 +238,7 @@ represented by the ArchMinPrefs record passed as the first argument.
         };
         $rv or return $pushes;
 
-        $self->logger->info("- Pushed $pushes glyphs to $glyph_home_name.");
+        $self->logger->info("- Pushed $pushes glyph types to $glyph_home_name.");
         return $pushes;
     }#}}}
     sub search_all_servers {#{{{
