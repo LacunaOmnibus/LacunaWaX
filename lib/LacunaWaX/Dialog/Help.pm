@@ -7,8 +7,6 @@ package LacunaWaX::Dialog::Help {
     use File::Slurp;
     use File::Spec;
     use File::Util;
-    use HTML::Scrubber;
-    use HTML::TreeBuilder::XPath;
     use Moose;
     use Template;
     use Try::Tiny;
@@ -42,7 +40,7 @@ package LacunaWaX::Dialog::Help {
     has 'szr_navbar'        => (is => 'rw', isa => 'Wx::Sizer',         lazy_build => 1, documentation => q{horizontal});
 
     ### Doesn't follow the Hungarian notation convention used for the other 
-    ### WxWindows on purpose, to set it apart from the other controls.    
+    ### WxWindows on purpose, to set it apart from the other controls. 
     ### main_sizer is required by our NonScrolled parent.
     has 'main_sizer' => (is => 'rw', isa => 'Wx::Sizer', lazy_build => 1, documentation => q{vertical});
 
@@ -190,33 +188,6 @@ package LacunaWaX::Dialog::Help {
         $text =~ s/\s{2,}/ /g;
         $text =~ s/\s+$//;
         return $text;
-    }#}}}
-    sub get_docs {#{{{
-        my $self    = shift;
-        my $loofa   = HTML::Scrubber->new();
-        my $docs    = {};
-        my $dir     = wxTheApp->globals->dir_html;
-
-        use HTML::TreeBuilder;
-        foreach my $f(glob("\"$dir\"/*.html")) {
-            my $html = read_file($f);
-
-            my $content = $loofa->scrub( $html );
-
-            my $x = HTML::TreeBuilder->new();
-            $x->parse("<html><body>$html</body></html>");
-
-            my $title_elem  = ($x->find_by_tag_name('h1'))[0];
-            my $title_text  = (ref $title_elem eq 'HTML::Element') ? $title_elem->as_text : 'No Title';
-            my $summary     = $self->get_doc_summary($x) || 'No Summary';
-
-            $docs->{$f} = {
-                content     => $content,
-                summary     => $summary,
-                title       => $title_text,
-            }
-        }
-        return $docs;
     }#}}}
     sub get_doc_summary {#{{{
         my $self = shift;
