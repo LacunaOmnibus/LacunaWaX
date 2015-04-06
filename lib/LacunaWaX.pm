@@ -11,8 +11,8 @@ package LacunaWaX {
     use Wx::Event qw(EVT_MOVE EVT_CLOSE);
 
     use base 'Wx::App';
-    $Wx::App::VERSION   = "2.06";
-    our $VERSION        = '2.06';
+    $Wx::App::VERSION   = "2.08";
+    our $VERSION        = '2.08';
 
     use LacunaWaX::Preload::Perlapp;
     use LacunaWaX::MainFrame;
@@ -54,8 +54,8 @@ package LacunaWaX {
 I'm now getting the same thing under 5.20.1, and my "fix" isn't 
 fixing anything.
 
-CHECK the core dump is coming from:
-        my $mf = LacunaWaX::MainFrame->new( $args );
+the core dump is coming from:
+    my $mf = LacunaWaX::MainFrame->new( $args );
 
 =cut
         ### I don't know if InitAllImageHandlers is being called in here twice 

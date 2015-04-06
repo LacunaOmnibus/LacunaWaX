@@ -14,13 +14,10 @@ package LacunaWaX::Model::Client {
 
     our $AUTOLOAD;
 
-    has 'app'           => (is => 'rw', isa => 'LacunaWaX', weak_ref => 1   ); 
-    has 'server_id'     => (is => 'rw', isa => 'Int',       required => 1   );
-
     has 'globals' => (
         is          => 'rw', 
         isa         => 'LacunaWaX::Model::Globals',
-        lazy_build  => 1,
+        required    => 1,
         handles     => {
             logger          => 'logger',
             log_schema      => 'log_schema',
@@ -28,7 +25,9 @@ package LacunaWaX::Model::Client {
         }
     );
 
-    has 'empire_status'   => (is => 'rw', isa => 'HashRef');
+    has 'app'           => (is => 'rw', isa => 'LacunaWaX', weak_ref => 1   ); 
+    has 'server_id'     => (is => 'rw', isa => 'Int',       required => 1   );
+    has 'empire_status' => (is => 'rw', isa => 'HashRef');
 
     has 'use_gui' => (
         is          => 'rw',
@@ -94,6 +93,7 @@ package LacunaWaX::Model::Client {
     has 'stations' => ( is => 'rw', isa => 'HashRef', lazy => 1, default => sub {{}},
         documentation => q{ name => id },
     );
+    has 'primary_embassy_id' => ( is => 'rw', isa => 'Int' );
 
     has 'sitter_clients' => ( is => 'rw', isa => 'HashRef', lazy => 1, default => sub {{}},
         documentation => q{
@@ -143,8 +143,15 @@ package LacunaWaX::Model::Client {
         ### re-called, but the whole client still exists, and its builder will 
         ### not be re-called.
         ### So reset the info on the current client.
-        $self->empire_name($rec->username);
-        $self->empire_pass($rec->password);
+        ###
+        ### otoh, if we're trying to log in as somebody else, using their 
+        ### sitter, we don't want to switch back to the main user's account.
+        ###
+        ### At this point, I think that if the actual Wax user wants to change 
+        ### their password in preferences, they can just change it and restart 
+        ### the silly thing.
+        #$self->empire_name($rec->username);
+        #$self->empire_pass($rec->password);
 
         return $rec;
     }#}}}
@@ -435,9 +442,10 @@ doing so returns much more quickly than having to recreate them.
         );
 
         my $lc = $self->new(
-            name        => $name,
-            password    => $pass,
-            client      => $glc,
+            empire_name => $name,
+            empire_pass => $pass,
+            #client      => $glc,
+            globals     => $self->globals,
             uri         => $self->uri,
             server_id   => $self->server_id,
             api_key     => $self->api_key,
@@ -973,6 +981,7 @@ necessary, call ping() instead.
         $self->planets({ reverse %{$status->{'empire'}{'planets'}} });
         $self->colonies({ reverse %{$status->{'empire'}{'colonies'}} });
         $self->stations({ reverse %{$status->{'empire'}{'stations'}} });
+        $self->primary_embassy_id( $status->{'empire'}{'primary_embassy_id'} );
         $self->app->Yield if $self->app;
         return 1;
     }#}}}

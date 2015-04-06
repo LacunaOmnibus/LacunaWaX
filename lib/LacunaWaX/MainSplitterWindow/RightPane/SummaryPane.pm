@@ -97,7 +97,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::SummaryPane {
             ### both a station and on a planet.  Station text is bigger. 
             ### Also, stations with warning text ("OMG we haven't seize our 
             ### own star!") will need even more height here.
-            Wx::Size->new(400,220)
+            Wx::Size->new(400,300)
         );
         $v->SetFont( wxTheApp->get_font('para_text_2') );
         return $v;
@@ -167,20 +167,9 @@ Orbit $s->{orbit} around $s->{star_name} (ID $s->{star_id}), in zone $s->{zone}\
             my $parl = try { wxTheApp->game_client->get_building($self->planet_id, 'Parliament') };
             my $laws = try { $parl->view_laws($self->planet_id) } if $parl;
 
-            my @non_seizure_laws = ();
-            LAW:
-            foreach my $hr(@{$laws->{'laws'}}) {
-                next LAW if $hr->{'name'} =~ /^Seize /;
-                push @non_seizure_laws, $hr;
-            }
-
-            if( @non_seizure_laws ) {
-                $text .= "\nLaws (other than star seizures):\n";
-                $text .= "-------------------------------\n";
-                foreach my $l(sort {$a->{'name'} cmp $b->{'name'}}@non_seizure_laws) {
-                    $text .= "$l->{'name'}\n";
-                }
-            }
+            $text .= "\nLaws:\n";
+            $text .= "-------------------------------\n";
+            $text .= join ', ', ( map{ $_->{'name'} }(sort{ $a->{'name'} cmp $b->{'name'} }@{$laws->{'laws'}} ) )
         }
 
         return $text;

@@ -10,6 +10,7 @@ package LacunaWaX::MainSplitterWindow::RightPane {
 
     use LacunaWaX::MainSplitterWindow::RightPane::BFGPane;
     use LacunaWaX::MainSplitterWindow::RightPane::DefaultPane;
+    use LacunaWaX::MainSplitterWindow::RightPane::EmbassyPropositionsPane;
     use LacunaWaX::MainSplitterWindow::RightPane::GlyphsPane;
     use LacunaWaX::MainSplitterWindow::RightPane::PropositionsPane;
     use LacunaWaX::MainSplitterWindow::RightPane::RearrangerPane;

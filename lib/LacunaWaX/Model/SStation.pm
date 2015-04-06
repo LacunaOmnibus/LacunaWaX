@@ -7,9 +7,10 @@ package LacunaWaX::Model::SStation {
     use Moose;
     use Try::Tiny;
 
-    has 'id'        => (is => 'rw', isa => 'Int',       required => 1       );
-    has 'name'      => (is => 'rw', isa => 'Str',       lazy_build => 1     );
-    has 'status'    => (is => 'rw', isa => 'HashRef',   lazy_build => 1     );
+    has 'id'        => (is => 'rw', isa => 'Int',                           required => 1       );
+    has 'name'      => (is => 'rw', isa => 'Str',                           lazy_build => 1     );
+    has 'status'    => (is => 'rw', isa => 'HashRef',                       lazy_build => 1     );
+    has 'body'      => (is => 'rw', isa => 'Games::Lacuna::Client::Body',   lazy_build => 1     );
 
     has 'game_client' => (
         is          => 'rw', 
@@ -29,6 +30,15 @@ package LacunaWaX::Model::SStation {
         handles => {
             incoming_hostiles => 'incoming_hostiles',
             has_hostile_spies => 'has_hostile_spies',
+        }
+    );
+
+    has 'laws' => (
+        is          => 'rw',
+        isa         => 'ArrayRef[HashRef]', 
+        lazy_build  => 1,
+        documentation => q{
+            id, name, description, date_enacted
         }
     );
 
@@ -57,6 +67,10 @@ package LacunaWaX::Model::SStation {
         my $self = shift;
         return $self->game_client->planet_name ($self->id ) || q{};
     }#}}}
+    sub _build_body {#{{{
+        my $self = shift;
+        return $self->game_client->get_body( $self->id );
+    }#}}}
     sub _build_command {#{{{
         my $self = shift;
         my $bldg = try {
@@ -72,6 +86,11 @@ package LacunaWaX::Model::SStation {
         }
 
         return $comm;
+    }#}}}
+    sub _build_laws {#{{{
+        my $self = shift;
+        my $v = $self->body->view_laws();
+        return $v->{'laws'};
     }#}}}
     sub _build_police {#{{{
         my $self = shift;
@@ -100,6 +119,20 @@ package LacunaWaX::Model::SStation {
         return $s;
     }#}}}
 
+    sub has_law {#{{{
+        my $self = shift;
+        my $cand = shift;
+
+        my $gotit = 0;
+        CHECKLAW:
+        foreach my $l( @{$self->laws} ) {
+            if( $l->{'name'} eq $cand ) {
+                $gotit = 1;
+                last CHECKLAW;
+            }
+        }
+        return $gotit;
+    }#}}}
     sub subpar_res {#{{{
         my $self = shift;
         my $min  = shift;

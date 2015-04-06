@@ -57,6 +57,8 @@ package LacunaWaX::MainSplitterWindow::RightPane::SSHealth {
     has 'lbl_hostile_spies'     => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1);
     has 'chk_own_star_seized'   => (is => 'rw', isa => 'Wx::CheckBox',      lazy_build => 1);
     has 'lbl_own_star_seized'   => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1);
+    has 'chk_mem_only_stations'   => (is => 'rw', isa => 'Wx::CheckBox',      lazy_build => 1);
+    has 'lbl_mem_only_stations'   => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1);
 
     has 'lbl_min_res_pre'   => (is => 'rw', isa => 'Wx::StaticText', lazy_build => 1);
     has 'lbl_min_res_suf'   => (is => 'rw', isa => 'Wx::StaticText', lazy_build => 1);
@@ -82,6 +84,8 @@ package LacunaWaX::MainSplitterWindow::RightPane::SSHealth {
         $self->szr_grid_opts->Add( $self->chk_hostile_spies, 0, 0, 0 );
         $self->szr_grid_opts->Add( $self->lbl_own_star_seized, 0, 0, 0 );
         $self->szr_grid_opts->Add( $self->chk_own_star_seized, 0, 0, 0 );
+        $self->szr_grid_opts->Add( $self->lbl_mem_only_stations, 0, 0, 0 );
+        $self->szr_grid_opts->Add( $self->chk_mem_only_stations, 0, 0, 0 );
         $self->szr_grid_opts->Add( $self->lbl_min_res_pre, 0, 0, 0 );
         $self->szr_grid_opts->Add( $self->txt_min_res, 0, 0, 0 );
 
@@ -98,7 +102,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::SSHealth {
     }
     sub _build_alert_record {#{{{
         my $self = shift;
-        
+ 
         my $schema = wxTheApp->main_schema;
         my $rec = $schema->resultset("SSAlerts")->find_or_create(
             {
@@ -225,6 +229,33 @@ package LacunaWaX::MainSplitterWindow::RightPane::SSHealth {
         $v->SetToolTip($tt);
         return $v;
     }#}}}
+    sub _build_chk_mem_only_stations {#{{{
+        my $self = shift;
+        my $v = Wx::CheckBox->new(
+            $self->parent, -1, 
+            'Yes',
+            wxDefaultPosition, 
+            Wx::Size->new(-1,-1), 
+        );
+
+        $v->SetFont( wxTheApp->get_font('para_text_2') );
+        $v->SetValue( $self->alert_record->members_only_stations );
+
+        return $v;
+    }#}}}
+    sub _build_lbl_mem_only_stations {#{{{
+        my $self = shift;
+        my $v = Wx::StaticText->new(
+            $self->parent, -1, 
+            "Enable members only station alerts?",
+            wxDefaultPosition, 
+            Wx::Size->new(-1, 20)
+        );
+        $v->SetFont( wxTheApp->get_font('para_text_2') );
+        my $tt = Wx::ToolTip->new( "Alerts if the station does not have 'Members Only Stations' turned on." );
+        $v->SetToolTip($tt);
+        return $v;
+    }#}}}
     sub _build_lbl_header {#{{{
         my $self = shift;
         my $v = Wx::StaticText->new(
@@ -332,12 +363,13 @@ package LacunaWaX::MainSplitterWindow::RightPane::SSHealth {
         EVT_CHECKBOX(   $self->parent, $self->chk_hostile_ships->GetId,     sub{$self->OnCheckShips(@_)}    );
         EVT_CHECKBOX(   $self->parent, $self->chk_hostile_spies->GetId,     sub{$self->OnCheckSpies(@_)}    );
         EVT_CHECKBOX(   $self->parent, $self->chk_own_star_seized->GetId,   sub{$self->OnCheckStar(@_)}     );
+        EVT_CHECKBOX(   $self->parent, $self->chk_mem_only_stations->GetId, sub{$self->OnCheckMemOnlyStation(@_)}     );
         return;
     }#}}}
 
     sub enable_alerts_check_from_child {#{{{
         my $self    = shift;
-        my $input     = shift;
+        my $input   = shift;
 
         ### If the user turns on any of the Enable alerts, forcefully turn on 
         ### the main "Turn on alerts" checkbox as well.
@@ -357,6 +389,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::SSHealth {
             $self->chk_hostile_ships->SetValue(0);
             $self->chk_hostile_spies->SetValue(0);
             $self->chk_own_star_seized->SetValue(0);
+            $self->chk_mem_only_stations->SetValue(0);
             $self->txt_min_res->SetValue(0);
         }
 
@@ -386,7 +419,14 @@ package LacunaWaX::MainSplitterWindow::RightPane::SSHealth {
         my $event   = shift;
 
         $self->enable_alerts_check_from_child( $self->chk_own_star_seized );
+        return 1;
+    }#}}}
+    sub OnCheckMemOnlyStation {#{{{
+        my $self    = shift;
+        my $window  = shift;
+        my $event   = shift;
 
+        $self->enable_alerts_check_from_child( $self->chk_mem_only_stations );
         return 1;
     }#}}}
     sub OnSave {#{{{
@@ -408,11 +448,12 @@ package LacunaWaX::MainSplitterWindow::RightPane::SSHealth {
             wxTheApp->popmsg("OK, it's your funeral.  But think hard about increasing that number or your station could get into trouble.");
         }
 
-        $self->alert_record->enabled(           $enabled                                    );
-        $self->alert_record->hostile_ships(     $self->chk_hostile_ships->GetValue()   || 0 );
-        $self->alert_record->hostile_spies(     $self->chk_hostile_spies->GetValue()   || 0 );
-        $self->alert_record->own_star_seized(   $self->chk_own_star_seized->GetValue() || 0 );
-        $self->alert_record->min_res(           $min_res                                    );
+        $self->alert_record->enabled(               $enabled                                         );
+        $self->alert_record->hostile_ships(         $self->chk_hostile_ships->GetValue()        || 0 );
+        $self->alert_record->hostile_spies(         $self->chk_hostile_spies->GetValue()        || 0 );
+        $self->alert_record->own_star_seized(       $self->chk_own_star_seized->GetValue()      || 0 );
+        $self->alert_record->members_only_stations( $self->chk_mem_only_stations->GetValue()    || 0 );
+        $self->alert_record->min_res(               $min_res                                         );
         $self->alert_record->update;
 
         my $msg = ($enabled)

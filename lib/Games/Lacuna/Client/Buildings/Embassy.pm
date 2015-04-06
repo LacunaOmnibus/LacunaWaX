@@ -32,6 +32,9 @@ sub api_methods {
     donate_to_stash        => { default_args => [qw(session_id building_id)] },
     exchange_with_stash    => { default_args => [qw(session_id building_id)] },
 
+    ### JDB
+    view_propositions   => { default_args => [qw(session_id building_id)] },
+    cast_vote           => { default_args => [qw(session_id building_id)] },
   };
 }
 
