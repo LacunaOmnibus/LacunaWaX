@@ -76,6 +76,7 @@ package LacunaWaX::Model::Client {
     has 'url'           => (is => 'rw', isa => 'Str',                   lazy_build => 1 );
     has 'protocol'      => (is => 'rw', isa => 'Str',                   lazy_build => 1 );
     has 'empire_name'   => (is => 'rw', isa => 'Str',                   lazy_build => 1 );
+    has 'empire_id'     => (is => 'rw', isa => 'Int'                                    );
     has 'empire_pass'   => (is => 'rw', isa => 'Str',                   lazy_build => 1 );
     has 'client'        => (is => 'rw', isa => 'Games::Lacuna::Client', lazy_build => 1 );
     has 'pingtime'      => (is => 'rw', isa => 'DateTime'                               );
@@ -978,6 +979,7 @@ necessary, call ping() instead.
         $self->app->Yield if $self->app;
         $self->pingtime( DateTime->now );
         $self->app->Yield if $self->app;
+        $self->empire_id( $status->{'empire'}{'id'} );
         $self->planets({ reverse %{$status->{'empire'}{'planets'}} });
         $self->colonies({ reverse %{$status->{'empire'}{'colonies'}} });
         $self->stations({ reverse %{$status->{'empire'}{'stations'}} });

@@ -4,6 +4,7 @@ use v5.14;
 package LacunaWaX {
     use Carp;
     use Data::Dumper;
+    use DateTime::Format::RFC3339;
     use DateTime::TimeZone;
     use Time::Duration qw(duration duration_exact);
     use Try::Tiny;
@@ -459,6 +460,13 @@ the core dump is coming from:
         if( my $db_version = $schema->resultset('AppPrefsKeystore')->find_or_create({ name => 'DbVersion' }) ) {
             $db_version->value( $LacunaWaX::Model::Schema::VERSION );
             $db_version->update;
+        }
+
+        if( my $lastrun = $schema->resultset('AppPrefsKeystore')->find_or_create({ name => 'LastRun' }) ) {
+            my $f  = DateTime::Format::RFC3339->new();
+            my $dt = DateTime->now();
+            $lastrun->value( $f->format_datetime($dt) );
+            $lastrun->update;
         }
 
         $event->Skip();
