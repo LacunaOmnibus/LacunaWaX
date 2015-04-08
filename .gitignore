@@ -1,6 +1,6 @@
 
 ### Directories
-lib/LacunaWaX/SMA/Model/SMA/
+lib/LacunaWaX/Model/SMA/*
 .svn/
 
 ### Specific files
