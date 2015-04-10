@@ -355,12 +355,8 @@ false and never die.
 
         $self->app->Yield if $self->app;
 
-        my $rv = try {
-            $self->get_empire_status
-        }
-        catch {
-            return;
-        };
+        my $rv = try { $self->get_empire_status };
+        $logger->debug("Login failed!") unless( $rv );
 
         return $rv;
     }#}}}
@@ -983,7 +979,7 @@ necessary, call ping() instead.
         $self->planets({ reverse %{$status->{'empire'}{'planets'}} });
         $self->colonies({ reverse %{$status->{'empire'}{'colonies'}} });
         $self->stations({ reverse %{$status->{'empire'}{'stations'}} });
-        $self->primary_embassy_id( $status->{'empire'}{'primary_embassy_id'} );
+        $self->primary_embassy_id( $status->{'empire'}{'primary_embassy_id'} // q{} );
         $self->app->Yield if $self->app;
         return 1;
     }#}}}

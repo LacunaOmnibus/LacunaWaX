@@ -1,6 +1,4 @@
 
-### Search on CHECK
-
 package LacunaWaX::MainSplitterWindow::RightPane::DefaultPane {
     use v5.14;
     use Moose;
@@ -27,7 +25,6 @@ package LacunaWaX::MainSplitterWindow::RightPane::DefaultPane {
     has 'header_sizer'      => (is => 'rw', isa => 'Wx::Sizer',         lazy_build => 1   );
     has 'lbl_header'        => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1   );
     has 'lbl_text'          => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1   );
-    #has 'lbl_text'          => (is => 'rw', isa => 'Wx::TextCtrl',    lazy_build => 1   );
 
     sub BUILD {
         my $self = shift;
@@ -56,7 +53,6 @@ package LacunaWaX::MainSplitterWindow::RightPane::DefaultPane {
         $v->SetFont( wxTheApp->get_font('header_1') );
         return $v;
     }#}}}
-
 
     sub _build_lbl_text {#{{{
         my $self = shift;
