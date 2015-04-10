@@ -97,7 +97,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::EmbassyPropositionsPane::PropR
     has 'cast_sitters_sizer'    => (is => 'rw', isa => 'Wx::Sizer',     lazy_build => 1, documentation => 'horizontal');
 
     has 'name_width'            => (is => 'rw', isa => 'Int', lazy => 1, default => 110);
-    has 'proposed_by_width'     => (is => 'rw', isa => 'Int', lazy => 1, default => 80);
+    has 'proposed_on_width'     => (is => 'rw', isa => 'Int', lazy => 1, default => 80);
     has 'votes_needed_width'    => (is => 'rw', isa => 'Int', lazy => 1, default => 60);
     has 'votes_yes_width'       => (is => 'rw', isa => 'Int', lazy => 1, default => 40);
     has 'votes_no_width'        => (is => 'rw', isa => 'Int', lazy => 1, default => 40);
@@ -105,7 +105,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::EmbassyPropositionsPane::PropR
     has 'button_width'          => (is => 'rw', isa => 'Int', lazy => 1, default => 35);
 
     has 'name_header'               => (is => 'rw', isa => 'Wx::StaticText');
-    has 'proposed_by_header'        => (is => 'rw', isa => 'Wx::StaticText');
+    has 'proposed_on_header'        => (is => 'rw', isa => 'Wx::StaticText');
     has 'votes_needed_header'       => (is => 'rw', isa => 'Wx::StaticText');
     has 'votes_yes_header'          => (is => 'rw', isa => 'Wx::StaticText');
     has 'votes_no_header'           => (is => 'rw', isa => 'Wx::StaticText');
@@ -114,7 +114,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::EmbassyPropositionsPane::PropR
     has 'cast_sitters_vote_header'  => (is => 'rw', isa => 'Wx::StaticText');
 
     has 'lbl_name'          => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1);
-    has 'lbl_proposed_by'   => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1);
+    has 'lbl_proposed_on'   => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1);
     has 'lbl_votes_needed'  => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1);
     has 'lbl_votes_yes'     => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1);
     has 'lbl_votes_no'      => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1);
@@ -138,7 +138,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::EmbassyPropositionsPane::PropR
         return $self->_make_footer if $self->is_footer;
 
         $self->main_sizer->Add($self->lbl_name, 0, 0, 0);
-        $self->main_sizer->Add($self->lbl_proposed_by, 0, 0, 0);
+        $self->main_sizer->Add($self->lbl_proposed_on, 0, 0, 0);
         $self->main_sizer->Add($self->lbl_votes_needed, 0, 0, 0);
         $self->main_sizer->Add($self->lbl_votes_yes, 0, 0, 0);
         $self->main_sizer->Add($self->lbl_votes_no, 0, 0, 0);
@@ -225,26 +225,27 @@ package LacunaWaX::MainSplitterWindow::RightPane::EmbassyPropositionsPane::PropR
 
         return $v;
     }#}}}
-    sub _build_lbl_proposed_by {#{{{
+    sub _build_lbl_proposed_on {#{{{
         my $self = shift;
 
-        my $text = my $orig_text = ($self->prop) ? $self->prop->{'proposed_by'}{'name'} : q{};
-        if(length $text > 13) { # Summarize long player names
-            substr $text, 10, (length $text), '...';
+
+        my $player_name = $self->prop->{'proposed_by'}{'name'} // q{};
+        my $abbrv_station = my $full_station = ($self->prop) ? $self->prop->{'station'} : q{};
+        $abbrv_station =~ s/^(\w)ASS\s+/$1-/;
+        if(length $abbrv_station > 13) { # Summarize long station names
+            substr $abbrv_station, 10, (length $abbrv_station), '...';
         }
 
         my $v = Wx::StaticText->new(
             $self->parent, -1, 
-            $text, 
+            $abbrv_station, 
             wxDefaultPosition, 
-            Wx::Size->new($self->proposed_by_width,$self->row_height)
+            Wx::Size->new($self->proposed_on_width,$self->row_height)
         );
         $v->SetFont( wxTheApp->get_font('para_text_1') );
 
-        unless($text eq $orig_text) {
-            my $tt = Wx::ToolTip->new( $orig_text );
-            $v->SetToolTip($tt);
-        }
+        my $tt = Wx::ToolTip->new( "Proposed on $full_station by $player_name" );
+        $v->SetToolTip($tt);
 
         return $v;
     }#}}}
@@ -412,10 +413,10 @@ package LacunaWaX::MainSplitterWindow::RightPane::EmbassyPropositionsPane::PropR
                 wxDefaultPosition, Wx::Size->new($self->name_width,$self->row_height)
             )
         );
-        $self->proposed_by_header(
+        $self->proposed_on_header(
             Wx::StaticText->new(
-                $self->parent, -1, 'Prop by: ',
-                wxDefaultPosition, Wx::Size->new($self->proposed_by_width,$self->row_height)
+                $self->parent, -1, 'Station: ',
+                wxDefaultPosition, Wx::Size->new($self->proposed_on_width,$self->row_height)
             )
         );
         $self->votes_needed_header(
@@ -460,7 +461,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::EmbassyPropositionsPane::PropR
         );
 
         $self->name_header->SetFont                 ( wxTheApp->get_font('header_7') );
-        $self->proposed_by_header->SetFont          ( wxTheApp->get_font('header_7') );
+        $self->proposed_on_header->SetFont          ( wxTheApp->get_font('header_7') );
         $self->votes_needed_header->SetFont         ( wxTheApp->get_font('header_7') );
         $self->votes_yes_header->SetFont            ( wxTheApp->get_font('header_7') );
         $self->votes_no_header->SetFont             ( wxTheApp->get_font('header_7') ); 
@@ -469,7 +470,7 @@ package LacunaWaX::MainSplitterWindow::RightPane::EmbassyPropositionsPane::PropR
         $self->cast_sitters_vote_header->SetFont    ( wxTheApp->get_font('header_7') ); 
 
         $self->main_sizer->Add($self->name_header, 0, 0, 0);
-        $self->main_sizer->Add($self->proposed_by_header, 0, 0, 0);
+        $self->main_sizer->Add($self->proposed_on_header, 0, 0, 0);
         $self->main_sizer->Add($self->votes_needed_header, 0, 0, 0);
         $self->main_sizer->Add($self->votes_yes_header, 0, 0, 0);
         $self->main_sizer->Add($self->votes_no_header, 0, 0, 0);

@@ -386,14 +386,21 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
             },
         ];#}}}
 
-        for(1..2) {
+        unless($^O eq 'MSWin32') {
             ### Add some empty nodes at the bottom of the last branch, or the 
             ### last item will be obscured by the bottom of the frame.
-            my $empty_node = {
-                node    => q{},
-                childs  => [],
-            };
-            push @{$embassy}, $empty_node;
+            ###
+            ### On Windows, those two empty nodes show up; there are 
+            ### branch outlines to them (and they're empty so the outlines 
+            ### go nowhere).  And even with everything expanded, nothing 
+            ### runs off the bottom, so skip it there.
+            for(1..2) {
+                my $empty_node = {
+                    node    => q{},
+                    childs  => [],
+                };
+                push @{$embassy}, $empty_node;
+            }
         }
 
         my $model_data = $self->treeview->model->data;
