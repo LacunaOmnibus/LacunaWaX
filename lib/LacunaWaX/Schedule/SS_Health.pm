@@ -95,6 +95,7 @@ package LacunaWaX::Schedule::SS_Health {
         STATION_RECORD:
         foreach my $ss_rec(@ss_alert_recs) {
             $self->make_station($ss_rec);
+
             unless( $self->station->has_command ) {
                 next STATION_RECORD;
             }
@@ -148,6 +149,13 @@ package LacunaWaX::Schedule::SS_Health {
             $self->logger->info("...and making sure it's seized by us.");
             if( $self->star_seized_by_other() ) {
                 $self->add_alert("Star has been seized by another SS!");
+            }
+        }
+
+        if( $ss_rec->members_only_stations ) {
+            $self->logger->info("Making sure mem only stations law is on.");
+            unless( $self->station->has_law('Members Only Stations') ) {
+                $self->add_alert("Members Only Stations law is not on!");
             }
         }
 

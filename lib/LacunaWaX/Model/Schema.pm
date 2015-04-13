@@ -1,7 +1,7 @@
 
 =pod
 
-The installation process is NOT using ->deploy to generate the databases.  
+The installation process is NOT using ->deploy to generate the databases. 
 Instead, the database asset creation statements are hard-coded in 
 post_install_script.pl.
 
@@ -75,7 +75,7 @@ package LacunaWaX::Model::Schema::BodyTypes {#{{{
         $table->add_index(name => 'BodyTypes_type_general', fields => ['type_general']);
         return 1;
     }#}}}
-    
+ 
 }#}}}
 package LacunaWaX::Model::Schema::LotteryPrefs {#{{{
     use v5.14;
@@ -175,14 +175,15 @@ package LacunaWaX::Model::Schema::SSAlerts {#{{{
 
     __PACKAGE__->table('SSAlerts');
     __PACKAGE__->add_columns( 
-        id              => {data_type => 'integer', is_auto_increment => 1, is_nullable => 0, extra => {unsigned => 1} },
-        server_id       => {data_type => 'integer',                         is_nullable => 0, },
-        station_id      => {data_type => 'integer',                         is_nullable => 0  },
-        enabled         => {data_type => 'integer',                         is_nullable => 0, default_value => '0' },
-        hostile_ships   => {data_type => 'integer',                         is_nullable => 0, default_value => '0' },
-        hostile_spies   => {data_type => 'integer',                         is_nullable => 0, default_value => '0' },
-        min_res         => {data_type => 'bigint',                          is_nullable => 0, default_value => '0' },
-        own_star_seized => {data_type => 'integer',                         is_nullable => 0, default_value => '0' },
+        id                      => {data_type => 'integer', is_auto_increment => 1, is_nullable => 0, extra => {unsigned => 1} },
+        server_id               => {data_type => 'integer',                         is_nullable => 0, },
+        station_id              => {data_type => 'integer',                         is_nullable => 0  },
+        enabled                 => {data_type => 'integer',                         is_nullable => 0, default_value => '0' },
+        hostile_ships           => {data_type => 'integer',                         is_nullable => 0, default_value => '0' },
+        hostile_spies           => {data_type => 'integer',                         is_nullable => 0, default_value => '0' },
+        min_res                 => {data_type => 'bigint',                          is_nullable => 0, default_value => '0' },
+        own_star_seized         => {data_type => 'integer',                         is_nullable => 0, default_value => '0' },
+        members_only_stations   => {data_type => 'integer',                         is_nullable => 0, default_value => '0' },
     );
     __PACKAGE__->set_primary_key( 'id' ); 
     __PACKAGE__->add_unique_constraint( 'one_alert_per_station' => [qw(server_id station_id)] ); 

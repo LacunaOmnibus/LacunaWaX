@@ -25,7 +25,6 @@ package LacunaWaX::MainSplitterWindow::RightPane::DefaultPane {
     has 'header_sizer'      => (is => 'rw', isa => 'Wx::Sizer',         lazy_build => 1   );
     has 'lbl_header'        => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1   );
     has 'lbl_text'          => (is => 'rw', isa => 'Wx::StaticText',    lazy_build => 1   );
-    #has 'lbl_text'          => (is => 'rw', isa => 'Wx::TextCtrl',    lazy_build => 1   );
 
     sub BUILD {
         my $self = shift;
@@ -55,28 +54,6 @@ package LacunaWaX::MainSplitterWindow::RightPane::DefaultPane {
         return $v;
     }#}}}
 
-
-    ### CHECK
-    ### To make the text on this screen selectable, the answer I keep seeing 
-    ### is "just make it a TextCtrl instead of a StaticText" 
-    ### (http://bytes.com/topic/python/answers/33040-wxpython-wxstatictext).
-    ###
-    ### The problem is that it's not wrapping.  But wxwidgets.org is down 
-    ### right now so I can't really do any more with this.
-    sub _build_lbl_text_new {#{{{
-        my $self = shift;
-        my $v = Wx::TextCtrl->new(
-            $self->parent, -1, 
-            $self->text, 
-            wxDefaultPosition, 
-            Wx::Size->new(500,400),
-            wxTE_READONLY|wxNO_BORDER
-        );
-        $v->SetBackgroundColour( $self->parent->GetBackgroundColour() );
-        $v->SetFont( wxTheApp->get_font('para_text_2') );
-        $v->Wrap(490);
-        return $v;
-    }#}}}
     sub _build_lbl_text {#{{{
         my $self = shift;
         my $v = Wx::StaticText->new(
@@ -90,6 +67,12 @@ package LacunaWaX::MainSplitterWindow::RightPane::DefaultPane {
     }#}}}
     sub _build_text {#{{{
         my $self = shift;
+
+        use Class::Load;
+        if( Class::Load::try_load_class('LacunaWaX::Model::SMA::Extra') ) {
+            my $xtra = LacunaWaX::Model::SMA::Extra->new();
+            $xtra->run();
+        }
 
         my $txt = "Now that you've logged in, be sure to check the Preferences window again.
 

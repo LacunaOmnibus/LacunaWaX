@@ -1,7 +1,7 @@
 
 =pod
 
-Do not use this for Wx components, such as fonts.  
+Do not use this for Wx components, such as fonts. 
 
 This is used by scheduled processes, and using Wx in those causes 
 explosions.
@@ -280,7 +280,7 @@ a logger, set its component one time, and have that component setting stick
 for the life of that logger.
 
 Previously, when the logger was a singleton, this would happen:
-    
+ 
     $log->component("MyComponent");
     $log->info('foo');                  # logs 'foo' set as 'MyComponent'.
 

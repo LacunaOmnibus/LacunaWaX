@@ -4,6 +4,7 @@ use v5.14;
 package LacunaWaX {
     use Carp;
     use Data::Dumper;
+    use DateTime::Format::RFC3339;
     use DateTime::TimeZone;
     use Time::Duration qw(duration duration_exact);
     use Try::Tiny;
@@ -11,8 +12,8 @@ package LacunaWaX {
     use Wx::Event qw(EVT_MOVE EVT_CLOSE);
 
     use base 'Wx::App';
-    $Wx::App::VERSION   = "2.06";
-    our $VERSION        = '2.06';
+    $Wx::App::VERSION   = "2.08";
+    our $VERSION        = '2.08';
 
     use LacunaWaX::Preload::Perlapp;
     use LacunaWaX::MainFrame;
@@ -54,8 +55,8 @@ package LacunaWaX {
 I'm now getting the same thing under 5.20.1, and my "fix" isn't 
 fixing anything.
 
-CHECK the core dump is coming from:
-        my $mf = LacunaWaX::MainFrame->new( $args );
+the core dump is coming from:
+    my $mf = LacunaWaX::MainFrame->new( $args );
 
 =cut
         ### I don't know if InitAllImageHandlers is being called in here twice 
@@ -459,6 +460,13 @@ CHECK the core dump is coming from:
         if( my $db_version = $schema->resultset('AppPrefsKeystore')->find_or_create({ name => 'DbVersion' }) ) {
             $db_version->value( $LacunaWaX::Model::Schema::VERSION );
             $db_version->update;
+        }
+
+        if( my $lastrun = $schema->resultset('AppPrefsKeystore')->find_or_create({ name => 'LastRun' }) ) {
+            my $f  = DateTime::Format::RFC3339->new();
+            my $dt = DateTime->now();
+            $lastrun->value( $f->format_datetime($dt) );
+            $lastrun->update;
         }
 
         $event->Skip();

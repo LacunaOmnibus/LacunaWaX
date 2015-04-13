@@ -25,6 +25,9 @@ See the github wiki pages for help.  https://github.com/tmtowtdi/LacunaWaX/wiki
 BRANCHES
 --------
 - master
+    - ss_lite_2015
+        - Norway and TT's newer station change code.  ss_changes (below) is defunct, this 
+          is current.
     - ss_changes
         - Dealt Icy's station changes code that's now defunct.  But there may be some 
           usable ideas in here.
@@ -35,6 +38,4 @@ BRANCHES
     - separate_bodies
         - empire->get_status() now includes status->{'stations'} and status->{'colonies'}.  
           This deals with that.
-
-
 

@@ -1,16 +1,24 @@
+
+### Directories
+lib/LacunaWaX/Model/SMA/*
 .svn/
+
+### Specific files
 Thumbs.db
+.carton 
+user/doc/html/html.idx/
+
+### Extensions
 *.exe
 *.msi
 *.sqlite
 *.sqlite-journal
 *.swo
 *.swp
+
+### Build files
 perlapp_projects/linux_64/LacunaWaX/
 perlapp_projects/linux_64/LacunaWaX*.gz
 perlapp_projects/windows_32/build
 perlapp_projects/windows_32/LacunaWaX-cache
 perlapp_projects/windows_32/LacunaWaX_win32.zip
-user/doc/html/html.idx/
-local 
-.carton 

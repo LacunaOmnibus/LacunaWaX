@@ -48,6 +48,14 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
             The 'Stations' leaf.
         }
     );
+    has 'embassy_item_id' => (
+        is              => 'rw', 
+        isa             => 'Wx::TreeItemId',
+        lazy_build      => 1,
+        documentation   => q{
+            The 'Embassy' leaf.
+        }
+    );
 
     has 'dispatch' => (
         is          => 'rw',
@@ -103,6 +111,7 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
         my $dispatch = {
             colonies => sub{ $self->toggle_expansion_state( 'colonies' ) },
             stations => sub{ $self->toggle_expansion_state( 'stations' ) },
+            embassy  => sub{ $self->toggle_expansion_state( 'embassy' ) },
             default => sub {
                 wxTheApp->right_pane->show_right_pane(
                     'LacunaWaX::MainSplitterWindow::RightPane::DefaultPane'
@@ -159,6 +168,7 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
                     { required_buildings => {'Police' => undef} } 
                 );
             },
+            ### This is the per-station propsitions pane
             propositions => sub {
                 my $planet  = shift;
                 wxTheApp->right_pane->show_right_pane(
@@ -168,6 +178,14 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
                         required_buildings  => {'Parliament' => undef}, 
                         nothrob             => 1,
                     } 
+                );
+            },
+            ### This is the embassy's propsitions pane
+            emb_props => sub {
+                my $planet  = shift;
+                wxTheApp->right_pane->show_right_pane(
+                    'LacunaWaX::MainSplitterWindow::RightPane::EmbassyPropositionsPane',
+                    $planet,
                 );
             },
             sshealth => sub {
@@ -195,8 +213,12 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
     }#}}}
     sub _build_treemodel {#{{{
         my $self = shift;
+
         my $b64_colonies = encode_base64(join q{:}, ('colonies'));
         my $b64_stations = encode_base64(join q{:}, ('stations'));
+        my $b64_embassy  = encode_base64(join q{:}, ('embassy'));
+
+
         my $tree_data = {
             node    => 'Root',
             childs  => [
@@ -210,6 +232,12 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
                 },
             ],
         };
+
+        my $c = wxTheApp->game_client;
+        if( $c->primary_embassy_id and $c->primary_embassy_id >= 1 ) {
+            push @{$tree_data->{'childs'}}, { node => 'Embassy', data => $b64_embassy };
+        }
+
         my $v = Wx::Perl::TreeView::SimpleModel->new( $tree_data );
         return $v;
     }#}}}
@@ -252,6 +280,18 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
 
         return $stations_id;
     }#}}}
+    sub _build_embassy_item_id {#{{{
+        my $self = shift;
+        ### This only works if Colonies is listed first, Stations second, and 
+        ### Embassy third.
+        my( $colonies_id, $stations_id, $embassy_id, $cookie );
+        ($colonies_id, $cookie) = $self->treeview->treectrl->GetFirstChild($self->root_item_id);
+
+        ($stations_id, $cookie) = $self->treeview->treectrl->GetNextChild($self->root_item_id, $cookie);
+        ($embassy_id, $cookie) = $self->treeview->treectrl->GetNextChild($self->root_item_id, $cookie);
+
+        return $embassy_id;
+    }#}}}
     sub _set_events {#{{{
         my $self = shift;
         EVT_TREE_ITEM_ACTIVATED(    $self->treeview->treectrl, $self->treeview->treectrl->GetId,    sub{$self->OnTreeClick(@_)}     );
@@ -264,6 +304,7 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
 
         $self->treectrl->SetItemFont( $self->colonies_item_id, wxTheApp->get_font('bold_para_text_1') );
         $self->treectrl->SetItemFont( $self->stations_item_id, wxTheApp->get_font('bold_para_text_1') );
+        $self->treectrl->SetItemFont( $self->embassy_item_id, wxTheApp->get_font('bold_para_text_1') );
     }#}}}
     sub bold_planet_names_orig {#{{{
         my $self = shift;
@@ -337,27 +378,37 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
             push @{$stations}, $station_node;
         }#}}}
 
-        for(1..2) {
-            ### Add some empty nodes at the bottom of the Stations branch, 
-            ### which is our last branch, or the last item will be obscured by 
-            ### the bottom of the frame.
-            my $empty_node = {
-                node    => q{},
+        my $embassy = [#{{{
+            {
+                node    => 'Propositions',
+                data    => encode_base64('emb_props'),
                 childs  => [],
-            };
-            push @{$stations}, $empty_node;
+            },
+        ];#}}}
+
+        unless($^O eq 'MSWin32') {
+            ### Add some empty nodes at the bottom of the last branch, or the 
+            ### last item will be obscured by the bottom of the frame.
+            ###
+            ### On Windows, those two empty nodes show up; there are 
+            ### branch outlines to them (and they're empty so the outlines 
+            ### go nowhere).  And even with everything expanded, nothing 
+            ### runs off the bottom, so skip it there.
+            for(1..2) {
+                my $empty_node = {
+                    node    => q{},
+                    childs  => [],
+                };
+                push @{$embassy}, $empty_node;
+            }
         }
 
         my $model_data = $self->treeview->model->data;
         $model_data->{'childs'}[0]{'childs'} = $colonies;
         $model_data->{'childs'}[1]{'childs'} = $stations;
+        $model_data->{'childs'}[2]{'childs'} = $embassy;
         $self->treeview->model->data( $model_data );
         $self->treeview->reload();
-
-        ### Why was I doing this?
-        #$self->clear_root_item_id;
-        #$self->clear_colonies_item_id;
-        #$self->clear_stations_item_id;
 
         ### Start out with only the colonies expanded.
         $self->toggle_expansion_state( 'colonies' );
@@ -369,7 +420,12 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
         my $self = shift;
         my $leaf = shift;
 
-        my $id = ($leaf eq 'colonies') ? $self->colonies_item_id : $self->stations_item_id;
+        my $id = ($leaf eq 'colonies') 
+            ? $self->colonies_item_id 
+            : ($leaf eq 'stations')
+                ? $self->stations_item_id
+                : $self->embassy_item_id;
+ 
         if( $self->treectrl->IsExpanded($id) )  { $self->treectrl->Collapse( $id )  }
         else                                    { $self->treectrl->Expand( $id ) }
 
