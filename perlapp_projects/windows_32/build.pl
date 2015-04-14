@@ -41,6 +41,16 @@ END {#{{{
 
 STDOUT->autoflush(1);
 
+my $build_scheduled = 1;
+unless( $build_scheduled ) {
+    ### Skipping builds on the scheduled scripts speeds up the build process, 
+    ### helpful while working.  Keep in mind that the installer builder will 
+    ### bomb out if it finds these files missing.
+    say "WE ARE NOT BUILDING THE SCHEDULED SCRIPTS!";
+    say "";
+    my $r = prompt( "a", "Got it?", "<any key>", "" );
+}
+
 my $binary_type = q{};  # 'deb'ug or 'pro'duction
 ### Interactively gather data from user {#{{{
     system('cls');
@@ -120,63 +130,87 @@ die "Database deploy failed! ($exit)" if $exit;
 say "Building LacunaWaX executable...";
 ($out,$err,$exit) = capture {
 
+
     if( $binary_type eq 'deb' ) {
-        system('perlapp --add Wx::;JSON::RPC::Common::;Params::Validate::*;DateTime::Locale::*;Bread::Board::;Moose::;MooseX::;SQL::Translator::;SQL::Abstract;Log::Dispatch::*;DateTime::Format::*;CHI::Driver::;LacunaWaX::;Games::Lacuna::Client::;Games::Lacuna::Cache;Games::Lacuna::Client::;Games::Lacuna::Client::;Games::Lacuna::Client;Games::Lacuna::Client::Buildings::**;Class::MOP::;HTML::TreeBuilder::XPath;Variable::Magic;CPAN;ExtUtils::MM_Win32 --icon "..\..\unpackaged assets\frai.ico" --scan ..\extra_scan.pl --lib ..\..\lib --shared private --norunlib --force --exe build\bin\LacunaWaX.exe --perl C:\Perl\bin\perl.exe ..\..\bin\LacunaWaX.pl') and return 1;
+        system('perlapp --add Wx::;JSON::RPC::Common::;Params::Validate::*;DateTime::Locale::*;Moose::;MooseX::;SQL::Translator::;SQL::Abstract;Log::Dispatch::*;DateTime::Format::*;CHI::Driver::;LacunaWaX::;Games::Lacuna::Client::;Games::Lacuna::Cache;Games::Lacuna::Client::;Games::Lacuna::Client::;Games::Lacuna::Client;Games::Lacuna::Client::Buildings::**;Class::MOP::;HTML::TreeBuilder::XPath;Variable::Magic;CPAN;ExtUtils::MM_Win32 --icon "..\..\unpackaged assets\frai.ico" --scan ..\extra_scan.pl --lib ..\..\lib --shared private --norunlib --force --exe build\bin\LacunaWaX.exe --perl C:\Perl\bin\perl.exe ..\..\bin\LacunaWaX.pl') and return 1;
     }
     else {
-        system('perlapp --add Wx::;JSON::RPC::Common::;Params::Validate::*;DateTime::Locale::*;Bread::Board::;Moose::;MooseX::;SQL::Translator::;SQL::Abstract;Log::Dispatch::*;DateTime::Format::*;CHI::Driver::;LacunaWaX::;Games::Lacuna::Client::;Games::Lacuna::Cache;Games::Lacuna::Client::;Games::Lacuna::Client::;Games::Lacuna::Client;Games::Lacuna::Client::Buildings::**;Class::MOP::;HTML::TreeBuilder::XPath;Variable::Magic;CPAN;ExtUtils::MM_Win32 --icon "..\..\unpackaged assets\frai.ico" --scan ..\extra_scan.pl --lib ..\..\lib --shared private --norunlib --gui --force --exe build\bin\LacunaWaX.exe --perl C:\Perl\bin\perl.exe ..\..\bin\LacunaWaX.pl') and return 1;
+        system('perlapp --add Wx::;JSON::RPC::Common::;Params::Validate::*;DateTime::Locale::*;Moose::;MooseX::;SQL::Translator::;SQL::Abstract;Log::Dispatch::*;DateTime::Format::*;CHI::Driver::;LacunaWaX::;Games::Lacuna::Client::;Games::Lacuna::Cache;Games::Lacuna::Client::;Games::Lacuna::Client::;Games::Lacuna::Client;Games::Lacuna::Client::Buildings::**;Class::MOP::;HTML::TreeBuilder::XPath;Variable::Magic;CPAN;ExtUtils::MM_Win32 --icon "..\..\unpackaged assets\frai.ico" --scan ..\extra_scan.pl --lib ..\..\lib --shared private --norunlib --gui --force --exe build\bin\LacunaWaX.exe --perl C:\Perl\bin\perl.exe ..\..\bin\LacunaWaX.pl') and return 1;
     }
 
 };
-die "Building LacunaWaX.exe failed!" if $exit;
+if($exit) {
+    say "-$out-";
+    say "-$err-";
+    die "Building LacunaWaX.exe failed!";
+}
 =pod
 =cut
 ### }#}}}
 ### Archmin {#{{{
-say "Building Archmin executable...";
-($out,$err,$exit) = capture {
+if($build_scheduled) {
+    say "Building Archmin executable...";
+    ($out,$err,$exit) = capture {
 
-    if( $binary_type eq 'deb' ) {
-        system('perlapp --add Wx::;JSON::RPC::Common::;Params::Validate::*;DateTime::Locale::*;Bread::Board::;Moose::;MooseX::;SQL::Translator::;SQL::Abstract;Log::Dispatch::*;DateTime::Format::*;CHI::Driver::;Moose;Class::MOP:: --icon "../../unpackaged assets/leela.ico" --scan ../extra_scan.pl --lib ..\..\lib --shared private --norunlib --force --exe build\bin\Schedule_archmin.exe --perl C:\Perl\bin\perl.exe ..\..\bin\Schedule_archmin.pl');
-    }
-    else {
-        system('perlapp --add Wx::;JSON::RPC::Common::;Params::Validate::*;DateTime::Locale::*;Bread::Board::;Moose::;MooseX::;SQL::Translator::;SQL::Abstract;Log::Dispatch::*;DateTime::Format::*;CHI::Driver::;Moose;Class::MOP:: --icon "../../unpackaged assets/leela.ico" --scan ../extra_scan.pl --lib ..\..\lib --shared private --norunlib --gui --force --exe build\bin\Schedule_archmin.exe --perl C:\Perl\bin\perl.exe ..\..\bin\Schedule_archmin.pl');
-    }
 
-};
-die "Building Schedule_archmin.exe failed!" if $exit;
+        if( $binary_type eq 'deb' ) {
+            system('perlapp --add Wx::;JSON::RPC::Common::;Params::Validate::*;DateTime::Locale::*;Bread::Board::;Moose::;MooseX::;SQL::Translator::;SQL::Abstract;Log::Dispatch::*;DateTime::Format::*;CHI::Driver::;Moose;Class::MOP:: --icon "../../unpackaged assets/leela.ico" --scan ../extra_scan.pl --lib ..\..\lib\LacunaWaX\Model\SMA\lib\lib\perl5 --lib ..\..\lib --shared private --norunlib --force --exe build\bin\Schedule_archmin.exe --perl C:\Perl\bin\perl.exe ..\..\bin\Schedule_archmin.pl');
+        }
+        else {
+            system('perlapp --add Wx::;JSON::RPC::Common::;Params::Validate::*;DateTime::Locale::*;Bread::Board::;Moose::;MooseX::;SQL::Translator::;SQL::Abstract;Log::Dispatch::*;DateTime::Format::*;CHI::Driver::;Moose;Class::MOP:: --icon "../../unpackaged assets/leela.ico" --scan ../extra_scan.pl --lib ..\..\lib\LacunaWaX\Model\SMA\lib\lib\perl5 --lib ..\..\lib --shared private --norunlib --gui --force --exe build\bin\Schedule_archmin.exe --perl C:\Perl\bin\perl.exe ..\..\bin\Schedule_archmin.pl');
+        }
+
+    };
+    if($exit) {
+        say "-$out-";
+        say "-$err-";
+        die "Building Schedule_archmin.exe failed!";
+    }
+}
 =pod
 =cut
 ### }#}}}
 ### Autovote {#{{{
-say "Building Autovote executable...";
-($out,$err,$exit) = capture {
+if($build_scheduled) {
+    say "Building Autovote executable...";
+    ($out,$err,$exit) = capture {
 
-    if( $binary_type eq 'deb' ) {
-        system('perlapp --add Wx::;JSON::RPC::Common::;Params::Validate::*;DateTime::Locale::*;Bread::Board::;Moose::;MooseX::;SQL::Translator::;SQL::Abstract;Log::Dispatch::*;DateTime::Format::*;CHI::Driver::;Moose;Class::MOP:: --icon "../../unpackaged assets/leela.ico" --scan ../extra_scan.pl --lib ../../lib --shared private --norunlib --force --exe build\bin\Schedule_autovote.exe --perl C:\Perl\bin\perl.exe ..\..\bin\Schedule_autovote.pl');
-    }
-    else {
-        system('perlapp --add Wx::;JSON::RPC::Common::;Params::Validate::*;DateTime::Locale::*;Bread::Board::;Moose::;MooseX::;SQL::Translator::;SQL::Abstract;Log::Dispatch::*;DateTime::Format::*;CHI::Driver::;Moose;Class::MOP:: --icon "../../unpackaged assets/leela.ico" --scan ../extra_scan.pl --lib ../../lib --shared private --norunlib --gui --force --exe build\bin\Schedule_autovote.exe --perl C:\Perl\bin\perl.exe ..\..\bin\Schedule_autovote.pl');
-    }
+        if( $binary_type eq 'deb' ) {
+            system('perlapp --add Wx::;JSON::RPC::Common::;Params::Validate::*;DateTime::Locale::*;Bread::Board::;Moose::;MooseX::;SQL::Translator::;SQL::Abstract;Log::Dispatch::*;DateTime::Format::*;CHI::Driver::;Moose;Class::MOP:: --icon "../../unpackaged assets/leela.ico" --scan ../extra_scan.pl --lib ..\..\lib\LacunaWaX\Model\SMA\lib\lib\perl5 --lib ../../lib --shared private --norunlib --force --exe build\bin\Schedule_autovote.exe --perl C:\Perl\bin\perl.exe ..\..\bin\Schedule_autovote.pl')
+        }
+        else {
+            system('perlapp --add Wx::;JSON::RPC::Common::;Params::Validate::*;DateTime::Locale::*;Bread::Board::;Moose::;MooseX::;SQL::Translator::;SQL::Abstract;Log::Dispatch::*;DateTime::Format::*;CHI::Driver::;Moose;Class::MOP:: --icon "../../unpackaged assets/leela.ico" --scan ../extra_scan.pl --lib ..\..\lib\LacunaWaX\Model\SMA\lib\lib\perl5 --lib ../../lib --shared private --norunlib --gui --force --exe build\bin\Schedule_autovote.exe --perl C:\Perl\bin\perl.exe ..\..\bin\Schedule_autovote.pl')
+        }
 
-};
-die "Building Schedule_autovote failed!" if $exit;
+    };
+    if($exit) {
+        say "-$out-";
+        say "-$err-";
+        die "Building Schedule_autovote.exe failed!";
+    }
+}
 =pod
 =cut
 ### }#}}}
 ### SS Health {#{{{
-say "Building SS Health executable...";
-($out,$err,$exit) = capture {
+if($build_scheduled) {
+    say "Building SS Health executable...";
+    ($out,$err,$exit) = capture {
 
-    if( $binary_type eq 'deb' ) {
-        system('perlapp --add Wx::;JSON::RPC::Common::;Params::Validate::*;DateTime::Locale::*;Bread::Board::;Moose::;MooseX::;SQL::Translator::;SQL::Abstract;Log::Dispatch::*;DateTime::Format::*;CHI::Driver::;Moose;Class::MOP:: --icon "../../unpackaged assets/leela.ico" --scan ../extra_scan.pl --lib ../../lib --shared private --norunlib --force --exe build\bin\Schedule_sshealth.exe --perl C:\Perl\bin\perl.exe ..\..\bin\Schedule_sshealth.pl');
-    }
-    else {
-        system('perlapp --add Wx::;JSON::RPC::Common::;Params::Validate::*;DateTime::Locale::*;Bread::Board::;Moose::;MooseX::;SQL::Translator::;SQL::Abstract;Log::Dispatch::*;DateTime::Format::*;CHI::Driver::;Moose;Class::MOP:: --icon "../../unpackaged assets/leela.ico" --scan ../extra_scan.pl --lib ../../lib --shared private --norunlib --gui --force --exe build\bin\Schedule_sshealth.exe --perl C:\Perl\bin\perl.exe ..\..\bin\Schedule_sshealth.pl');
-    }
+        if( $binary_type eq 'deb' ) {
+            system('perlapp --add Wx::;JSON::RPC::Common::;Params::Validate::*;DateTime::Locale::*;Bread::Board::;Moose::;MooseX::;SQL::Translator::;SQL::Abstract;Log::Dispatch::*;DateTime::Format::*;CHI::Driver::;Moose;Class::MOP:: --icon "../../unpackaged assets/leela.ico" --scan ../extra_scan.pl --lib ..\..\lib\LacunaWaX\Model\SMA\lib\lib\perl5 --lib ../../lib --shared private --norunlib --force --exe build\bin\Schedule_sshealth.exe --perl C:\Perl\bin\perl.exe ..\..\bin\Schedule_sshealth.pl');
+        }
+        else {
+            system('perlapp --add Wx::;JSON::RPC::Common::;Params::Validate::*;DateTime::Locale::*;Bread::Board::;Moose::;MooseX::;SQL::Translator::;SQL::Abstract;Log::Dispatch::*;DateTime::Format::*;CHI::Driver::;Moose;Class::MOP:: --icon "../../unpackaged assets/leela.ico" --scan ../extra_scan.pl --lib ..\..\lib\LacunaWaX\Model\SMA\lib\lib\perl5 --lib ../../lib --shared private --norunlib --gui --force --exe build\bin\Schedule_sshealth.exe --perl C:\Perl\bin\perl.exe ..\..\bin\Schedule_sshealth.pl');
+        }
 
-};
-die "Building Schedule_sshealth failed!" if $exit;
+    };
+    if($exit) {
+        say "-$out-";
+        say "-$err-";
+        die "Building Schedule_sshealth.exe failed!";
+    }
+}
 =pod
 =cut
 ### }#}}}

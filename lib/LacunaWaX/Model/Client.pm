@@ -967,6 +967,9 @@ necessary, call ping() instead.
             $empire->get_status;
         }
         catch {
+            say "--$IO::Socket::SSL::VERSION--";
+            say "--$_--";
+            say "--$empire--";
             return;
         };
         ref $status eq 'HASH' or return;

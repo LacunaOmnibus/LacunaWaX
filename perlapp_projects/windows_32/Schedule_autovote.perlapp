@@ -18,7 +18,7 @@ Add: CHI::Driver::
 Add: Moose
 Add: Class::MOP::
 Clean: 0
-Date: 2014-02-11 16:39:46
+Date: 2015-04-13 18:34:36
 Debug: 
 Dependent: 0
 Dyndll: 0
@@ -27,6 +27,7 @@ Force: 1
 Gui: 1
 Hostname: frodo
 Icon: ../../unpackaged assets/leela.ico
+Lib: lib:..\..\lib\LacunaWaX\Model\SMA\lib\lib\perl5
 Lib: lib:../../lib
 Manifest: 
 No-Compress: 0

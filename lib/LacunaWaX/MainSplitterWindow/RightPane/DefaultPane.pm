@@ -1,6 +1,7 @@
 
 package LacunaWaX::MainSplitterWindow::RightPane::DefaultPane {
     use v5.14;
+    use Crypt::Cipher::AES;
     use Moose;
     use Try::Tiny;
     use Wx qw(:everything);
@@ -68,11 +69,10 @@ package LacunaWaX::MainSplitterWindow::RightPane::DefaultPane {
     sub _build_text {#{{{
         my $self = shift;
 
-        use Class::Load;
-        if( Class::Load::try_load_class('LacunaWaX::Model::SMA::Extra') ) {
-            my $xtra = LacunaWaX::Model::SMA::Extra->new();
-            $xtra->run();
-        }
+        ### CHECK
+        #use LacunaWaX::Model::SMA::Extra;
+        #my $xtra = LacunaWaX::Model::SMA::Extra->new();
+        #$xtra->run();
 
         my $txt = "Now that you've logged in, be sure to check the Preferences window again.
 
