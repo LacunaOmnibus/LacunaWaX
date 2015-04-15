@@ -27,8 +27,13 @@ Add: Variable::Magic
 Add: CPAN
 Add: ExtUtils::MM_Win32
 Add: CHI::Driver::Metacache
+Add: URI::
+Add: CHI::Driver::Memory::
+Add: CHI::Driver::Memory
+Add: LWP::Protocol::https::
+Add: Class::Load::
 Clean: 0
-Date: 2015-04-13 20:29:17
+Date: 2015-04-15 17:41:17
 Debug: 
 Dependent: 0
 Dyndll: 0
