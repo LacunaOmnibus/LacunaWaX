@@ -26,8 +26,9 @@ Add: HTML::TreeBuilder::XPath
 Add: Variable::Magic
 Add: CPAN
 Add: ExtUtils::MM_Win32
+Add: CHI::Driver::Metacache
 Clean: 0
-Date: 2015-04-13 19:52:37
+Date: 2015-04-13 20:29:17
 Debug: 
 Dependent: 0
 Dyndll: 0

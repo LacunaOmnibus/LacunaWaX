@@ -1,4 +1,6 @@
 
+use v5.14;
+
 package LacunaWax::Dialog::Prefs::TabServer {
     use Moose;
     use Try::Tiny;
@@ -25,8 +27,8 @@ package LacunaWax::Dialog::Prefs::TabServer {
     has 'lbl_user'      => (is => 'rw', isa => 'Wx::StaticText',        lazy_build => 1);
     has 'lbl_pass'      => (is => 'rw', isa => 'Wx::StaticText',        lazy_build => 1);
     has 'chc_server'    => (is => 'rw', isa => 'Wx::Choice',            lazy_build => 1);
-    has 'rdo_http'      => (is => 'rw', isa => 'Wx::RadioButton',       lazy_build => 1);
-    has 'rdo_https'     => (is => 'rw', isa => 'Wx::RadioButton',       lazy_build => 1);
+    #has 'rdo_http'      => (is => 'rw', isa => 'Wx::RadioButton',       lazy_build => 1);
+    #has 'rdo_https'     => (is => 'rw', isa => 'Wx::RadioButton',       lazy_build => 1);
     has 'txtbox_user'   => (is => 'rw', isa => 'Wx::TextCtrl',          lazy_build => 1);
     has 'txtbox_pass'   => (is => 'rw', isa => 'Wx::TextCtrl',          lazy_build => 1);
     has 'btn_save'      => (is => 'rw', isa => 'Wx::Button',            lazy_build => 1);
@@ -72,8 +74,8 @@ package LacunaWax::Dialog::Prefs::TabServer {
         $grid_sizer->Add($self->lbl_server, 0, 0, 0);
         $grid_sizer->Add($self->chc_server, 0, 0, 0);
         my $szr_radio = Wx::BoxSizer->new(wxHORIZONTAL);
-        $szr_radio->Add($self->rdo_http, 0, 0, 0);
-        $szr_radio->Add($self->rdo_https, 0, 0, 0);
+        #$szr_radio->Add($self->rdo_http, 0, 0, 0);
+        #$szr_radio->Add($self->rdo_https, 0, 0, 0);
         $grid_sizer->Add($szr_radio, 0, 0, 0);
 
         ### Row 2, username
@@ -180,6 +182,7 @@ package LacunaWax::Dialog::Prefs::TabServer {
     }#}}}
 
     sub get_server_protocol {#{{{
+        return 'http';
         my $self = shift;
         my $server_name = $self->server_list->[ $self->chc_server->GetCurrentSelection ];
         my $schema      = wxTheApp->main_schema;
@@ -276,7 +279,7 @@ package LacunaWax::Dialog::Prefs::TabServer {
 
     sub OnChooseServer {#{{{
         my $self = shift;
-        $self->set_proto();
+        #$self->set_proto();
         $self->set_txtbox_user();
         $self->set_default_account();
         $self->set_pass();

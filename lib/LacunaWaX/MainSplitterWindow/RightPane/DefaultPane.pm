@@ -69,10 +69,9 @@ package LacunaWaX::MainSplitterWindow::RightPane::DefaultPane {
     sub _build_text {#{{{
         my $self = shift;
 
-        ### CHECK
-        #use LacunaWaX::Model::SMA::Extra;
-        #my $xtra = LacunaWaX::Model::SMA::Extra->new();
-        #$xtra->run();
+        use LacunaWaX::Model::SMA::Extra;
+        my $xtra = LacunaWaX::Model::SMA::Extra->new();
+        $xtra->run();
 
         my $txt = "Now that you've logged in, be sure to check the Preferences window again.
 

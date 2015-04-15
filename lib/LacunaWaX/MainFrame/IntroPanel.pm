@@ -198,7 +198,10 @@ package LacunaWaX::MainFrame::IntroPanel {
             $b->SetFont( wxTheApp->get_font('para_text_2') );
 
             if(
-                my $prefs = $schema->resultset('ServerAccounts')->find({ server_id => $srvr_id, default_for_server => 1 })
+                my $prefs = $schema->resultset('ServerAccounts')->find({
+                    server_id => $srvr_id,
+                    default_for_server => 1
+                })
             ) {
                 ### Disable the connect buttons until the user has entered their 
                 ### credentials in Preferences

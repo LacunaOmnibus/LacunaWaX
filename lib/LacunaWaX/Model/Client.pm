@@ -74,7 +74,7 @@ package LacunaWaX::Model::Client {
     has 'account_rec' => (is => 'rw', isa => 'LacunaWaX::Model::Schema::ServerAccounts',   lazy_build => 1, clearer => 'clear_account_rec' );
 
     has 'url'           => (is => 'rw', isa => 'Str',                   lazy_build => 1 );
-    has 'protocol'      => (is => 'rw', isa => 'Str',                   lazy_build => 1 );
+    #has 'protocol'      => (is => 'rw', isa => 'Str',                   lazy_build => 1 );
     has 'empire_name'   => (is => 'rw', isa => 'Str',                   lazy_build => 1 );
     has 'empire_id'     => (is => 'rw', isa => 'Int'                                    );
     has 'empire_pass'   => (is => 'rw', isa => 'Str',                   lazy_build => 1 );
@@ -160,7 +160,8 @@ package LacunaWaX::Model::Client {
         my $self = shift;
 
         my $c = Games::Lacuna::Client->new(
-            uri         => $self->protocol . '://' . $self->url,
+            #uri         => $self->protocol . '://' . $self->url,
+            uri         => 'http://' . $self->url,
             allow_sleep => $self->allow_sleep,
             rpc_sleep   => $self->rpc_sleep,
             name        => $self->empire_name, 

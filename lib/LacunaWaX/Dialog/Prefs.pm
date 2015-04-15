@@ -129,7 +129,8 @@ package LacunaWaX::Dialog::Prefs {
         $existing_server_accounts_rs->delete;
 
         ### Update account info 
-        my $proto = ($self->tab_server->rdo_https->GetValue) ? 'https' : 'http';
+        #my $proto = ($self->tab_server->rdo_https->GetValue) ? 'https' : 'http';
+        my $proto = 'http';
         my $server_account = $schema->resultset('ServerAccounts')->find_or_create(
             {
                 username        => $username_str,
