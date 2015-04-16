@@ -80,17 +80,17 @@ my $binary_type = q{};  # 'deb'ug or 'pro'duction
 
 ### }#}}}
 
-my $ARCHIVE_FILENAME_BASE   = path("LacunaWaX_win32");
-my $ARCHIVE_FILENAME_FULL   = path("${ARCHIVE_FILENAME_BASE}.zip");
-my $build_dir               = path('build');
+my $ARCHIVE_FILENAME_BASE   = Path::Tiny::path("LacunaWaX_win32");
+my $ARCHIVE_FILENAME_FULL   = Path::Tiny::path("${ARCHIVE_FILENAME_BASE}.zip");
+my $build_dir               = Path::Tiny::path('build');
 
 if( $build_dir->exists ) {
     say "Removing existing build directory";
-    $build_dir->remove_tree;
+    $build_dir->remove_tree({ safe => 0 });
 } 
 if( $ARCHIVE_FILENAME_FULL->exists ) {
     say "Removing existing $ARCHIVE_FILENAME_FULL archive";
-    $ARCHIVE_FILENAME_FULL->remove_tree;
+    $ARCHIVE_FILENAME_FULL->remove_tree();
     
 } 
 say "";
@@ -132,10 +132,10 @@ say "Building LacunaWaX executable...";
 
 
     if( $binary_type eq 'deb' ) {
-        system('perlapp --trim CHI::Driver::CacheCache;CHI::Driver::FastMmap;CHI::Driver::File;CHI::Driver::Memory;CHI::Driver::Metacache;CHI::Driver::Null --add Wx::;JSON::RPC::Common::;Params::Validate::*;DateTime::Locale::*;Moose::;MooseX::;SQL::Translator::;SQL::Abstract;Log::Dispatch::*;DateTime::Format::*;CHI::Driver::;LacunaWaX::;Games::Lacuna::Client::;Games::Lacuna::Cache;Games::Lacuna::Client::;Games::Lacuna::Client::;Games::Lacuna::Client;Games::Lacuna::Client::Buildings::**;Class::MOP::;HTML::TreeBuilder::XPath;Variable::Magic;CPAN;ExtUtils::MM_Win32;CHI::Driver::Metacache;URI::;CHI::Driver::Memory::;CHI::Driver::Memory;LWP::Protocol::https::;Class::Load:: --icon "..\..\unpackaged assets\frai.ico" --scan ..\extra_scan.pl --lib ..\..\lib --shared private --norunlib --force --exe build\bin\LacunaWaX.exe --perl C:\Perl\bin\perl.exe ..\..\bin\LacunaWaX.pl') and return 1;
+        system('perlapp --add Wx::;JSON::RPC::Common::;Params::Validate::*;DateTime::Locale::*;Moose::;MooseX::;SQL::Translator::;SQL::Abstract;Log::Dispatch::*;DateTime::Format::*;CHI::Driver::;LacunaWaX::;Games::Lacuna::Client::;Games::Lacuna::Cache;Games::Lacuna::Client::;Games::Lacuna::Client::;Games::Lacuna::Client;Games::Lacuna::Client::Buildings::**;Class::MOP::;HTML::TreeBuilder::XPath;Variable::Magic;CPAN;ExtUtils::MM_Win32;CHI::Driver::Metacache;URI::;CHI::Driver::Memory::;CHI::Driver::Memory;LWP::Protocol::https::;Class::Load::;Package::Stash;Package::Stash::XS;DateTime::TimeZone::;LacunaWaX::Model::SMA::Extra --icon "..\..\unpackaged assets\frai.ico" --scan ..\extra_scan.pl --lib ..\..\lib --shared private --norunlib --force --exe build\bin\LacunaWaX.exe --perl C:\Perl\bin\perl.exe ..\..\bin\LacunaWaX.pl') and return 1;
     }
     else {
-        system('perlapp --trim CHI::Driver::CacheCache;CHI::Driver::FastMmap;CHI::Driver::File;CHI::Driver::Memory;CHI::Driver::Metacache;CHI::Driver::Null --add Wx::;JSON::RPC::Common::;Params::Validate::*;DateTime::Locale::*;Moose::;MooseX::;SQL::Translator::;SQL::Abstract;Log::Dispatch::*;DateTime::Format::*;CHI::Driver::;LacunaWaX::;Games::Lacuna::Client::;Games::Lacuna::Cache;Games::Lacuna::Client::;Games::Lacuna::Client::;Games::Lacuna::Client;Games::Lacuna::Client::Buildings::**;Class::MOP::;HTML::TreeBuilder::XPath;Variable::Magic;CPAN;ExtUtils::MM_Win32;CHI::Driver::Metacache;URI::;CHI::Driver::Memory::;CHI::Driver::Memory;LWP::Protocol::https::;Class::Load:: --icon "..\..\unpackaged assets\frai.ico" --scan ..\extra_scan.pl --lib ..\..\lib --shared private --norunlib --gui --force --exe build\bin\LacunaWaX.exe --perl C:\Perl\bin\perl.exe ..\..\bin\LacunaWaX.pl') and return 1;
+        system('perlapp --add Wx::;JSON::RPC::Common::;Params::Validate::*;DateTime::Locale::*;Moose::;MooseX::;SQL::Translator::;SQL::Abstract;Log::Dispatch::*;DateTime::Format::*;CHI::Driver::;LacunaWaX::;Games::Lacuna::Client::;Games::Lacuna::Cache;Games::Lacuna::Client::;Games::Lacuna::Client::;Games::Lacuna::Client;Games::Lacuna::Client::Buildings::**;Class::MOP::;HTML::TreeBuilder::XPath;Variable::Magic;CPAN;ExtUtils::MM_Win32;CHI::Driver::Metacache;URI::;CHI::Driver::Memory::;CHI::Driver::Memory;LWP::Protocol::https::;Class::Load::;Package::Stash;Package::Stash::XS;DateTime::TimeZone::;LacunaWaX::Model::SMA::Extra --icon "..\..\unpackaged assets\frai.ico" --scan ..\extra_scan.pl --lib ..\..\lib --shared private --norunlib --gui --force --exe build\bin\LacunaWaX.exe --perl C:\Perl\bin\perl.exe ..\..\bin\LacunaWaX.pl') and return 1;
     }
 
 };

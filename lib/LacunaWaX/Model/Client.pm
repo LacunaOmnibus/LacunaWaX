@@ -966,12 +966,6 @@ necessary, call ping() instead.
         $self->app->Yield if $self->app;
         my $status = try {
             $empire->get_status;
-        }
-        catch {
-            say "--$IO::Socket::SSL::VERSION--";
-            say "--$_--";
-            say "--$empire--";
-            return;
         };
         ref $status eq 'HASH' or return;
         $self->empire_status($status);

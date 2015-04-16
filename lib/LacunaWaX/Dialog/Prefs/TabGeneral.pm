@@ -252,7 +252,7 @@ COLUMNS
             my $current_tz_name = $current_tz->name;
             my( $cat, $tz ) = split '/', $current_tz_name, 2;
             $self->current_category( $cat );
-            $self->current_tz_name( $tz );
+            $self->current_tz_name( $tz || q{} );
         };
     }#}}}
     sub _build_current_category {#{{{
@@ -321,37 +321,6 @@ COLUMNS
             $rec->value( $fqtz );
             $rec->update;
             wxTheApp->time_zone( $fqtz );
-        }
-
-        if( my $type = $self->rdo_2412->GetString($self->rdo_2412->GetSelection) ) {
-            my $rec = $schema->resultset('AppPrefsKeystore')->find_or_create({ name => 'ClockType' });
-            $rec->value( $type );
-            $rec->update;
-            wxTheApp->clock_type( $type );
-        }
-
-        wxTheApp->popmsg("Your preferences have been saved.", 'Success!' );
-        return 1;
-    }#}}}
-    sub OnSavePrefs_orig {#{{{
-        my $self    = shift;
-        my $dialog  = shift;
-        my $event   = shift;
-
-        my $schema = wxTheApp->main_schema;
-
-        if( my $tz_offset = $self->chc_tz->GetCurrentSelection ) {
-            my $tz_cat  = $self->chc_tz_category->GetStringSelection;
-            #my $tz      = (DateTime::TimeZone->names_in_category($tz_cat))[$tz_offset];
-            my $tz      = (DateTime::TimeZone->names_in_category($tz_cat))[$tz_offset];
-
-            if( $tz_cat ne 'Select One' and $tz ) {
-                my $fqtz    = join '/', ($tz_cat, $tz);
-                my $rec     = $schema->resultset('AppPrefsKeystore')->find_or_create({ name => 'TimeZone' });
-                $rec->value( $fqtz );
-                $rec->update;
-                wxTheApp->time_zone( $fqtz );
-            }
         }
 
         if( my $type = $self->rdo_2412->GetString($self->rdo_2412->GetSelection) ) {

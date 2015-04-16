@@ -3,8 +3,6 @@
 use v5.14;
 use strict;
 
-use File::Copy;
-use IO::All;
 use Wx qw(:allclasses);
 
 my $i;
@@ -18,6 +16,11 @@ BEGIN {
 BEGIN {
     use LacunaWaX::Preload::Perlapp;
     use Wx::Perl::SplashFast( $i, 1000 );
+}
+BEGIN {
+    ### These confuse FindBin if they're loaded outside BEGIN
+    use File::Copy;
+    use IO::All;
 }
 use LacunaWaX;
 use LacunaWaX::Util;

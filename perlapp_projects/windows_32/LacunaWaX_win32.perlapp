@@ -32,8 +32,12 @@ Add: CHI::Driver::Memory::
 Add: CHI::Driver::Memory
 Add: LWP::Protocol::https::
 Add: Class::Load::
+Add: Package::Stash
+Add: Package::Stash::XS
+Add: DateTime::TimeZone::
+Add: LacunaWaX::Model::SMA::Extra
 Clean: 0
-Date: 2015-04-15 17:41:17
+Date: 2015-04-16 18:13:12
 Debug: 
 Dependent: 0
 Dyndll: 0
@@ -50,12 +54,6 @@ Runlib:
 Scan: ..\extra_scan.pl
 Shared: private
 Tmpdir: 
-Trim: CHI::Driver::CacheCache
-Trim: CHI::Driver::FastMmap
-Trim: CHI::Driver::File
-Trim: CHI::Driver::Memory
-Trim: CHI::Driver::Metacache
-Trim: CHI::Driver::Null
 Verbose: 0
 Version-Comments: 
 Version-CompanyName: 

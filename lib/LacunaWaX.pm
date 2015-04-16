@@ -270,8 +270,6 @@ the core dump is coming from:
         my $icon = Wx::Icon->new();
         $icon->CopyFromBitmap($bmp);
 
-        #say $icon->IsOk;
-
         return $icon;
     }#}}}
     sub _build_main_frame {#{{{
