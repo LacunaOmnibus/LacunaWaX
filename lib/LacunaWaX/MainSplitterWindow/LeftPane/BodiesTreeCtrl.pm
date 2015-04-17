@@ -386,14 +386,26 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
             },
         ];#}}}
 
+
         unless($^O eq 'MSWin32') {
             ### Add some empty nodes at the bottom of the last branch, or the 
             ### last item will be obscured by the bottom of the frame.
             ###
-            ### On Windows, those two empty nodes show up; there are 
-            ### branch outlines to them (and they're empty so the outlines 
-            ### go nowhere).  And even with everything expanded, nothing 
-            ### runs off the bottom, so skip it there.
+            ### On Windows, those two empty nodes show up; there are branch 
+            ### outlines to them (and they're empty so the outlines go 
+            ### nowhere).  And even with everything expanded, nothing runs off 
+            ### the bottom, so skip it there.
+            ###
+            ### These empty nodes only help if the Embassy branch is open, and 
+            ### the user then opens the Stations branch as well, and there are 
+            ### enough stations to run the Embassy off the bottom.
+            ###
+            ### If the Embassy branch is not open, the empty nodes we're 
+            ### adding to the bottom of it won't show, and the Embassy leaf 
+            ### itself will run off the bottom.
+            ###
+            ### This is bogus; I need to figure out how to add margin to the 
+            ### whole control instead of these shims.
             for(1..2) {
                 my $empty_node = {
                     node    => q{},
@@ -407,6 +419,7 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
         $model_data->{'childs'}[0]{'childs'} = $colonies;
         $model_data->{'childs'}[1]{'childs'} = $stations;
         $model_data->{'childs'}[2]{'childs'} = $embassy;
+
         $self->treeview->model->data( $model_data );
         $self->treeview->reload();
 

@@ -40,7 +40,10 @@ package LacunaWaX::MainSplitterWindow {
 
         $self->splitter_window->Show(0);
 
-        $self->splitter_window->SplitVertically($self->left_pane->main_panel, $self->right_pane->main_panel);
+        $self->splitter_window->SplitVertically(
+            $self->left_pane->main_panel, 
+            $self->right_pane->main_panel,
+        );
         $self->splitter_window->SetMinimumPaneSize( $self->min_pane_size );
         $self->splitter_window->SetSashPosition( $self->init_sash_pos, 1 );
 
