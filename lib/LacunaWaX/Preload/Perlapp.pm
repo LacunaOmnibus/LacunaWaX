@@ -4,11 +4,10 @@ use warnings;
 package LacunaWaX::Preload::Perlapp {
 
     ### Needed for Moose
-use Package::Stash::XS;                         # 7
+    use Package::Stash::XS;                         # 7
     use Variable::Magic;                            # 15    (RepairPane, at least)
     use B::Hooks::EndOfScope::XS;                   # 14    (RepairPane, at least)
     use Class::Load::XS;                            # 1
-#use Package::Stash::XS;                         # 7
     use Params::Validate::XS;                       # 12    (RepairPane, at least)
     use Moose;                                      # 8
     use Class::MOP::Mixin;                          # 2
@@ -425,7 +424,6 @@ use Package::Stash::XS;                         # 7
         use DateTime::TimeZone::Indian::Reunion;
         use DateTime::TimeZone::Local::Unix;
         use DateTime::TimeZone::Local::VMS;
-        use DateTime::TimeZone::Local::Win32;
         use DateTime::TimeZone::OlsonDB::Change;
         use DateTime::TimeZone::OlsonDB::Observance;
         use DateTime::TimeZone::OlsonDB::Rule;
