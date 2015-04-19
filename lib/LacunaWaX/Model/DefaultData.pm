@@ -26,7 +26,7 @@ package LacunaWaX::Model::DefaultData {
             US1 => {
                 url      => 'us1.lacunaexpanse.com',
                 order    => 1,
-                protocol => 'https',
+                protocol => 'http',
             },
             PT => {
                 url      => 'pt.lacunaexpanse.com',
@@ -156,7 +156,7 @@ LacunaWaX::Model::DefaultData - Default data to be added to databases post-deplo
 =head1 DESCRIPTION
 
 This module provides all known game servers, but all other data refers to the 
-main play server, US1.  
+main play server, US1. 
 
 =cut
 

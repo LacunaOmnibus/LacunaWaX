@@ -74,7 +74,6 @@ package LacunaWaX::Model::Client {
     has 'account_rec' => (is => 'rw', isa => 'LacunaWaX::Model::Schema::ServerAccounts',   lazy_build => 1, clearer => 'clear_account_rec' );
 
     has 'url'           => (is => 'rw', isa => 'Str',                   lazy_build => 1 );
-    #has 'protocol'      => (is => 'rw', isa => 'Str',                   lazy_build => 1 );
     has 'empire_name'   => (is => 'rw', isa => 'Str',                   lazy_build => 1 );
     has 'empire_id'     => (is => 'rw', isa => 'Int'                                    );
     has 'empire_pass'   => (is => 'rw', isa => 'Str',                   lazy_build => 1 );
@@ -160,7 +159,6 @@ package LacunaWaX::Model::Client {
         my $self = shift;
 
         my $c = Games::Lacuna::Client->new(
-            #uri         => $self->protocol . '://' . $self->url,
             uri         => 'http://' . $self->url,
             allow_sleep => $self->allow_sleep,
             rpc_sleep   => $self->rpc_sleep,
@@ -232,10 +230,6 @@ package LacunaWaX::Model::Client {
             uraninite
             zircon
         ) ];
-    }#}}}
-    sub _build_protocol {#{{{
-        my $self = shift;
-        return $self->server_rec->protocol;
     }#}}}
     sub _build_server_rec {#{{{
         my $self = shift;
@@ -1516,7 +1510,7 @@ user.
 Note that these will continue to represent the I<current LacunaWaX user> even if 
 another user's empire_name and empire_pass are being used.
 
-=head2 url, protocol, empire_name, empire_pass
+=head2 url, empire_name, empire_pass
 
 Connection information pertaining to the current client.
 

@@ -1,7 +1,6 @@
 
 package LacunaWaX::MainSplitterWindow::RightPane::DefaultPane {
     use v5.14;
-    use Crypt::Cipher::AES;
     use Moose;
     use Try::Tiny;
     use Wx qw(:everything);
