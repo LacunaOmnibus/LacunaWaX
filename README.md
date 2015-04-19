@@ -7,10 +7,10 @@ A GUI for The Lacuna Expanse
 
 Copyright 2012-2015 Jonathan D. Barton (tmtowtdi@gmail.com) 
 
-STATUS
+TBD
 ------
-Installing and running the executable on Windows is reasonably straightforward and stable.
-Running from source takes a bit of tweaking.  See the wiki for what information there is.
+Adding sitters breaks.  See TC's comment in the MontyLacuna (for whatever 
+reason) gitter.
 
 CAUTION
 -------
