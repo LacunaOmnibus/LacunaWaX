@@ -266,7 +266,7 @@ still needs to be called on header rows.
 =pod
 
 Tests a name/password combo for validity.  Returns the game ID of the empire 
-$name on success, dies on failure.  
+$name on success, dies on failure. 
 
 The returned game ID was just fetched from the game server, not the local 
 database.  So if the returned ID disagrees with whatever you have stored 
@@ -284,7 +284,10 @@ test_sitter_gui(), is unacceptable.
 
 =cut
 
-        my $uri     = wxTheApp->server->protocol . '://' . wxTheApp->server->url;
+        ### Fuck this.  The packaged version no longer works with https.  I'm done 
+        ### struggling with it; use http.
+        #my $uri     = wxTheApp->server->protocol . '://' . wxTheApp->server->url;
+        my $uri     = 'http://' . wxTheApp->server->url;
         my $api_key = wxTheApp->globals->api_key;
 
         my $client = Games::Lacuna::Client->new(
