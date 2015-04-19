@@ -9,8 +9,10 @@ Copyright 2012-2015 Jonathan D. Barton (tmtowtdi@gmail.com)
 
 TBD
 ------
-Adding sitters breaks.  See TC's comment in the MontyLacuna (for whatever 
-reason) gitter.
+- Adding sitters breaks.  See TC's comment in the MontyLacuna (for whatever 
+  reason) gitter.
+- Have another look at the stations screen again - "seized X of Y" -- get rid 
+  of that.  Maybe just display total influence.
 
 CAUTION
 -------
