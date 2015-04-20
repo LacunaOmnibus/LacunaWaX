@@ -159,9 +159,6 @@ Orbit $s->{orbit} around $s->{star_name} (ID $s->{star_id}), in zone $s->{zone}\
             my $diff = $total - $spent;
             my $pl_star = ($diff == 1) ? 'star' : 'stars';
             $text .= "Influence: $spent/$total";
-            if( $diff ) {
-                $text .= " - this station can seize $diff more $pl_star.";
-            }
             $text .= "\n";
 
             my $parl = try { wxTheApp->game_client->get_building($self->planet_id, 'Parliament') };
