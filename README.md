@@ -14,6 +14,7 @@ TBD
   - Fixed
 - Have another look at the stations screen again - "seized X of Y" -- get rid 
   of that.  Maybe just display total influence.
+  - Fixed
 
 CAUTION
 -------
@@ -28,17 +29,7 @@ See the github wiki pages for help.  https://github.com/tmtowtdi/LacunaWaX/wiki
 BRANCHES
 --------
 - master
-    - ss_lite_2015
-        - Norway and TT's newer station change code.  ss_changes (below) is defunct, this 
-          is current.
     - ss_changes
         - Dealt Icy's station changes code that's now defunct.  But there may be some 
           usable ideas in here.
-    - mass_delete_email
-        - Deals with trash_messages_where().  The code on PT is still different from the 
-          code on US1, but the mail deleter in this branch should be able to deal with the 
-          US1 code as it stands now, and the PT code once it gets copied over to US1.
-    - separate_bodies
-        - empire->get_status() now includes status->{'stations'} and status->{'colonies'}.  
-          This deals with that.
 
