@@ -29,10 +29,7 @@ See the github wiki pages for help.  https://github.com/tmtowtdi/LacunaWaX/wiki
 BRANCHES
 --------
 - master
-    - orbiting
-        - Add an "orbiting ships" panel to space stations, mainly so we can see how many 
-          fighters are present.
-    - ss_changes
-        - Dealt with Icy's station changes code that's now defunct.  But there may be some 
-          usable ideas in here.
+- ss_changes
+    - Dealt with Icy's station changes code that's now defunct.  But there may be some 
+        usable ideas in here.
 
