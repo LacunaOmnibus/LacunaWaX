@@ -168,6 +168,15 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
                     { required_buildings => {'Police' => undef} } 
                 );
             },
+            orbiting => sub {
+                my $planet  = shift;
+                wxTheApp->right_pane->show_right_pane(
+                    'LacunaWaX::MainSplitterWindow::RightPane::SSOrbiting',
+                    $planet,
+                    { required_buildings => {'Police' => undef} } 
+                );
+            },
+
             ### This is the per-station propsitions pane
             propositions => sub {
                 my $planet  = shift;
@@ -365,6 +374,7 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
             ### Station
             my $b64_bfg         = encode_base64(join q{:}, ('bfg', $pid));
             my $b64_inc         = encode_base64(join q{:}, ('incoming', $pid));
+            my $b64_orbit       = encode_base64(join q{:}, ('orbiting', $pid));
             my $b64_props       = encode_base64(join q{:}, ('propositions', $pid));
             my $b64_sshealth    = encode_base64(join q{:}, ('sshealth', $pid));
 
@@ -372,6 +382,7 @@ package LacunaWaX::MainSplitterWindow::LeftPane::BodiesTreeCtrl {
             push @{ $station_node->{'childs'} }, { node => 'Fire the BFG',   data => $b64_bfg };
             push @{ $station_node->{'childs'} }, { node => 'Health Alerts',  data => $b64_sshealth };
             push @{ $station_node->{'childs'} }, { node => 'Incoming',       data => $b64_inc };
+            push @{ $station_node->{'childs'} }, { node => 'Orbiting',       data => $b64_orbit };
             push @{ $station_node->{'childs'} }, { node => 'Propositions',   data => $b64_props };
             push @{ $station_node->{'childs'} }, { node => 'Rearrange',      data => $b64_rearrange };
 

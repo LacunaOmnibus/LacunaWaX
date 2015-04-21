@@ -17,6 +17,7 @@ package LacunaWaX::MainSplitterWindow::RightPane {
     use LacunaWaX::MainSplitterWindow::RightPane::RepairPane;
     use LacunaWaX::MainSplitterWindow::RightPane::SpiesPane;
     use LacunaWaX::MainSplitterWindow::RightPane::SSIncoming;
+    use LacunaWaX::MainSplitterWindow::RightPane::SSOrbiting;
     use LacunaWaX::MainSplitterWindow::RightPane::SSHealth;
     use LacunaWaX::MainSplitterWindow::RightPane::SummaryPane;
 
