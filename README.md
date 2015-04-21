@@ -30,6 +30,6 @@ BRANCHES
 --------
 - master
     - ss_changes
-        - Dealt Icy's station changes code that's now defunct.  But there may be some 
+        - Dealt with Icy's station changes code that's now defunct.  But there may be some 
           usable ideas in here.
 
