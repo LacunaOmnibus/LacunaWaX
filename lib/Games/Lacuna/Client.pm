@@ -10,6 +10,10 @@ package Games::Lacuna::Client {
     use File::Temp qw( tempfile );
     use Cwd        qw( abs_path );
 
+    ### JDB - for packaged wax
+    use URI;
+    use URI::_query;
+
     use constant DEBUG => 1;
 
     use Games::Lacuna::Client::Module; # base module class

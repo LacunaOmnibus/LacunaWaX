@@ -49,11 +49,9 @@ package LacunaWaX::Preload::Perlapp {
     use CHI::Driver::RawMemory;
 
 
-
     ### 
     ### Needed for LacunaWaX
     ### 
-
     ### DateTime::TimeZone {#{{{
 
         use DateTime::TimeZone::Catalog;
@@ -940,7 +938,6 @@ package LacunaWaX::Preload::Perlapp {
         use DateTime::Locale::zu_ZA;
 
     ###  End time zone }#}}}
-
     use LacunaWaX::Dialog::NonScrolled;
     use LacunaWaX::Dialog::Scrolled;
     use LacunaWaX::Roles::MainFrame::MenuBar::Menu;

@@ -44,8 +44,8 @@ package LacunaWaX::Roles::ScheduledTask {
         my $self      = shift;
         my $server_id = shift;
 
-        ### This will fail if the user hasn't filled out their creds yet, which 
-        ### includes if they haven't got a PT account.
+        ### This will fail if the user hasn't filled out their creds yet, 
+        ### which includes if they haven't got a PT account.
         my $client = try {
             LacunaWaX::Model::Client->new (
                 globals     => $self->globals,

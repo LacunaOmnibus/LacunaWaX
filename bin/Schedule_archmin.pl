@@ -1,5 +1,7 @@
 use v5.14;
 use warnings;
+use URI;
+use URI::_query;
 
 use FindBin;
 use lib $FindBin::Bin . '/../lib';
