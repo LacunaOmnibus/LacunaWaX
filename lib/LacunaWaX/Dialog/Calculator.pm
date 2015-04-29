@@ -791,8 +791,11 @@ sub distance_from_coords {#{{{
             }
         }
 
-        $ac_time = $self->secs_from_game_dur($ac_time);
-        $bc_time = $self->secs_from_game_dur($bc_time);
+        ### A flat 5 minutes is added to all ships' travel time now, so the 
+        ### time displayed is no longer R*T=D.  Pull off the extra 5 minutes 
+        ### so the math works out.
+        $ac_time = $self->secs_from_game_dur($ac_time) - 300;
+        $bc_time = $self->secs_from_game_dur($bc_time) - 300;
 
         my $ab_length = $self->distance_from_coords($ax, $ay, $bx, $by);
         my $ac_length = $self->distance_from_rt($ac_rate, $ac_time);
