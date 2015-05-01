@@ -30,14 +30,13 @@ Add: CHI::Driver::Metacache
 Add: URI::
 Add: CHI::Driver::Memory::
 Add: CHI::Driver::Memory
-Add: LWP::Protocol::https::
 Add: Class::Load::
 Add: Package::Stash
 Add: Package::Stash::XS
 Add: DateTime::TimeZone::
 Add: LacunaWaX::Model::SMA::Extra
 Clean: 0
-Date: 2015-04-29 15:24:08
+Date: 2015-05-01 15:10:37
 Debug: 
 Dependent: 0
 Dyndll: 0
