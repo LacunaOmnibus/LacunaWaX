@@ -93,7 +93,7 @@ package LacunaWaX::Model::Client {
     has 'stations' => ( is => 'rw', isa => 'HashRef', lazy => 1, default => sub {{}},
         documentation => q{ name => id },
     );
-    has 'primary_embassy_id' => ( is => 'rw', isa => 'Int' );
+    has 'primary_embassy_id' => ( is => 'rw', isa => 'Maybe[Int]' );
 
     has 'sitter_clients' => ( is => 'rw', isa => 'HashRef', lazy => 1, default => sub {{}},
         documentation => q{
@@ -973,7 +973,7 @@ necessary, call ping() instead.
         $self->planets({ reverse %{$status->{'empire'}{'planets'}} });
         $self->colonies({ reverse %{$status->{'empire'}{'colonies'}} });
         $self->stations({ reverse %{$status->{'empire'}{'stations'}} });
-        $self->primary_embassy_id( $status->{'empire'}{'primary_embassy_id'} // q{} );
+        $self->primary_embassy_id( $status->{'empire'}{'primary_embassy_id'} // undef );
         $self->app->Yield if $self->app;
         return 1;
     }#}}}
