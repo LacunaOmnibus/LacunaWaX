@@ -24,19 +24,19 @@ package LacunaWaX::Dialog::Prefs {
 
     has 'tab_general' => (
         is          => 'rw', 
-        isa         => 'LacunaWax::Dialog::Prefs::TabGeneral',         
+        isa         => 'LacunaWax::Dialog::Prefs::TabGeneral', 
         lazy_build  => 1,
     );
 
     has 'tab_server' => (
         is          => 'rw', 
-        isa         => 'LacunaWax::Dialog::Prefs::TabServer',         
+        isa         => 'LacunaWax::Dialog::Prefs::TabServer', 
         lazy_build  => 1,
     );
 
     sub BUILD {
         my($self, @params) = @_;
-    
+ 
         wxTheApp->borders_off();    # Change to borders_on to see borders around sizers
         $self->SetTitle( $self->title );
         $self->SetSize( $self->size );
@@ -129,8 +129,8 @@ package LacunaWaX::Dialog::Prefs {
         $existing_server_accounts_rs->delete;
 
         ### Update account info 
-        #my $proto = ($self->tab_server->rdo_https->GetValue) ? 'https' : 'http';
-        my $proto = 'http';
+        my $proto = ($self->tab_server->rdo_https->GetValue) ? 'https' : 'http';
+        #my $proto = 'https';
         my $server_account = $schema->resultset('ServerAccounts')->find_or_create(
             {
                 username        => $username_str,
