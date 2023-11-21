@@ -25,7 +25,7 @@ It is safe to send your lacuna\_log.sqlite file to someone else for debugging he
 
 RUNNING FROM SOURCE
 -------------------
-See the github wiki pages for help.  https://github.com/tmtowtdi/LacunaWaX/wiki
+See the github wiki pages for help.  https://github.com/tmtowtdi/LacunaWaX/wiki (deprecated) https://github.com/tmtowtdi/WaXWorks
 
 BRANCHES
 --------
