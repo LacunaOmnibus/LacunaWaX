@@ -1,4 +1,5 @@
-https://github.com/LacunaOmnibus/WaXWorks
+  https://github.com/LacunaOmnibus/WaXWorks
+  https://github.com/LacunaOmnibus/LacunaWaX-Red
 
 LacunaWaX
 =========
